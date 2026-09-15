@@ -1,0 +1,21 @@
+# Finales de linea: normalizados al clonar, para que el proyecto funcione igual
+# en macOS, Linux, WSL2 y Windows sin que nadie configure nada.
+* text=auto
+
+# Scripts de shell y Python: SIEMPRE LF.
+# Si git los entrega con CRLF en Windows, bajo WSL2 fallan con
+# "bad interpreter: /bin/bash^M" — un error que no dice lo que pasa.
+*.sh    text eol=lf
+*.py    text eol=lf
+*.c     text eol=lf
+*.h     text eol=lf
+
+# Scripts nativos de Windows: SIEMPRE CRLF.
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# Binarios y datos: git no los toca.
+*.png   binary
+*.pdf   binary
+*.zip   binary
+*.csv   -text

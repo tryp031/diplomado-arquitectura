@@ -16,6 +16,7 @@ conocimiento acumulado, no empezar de cero.
 
 | Si eres… | Lee esto primero |
 |---|---|
+| **Acabas de entrar al repo** | La sección *Obtener el proyecto*, aquí abajo — clonar, requisitos por sistema operativo y arrancar |
 | **Nuevo en el proyecto** | `INDICE.html`, luego este README y `CONTRIBUIR.md` |
 | **Vas a aportar algo** | `CONTRIBUIR.md` — nombres, fichas de autoría, dónde va cada cosa |
 | **Buscas el estado de todo** | `_Base-Conocimiento/INDICE.md` |
@@ -24,6 +25,74 @@ conocimiento acumulado, no empezar de cero.
 | **Vas a trabajar el reto del M1** | `Modulo 1/Aportes/danny/m1-clasificador-hosts-danny.html` (ábrelo en el navegador) |
 | **Vas a usar IA sobre el proyecto** | La sección *Trabajar con IA* de este README — hay skills que debes invocar |
 | **Eres un agente de IA** | `CLAUDE.md` y `PROMPT-MAESTRO.md` — el contrato de trabajo |
+
+---
+
+## Obtener el proyecto
+
+El repositorio es **privado**. Si puedes abrir
+[github.com/tryp031/diplomado-arquitectura](https://github.com/tryp031/diplomado-arquitectura)
+ya tienes acceso; si no, pídeselo a Danny.
+
+### 1. Requisitos
+
+| Sistema | Qué necesitas | Cómo |
+|---|---|---|
+| **macOS** | git · Python 3.9+ | `xcode-select --install` (trae git y compilador). Python ya viene |
+| **Linux** | git · Python 3.9+ · compilador | `sudo apt install git python3 build-essential` |
+| **Windows** | [Git for Windows](https://git-scm.com/download/win) · [Python 3.9+](https://python.org/downloads) | Al instalar Python marca **«Add Python to PATH»** |
+| **WSL2** *(recomendado en Windows)* | `wsl --install` en PowerShell como administrador | Después, dentro de WSL, lo mismo que Linux |
+
+### 2. Clonar
+
+```bash
+git clone https://github.com/tryp031/diplomado-arquitectura.git
+cd diplomado-arquitectura
+```
+
+> **GitHub ya no acepta tu contraseña** al clonar por HTTPS: pide un *token*. Lo más simple es
+> instalar [GitHub CLI](https://cli.github.com) y ejecutar `gh auth login` una vez — después
+> `git clone` funciona solo. Si prefieres SSH, usa
+> `git clone git@github.com:tryp031/diplomado-arquitectura.git`.
+
+### 3. Arrancar el reto de latencia
+
+La ruta tiene espacios, así que **va entre comillas**:
+
+```bash
+cd "Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2"
+```
+
+```bash
+./iniciar.sh     # macOS, Linux, WSL2
+```
+```powershell
+.\iniciar.ps1    # Windows (o doble clic en iniciar.cmd)
+```
+
+Abre `http://127.0.0.1:8080`. **No hace falta `chmod`** — los permisos de ejecución viajan en git.
+**No hace falta instalar dependencias:** ni `pip`, ni `npm`, ni entornos virtuales.
+
+**¿Algo falla?** No preguntes por chat, pregúntale a la máquina:
+
+```bash
+python3 doctor.py      # macOS / Linux / WSL
+doctor.cmd             # Windows (doble clic)
+```
+
+Te dice qué tienes, qué falta y el comando exacto para conseguirlo.
+
+### 4. Antes de medir, lee esto
+
+> ⚠️ **En Windows nativo puedes ver y demostrar el sistema, pero no medirlo.** El plano de datos
+> usa memoria compartida POSIX y sockets ICMP crudos, que ahí no existen. Las mediciones exigen
+> **macOS, Linux o WSL2**, y las cifras del informe salen de **un solo equipo declarado**.
+
+Esto no es un detalle de instalación: es una decisión de validez razonada en `ADR-005`. El detalle
+completo —los tres caminos, qué corre en cada uno y por qué— está en el
+[`README.md` del reto](Modulo%201/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/README.md).
+
+**Si vas a tocar cualquier archivo del reto, invoca antes `/reto-latencia`** (ver más abajo).
 
 ---
 
