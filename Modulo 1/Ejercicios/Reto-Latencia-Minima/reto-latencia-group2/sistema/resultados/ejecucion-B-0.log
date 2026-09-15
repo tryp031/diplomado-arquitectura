@@ -1,0 +1,55 @@
+fecha:     2026-09-08T18:46:49-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+variante:  B   ronda: 0
+args:      --warmup 20000 --iters 100000
+---
+[servidor B] escuchando en 127.0.0.1:9101, payload=32B
+[servidor B] conexión de ('127.0.0.1', 59784)
+[cliente B] warmup 20,000 iteraciones…
+[cliente B] midiendo 100,000 iteraciones…
+[servidor B] conexión cerrada
+[cliente B] 100,000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-B-0.csv
+
+=== resultados-B-0 ===
+  n              100,000
+  mín                    7.58 µs
+  p50                   13.38 µs
+  p90                   14.88 µs
+  p99                   18.75 µs
+  p99.9                 62.38 µs
+  p99.99               161.71 µs
+  máx                2,202.00 µs
+  desv. est.             9.52 µs
+  media                 13.45 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-B-0
+        6.310 µs |                                                                 98 ( 0.10%)
+        7.943 µs | #####                                                        6,210 ( 6.21%)
+       10.000 µs | ###########                                                 14,503 (14.50%)
+       12.589 µs | ########################################################    74,976 (74.98%)
+       15.849 µs | ###                                                          3,426 ( 3.43%)
+       19.953 µs |                                                                259 ( 0.26%)
+       25.119 µs |                                                                140 ( 0.14%)
+       31.623 µs |                                                                137 ( 0.14%)
+       39.811 µs |                                                                100 ( 0.10%)
+       50.119 µs |                                                                 56 ( 0.06%)
+       63.096 µs |                                                                 30 ( 0.03%)
+       79.433 µs |                                                                 38 ( 0.04%)
+      100.000 µs |                                                                 11 ( 0.01%)
+      125.893 µs |                                                                  5 ( 0.01%)
+      158.489 µs |                                                                  3 ( 0.00%)
+      199.526 µs |                                                                  3 ( 0.00%)
+      251.189 µs |                                                                  1 ( 0.00%)
+      316.228 µs |                                                                  0 ( 0.00%)
+      398.107 µs |                                                                  1 ( 0.00%)
+      501.187 µs |                                                                  0 ( 0.00%)
+      630.957 µs |                                                                  0 ( 0.00%)
+      794.328 µs |                                                                  1 ( 0.00%)
+     1000.000 µs |                                                                  0 ( 0.00%)
+     1258.925 µs |                                                                  1 ( 0.00%)
+     1584.893 µs |                                                                  0 ( 0.00%)
+     1995.262 µs |                                                                  1 ( 0.00%)

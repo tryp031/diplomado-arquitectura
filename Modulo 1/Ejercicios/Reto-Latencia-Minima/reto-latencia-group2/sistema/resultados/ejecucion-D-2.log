@@ -1,0 +1,74 @@
+fecha:     2026-09-14T12:22:41-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  D   ronda: 2
+args:      --warmup 100000 --iters 1000000
+---
+compilando D...
+make: Nothing to be done for `all'.
+ejecutable: /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/variante-D-shm/server
+[servidor D] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[servidor D] shm=/latm-D-9103 payload=32B region=256B — girando (un nucleo al 100%)
+[cliente D] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[cliente D] piso de medicion (par de llamadas al reloj): min=0 ns  p50=0 ns  p99=42 ns
+[cliente D] granularidad del reloj ~41.67 ns (contador de 24 MHz): las medidas
+            individuales estan CUANTIZADAS en multiplos de ese valor. Reportarlo.
+[cliente D] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente D] warmup 100000 iteraciones...
+[cliente D] midiendo 1000000 iteraciones...
+[cliente D] integridad OK: 1000000/1000000 respuestas correctas
+[cliente D] contraste por lotes (1000 intercambios x 200 rondas): min=64 ns  mediana=64 ns  max=67 ns por intercambio
+[cliente D] (media por lote: sin cola. Los percentiles salen de las muestras individuales del CSV.)
+[cliente D] 1000000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-D-2.csv
+[servidor D] fin, 1300017 peticiones atendidas
+
+=== resultados-D-2 ===
+  n              1,000,000
+  mín                    0.00 µs
+  p50                    0.08 µs
+  p90                    0.08 µs
+  p99                    0.12 µs
+  p99.9                  0.12 µs
+  p99.99                 0.21 µs
+  máx                    1.71 µs
+  desv. est.             0.02 µs
+  media                  0.07 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-D-2
+        0.001 µs |                                                                104 ( 0.01%)
+        0.001 µs |                                                                  0 ( 0.00%)
+        0.002 µs |                                                                  0 ( 0.00%)
+        0.002 µs |                                                                  0 ( 0.00%)
+        0.003 µs |                                                                  0 ( 0.00%)
+        0.003 µs |                                                                  0 ( 0.00%)
+        0.004 µs |                                                                  0 ( 0.00%)
+        0.005 µs |                                                                  0 ( 0.00%)
+        0.006 µs |                                                                  0 ( 0.00%)
+        0.008 µs |                                                                  0 ( 0.00%)
+        0.010 µs |                                                                  0 ( 0.00%)
+        0.013 µs |                                                                  0 ( 0.00%)
+        0.016 µs |                                                                  0 ( 0.00%)
+        0.020 µs |                                                                  0 ( 0.00%)
+        0.025 µs |                                                                  0 ( 0.00%)
+        0.032 µs |                                                                  0 ( 0.00%)
+        0.040 µs | ############################                               329,511 (32.95%)
+        0.050 µs |                                                                  0 ( 0.00%)
+        0.063 µs |                                                                  0 ( 0.00%)
+        0.079 µs | ########################################################   659,504 (65.95%)
+        0.100 µs | #                                                           10,309 ( 1.03%)
+        0.126 µs |                                                                  0 ( 0.00%)
+        0.158 µs |                                                                408 ( 0.04%)
+        0.200 µs |                                                                134 ( 0.01%)
+        0.251 µs |                                                                 13 ( 0.00%)
+        0.316 µs |                                                                  0 ( 0.00%)
+        0.398 µs |                                                                  0 ( 0.00%)
+        0.501 µs |                                                                  0 ( 0.00%)
+        0.631 µs |                                                                  2 ( 0.00%)
+        0.794 µs |                                                                  4 ( 0.00%)
+        1.000 µs |                                                                  8 ( 0.00%)
+        1.259 µs |                                                                  2 ( 0.00%)
+        1.585 µs |                                                                  1 ( 0.00%)

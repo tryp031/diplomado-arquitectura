@@ -1,0 +1,36 @@
+# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODAS las variantes.
+#
+# ESCENARIO: control de acceso en la ruta critica de una plataforma financiera.
+#   Lista blanca -> servicios internos autorizados a originar una transaccion.
+#   Lista negra  -> origenes bloqueados por politica de seguridad.
+#   Cualquier host ausente -> DESCONOCIDO (se rechaza por defecto).
+#
+# Direcciones: la lista blanca usa RFC 1918 (10.0.0.0/8, privadas) y la negra usa
+# RFC 5737 (198.51.100.0/24, TEST-NET-2, reservada para documentacion). Son los
+# rangos correctos para datos de ejemplo: no pertenecen a nadie y no enrutan.
+#
+# Se carga UNA VEZ al arrancar cada servidor. Nunca se lee dentro del bucle de medicion.
+#
+# Limite duro: 16 filas. 16 x 4 bytes = 64 bytes = UNA linea de cache.
+#   Ese limite es una DECISION de diseno, no una casualidad: es lo que permite
+#   afirmar que la clasificacion no contamina la medicion. Ver ADR-004.
+#
+# veredicto: local | externo
+#
+nombre,ip,veredicto
+core-bancario,10.20.0.11,local
+autorizador,10.20.0.12,local
+motor-riesgo,10.20.0.13,local
+pasarela-pagos,10.20.0.14,local
+cifrado-hsm,10.20.1.20,local
+bus-eventos,10.20.1.21,local
+cache-sesiones,10.20.1.22,local
+db-transacciones,10.20.2.30,local
+db-clientes,10.20.2.31,local
+monitoreo,10.20.3.40,local
+tor-salida,198.51.100.10,externo
+proxy-anonimo,198.51.100.11,externo
+escaneo-masivo,198.51.100.12,externo
+vpn-no-autorizada,198.51.100.13,externo
+origen-bloqueado,198.51.100.14,externo
+host-cuarentena,198.51.100.15,externo

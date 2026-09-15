@@ -1,0 +1,44 @@
+fecha:     2026-09-14T12:27:37-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  B   ronda: 9
+args:      --warmup 5000 --iters 20000
+---
+ejecutable: python3 /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/variante-B-tcp/server.py
+[servidor B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[cliente B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[servidor B] escuchando en 127.0.0.1:9101, payload=32B
+[servidor B] conexión de ('127.0.0.1', 55726)
+[cliente B] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente B] warmup 5,000 iteraciones…
+[cliente B] midiendo 20,000 iteraciones…
+[servidor B] conexión cerrada
+[cliente B] 20,000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-B-9.csv
+
+=== resultados-B-9 ===
+  n              20,000
+  mín                    7.50 µs
+  p50                    9.50 µs
+  p90                   10.58 µs
+  p99                   12.83 µs
+  p99.9                 26.54 µs
+  p99.99                49.50 µs
+  máx                   56.00 µs
+  desv. est.             1.37 µs
+  media                  9.55 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-B-9
+        6.310 µs | ##                                                             610 ( 3.05%)
+        7.943 µs | ########################################################    13,909 (69.55%)
+       10.000 µs | #####################                                        5,225 (26.12%)
+       12.589 µs | #                                                              215 ( 1.07%)
+       15.849 µs |                                                                 13 ( 0.07%)
+       19.953 µs |                                                                  6 ( 0.03%)
+       25.119 µs |                                                                 11 ( 0.06%)
+       31.623 µs |                                                                  3 ( 0.01%)
+       39.811 µs |                                                                  6 ( 0.03%)
+       50.119 µs |                                                                  2 ( 0.01%)

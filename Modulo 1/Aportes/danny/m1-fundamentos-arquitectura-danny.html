@@ -1,0 +1,1050 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fundamentos de Arquitectura de Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+
+<style>
+  :root{
+    --ground:#F1F4F4;
+    --surface:#FFFFFF;
+    --surface-2:#E7EDED;
+    --ink:#0E2226;
+    --ink-2:#3F5A61;
+    --ink-3:#6E868C;
+    --rule:#CDDADC;
+    --rule-2:#E1E9EA;
+    --accent:#0A6C7C;
+    --accent-soft:#DBEDEF;
+    --signal:#A85B0C;
+    --signal-soft:#F7E8D4;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517;
+      --surface:#101F22;
+      --surface-2:#16292D;
+      --ink:#E3EBEC;
+      --ink-2:#A5B9BE;
+      --ink-3:#7C9399;
+      --rule:#233A3F;
+      --rule-2:#1A2E32;
+      --accent:#5CB9C8;
+      --accent-soft:#123338;
+      --signal:#E0A257;
+      --signal-soft:#33240F;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517;
+    --surface:#101F22;
+    --surface-2:#16292D;
+    --ink:#E3EBEC;
+    --ink-2:#A5B9BE;
+    --ink-3:#7C9399;
+    --rule:#233A3F;
+    --rule-2:#1A2E32;
+    --accent:#5CB9C8;
+    --accent-soft:#123338;
+    --signal:#E0A257;
+    --signal-soft:#33240F;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1140px;
+    margin:0 auto;
+    padding:0 24px 96px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0 56px;
+  }
+  @media (min-width:1020px){
+    .wrap{grid-template-columns:212px minmax(0,1fr)}
+  }
+
+  .masthead{
+    grid-column:1/-1;
+    border-bottom:1px solid var(--rule);
+    padding:56px 0 30px;
+    margin-bottom:44px;
+  }
+  .kicker{
+    font-family:var(--mono);
+    font-size:.7rem;
+    font-weight:500;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 18px;
+  }
+  h1{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:clamp(2.05rem,4.6vw,3.05rem);
+    line-height:1.05;
+    letter-spacing:-.024em;
+    text-wrap:balance;
+    margin:0 0 20px;
+  }
+  .standfirst{
+    font-size:1.2rem;
+    line-height:1.6;
+    color:var(--ink-2);
+    max-width:60ch;
+    margin:0 0 30px;
+  }
+  .standfirst em{color:var(--ink);font-style:italic}
+  .facts{
+    display:flex;
+    flex-wrap:wrap;
+    border:1px solid var(--rule);
+    border-radius:3px;
+    overflow:hidden;
+    background:var(--surface);
+    margin:0;
+  }
+  .fact{
+    flex:1 1 150px;
+    padding:13px 18px;
+    border-right:1px solid var(--rule-2);
+  }
+  .fact:last-child{border-right:none}
+  .fact dt{
+    font-family:var(--mono);
+    font-size:.63rem;
+    letter-spacing:.11em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin:0 0 5px;
+  }
+  .fact dd{
+    margin:0;
+    font-family:var(--sans);
+    font-size:.94rem;
+    font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  .fact dd.warn{color:var(--signal)}
+
+  .rail{display:none}
+  @media (min-width:1020px){
+    .rail{
+      display:block;
+      align-self:start;
+      position:sticky;
+      top:28px;
+      font-family:var(--sans);
+      font-size:.83rem;
+      padding-bottom:40px;
+    }
+  }
+  .rail h2{
+    font-family:var(--mono);
+    font-size:.63rem;
+    font-weight:500;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin:0 0 12px;
+  }
+  .rail ol{
+    list-style:none;
+    margin:0 0 30px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .rail a{
+    display:flex;
+    gap:9px;
+    color:var(--ink-2);
+    text-decoration:none;
+    padding:4px 0;
+    line-height:1.35;
+  }
+  .rail a:hover{color:var(--accent)}
+  .rail a .n{
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--ink-3);
+    flex:0 0 15px;
+    padding-top:1px;
+  }
+  .tracker{border-top:1px solid var(--rule);padding-top:18px}
+  .tracker ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  .tracker label{
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    font-size:.8rem;
+    color:var(--ink-2);
+    cursor:pointer;
+    line-height:1.35;
+  }
+  .tracker input{
+    accent-color:var(--accent);
+    margin:2px 0 0;
+    flex:0 0 auto;
+    width:14px;height:14px;
+  }
+  .tracker input:checked + span{color:var(--ink-3);text-decoration:line-through}
+
+  main{min-width:0}
+  section{padding-top:8px;margin-bottom:60px;scroll-margin-top:20px}
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:var(--mono);
+    font-size:.65rem;
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin:0 0 14px;
+  }
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  .eyebrow .tag{color:var(--accent)}
+  h2.sec{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:1.62rem;
+    line-height:1.2;
+    letter-spacing:-.017em;
+    text-wrap:balance;
+    margin:0 0 16px;
+    max-width:34ch;
+  }
+  h3{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:1.06rem;
+    letter-spacing:-.008em;
+    margin:34px 0 10px;
+    max-width:44ch;
+  }
+  p{margin:0 0 18px;max-width:66ch}
+  main ul,main ol{max-width:64ch;margin:0 0 18px;padding-left:22px}
+  main li{margin-bottom:8px}
+  strong{font-weight:600;color:var(--ink)}
+  code,.num{font-family:var(--mono);font-size:.86em;font-variant-numeric:tabular-nums}
+  code{background:var(--surface-2);padding:.1em .34em;border-radius:2px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{border-bottom-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  .pill{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:.6rem;
+    font-weight:500;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    padding:.18em .48em;
+    border-radius:2px;
+    vertical-align:.14em;
+    white-space:nowrap;
+  }
+  .p-curso{background:var(--accent-soft);color:var(--accent)}
+  .p-compl{background:var(--surface-2);color:var(--ink-2)}
+  .p-recom{background:var(--signal-soft);color:var(--signal)}
+
+  .note{
+    border-left:2px solid var(--accent);
+    background:var(--surface);
+    padding:16px 20px;
+    margin:24px 0;
+    max-width:66ch;
+    border-radius:0 3px 3px 0;
+  }
+  .note.risk{border-left-color:var(--signal)}
+  .note p:last-child{margin-bottom:0}
+  .note .lab{
+    display:block;
+    font-family:var(--mono);
+    font-size:.63rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin-bottom:7px;
+  }
+
+  .tw{overflow-x:auto;margin:24px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  thead th{
+    font-family:var(--mono);
+    font-size:.63rem;
+    font-weight:500;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    background:var(--surface-2);
+    white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.hi{color:var(--signal);font-weight:500}
+  .cat{font-family:var(--sans);font-weight:600}
+
+  figure{margin:30px 0;padding:0}
+  figure svg{display:block;width:100%;max-width:100%;height:auto;color:var(--ink-2)}
+  .figbox{
+    border:1px solid var(--rule);
+    border-radius:3px;
+    background:var(--surface);
+    padding:20px 18px 10px;
+    overflow-x:auto;
+  }
+  figcaption{
+    font-family:var(--sans);
+    font-size:.82rem;
+    line-height:1.55;
+    color:var(--ink-2);
+    margin-top:12px;
+    max-width:70ch;
+  }
+  figcaption b{color:var(--ink);font-weight:600}
+
+  .steps{list-style:none;margin:24px 0;padding:0;display:flex;flex-direction:column}
+  .steps li{
+    display:grid;
+    grid-template-columns:38px 1fr;
+    gap:16px;
+    padding:16px 0;
+    border-top:1px solid var(--rule);
+    margin:0;
+  }
+  .steps li:last-child{border-bottom:1px solid var(--rule)}
+  .steps .sn{
+    font-family:var(--mono);
+    font-size:1.02rem;
+    font-weight:500;
+    color:var(--accent);
+    line-height:1.3;
+  }
+  .steps h4{font-family:var(--sans);font-size:.98rem;font-weight:600;margin:0 0 5px}
+  .steps .when{
+    font-family:var(--mono);
+    font-size:.68rem;
+    letter-spacing:.06em;
+    color:var(--ink-3);
+    text-transform:uppercase;
+    margin-left:9px;
+    font-weight:400;
+  }
+  .steps p{margin:0;font-size:.98rem;max-width:62ch}
+
+  .hand{
+    list-style:none;
+    counter-reset:h;
+    margin:22px 0;
+    padding:0;
+    display:grid;
+    gap:1px;
+    background:var(--rule-2);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .hand li{
+    counter-increment:h;
+    background:var(--surface);
+    padding:12px 16px 12px 44px;
+    position:relative;
+    font-family:var(--sans);
+    font-size:.92rem;
+    margin:0;
+    line-height:1.45;
+  }
+  .hand li::before{
+    content:counter(h);
+    position:absolute;
+    left:16px;top:12px;
+    font-family:var(--mono);
+    font-size:.78rem;
+    color:var(--accent);
+  }
+
+  .cards{display:grid;gap:10px;margin:26px 0;grid-template-columns:1fr}
+  @media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  details.card{
+    border:1px solid var(--rule);
+    border-radius:3px;
+    background:var(--surface);
+    overflow:hidden;
+  }
+  details.card summary{
+    cursor:pointer;
+    padding:14px 16px;
+    font-family:var(--sans);
+    font-size:.92rem;
+    font-weight:500;
+    line-height:1.45;
+    list-style:none;
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+  }
+  details.card summary::-webkit-details-marker{display:none}
+  details.card summary::before{
+    content:"?";
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--accent);
+    flex:0 0 auto;
+    padding-top:1px;
+  }
+  details.card[open] summary::before{content:"\2014"}
+  details.card summary:hover{background:var(--surface-2)}
+  details.card .ans{
+    padding:13px 16px 15px 42px;
+    font-size:.98rem;
+    line-height:1.62;
+    color:var(--ink-2);
+    border-top:1px solid var(--rule-2);
+  }
+  details.card .ans p{margin:0;max-width:none}
+
+  .gloss{margin:24px 0;display:flex;flex-direction:column}
+  .gterm{
+    border-top:1px solid var(--rule-2);
+    padding:12px 0;
+    display:grid;
+    gap:2px 20px;
+    grid-template-columns:1fr;
+  }
+  @media (min-width:620px){.gterm{grid-template-columns:190px 1fr}}
+  .gterm:last-child{border-bottom:1px solid var(--rule-2)}
+  .gterm dt{font-family:var(--sans);font-weight:600;font-size:.92rem;line-height:1.45}
+  .gterm dd{margin:0;font-size:.98rem;line-height:1.6;color:var(--ink-2);max-width:62ch}
+
+  footer{
+    grid-column:1/-1;
+    border-top:1px solid var(--rule);
+    padding-top:26px;
+    font-family:var(--sans);
+    font-size:.84rem;
+    line-height:1.65;
+    color:var(--ink-2);
+  }
+  footer p{max-width:70ch;margin:0 0 12px}
+  footer .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 18px}
+  footer .legend span{display:flex;gap:8px;align-items:baseline}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Diplomado en Arquitectura de Software y Cloud Computing · Módulo 1</p>
+    <h1>Fundamentos de la arquitectura de software</h1>
+    <p class="standfirst">Este módulo se resume en una sola idea: <em>la arquitectura es el conjunto de decisiones difíciles de revertir.</em> Todo lo demás es diseño. De ahí sale el resto — por qué los atributos de calidad se analizan temprano, por qué toda decisión es un trade-off, y por qué el «por qué» importa más que el «cómo».</p>
+    <dl class="facts">
+      <div class="fact"><dt>Ventana</dt><dd>07/09 → 29/09</dd></div>
+      <div class="fact"><dt>Dedicación</dt><dd>15 horas</dd></div>
+      <div class="fact"><dt>Encuentros</dt><dd>15/09 · 29/09</dd></div>
+      <div class="fact"><dt>Autoevaluación</dt><dd class="warn">1 solo intento</dd></div>
+      <div class="fact"><dt>Actividad</dt><dd>Reto de latencia</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Contenido">
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#metodo"><span class="n">00</span><span>Cómo estudiarlo</span></a></li>
+      <li><a href="#que-es"><span class="n">01</span><span>Qué es la arquitectura</span></a></li>
+      <li><a href="#dimensiones"><span class="n">02</span><span>Las tres dimensiones</span></a></li>
+      <li><a href="#leyes"><span class="n">03</span><span>Las leyes</span></a></li>
+      <li><a href="#restricciones"><span class="n">04</span><span>Restricciones</span></a></li>
+      <li><a href="#atributos"><span class="n">05</span><span>Atributos de calidad</span></a></li>
+      <li><a href="#iso"><span class="n">06</span><span>ISO/IEC 25010</span></a></li>
+      <li><a href="#tradeoffs"><span class="n">07</span><span>Trade-offs</span></a></li>
+      <li><a href="#ancla"><span class="n">08</span><span>El ancla: latencia</span></a></li>
+      <li><a href="#examen"><span class="n">09</span><span>Autoevaluación</span></a></li>
+      <li><a href="#glosario"><span class="n">10</span><span>Glosario</span></a></li>
+    </ol>
+    <div class="tracker">
+      <h2>Mis pasadas</h2>
+      <ul id="tracker">
+        <li><label><input type="checkbox" data-k="p1"><span>1 · Mapa</span></label></li>
+        <li><label><input type="checkbox" data-k="p2"><span>2 · Anclaje</span></label></li>
+        <li><label><input type="checkbox" data-k="p3"><span>3 · Recuperación</span></label></li>
+        <li><label><input type="checkbox" data-k="p4"><span>4 · Defensa</span></label></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+
+    <section id="metodo">
+      <p class="eyebrow"><span class="tag">Método</span> lo primero, porque cambia todo lo demás</p>
+      <h2 class="sec">Cómo estudiar este módulo</h2>
+
+      <p>La trampa de este módulo es que todo suena razonable al leerlo. «Los atributos de calidad deben analizarse temprano» se entiende de inmediato — y por eso mismo no se aprende. La sensación de comprender mientras lees es el peor predictor de recordar después.</p>
+
+      <p>Dos decisiones cambian el resultado. La primera: <strong>recuperar en vez de releer</strong>. Cerrar las notas y reconstruir el concepto de memoria fija el conocimiento; releerlo solo genera familiaridad, que se siente igual pero no lo es. La segunda, y la más importante en tu caso: <strong>anclar cada abstracción a un número propio</strong>.</p>
+
+      <div class="note">
+        <span class="lab">Por qué el ancla</span>
+        <p>«Atributo operacional medible» es aire. <span class="num">p99.9 = 62,38 µs</span> medido por ti, en tu máquina, con tu código, no lo es. Tienes algo que la mayoría de tus compañeros no tendrá: un experimento real con datos propios. Cada concepto abstracto de este módulo tiene un punto de contacto con el reto de latencia — úsalo como percha. Es la diferencia entre memorizar una taxonomía y entender para qué existe.</p>
+      </div>
+
+      <h3>Cuatro pasadas, no una</h3>
+      <ol class="steps">
+        <li>
+          <span class="sn">01</span>
+          <div>
+            <h4>Mapa <span class="when">hoy · 40 min</span></h4>
+            <p>Leer solo los títulos, las tablas y los diagramas de esta página. Sin detenerse. El objetivo no es dominar nada: es saber qué piezas existen y cómo se llaman, para que la segunda pasada tenga dónde colgarse.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sn">02</span>
+          <div>
+            <h4>Anclaje <span class="when">2 sesiones de 1 h</span></h4>
+            <p>Recorrer las infografías del aula y esta página en paralelo. Por cada concepto, escribir <em>una sola frase</em> en el cuaderno que lo conecte con el reto de latencia. Si no encuentras la conexión, ese es justamente el concepto que no entendiste todavía.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sn">03</span>
+          <div>
+            <h4>Recuperación activa <span class="when">15 min · 12/09, 17/09, 24/09</span></h4>
+            <p>Las tarjetas de la sección 09, con la respuesta tapada, respondiendo <strong>en voz alta</strong>. Tres sesiones separadas en el tiempo valen más que tres seguidas. Regla: si no puedes explicarlo en 60 segundos sin mirar, no lo sabes.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sn">04</span>
+          <div>
+            <h4>Defensa <span class="when">26/09</span></h4>
+            <p>Explicarle a Freddy, Bryan o Camilo la tabla de trade-offs y la decisión de la frontera de medición, sin notas, aceptando preguntas. Esto no es repaso: es el ensayo del video de 5 minutos y de la demo en vivo.</p>
+          </div>
+        </li>
+      </ol>
+
+      <h3>Qué escribir a mano en el cuaderno</h3>
+      <p>Escribir a mano es lento, y por eso funciona: obliga a comprimir. No copies esta página — el cuaderno es para el núcleo irreducible, las seis cosas que deben salir automáticas en la autoevaluación.</p>
+      <ol class="hand">
+        <li>Los <strong>cuatro componentes</strong> de una arquitectura: estructura · características · decisiones · principios.</li>
+        <li>Las <strong>tres dimensiones</strong> de su importancia: complejidad · atributos temprano · decisiones informadas.</li>
+        <li><strong>Primera ley</strong> con su corolario, y <strong>segunda ley</strong>.</li>
+        <li>Los <strong>tres frentes</strong> de restricciones: negocio · tecnología · equipo.</li>
+        <li>Las <strong>tres categorías</strong> de atributos, con tres ejemplos de cada una.</li>
+        <li>Las <strong>ocho características</strong> de ISO/IEC 25010:2011.</li>
+      </ol>
+    </section>
+
+    <section id="que-es">
+      <p class="eyebrow"><span class="tag">Concepto</span> el punto de partida</p>
+      <h2 class="sec">Qué es la arquitectura de software</h2>
+
+      <p><span class="pill p-curso">Curso</span> El módulo la define en negativo primero: <strong>no es una estructura estática</strong>, sino «un conjunto dinámico de elementos interrelacionados que definen cómo opera y se desarrolla un sistema de software». La palabra que hace el trabajo es <em>dinámico</em>: la arquitectura no se decide una vez y se archiva.</p>
+
+      <p><span class="pill p-compl">Complementario</span> Richards y Ford — bibliografía oficial del módulo — concretan esa definición en cuatro componentes. Vale aprendérselos porque separan cosas que en la conversación diaria se mezclan:</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Componente</th><th>Qué es</th><th>Ejemplo</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">Estructura</td><td>El estilo arquitectónico elegido</td><td>Microservicios, capas, monolito modular, event-driven</td></tr>
+            <tr><td class="cat">Características</td><td>Los atributos de calidad que el sistema debe cumplir</td><td>Latencia &lt; 1 ms, disponibilidad del 99,9 %</td></tr>
+            <tr><td class="cat">Decisiones</td><td>Reglas <strong>duras</strong>, obligatorias en el proyecto</td><td>«Solo la capa de negocio accede a la base de datos»</td></tr>
+            <tr><td class="cat">Principios</td><td><strong>Guías</strong> con margen de interpretación</td><td>«Preferir mensajería asíncrona cuando sea posible»</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>La frontera entre <strong>decisión</strong> y <strong>principio</strong> es de lo más examinable del módulo: la decisión no admite excepción sin cambiar la arquitectura; el principio admite que un caso justificado se salga.</p>
+
+      <h3>Arquitectura o diseño: la prueba de reversibilidad</h3>
+      <p><span class="pill p-recom">Recomendación</span> La pregunta «¿esto es arquitectura o diseño?» no se resuelve por tamaño ni por importancia, sino por <strong>cuánto cuesta cambiarlo dentro de seis meses</strong>. Si revertirlo obliga a tocar el despliegue, el contrato con otros equipos o el modelo de datos, es arquitectura. Si se revierte en una tarde, es diseño.</p>
+
+      <div class="note">
+        <span class="lab">Ancla en el reto</span>
+        <p>Elegir <strong>memoria compartida en vez de HTTP</strong> es arquitectura: cambia el lenguaje viable, ata los procesos al mismo host, altera cómo se despliega y cómo se depura. Cambiar el <strong>tamaño del payload de 32 a 64 bytes</strong> es diseño: una línea, sin consecuencias más allá de sí misma. Mismo sistema, mismo archivo, dos naturalezas distintas.</p>
+      </div>
+    </section>
+
+    <section id="dimensiones">
+      <p class="eyebrow"><span class="tag">Concepto</span> contenido central del módulo</p>
+      <h2 class="sec">Las tres dimensiones de su importancia</h2>
+
+      <p><span class="pill p-curso">Curso</span> El módulo declara explícitamente tres dimensiones que definen por qué la arquitectura importa. Es muy probable que aparezcan en la autoevaluación, y la tercera columna de esta tabla es tu ancla: cada dimensión ya la ejerciste al montar el harness del reto.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Dimensión</th><th>Qué significa</th><th>Dónde la ejerciste</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cat">Estructuración<br>de la complejidad</td>
+              <td>Descomponer el sistema en partes con límites claros, para que el todo sea comprensible y modificable.</td>
+              <td>Separar cliente medidor · servidor · análisis. El harness común es el límite que evita que las cuatro variantes se acoplen entre sí.</td>
+            </tr>
+            <tr>
+              <td class="cat">Análisis temprano de<br>atributos de calidad</td>
+              <td>Evaluar rendimiento, seguridad o disponibilidad <em>antes</em> de construir, porque después no se «añaden».</td>
+              <td>Congelar la especificación de medición <strong>antes</strong> de escribir una línea de las variantes. Si cada uno mide distinto, el estudio no vale nada.</td>
+            </tr>
+            <tr>
+              <td class="cat">Decisiones técnicas<br>informadas</td>
+              <td>Decidir con criterio explícito y dejar rastro del razonamiento, no solo del resultado.</td>
+              <td>Elegir dónde empieza y termina la medición del RTT, y justificarlo en el informe en vez de dejarlo implícito en el código.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>La segunda dimensión es la que más cuesta interiorizar, porque contradice el instinto de programar primero. El razonamiento es económico: el costo de cambiar una decisión arquitectónica <strong>no crece de forma lineal con el tiempo</strong>. Cada semana que pasa, más código, más equipos y más datos dependen de ella.</p>
+    </section>
+
+    <section id="leyes">
+      <p class="eyebrow"><span class="tag">Concepto</span> verificar contra la infografía del aula</p>
+      <h2 class="sec">Las leyes de la arquitectura</h2>
+
+      <p><span class="pill p-compl">Complementario</span> El material del módulo referencia «las leyes fundamentales que rigen la arquitectura de software», pero el detalle vive en la infografía interactiva del aula. Las de Richards y Ford — bibliografía del módulo, así que probablemente sean estas — son tres enunciados:</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Enunciado</th><th>Qué implica en la práctica</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">Primera ley<br><em>Todo en arquitectura de software es un trade-off.</em></td><td>No existe la respuesta «mejor». Existe la apropiada para unos atributos priorizados en un contexto.</td></tr>
+            <tr><td class="cat">Corolario<br><em>Si crees que encontraste algo que no es un trade-off, es que todavía no lo identificaste.</em></td><td>Es más útil que la ley misma: convierte «no veo la desventaja» en «me falta buscar», no en «no hay».</td></tr>
+            <tr><td class="cat">Segunda ley<br><em>El «por qué» importa más que el «cómo».</em></td><td>Es la justificación conceptual de los <strong>ADR</strong>. El código dice cómo; solo el registro de la decisión dice por qué, y sin el por qué nadie puede revisarla después.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note risk">
+        <span class="lab">Antes de la autoevaluación</span>
+        <p>Confirma estos enunciados contra la infografía «Leyes y alcance de la arquitectura de software» del aula. El docente puede usar otra formulación o añadir leyes propias, y tienes <strong>un solo intento</strong>.</p>
+      </div>
+
+      <div class="note">
+        <span class="lab">Ancla en el reto</span>
+        <p>La variante de memoria compartida gana por tres órdenes de magnitud <em>y</em> es la que jamás desplegarías en producción: ata los procesos al mismo host, quema núcleos al 100 %, pierde transparencia de red y es infernal de depurar. No hay ganador — hay una elección que depende de qué atributo prioriza el negocio. Esa es la primera ley, medida.</p>
+      </div>
+    </section>
+
+    <section id="restricciones">
+      <p class="eyebrow"><span class="tag">Concepto</span> contenido central del módulo</p>
+      <h2 class="sec">Restricciones y decisiones</h2>
+
+      <p><span class="pill p-curso">Curso</span> Las <strong>decisiones</strong> definen estructura y comportamiento; las <strong>restricciones</strong> son los límites que guían el diseño. El módulo las agrupa en tres frentes, y el examen puede pedir clasificar ejemplos en ellos.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Frente</th><th>Ejemplos típicos</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">Negocio</td><td>Presupuesto · time-to-market · regulación y cumplimiento · contratos con terceros · penalizaciones por indisponibilidad</td></tr>
+            <tr><td class="cat">Tecnología</td><td>Stack heredado · licencias · nube ya contratada · capacidad de la red · límites del proveedor · versiones soportadas</td></tr>
+            <tr><td class="cat">Equipo y recursos</td><td>Tamaño del equipo · experiencia disponible · madurez operativa · rotación · presupuesto de tiempo</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><span class="pill p-recom">Recomendación</span> La restricción de <strong>equipo</strong> es la más subestimada y la que más proyectos hunde. Una arquitectura de microservicios con event sourcing es impecable sobre el papel y catastrófica con cuatro personas sin experiencia en sistemas distribuidos. La mejor arquitectura teórica puede ser la peor decisión práctica, y eso no es una concesión: es parte del análisis.</p>
+
+      <figure>
+        <div class="figbox">
+          <svg viewBox="0 0 900 306" role="img" aria-label="Ciclo de la decisión arquitectónica: los objetivos de negocio y las restricciones acotan los drivers, que definen atributos de calidad medibles y priorizados, que justifican las decisiones; las decisiones materializan la estructura y se registran en un ADR, y la evolución del sistema devuelve nueva evidencia a los drivers.">
+            <defs>
+              <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor"/>
+              </marker>
+            </defs>
+            <g font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="currentColor">
+
+              <rect x="14" y="40" width="146" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="87" y="65" text-anchor="middle">Objetivos de negocio</text>
+
+              <rect x="14" y="114" width="146" height="54" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="87" y="135" text-anchor="middle">Restricciones</text>
+              <text x="87" y="152" text-anchor="middle" font-size="10.5" opacity=".7">negocio · tecnología · equipo</text>
+
+              <rect x="212" y="78" width="118" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="271" y="101" text-anchor="middle">Drivers</text>
+              <text x="271" y="117" text-anchor="middle" font-size="10.5" opacity=".7">arquitectónicos</text>
+
+              <rect x="384" y="72" width="152" height="64" rx="2" fill="none" stroke="#0A6C7C" stroke-width="1.6"/>
+              <text x="460" y="95" text-anchor="middle" fill="#0A6C7C" font-weight="600">Atributos de calidad</text>
+              <text x="460" y="112" text-anchor="middle" font-size="10.5" fill="#0A6C7C">medibles</text>
+              <text x="460" y="126" text-anchor="middle" font-size="10.5" fill="#0A6C7C">y priorizados</text>
+
+              <rect x="590" y="78" width="118" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="649" y="109" text-anchor="middle">Decisiones</text>
+
+              <rect x="762" y="34" width="124" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="824" y="59" text-anchor="middle">Estructura</text>
+
+              <rect x="762" y="132" width="124" height="42" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+              <text x="824" y="157" text-anchor="middle">Evolución</text>
+
+              <rect x="566" y="200" width="166" height="42" rx="2" fill="none" stroke="#A85B0C" stroke-width="1.3" stroke-dasharray="4 3"/>
+              <text x="649" y="219" text-anchor="middle" fill="#A85B0C" font-size="12">ADR</text>
+              <text x="649" y="234" text-anchor="middle" fill="#A85B0C" font-size="10.5">el registro del «por qué»</text>
+
+              <line x1="160" y1="61" x2="206" y2="92" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+              <line x1="160" y1="141" x2="206" y2="116" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+              <text x="185" y="80" text-anchor="middle" font-size="10">acotan</text>
+
+              <line x1="330" y1="104" x2="378" y2="104" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+              <text x="354" y="96" text-anchor="middle" font-size="10">definen</text>
+
+              <line x1="536" y1="104" x2="584" y2="104" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+              <text x="560" y="96" text-anchor="middle" font-size="10">justifican</text>
+
+              <line x1="708" y1="94" x2="757" y2="64" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+              <text x="736" y="114" text-anchor="middle" font-size="10">materializan</text>
+
+              <line x1="824" y1="76" x2="824" y2="127" stroke="currentColor" stroke-width="1" marker-end="url(#ar1)"/>
+
+              <line x1="649" y1="130" x2="649" y2="195" stroke="#A85B0C" stroke-width="1.1" stroke-dasharray="4 3" marker-end="url(#ar1)"/>
+
+              <polyline points="824,174 824,276 271,276 271,135" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#ar1)"/>
+              <text x="548" y="268" text-anchor="middle" font-size="10.5">nueva evidencia</text>
+
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>La arquitectura es un ciclo, no un acto único.</b> La flecha que más importa es la punteada de regreso: la evolución del sistema produce evidencia que redefine los drivers. Y el ADR es lo único que hace revisable la decisión más adelante — sin él, en seis meses nadie sabrá si una decisión sigue siendo válida o solo sigue siendo vieja.</figcaption>
+      </figure>
+    </section>
+
+    <section id="atributos">
+      <p class="eyebrow"><span class="tag">Taxonomía</span> el cierre del módulo</p>
+      <h2 class="sec">Atributos de calidad y características arquitectónicas</h2>
+
+      <p><span class="pill p-curso">Curso</span> El módulo clasifica las características arquitectónicas en tres categorías: <strong>operacionales</strong>, <strong>estructurales</strong> y <strong>transversales</strong>. <span class="pill p-compl">Complementario</span> El desglose de ejemplos es de Richards y Ford; la clasificación en tres es del curso.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Categoría</th><th>Qué mide</th><th>Ejemplos</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="cat">Operacionales</td>
+              <td>Cómo se comporta el sistema <strong>en producción</strong></td>
+              <td>Disponibilidad · rendimiento · <strong>latencia</strong> · escalabilidad · elasticidad · recuperabilidad · continuidad de negocio (RTO/RPO)</td>
+            </tr>
+            <tr>
+              <td class="cat">Estructurales</td>
+              <td>Cómo está <strong>construido</strong> el código</td>
+              <td>Modularidad · mantenibilidad · extensibilidad · portabilidad · capacidad de despliegue · testabilidad · reutilización</td>
+            </tr>
+            <tr>
+              <td class="cat">Transversales</td>
+              <td>Lo que <strong>no cabe</strong> en las otras dos</td>
+              <td>Seguridad · usabilidad · accesibilidad · privacidad · cumplimiento normativo · autenticación · autorización</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>La regla que vale más que la taxonomía</h3>
+      <p><span class="pill p-recom">Recomendación</span> Un atributo de calidad que no se puede medir <strong>no es un atributo de calidad: es un deseo</strong>. Y esto no es una frase de efecto — es exactamente lo que separa un requisito accionable de uno inútil:</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Deseo</th><th>Atributo de calidad</th></tr></thead>
+          <tbody>
+            <tr><td>«El sistema debe ser rápido»</td><td>p99.9 del RTT &lt; 1 ms, payload de 32 B, closed-loop, en loopback</td></tr>
+            <tr><td>«El sistema debe ser seguro»</td><td>Cero vulnerabilidades críticas de OWASP Top 10 en SAST previo a cada despliegue</td></tr>
+            <tr><td>«El sistema debe estar disponible»</td><td>99,95 % mensual · RTO 15 min · RPO 5 min</td></tr>
+            <tr><td>«El sistema debe ser mantenible»</td><td>Un desarrollador nuevo despliega un cambio en producción en su primera semana</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Fíjate en la primera fila: el enunciado del reto dice «preferiblemente menor a un milisegundo», que es un deseo a medio camino. Convertirlo en la versión de la derecha — nombrando percentil, payload, régimen de carga y frontera de medición — <strong>es</strong> el trabajo arquitectónico de la actividad.</p>
+    </section>
+
+    <section id="iso">
+      <p class="eyebrow"><span class="tag">Precisión</span> aquí el material es ambiguo</p>
+      <h2 class="sec">ISO/IEC 25010, con dos advertencias</h2>
+
+      <p><span class="pill p-curso">Curso</span> El módulo cita el estándar como referencia para evaluar calidad. Pero lo nombra de dos formas distintas: en la sección de cierre dice «estándares como <strong>ISO/IEC 25000</strong>», y en las conclusiones y los recursos dice <strong>ISO/IEC 25010</strong>. No son lo mismo:</p>
+
+      <ul>
+        <li><strong>ISO/IEC 25000</strong> es la <em>familia</em> completa de normas — SQuaRE, <em>Systems and software Quality Requirements and Evaluation</em>.</li>
+        <li><strong>ISO/IEC 25010</strong> es el <em>modelo de calidad</em> dentro de esa familia. Es el que enumera las características.</li>
+      </ul>
+
+      <p><span class="pill p-compl">Complementario</span> Las ocho características de <strong>ISO/IEC 25010:2011</strong> — la versión que cita el diplomado:</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>#</th><th>Característica</th><th>Subcaracterísticas</th></tr></thead>
+          <tbody>
+            <tr><td class="n">1</td><td class="cat">Adecuación funcional</td><td>Completitud · corrección · pertinencia</td></tr>
+            <tr><td class="n">2</td><td class="cat">Eficiencia de desempeño</td><td>Comportamiento temporal · uso de recursos · capacidad</td></tr>
+            <tr><td class="n">3</td><td class="cat">Compatibilidad</td><td>Coexistencia · interoperabilidad</td></tr>
+            <tr><td class="n">4</td><td class="cat">Usabilidad</td><td>Aprendizaje · operabilidad · protección ante error · estética · accesibilidad</td></tr>
+            <tr><td class="n">5</td><td class="cat">Fiabilidad</td><td>Madurez · <strong>disponibilidad</strong> · tolerancia a fallos · recuperabilidad</td></tr>
+            <tr><td class="n">6</td><td class="cat">Seguridad</td><td>Confidencialidad · integridad · no repudio · responsabilidad · autenticidad</td></tr>
+            <tr><td class="n">7</td><td class="cat">Mantenibilidad</td><td>Modularidad · reusabilidad · analizabilidad · modificabilidad · testabilidad</td></tr>
+            <tr><td class="n">8</td><td class="cat">Portabilidad</td><td>Adaptabilidad · instalabilidad · reemplazabilidad</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note risk">
+        <span class="lab">Segunda advertencia</span>
+        <p>ISO/IEC 25010 fue <strong>revisada en 2023</strong> y la versión vigente tiene <strong>nueve</strong> características: añade <em>Safety</em>, renombra <em>Usability</em> como <em>Interaction Capability</em> y absorbe <em>Portability</em> dentro de una nueva característica, <em>Flexibility</em>. El material del diplomado cita la de 2011.</p>
+        <p>Para la autoevaluación, responde según <strong>2011: ocho características</strong>. Pero conviene verificarlo en <a href="https://iso25000.com/index.php/normas-iso-25000/iso-25010">iso25000.com</a> antes de citar el estándar en una entrega escrita — y mencionar que conoces la revisión es exactamente el tipo de precisión que distingue a un arquitecto de alguien que memorizó una tabla.</p>
+      </div>
+    </section>
+
+    <section id="tradeoffs">
+      <p class="eyebrow"><span class="tag">Trade-off</span> el corazón del módulo</p>
+      <h2 class="sec">Los atributos compiten entre sí</h2>
+
+      <p>Si te llevas una sola tabla de este módulo, que sea esta. El error clásico del estudiante de arquitectura es intentar maximizar todo a la vez; el ejercicio real es <strong>elegir tres o cuatro atributos driver</strong> y aceptar explícitamente que los demás quedan en un nivel «suficiente».</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Al maximizar…</th><th>…se degrada</th><th>Por qué</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">Latencia mínima</td><td>Portabilidad · mantenibilidad · costo · simplicidad operativa</td><td>Cada nanosegundo se compra con especificidad: mismo host, código de bajo nivel, CPU dedicada</td></tr>
+            <tr><td class="cat">Disponibilidad</td><td>Consistencia · costo</td><td>Teorema CAP: ante partición hay que elegir. Y la redundancia se paga</td></tr>
+            <tr><td class="cat">Seguridad</td><td>Rendimiento · usabilidad</td><td>Cifrado, validación y autenticación añaden trabajo y fricción</td></tr>
+            <tr><td class="cat">Escalabilidad</td><td>Simplicidad · consistencia · depurabilidad</td><td>Distribuir introduce red, y la red introduce fallo parcial</td></tr>
+            <tr><td class="cat">Time-to-market</td><td>Todo lo demás</td><td>Se paga en deuda técnica, que es un préstamo con intereses</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lab">Cómo responder en un examen o ante el docente</span>
+        <p>Nunca «esta arquitectura es mejor». La forma defendible es: <em>«priorizando <strong>X</strong> y <strong>Y</strong>, y aceptando degradar <strong>Z</strong>, la opción apropiada es <strong>A</strong>, porque…»</em>. Nombrar lo que sacrificas no es debilidad en la respuesta: es la respuesta.</p>
+      </div>
+    </section>
+
+    <section id="ancla">
+      <p class="eyebrow"><span class="tag">Ancla</span> datos propios, medidos</p>
+      <h2 class="sec">El reto de latencia como laboratorio del módulo</h2>
+
+      <p>Esta sección es la que hace que todo lo anterior deje de ser abstracto. Los números son reales: variante B del harness — TCP crudo con <code>TCP_NODELAY</code>, Python 3.13, loopback, 100 000 iteraciones tras 20 000 de calentamiento.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Métrica</th><th>Valor</th><th>Lectura</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">mín</td><td class="n">7,58 µs</td><td>El mejor caso, útil solo como cota inferior</td></tr>
+            <tr><td class="cat">p50</td><td class="n">13,38 µs</td><td>La mitad de las peticiones va por debajo</td></tr>
+            <tr><td class="cat">p90</td><td class="n">14,88 µs</td><td>Distribución muy concentrada en el centro</td></tr>
+            <tr><td class="cat">p99</td><td class="n">18,75 µs</td><td>Todavía plano: la cola aún no aparece</td></tr>
+            <tr><td class="cat">p99.9</td><td class="n">62,38 µs</td><td>Aquí empieza la cola: ×4,7 respecto al p99</td></tr>
+            <tr><td class="cat">p99.99</td><td class="n">161,71 µs</td><td>×2,6 más</td></tr>
+            <tr><td class="cat">máx</td><td class="n hi">2 202 µs</td><td class="hi">Se pasa del objetivo de 1 ms por más del doble</td></tr>
+            <tr><td class="cat">media</td><td class="n">13,45 µs</td><td>Oculta el máximo por un factor de <strong>163</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure>
+        <div class="figbox">
+          <svg viewBox="0 0 900 372" role="img" aria-label="Escala logarítmica de latencias desde 1 nanosegundo hasta 100 milisegundos, con bandas para llamada en proceso, memoria compartida, socket Unix, TCP en loopback, HTTP en loopback, LAN e internet. Una línea vertical marca el umbral de 1 milisegundo, y una fila inferior sitúa las mediciones reales: p50 de 13,4 microsegundos y p99.9 de 62,4 a la izquierda del umbral, y el máximo de 2202 microsegundos a su derecha.">
+            <g font-family="IBM Plex Sans, sans-serif" fill="currentColor">
+
+              <line x1="700" y1="34" x2="700" y2="322" stroke="#A85B0C" stroke-width="1.4" stroke-dasharray="5 4"/>
+              <text x="700" y="26" text-anchor="middle" font-size="11.5" fill="#A85B0C" font-weight="600">objetivo · 1 ms</text>
+
+              <g font-size="12" text-anchor="end">
+                <text x="178" y="78">Función en proceso</text>
+                <text x="178" y="108">Memoria compartida · D</text>
+                <text x="178" y="138">Unix socket / UDP · C</text>
+                <text x="178" y="168" font-weight="600" fill="#0A6C7C">TCP loopback · B</text>
+                <text x="178" y="198">HTTP/1.1 loopback · A</text>
+                <text x="178" y="228">LAN mismo datacenter</text>
+                <text x="178" y="258">Internet</text>
+              </g>
+
+              <rect x="190" y="63"  width="85"  height="18" fill="currentColor" opacity=".2"/>
+              <rect x="334" y="93"  width="111" height="18" fill="currentColor" opacity=".2"/>
+              <rect x="530" y="123" width="26"  height="18" fill="currentColor" opacity=".2"/>
+              <rect x="556" y="153" width="33"  height="18" fill="#0A6C7C" opacity=".5"/>
+              <rect x="589" y="183" width="52"  height="18" fill="currentColor" opacity=".2"/>
+              <rect x="615" y="213" width="59"  height="18" fill="currentColor" opacity=".2"/>
+              <rect x="785" y="243" width="85"  height="18" fill="currentColor" opacity=".2"/>
+
+              <text x="178" y="292" text-anchor="end" font-size="12" font-weight="600" fill="#A85B0C">Medido · B</text>
+              <line x1="541" y1="288" x2="729" y2="288" stroke="#A85B0C" stroke-width="1.2"/>
+              <g fill="#A85B0C">
+                <polygon points="541,282 547,288 541,294 535,288"/>
+                <polygon points="598,282 604,288 598,294 592,288"/>
+                <polygon points="729,282 735,288 729,294 723,288"/>
+              </g>
+              <g font-size="10.5" fill="#A85B0C" text-anchor="middle">
+                <text x="537" y="276">p50 13,4</text>
+                <text x="606" y="308">p99.9 62,4</text>
+                <text x="741" y="276">máx 2 202</text>
+              </g>
+
+              <line x1="190" y1="322" x2="870" y2="322" stroke="currentColor" stroke-width="1"/>
+              <g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle">
+                <line x1="190" y1="322" x2="190" y2="328" stroke="currentColor" stroke-width="1"/><text x="190" y="343">1 ns</text>
+                <line x1="275" y1="322" x2="275" y2="328" stroke="currentColor" stroke-width="1"/><text x="275" y="343">10 ns</text>
+                <line x1="360" y1="322" x2="360" y2="328" stroke="currentColor" stroke-width="1"/><text x="360" y="343">100 ns</text>
+                <line x1="445" y1="322" x2="445" y2="328" stroke="currentColor" stroke-width="1"/><text x="445" y="343">1 µs</text>
+                <line x1="530" y1="322" x2="530" y2="328" stroke="currentColor" stroke-width="1"/><text x="530" y="343">10 µs</text>
+                <line x1="615" y1="322" x2="615" y2="328" stroke="currentColor" stroke-width="1"/><text x="615" y="343">100 µs</text>
+                <line x1="700" y1="322" x2="700" y2="328" stroke="currentColor" stroke-width="1"/><text x="700" y="343">1 ms</text>
+                <line x1="785" y1="322" x2="785" y2="328" stroke="currentColor" stroke-width="1"/><text x="785" y="343">10 ms</text>
+                <line x1="870" y1="322" x2="870" y2="328" stroke="currentColor" stroke-width="1"/><text x="870" y="343">100 ms</text>
+              </g>
+              <text x="530" y="364" text-anchor="middle" font-size="10.5">escala logarítmica · cada marca es ×10</text>
+
+            </g>
+          </svg>
+        </div>
+        <figcaption><b>El objetivo de 1 ms queda muy a la izquierda de la barrera.</b> La banda destacada es la variante ya medida: su p50 está <b>75 veces</b> por debajo del umbral, con la implementación más lenta imaginable y sin una sola optimización. Pero el rombo del máximo cae a la <em>derecha</em> de la línea de 1 ms — una muestra entre cien mil se pasó del objetivo. Eso es la cola, y es precisamente lo que un promedio de 13,45 µs no permite ver.</figcaption>
+      </figure>
+
+      <h3>Tres lecciones que van directo al informe</h3>
+      <ol>
+        <li><strong>El umbral se cumple trivialmente.</strong> Perseguir el número no es el reto. La nota está en la metodología y en el análisis del trade-off.</li>
+        <li><strong>El máximo se pasa del objetivo.</strong> Ese es el hallazgo interesante, no un defecto que esconder. Explicar por qué ocurre — planificador del sistema operativo, recolección de basura, migración entre núcleos, interrupciones — vale más que cualquier optimización.</li>
+        <li><strong>La media miente por un factor de 163.</strong> Es la demostración empírica de por qué el módulo insiste en atributos <em>medibles</em>, y de por qué reportar promedios en un sistema de baja latencia es un error metodológico, no una simplificación aceptable.</li>
+      </ol>
+
+      <h3>Cada concepto del módulo, en el reto</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Concepto del módulo</th><th>Cómo aparece en la actividad</th></tr></thead>
+          <tbody>
+            <tr><td class="cat">Atributo operacional</td><td>La latencia RTT es el atributo driver, y el percentil es su unidad</td></tr>
+            <tr><td class="cat">Atributo medible</td><td>Convertir «preferiblemente menor a 1 ms» en un enunciado con percentil, payload y régimen</td></tr>
+            <tr><td class="cat">Decisión arquitectónica</td><td>Dónde empieza y termina la medición — la decisión central del ejercicio</td></tr>
+            <tr><td class="cat">Restricción de tecnología</td><td>El lenguaje elegido acota el suelo alcanzable; Python no llega a nanosegundos</td></tr>
+            <tr><td class="cat">Restricción de equipo</td><td>Cuatro personas, hardware distinto: de ahí que la ronda final deba correr en una sola máquina</td></tr>
+            <tr><td class="cat">Trade-off</td><td>Memoria compartida gana por 1000× y es indesplegable en producción</td></tr>
+            <tr><td class="cat">Segunda ley · ADR</td><td>El informe no pide el número: pide la justificación de las herramientas elegidas</td></tr>
+            <tr><td class="cat">Análisis temprano</td><td>Congelar la especificación de medición antes de escribir código</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="examen">
+      <p class="eyebrow"><span class="tag">Examen</span> tapar, responder en voz alta, luego abrir</p>
+      <h2 class="sec">Autoevaluación</h2>
+
+      <p>Doce preguntas. La regla es una: <strong>responder en voz alta antes de abrir la tarjeta</strong>. Si tu respuesta mental fue «sí, más o menos eso», cuenta como fallada.</p>
+
+      <div class="cards">
+        <details class="card"><summary>¿Cuál es la diferencia entre arquitectura y diseño?</summary>
+          <div class="ans"><p>No es el tamaño ni la importancia, sino el <strong>costo de revertir</strong>. Arquitectura son las decisiones difíciles de deshacer — las que obligan a tocar despliegue, contratos entre equipos o modelo de datos. Diseño es lo que se revierte en una tarde.</p></div>
+        </details>
+
+        <details class="card"><summary>Enuncia la primera ley y explica por qué el corolario es más útil que la ley.</summary>
+          <div class="ans"><p>«Todo en arquitectura de software es un trade-off.» El corolario — «si crees que encontraste algo que no es un trade-off, todavía no lo identificaste» — es más útil porque convierte «no veo la desventaja» en una instrucción de seguir buscando, en lugar de una conclusión.</p></div>
+        </details>
+
+        <details class="card"><summary>¿Cuáles son las tres dimensiones que definen la importancia de la arquitectura?</summary>
+          <div class="ans"><p>Estructuración de la complejidad · análisis temprano de atributos de calidad · toma de decisiones técnicas informadas.</p></div>
+        </details>
+
+        <details class="card"><summary>Diferencia decisión arquitectónica de principio de diseño, con un ejemplo de cada uno.</summary>
+          <div class="ans"><p><strong>Decisión:</strong> regla dura, sin excepciones — «solo la capa de negocio accede a la base de datos». <strong>Principio:</strong> guía con margen — «preferir mensajería asíncrona cuando sea posible». Saltarse un principio se justifica; saltarse una decisión cambia la arquitectura.</p></div>
+        </details>
+
+        <details class="card"><summary>Clasifica: disponibilidad, testabilidad, no repudio, elasticidad, portabilidad, accesibilidad.</summary>
+          <div class="ans"><p><strong>Operacionales:</strong> disponibilidad, elasticidad. <strong>Estructurales:</strong> testabilidad, portabilidad. <strong>Transversales:</strong> no repudio, accesibilidad.</p></div>
+        </details>
+
+        <details class="card"><summary>¿Qué es ISO/IEC 25000 y qué es ISO/IEC 25010?</summary>
+          <div class="ans"><p>25000 es la <strong>familia</strong> de normas (SQuaRE). 25010 es el <strong>modelo de calidad</strong> dentro de esa familia, el que enumera las características: ocho en la versión de 2011 que cita el diplomado.</p></div>
+        </details>
+
+        <details class="card"><summary>Nombra las ocho características de ISO/IEC 25010:2011.</summary>
+          <div class="ans"><p>Adecuación funcional · eficiencia de desempeño · compatibilidad · usabilidad · fiabilidad · seguridad · mantenibilidad · portabilidad.</p></div>
+        </details>
+
+        <details class="card"><summary>Los tres frentes de restricciones, con un ejemplo real de cada uno.</summary>
+          <div class="ans"><p><strong>Negocio:</strong> una fecha de salida comprometida con un cliente. <strong>Tecnología:</strong> una base Oracle heredada que no se puede migrar. <strong>Equipo:</strong> nadie con experiencia en Kafka en producción.</p></div>
+        </details>
+
+        <details class="card"><summary>¿Por qué «el sistema debe ser seguro» no es un atributo de calidad utilizable? Reescríbelo.</summary>
+          <div class="ans"><p>Porque no se puede verificar: no dice contra qué, ni con qué umbral, ni cuándo se comprueba. Versión utilizable: «cero vulnerabilidades críticas de OWASP Top 10 detectadas por SAST antes de cada despliegue a producción».</p></div>
+        </details>
+
+        <details class="card"><summary>Da dos atributos en conflicto directo y explica el trade-off.</summary>
+          <div class="ans"><p>Disponibilidad y consistencia: ante una partición de red hay que elegir cuál se sacrifica (CAP). O latencia y mantenibilidad: la memoria compartida con busy-spin gana microsegundos y produce un sistema atado a un host, imposible de depurar y difícil de operar.</p></div>
+        </details>
+
+        <details class="card"><summary>¿Por qué el análisis de atributos de calidad debe ser temprano?</summary>
+          <div class="ans"><p>Porque los atributos de calidad no se añaden después: se derivan de la estructura. Y el costo de cambiar una decisión arquitectónica no crece de forma lineal — cada semana más código, más equipos y más datos dependen de ella.</p></div>
+        </details>
+
+        <details class="card"><summary>En tu solución al reto: ¿dónde empieza y termina tu medición, y qué sacrificaste?</summary>
+          <div class="ans"><p>Sin respuesta única — <strong>es tu decisión y la del equipo</strong>. Lo que no es opcional es poder responderla con precisión: el mismo sistema reporta 200 ns o 20 ms según dónde se coloquen las sondas. Si no puedes contestar esto sin dudar, el informe no está listo.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <section id="glosario">
+      <p class="eyebrow"><span class="tag">Glosario</span> los términos que deben salir automáticos</p>
+      <h2 class="sec">Glosario rápido</h2>
+
+      <dl class="gloss">
+        <div class="gterm"><dt>Arquitectura de software</dt><dd>Conjunto dinámico de elementos interrelacionados que definen cómo opera y se desarrolla un sistema. En la práctica: las decisiones difíciles de revertir.</dd></div>
+        <div class="gterm"><dt>Driver arquitectónico</dt><dd>Factor que fuerza una decisión de arquitectura: un atributo de calidad prioritario, una restricción o un requisito de alto impacto.</dd></div>
+        <div class="gterm"><dt>Atributo de calidad</dt><dd>Propiedad no funcional que el sistema debe cumplir, con un umbral verificable. Sin métrica, es un deseo.</dd></div>
+        <div class="gterm"><dt>ADR</dt><dd><em>Architecture Decision Record.</em> Documento breve e inmutable con contexto, opciones, decisión, justificación y consecuencias. Si la decisión cambia, se escribe uno nuevo que supersede al anterior.</dd></div>
+        <div class="gterm"><dt>Trade-off</dt><dd>Intercambio entre atributos que compiten. Nombrar lo que se sacrifica es parte de la decisión, no una concesión.</dd></div>
+        <div class="gterm"><dt>RTO / RPO</dt><dd>Tiempo máximo aceptable de recuperación y pérdida máxima aceptable de datos. No están en el temario del módulo, pero los cuatro artículos de <em>Disaster Recovery</em> en AWS de los recursos complementarios giran alrededor de ellos.</dd></div>
+        <div class="gterm"><dt>Percentil (p99, p99.9)</dt><dd>Valor por debajo del cual cae ese porcentaje de las muestras. En latencia sustituye al promedio, porque el promedio oculta la cola.</dd></div>
+        <div class="gterm"><dt>RTT</dt><dd><em>Round-trip time.</em> Tiempo de ida y vuelta completo, medido desde el punto de vista de quien consume el servicio.</dd></div>
+        <div class="gterm"><dt>Coordinated omission</dt><dd>Error de medición clásico: registrar solo las peticiones que el sistema alcanzó a atender, ignorando el retraso acumulado de las que quedaron esperando. Hunde la credibilidad de un benchmark de latencia.</dd></div>
+      </dl>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="legend">
+      <span><span class="pill p-curso">Curso</span> está en el material del diplomado</span>
+      <span><span class="pill p-compl">Complementario</span> conocimiento externo, verificable</span>
+      <span><span class="pill p-recom">Recomendación</span> criterio propio, discutible</span>
+    </div>
+    <p>Bibliografía del módulo: <strong>Richards y Ford (2020)</strong>, <em>Fundamentals of Software Architecture: An Engineering Approach</em>, O'Reilly · <strong>Bass, Clements y Kazman (2022)</strong>, <em>Software Architecture in Practice</em>, 4.ª ed., SEI / Addison-Wesley.</p>
+    <p>Pendiente de verificar contra las infografías interactivas del aula, que no quedaron descargadas: el enunciado exacto de las leyes de la arquitectura y la taxonomía completa de atributos de calidad. La autoevaluación admite <strong>un solo intento</strong>.</p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var boxes = document.querySelectorAll('#tracker input[type="checkbox"]');
+    function read(k) {
+      try { return localStorage.getItem('m1-' + k) === '1'; } catch (e) { return false; }
+    }
+    function write(k, v) {
+      try { localStorage.setItem('m1-' + k, v ? '1' : '0'); } catch (e) { /* sin persistencia */ }
+    }
+    Array.prototype.forEach.call(boxes, function (b) {
+      b.checked = read(b.dataset.k);
+      b.addEventListener('change', function () { write(b.dataset.k, b.checked); });
+    });
+  })();
+</script>
+
+</body></html>

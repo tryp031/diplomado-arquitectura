@@ -1,0 +1,45 @@
+fecha:     2026-09-14T12:23:17-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  E   ronda: 2
+args:      --destino 127.0.0.1 --warmup 2000 --iters 50000
+---
+compilando E...
+make: Nothing to be done for `all'.
+ejecutable: /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/variante-E-icmp/client  (sin servidor: responde el kernel)
+[cliente E] reloj: granularidad=41 ns  sobrecoste(par de lecturas) p50=0 ns p99=42 ns  deltas-cero=75.2%
+[cliente E] ICMP echo hacia 127.0.0.1, payload=32B (paquete ICMP=40B)
+[cliente E] AVISO: quien responde es el KERNEL, no un proceso nuestro.
+            Esta variante NO clasifica y NO cumple el enunciado. Es linea base.
+[cliente E] midiendo 50000 iteraciones...
+[cliente E] 50000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-E-2.csv
+
+=== resultados-E-2 ===
+  n              50,000
+  mín                    5.25 µs
+  p50                   10.00 µs
+  p90                   11.04 µs
+  p99                   12.08 µs
+  p99.9                 14.83 µs
+  p99.99                24.21 µs
+  máx                   67.88 µs
+  desv. est.             1.45 µs
+  media                  9.67 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-E-2
+        5.012 µs | #                                                              465 ( 0.93%)
+        6.310 µs | ################                                             7,303 (14.61%)
+        7.943 µs | #####################################                       16,779 (33.56%)
+       10.000 µs | ########################################################    25,221 (50.44%)
+       12.589 µs |                                                                210 ( 0.42%)
+       15.849 µs |                                                                 16 ( 0.03%)
+       19.953 µs |                                                                  1 ( 0.00%)
+       25.119 µs |                                                                  1 ( 0.00%)
+       31.623 µs |                                                                  1 ( 0.00%)
+       39.811 µs |                                                                  0 ( 0.00%)
+       50.119 µs |                                                                  2 ( 0.00%)
+       63.096 µs |                                                                  1 ( 0.00%)

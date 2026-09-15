@@ -1,0 +1,732 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Clasificador de Hosts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root{
+    --ink:#10171C; --text:#24333A; --muted:#5E717A;
+    --paper:#EFF3F4; --surface:#FFFFFF;
+    --rule:#CFDADE; --rule-soft:#E3EAEC;
+    --accent:#0C6173; --accent-soft:#E0EFF2;
+    --signal:#A85C0C; --signal-soft:#FAEEDD;
+    --ok:#2B6A4B; --ok-soft:#E2EFE8;
+    --alert:#9C2B26; --alert-soft:#F7E6E5;
+    --code-bg:#10171C; --code-fg:#E8EFF0; --on-fill:#FFFFFF;
+
+    --display:"Chivo","Helvetica Neue",Arial,sans-serif;
+    --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#E6EDEF; --text:#C6D3D7; --muted:#8A9CA3;
+      --paper:#0D1417; --surface:#141E22;
+      --rule:#2A3940; --rule-soft:#1E2A30;
+      --accent:#55B6C7; --accent-soft:#102E36;
+      --signal:#D9993F; --signal-soft:#2E220F;
+      --ok:#5FB584; --ok-soft:#10261B;
+      --alert:#E0736C; --alert-soft:#2C1513;
+      --code-bg:#070C0F; --code-fg:#C9D6D9; --on-fill:#0D1417;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E6EDEF; --text:#C6D3D7; --muted:#8A9CA3;
+    --paper:#0D1417; --surface:#141E22;
+    --rule:#2A3940; --rule-soft:#1E2A30;
+    --accent:#55B6C7; --accent-soft:#102E36;
+    --signal:#D9993F; --signal-soft:#2E220F;
+    --ok:#5FB584; --ok-soft:#10261B;
+    --alert:#E0736C; --alert-soft:#2C1513;
+    --code-bg:#070C0F; --code-fg:#C9D6D9; --on-fill:#0D1417;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper); color:var(--text);
+    font-family:var(--body); font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding-inline:24px; padding-block:0}
+  .prose{max-width:64ch}
+
+  h1,h2,h3,h4,.eyebrow{font-family:var(--display)}
+  h1{font-size:clamp(2rem,5.6vw,3.1rem); line-height:1.05; font-weight:900; letter-spacing:-.025em; color:var(--ink); margin:.1em 0 .35em; text-wrap:balance}
+  h2{font-size:clamp(1.22rem,3vw,1.55rem); font-weight:700; letter-spacing:-.012em; color:var(--ink); margin:0; text-wrap:balance}
+  h3{font-size:1.02rem; font-weight:700; color:var(--ink); margin:0 0 .35em}
+  h4{font-size:.78rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--muted); margin:0 0 .7em}
+  p{margin:0 0 1em}
+  a{color:var(--accent)}
+  strong{font-weight:600; color:var(--ink)}
+  em{font-style:italic}
+
+  .eyebrow{font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 .9em}
+  .lede{font-size:clamp(1.06rem,2.3vw,1.28rem); line-height:1.5; max-width:58ch; margin:0}
+
+  header.masthead{border-bottom:2px solid var(--ink); padding-block:52px 30px}
+  .stamp{font-family:var(--mono); font-size:.76rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:.4em 1.4em; margin-top:1.5em}
+  .stamp b{color:var(--ink); font-weight:600}
+
+  section{padding-block:44px; border-bottom:1px solid var(--rule-soft)}
+  .shead{display:flex; align-items:baseline; gap:.8em; margin-bottom:1.3em; flex-wrap:wrap}
+  .shead .tag{font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--rule); padding:.15em .5em; border-radius:2px; white-space:nowrap}
+
+  .scroller{overflow-x:auto}
+  .scroller svg{width:100%; min-width:640px; height:auto; display:block}
+  .cap{font-family:var(--mono); font-size:.74rem; color:var(--muted); margin:1em 0 0; line-height:1.55; max-width:74ch}
+
+  .tbl{overflow-x:auto}
+  table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:560px}
+  th,td{text-align:left; padding:.6em .75em; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+  thead th{font-family:var(--display); font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--rule); white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  .sub{color:var(--muted); font-size:.92em; display:block; margin-top:.15em; font-family:var(--body)}
+  .idc{font-family:var(--mono); font-size:.78rem; font-weight:600; color:var(--accent); white-space:nowrap}
+
+  pre{font-family:var(--mono); font-size:.79rem; line-height:1.7; background:var(--code-bg); color:var(--code-fg); padding:18px 20px; overflow-x:auto; margin:0 0 1.2em; border-radius:2px}
+  pre b{color:#7FD4E3; font-weight:500}
+  pre i{color:#93A7AD; font-style:normal}
+  pre u{color:#E4B471; text-decoration:none}
+  code{font-family:var(--mono); font-size:.87em; background:var(--accent-soft); padding:.08em .35em; border-radius:2px; color:var(--ink)}
+
+  .badge{font-family:var(--mono); font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:.2em .5em; border-radius:2px; display:inline-block; white-space:nowrap}
+  .b-ok{color:var(--ok); background:var(--ok-soft)}
+  .b-go{color:var(--signal); background:var(--signal-soft)}
+  .b-no{color:var(--muted); background:var(--rule-soft)}
+  .b-al{color:var(--alert); background:var(--alert-soft)}
+
+  .split{display:grid; grid-template-columns:repeat(auto-fit,minmax(288px,1fr)); gap:20px; margin:1.6em 0}
+  .panel{background:var(--surface); border:1px solid var(--rule); padding:22px 24px}
+  .panel.win{border-top:4px solid var(--ok)}
+  .panel.lose{border-top:4px solid var(--muted)}
+  .panel .num{font-family:var(--mono); font-size:1.65rem; font-weight:600; color:var(--ink); letter-spacing:-.02em; display:block; margin:.1em 0}
+  .panel .verdictline{font-family:var(--display); font-weight:700; font-size:.92rem; margin-top:.9em; padding-top:.9em; border-top:1px solid var(--rule-soft)}
+  .panel.win .verdictline{color:var(--ok)}
+  .panel.lose .verdictline{color:var(--muted)}
+  .panel p:last-child{margin-bottom:0}
+  .panel p.small{font-size:.93rem; color:var(--muted); margin-top:.6em}
+
+  .keynote{background:var(--signal-soft); border-left:4px solid var(--signal); padding:20px 22px; margin:1.5em 0; max-width:68ch}
+  .keynote p:last-child{margin-bottom:0}
+  .keynote strong{color:var(--signal)}
+
+  ul.plain{list-style:none; padding:0; margin:0; display:grid; gap:13px; max-width:66ch}
+  ul.plain li{display:grid; grid-template-columns:auto 1fr; gap:.8em; align-items:start}
+  ul.plain .dot{font-family:var(--mono); font-size:.7rem; font-weight:600; color:var(--accent); border:1px solid var(--accent); width:1.85em; height:1.85em; display:grid; place-items:center; border-radius:50%; margin-top:.2em}
+
+  .board{display:grid; gap:0; margin-top:.4em}
+  .task{display:grid; grid-template-columns:auto 1fr auto auto; gap:.9em; align-items:start; padding:.78em 0; border-bottom:1px solid var(--rule-soft)}
+  .task:last-child{border-bottom:0}
+  .task input[type=checkbox]{width:17px; height:17px; margin-top:.4em; accent-color:var(--accent); cursor:pointer; flex:none}
+  .task label{cursor:pointer; line-height:1.45}
+  .task input:checked + label .tt{text-decoration:line-through; color:var(--muted)}
+  .tt{font-weight:600; color:var(--ink)}
+  .task .owner{font-family:var(--mono); font-size:.74rem; color:var(--muted); white-space:nowrap; margin-top:.35em}
+  .task .when{font-family:var(--mono); font-size:.74rem; font-weight:600; white-space:nowrap; margin-top:.35em; color:var(--signal)}
+  .blockgroup{margin-bottom:26px}
+  .note{font-family:var(--mono); font-size:.72rem; color:var(--muted); margin-top:1.2em}
+  input:focus-visible,a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  footer{padding-block:34px 56px; font-family:var(--mono); font-size:.76rem; color:var(--muted); line-height:1.7}
+
+  @media (max-width:600px){
+    body{font-size:16px}
+    .task{grid-template-columns:auto 1fr}
+    .task .owner,.task .when{grid-column:2; margin-top:.1em}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Group 2 · Módulo 1 · guía para la reunión · sistema corriendo</p>
+  <h1>Clasificador de Hosts</h1>
+  <p class="lede">Qué construimos, cómo funciona, cómo se usa, y en qué punto exacto del reto encaja cada pieza.</p>
+  <div class="stamp">
+    <span><b>Sistema</b> funcionando y medido</span>
+    <span><b>Entrega</b> 27/09/2026</span>
+    <span><b>Cierre</b> 29/09/2026</span>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><h2>Empecemos por lo que confunde</h2><span class="tag">léase primero</span></div>
+
+  <div class="prose">
+    <p>La pregunta honesta es: <em>¿cómo es que unas listas blancas y negras resuelven un reto de latencia?</em></p>
+  </div>
+
+  <div class="keynote">
+    <p><strong>No lo resuelven. Y está bien que no lo hagan.</strong></p>
+    <p>El reto lo resuelve <strong>por dónde viaja el mensaje</strong>, no lo que el mensaje dice. Las listas son lo que el mensaje dice.</p>
+  </div>
+
+  <div class="prose">
+    <p>Pensalo como un sobre de correo. La velocidad depende de si el sobre va en moto, en camión o en avión. Lo que está escrito en el papel de adentro no cambia cuánto tarda en llegar.</p>
+    <p>Pero un sobre vacío tampoco es correo: es un experimento. <strong>Las listas son el papel.</strong> No hacen el sistema más rápido — hacen que el sistema tenga una razón de existir.</p>
+  </div>
+
+  <div class="split">
+    <div class="panel win">
+      <h4>El sobre · cómo viaja</h4>
+      <span class="num">0,08 – 13 400 ns</span>
+      <p class="small">Memoria compartida, TCP, HTTP, sockets Unix. Aquí está toda la diferencia: entre la opción más lenta y la más rápida hay un factor de <strong>160 000×</strong>.</p>
+      <p class="verdictline">✔ Esto es lo que resuelve el reto</p>
+    </div>
+    <div class="panel lose">
+      <h4>El papel · qué dice</h4>
+      <span class="num">1,9 ns</span>
+      <p class="small">Las listas blancas y negras. Cuesta lo mismo responder <em>local</em>, <em>externo</em> o <em>desconocido</em>: es una constante, no depende del dato.</p>
+      <p class="verdictline">✖ Esto no resuelve el reto</p>
+    </div>
+  </div>
+
+  <div class="prose">
+    <h3>Entonces, ¿para qué las pusimos?</h3>
+    <p>Por tres razones concretas, y ninguna es la velocidad:</p>
+  </div>
+
+  <ul class="plain">
+    <li><span class="dot">1</span><div><strong>El reto exige una «respuesta específica».</strong><span class="sub">Con un eco puro la respuesta era siempre la misma, pasara lo que pasara. Ahora depende del estímulo: si mandás una IP distinta, contesta distinto. Eso es literalmente lo que pide el enunciado.</span></div></li>
+    <li><span class="dot">2</span><div><strong>Responde «¿y esto para qué sirve?»</strong><span class="sub">Un sistema que devuelve lo mismo que recibe no tiene caso de uso. Un control de acceso en la ruta crítica sí: en banca —el sector del profesor— validar si un origen está autorizado antes de dejar pasar una transacción es exactamente un problema donde el milisegundo importa.</span></div></li>
+    <li><span class="dot">3</span><div><strong>Hay algo que demostrar en vivo.</strong><span class="sub">Escribís un host, responde el veredicto y el tiempo. Un CSV con un millón de filas no se puede mostrar en una demo; esto sí.</span></div></li>
+  </ul>
+
+  <p class="cap" style="margin-top:1.8em">Lo difícil no fue poner las listas: fue lograr que costaran 1,9 nanosegundos. Si hubieran costado microsegundos, habrían contaminado toda la medición y el estudio se habría roto.</p>
+</section>
+
+<section>
+  <div class="shead"><h2>Qué nos pide el reto</h2><span class="tag">resumen del enunciado</span></div>
+
+  <div class="prose">
+    <p>En una frase: <strong>un sistema que esté siempre escuchando, que al recibir un estímulo responda algo concreto, y que midamos cuánto tarda — idealmente menos de 1 milisegundo.</strong></p>
+    <p>Y el enunciado es explícito en algo más: <em>«no se otorgarán pistas ni guías»</em>, <em>«la investigación es parte del reto»</em>. O sea que <strong>cómo lo resolvamos y por qué elegimos eso es parte de lo que se califica</strong>, no solo el número que salga.</p>
+  </div>
+
+  <div class="tbl" style="margin-top:1.5em">
+  <table>
+    <thead><tr><th>Lo que pide</th><th>Qué significa en la práctica</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Escuchar permanentemente</strong></td><td>Un proceso que no se muere: queda en un bucle esperando estímulos.</td></tr>
+      <tr><td><strong>Retornar una respuesta específica</strong></td><td>No cualquier cosa: algo determinado, que el receptor pueda verificar.</td></tr>
+      <tr><td><strong>Medir el tiempo transcurrido</strong></td><td>Desde que se envía hasta que se recibe la respuesta. Nosotros medimos ida y vuelta completa.</td></tr>
+      <tr><td><strong>Menos de 1 ms, preferiblemente</strong></td><td>«Preferiblemente» — es un objetivo, no una condición de aprobación.</td></tr>
+      <tr><td><strong>Justificar herramientas y método</strong></td><td>El PDF tiene que explicar <em>por qué</em> cada decisión, no solo <em>qué</em> se hizo.</td></tr>
+      <tr><td><strong>Comparar explícitamente contra 1 ms</strong></td><td>Decir con todas las letras si se cumple o no, y con qué holgura.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>El sistema, visto</h2><span class="tag">un intercambio completo</span></div>
+
+  <div class="scroller">
+  <svg viewBox="0 0 900 330" role="img" aria-label="El cliente medidor envía 32 bytes con una dirección IP al servidor clasificador, que busca en una tabla en memoria y devuelve 32 bytes con un veredicto. El cronómetro corre entre el envío y la recepción completa.">
+    <g font-family="Chivo, sans-serif" font-size="11.5" font-weight="700" fill="var(--muted)" letter-spacing="1.2">
+      <text x="115" y="38" text-anchor="middle">CLIENTE MEDIDOR</text>
+      <text x="765" y="38" text-anchor="middle">SERVIDOR CLASIFICADOR</text>
+    </g>
+
+    <rect x="30" y="52" width="170" height="132" fill="var(--surface)" stroke="var(--rule)" stroke-width="1.5"/>
+    <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--text)">
+      <text x="46" y="78">arma el estímulo</text>
+      <text x="46" y="98">lee el reloj → t0</text>
+      <text x="46" y="118">envía</text>
+      <text x="46" y="138">espera y lee todo</text>
+      <text x="46" y="158">lee el reloj → t1</text>
+      <text x="46" y="176" fill="var(--muted)">guarda t1 − t0</text>
+    </g>
+
+    <rect x="660" y="52" width="210" height="132" fill="var(--surface)" stroke="var(--rule)" stroke-width="1.5"/>
+    <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--text)">
+      <text x="676" y="78">lee los 32 B</text>
+      <text x="676" y="98">saca el host_id</text>
+      <text x="676" y="118" fill="var(--accent)">busca en la tabla</text>
+      <text x="676" y="138">escribe el veredicto</text>
+      <text x="676" y="158">responde</text>
+      <text x="676" y="176" fill="var(--muted)">vuelve a esperar</text>
+    </g>
+
+    <line x1="212" y1="100" x2="640" y2="100" stroke="var(--accent)" stroke-width="2"/>
+    <path d="M640 100 L629 95 L629 105 Z" fill="var(--accent)"/>
+    <circle cx="208" cy="100" r="4.5" fill="var(--signal)"/>
+    <text x="208" y="86" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="var(--signal)" text-anchor="middle">t0</text>
+    <text x="428" y="86" font-family="Chivo, sans-serif" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle">ESTÍMULO · 32 bytes</text>
+    <text x="428" y="120" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="middle">host_id = 10.20.0.11 (core-bancario)</text>
+
+    <line x1="640" y1="158" x2="212" y2="158" stroke="var(--ok)" stroke-width="2"/>
+    <path d="M212 158 L223 153 L223 163 Z" fill="var(--ok)"/>
+    <circle cx="208" cy="158" r="4.5" fill="var(--signal)"/>
+    <text x="208" y="180" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="var(--signal)" text-anchor="middle">t1</text>
+    <text x="428" y="148" font-family="Chivo, sans-serif" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle">RESPUESTA · 32 bytes</text>
+    <text x="428" y="178" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="middle">veredicto = LOCAL · eco del host_id</text>
+
+    <line x1="208" y1="196" x2="208" y2="226" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <line x1="208" y1="226" x2="424" y2="226" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="434" y="230" font-family="Chivo, sans-serif" font-size="12.5" font-weight="700" fill="var(--signal)">latencia = t1 − t0</text>
+    <text x="434" y="248" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--muted)">arranca antes de escribir, para cuando la respuesta está completa</text>
+
+    <text x="30" y="288" font-family="Chivo, sans-serif" font-size="11" font-weight="700" fill="var(--muted)" letter-spacing="1.1">TRES RESPUESTAS POSIBLES</text>
+    <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+      <rect x="30" y="298" width="74" height="22" fill="var(--ok-soft)"/>
+      <text x="67" y="313" fill="var(--ok)" text-anchor="middle" font-weight="600">LOCAL</text>
+      <text x="112" y="313" fill="var(--muted)">en la lista blanca</text>
+
+      <rect x="280" y="298" width="84" height="22" fill="var(--alert-soft)"/>
+      <text x="322" y="313" fill="var(--alert)" text-anchor="middle" font-weight="600">EXTERNO</text>
+      <text x="372" y="313" fill="var(--muted)">en la lista negra</text>
+
+      <rect x="540" y="298" width="116" height="22" fill="var(--rule-soft)"/>
+      <text x="598" y="313" fill="var(--muted)" text-anchor="middle" font-weight="600">DESCONOCIDO</text>
+      <text x="664" y="313" fill="var(--muted)">en ninguna de las dos</text>
+    </g>
+  </svg>
+  </div>
+
+  <p class="cap">El servidor no hace nada más que esto. No escribe en disco, no consulta la red, no reserva memoria. Cualquiera de esas cosas costaría más que todo lo que estamos midiendo.</p>
+</section>
+
+<section>
+  <div class="shead"><h2>La tabla cabe en una línea de caché</h2><span class="tag">por qué cuesta 1,9 ns</span></div>
+
+  <div class="prose">
+    <p><strong>El escenario:</strong> control de acceso en la ruta crítica de una plataforma financiera. La lista blanca son los servicios internos autorizados a originar una transacción (<code>core-bancario</code>, <code>autorizador</code>, <code>cifrado-hsm</code>…); la negra, orígenes bloqueados por política de seguridad (<code>tor-salida</code>, <code>escaneo-masivo</code>…). Lo que no esté en ninguna se rechaza por defecto.</p>
+    <p class="cap" style="margin:0 0 1em">Las direcciones no son inventadas al azar: la lista blanca usa RFC 1918 (privadas) y la negra usa RFC 5737 (TEST-NET-2, reservado para documentación). Son los rangos correctos para datos de ejemplo — no pertenecen a nadie y no enrutan.</p>
+    <p>Ésta es la decisión de diseño que hace viable toda la idea. La tabla son <strong>16 hosts × 4 bytes = 64 bytes exactos</strong>, y 64 bytes es justo lo que el procesador trae de memoria de un solo tirón.</p>
+    <p>Como cabe entera en la caché más rápida, <strong>nunca hay que ir a buscarla</strong>. Con mil hosts habría que salir a memoria, tardaría cien veces más, y contaminaría la medición.</p>
+  </div>
+
+  <div class="scroller" style="margin-top:1.5em">
+  <svg viewBox="0 0 900 200" role="img" aria-label="La tabla en memoria: 16 celdas de 4 bytes, diez locales y seis externas, sumando 64 bytes que equivalen a una línea de caché.">
+    <path d="M60 46 L60 34 L840 34 L840 46" fill="none" stroke="var(--signal)" stroke-width="1.5"/>
+    <text x="450" y="24" font-family="Chivo, sans-serif" font-size="12.5" font-weight="700" fill="var(--signal)" text-anchor="middle">64 bytes = UNA línea de caché · nunca falla</text>
+
+    <rect x="60" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="108.75" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="157.5" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="206.25" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="255" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="303.75" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="352.5" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="401.25" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="450" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="498.75" y="56" width="46.75" height="46" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <rect x="547.5" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+    <rect x="596.25" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+    <rect x="645" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+    <rect x="693.75" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+    <rect x="742.5" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+    <rect x="791.25" y="56" width="46.75" height="46" fill="var(--alert-soft)" stroke="var(--alert)"/>
+
+    <g font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--muted)" text-anchor="middle">
+      <text x="83" y="83">4 B</text><text x="132" y="83">4 B</text><text x="181" y="83">4 B</text><text x="230" y="83">4 B</text>
+      <text x="278" y="83">4 B</text><text x="327" y="83">4 B</text><text x="376" y="83">4 B</text><text x="425" y="83">4 B</text>
+      <text x="473" y="83">4 B</text><text x="522" y="83">4 B</text><text x="571" y="83">4 B</text><text x="620" y="83">4 B</text>
+      <text x="668" y="83">4 B</text><text x="717" y="83">4 B</text><text x="766" y="83">4 B</text><text x="815" y="83">4 B</text>
+    </g>
+
+    <line x1="60" y1="112" x2="545" y2="112" stroke="var(--ok)" stroke-width="2"/>
+    <text x="302" y="130" font-family="Chivo, sans-serif" font-size="11.5" font-weight="700" fill="var(--ok)" text-anchor="middle">10 SERVICIOS INTERNOS · lista blanca</text>
+    <text x="302" y="147" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">core-bancario · autorizador · db-clientes …</text>
+
+    <line x1="547.5" y1="112" x2="838" y2="112" stroke="var(--alert)" stroke-width="2"/>
+    <text x="693" y="130" font-family="Chivo, sans-serif" font-size="11.5" font-weight="700" fill="var(--alert)" text-anchor="middle">6 ORÍGENES BLOQUEADOS · lista negra</text>
+    <text x="693" y="147" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)" text-anchor="middle">tor-salida · proxy-anonimo · escaneo-masivo …</text>
+
+    <text x="450" y="184" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="middle">cualquier IP que no esté en estas 16 celdas → DESCONOCIDO</text>
+  </svg>
+  </div>
+
+  <div class="prose" style="margin-top:1.6em">
+    <h3>Y se recorren las 16 siempre</h3>
+    <p>Aunque la IP esté en la primera celda, el código revisa las dieciséis. Suena absurdo, pero es deliberado: <strong>así responder <em>local</em> cuesta exactamente lo mismo que responder <em>externo</em></strong>.</p>
+    <p>Si no fuera así, la latencia dependería de qué IP mandaras, y se romperían dos cosas: la comparación entre variantes quedaría sesgada por qué mezcla de IPs tocó en cada corrida, y —en un sistema de verdad— alguien podría deducir qué hay en la lista midiendo tiempos.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>Por qué unas versiones son 160 000 veces más rápidas</h2><span class="tag">esto sí resuelve el reto</span></div>
+
+  <div class="prose">
+    <p>Construimos el mismo sistema cinco veces, cambiando <strong>solo por dónde viaja el mensaje</strong>. Cuantas menos capas atraviesa, menos tarda:</p>
+  </div>
+
+  <div class="scroller" style="margin-top:1.4em">
+  <svg viewBox="0 0 900 310" role="img" aria-label="HTTP atraviesa nueve capas y tarda 50 a 200 microsegundos; TCP siete y tarda 13,4; ICMP cinco y tarda 9,7; socket Unix tres y tarda 8 a 20; memoria compartida tres sin llamadas al sistema y tarda 0,08 microsegundos.">
+    <g font-family="Chivo, sans-serif" font-size="10.5" font-weight="700" fill="var(--muted)" letter-spacing="1">
+      <text x="150" y="34">LO QUE ATRAVIESA CADA MENSAJE</text>
+      <text x="678" y="34">MEDIANA</text>
+      <text x="790" y="34">AL KERNEL</text>
+    </g>
+    <line x1="30" y1="42" x2="870" y2="42" stroke="var(--rule)"/>
+
+    <g font-family="Chivo, sans-serif" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="end">
+      <text x="140" y="72">A · HTTP</text>
+      <text x="140" y="118">B · TCP</text>
+      <text x="140" y="164">E · ICMP</text>
+      <text x="140" y="210">C · Unix</text>
+      <text x="140" y="256">D · memoria</text>
+    </g>
+
+    <g font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle">
+      <rect x="150" y="56" width="54" height="24" fill="var(--accent-soft)"/><text x="177" y="72" fill="var(--accent)">app</text>
+      <rect x="207" y="56" width="54" height="24" fill="var(--accent)"/><text x="234" y="72" fill="var(--on-fill)">HTTP</text>
+      <rect x="264" y="56" width="54" height="24" fill="var(--accent)"/><text x="291" y="72" fill="var(--on-fill)">TCP</text>
+      <rect x="321" y="56" width="54" height="24" fill="var(--accent)"/><text x="348" y="72" fill="var(--on-fill)">IP</text>
+      <rect x="378" y="56" width="54" height="24" fill="var(--muted)"/><text x="405" y="72" fill="var(--on-fill)">lo</text>
+      <rect x="435" y="56" width="54" height="24" fill="var(--accent)"/><text x="462" y="72" fill="var(--on-fill)">IP</text>
+      <rect x="492" y="56" width="54" height="24" fill="var(--accent)"/><text x="519" y="72" fill="var(--on-fill)">TCP</text>
+      <rect x="549" y="56" width="54" height="24" fill="var(--accent)"/><text x="576" y="72" fill="var(--on-fill)">HTTP</text>
+      <rect x="606" y="56" width="54" height="24" fill="var(--accent-soft)"/><text x="633" y="72" fill="var(--accent)">app</text>
+
+      <rect x="150" y="102" width="70" height="24" fill="var(--accent-soft)"/><text x="185" y="118" fill="var(--accent)">app</text>
+      <rect x="223" y="102" width="70" height="24" fill="var(--accent)"/><text x="258" y="118" fill="var(--on-fill)">TCP</text>
+      <rect x="296" y="102" width="70" height="24" fill="var(--accent)"/><text x="331" y="118" fill="var(--on-fill)">IP</text>
+      <rect x="369" y="102" width="70" height="24" fill="var(--muted)"/><text x="404" y="118" fill="var(--on-fill)">loopback</text>
+      <rect x="442" y="102" width="70" height="24" fill="var(--accent)"/><text x="477" y="118" fill="var(--on-fill)">IP</text>
+      <rect x="515" y="102" width="70" height="24" fill="var(--accent)"/><text x="550" y="118" fill="var(--on-fill)">TCP</text>
+      <rect x="588" y="102" width="72" height="24" fill="var(--accent-soft)"/><text x="624" y="118" fill="var(--accent)">app</text>
+
+      <rect x="150" y="148" width="100" height="24" fill="var(--accent-soft)"/><text x="200" y="164" fill="var(--accent)">app</text>
+      <rect x="253" y="148" width="100" height="24" fill="var(--accent)"/><text x="303" y="164" fill="var(--on-fill)">ICMP</text>
+      <rect x="356" y="148" width="148" height="24" fill="var(--signal)"/><text x="430" y="164" fill="var(--on-fill)">responde el kernel</text>
+      <rect x="507" y="148" width="100" height="24" fill="var(--accent)"/><text x="557" y="164" fill="var(--on-fill)">ICMP</text>
+      <rect x="610" y="148" width="50" height="24" fill="var(--accent-soft)"/><text x="635" y="164" fill="var(--accent)">app</text>
+
+      <rect x="150" y="194" width="168" height="24" fill="var(--accent-soft)"/><text x="234" y="210" fill="var(--accent)">app</text>
+      <rect x="321" y="194" width="168" height="24" fill="var(--muted)"/><text x="405" y="210" fill="var(--on-fill)">buffer del kernel</text>
+      <rect x="492" y="194" width="168" height="24" fill="var(--accent-soft)"/><text x="576" y="210" fill="var(--accent)">app</text>
+
+      <rect x="150" y="240" width="168" height="24" fill="var(--accent-soft)"/><text x="234" y="256" fill="var(--accent)">app</text>
+      <rect x="321" y="240" width="168" height="24" fill="var(--signal)"/><text x="405" y="256" fill="var(--on-fill)">memoria compartida</text>
+      <rect x="492" y="240" width="168" height="24" fill="var(--accent-soft)"/><text x="576" y="256" fill="var(--accent)">app</text>
+    </g>
+
+    <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--text)">
+      <text x="678" y="72">50–200 µs</text>
+      <text x="678" y="118">13,4 µs</text>
+      <text x="678" y="164">9,7 µs</text>
+      <text x="678" y="210">8–20 µs</text>
+      <text x="678" y="256" font-weight="600" fill="var(--signal)">0,08 µs</text>
+    </g>
+    <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--muted)" text-anchor="middle">
+      <text x="820" y="72">2 +</text>
+      <text x="820" y="118">2</text>
+      <text x="820" y="164">2</text>
+      <text x="820" y="210">2</text>
+      <text x="820" y="256" font-weight="600" fill="var(--signal)">0</text>
+    </g>
+
+    <text x="30" y="296" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">A y C son estimaciones — las están implementando Freddy y Camilo. B, E y D están medidas con 3 rondas de 1 000 000.</text>
+  </svg>
+  </div>
+
+  <div class="keynote" style="margin-top:1.6em">
+    <p><strong>La última columna es la clave.</strong> D no es más rápida por tener menos cajas: es más rápida porque no le pide <em>nada</em> al sistema operativo. Los dos procesos escriben y leen la misma memoria física, y uno da vueltas esperando en vez de dormirse.</p>
+    <p>El precio: quema un núcleo al 100 % sin parar, solo funciona entre programas de la misma máquina, y no interopera con nada. <strong>Es la más rápida y sería la peor decisión para casi cualquier sistema real.</strong> Decir las dos cosas a la vez es el ejercicio.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>Cómo se usa</h2><span class="tag">ya corre en vivo</span></div>
+
+  <div class="prose">
+    <p>Desde el <strong>14/09</strong> el sistema tiene aplicación propia: se arranca con un comando,
+    sin <code>npm</code>, sin <code>pip install</code>, sin <code>node_modules</code>. Solo Python 3
+    y un compilador de C.</p>
+  </div>
+
+  <pre>./iniciar.sh</pre>
+
+  <div class="prose">
+    <p>Compila las variantes en C, levanta el panel y abre el navegador. Desde ahí:</p>
+  </div>
+
+  <ul class="plain">
+    <li><span class="dot">1</span><div><strong>Arrancar y parar cada variante</strong><span class="sub">Cada servidor es un proceso aparte con su puerto. La aplicación los enciende, pero no interviene en lo que miden.</span></div></li>
+    <li><span class="dot">2</span><div><strong>Mandar estímulos</strong><span class="sub">Escribís <code>core-bancario</code> y responde LOCAL; <code>tor-salida</code> responde EXTERNO; cualquier cosa fuera de la tabla, DESCONOCIDO.</span></div></li>
+    <li><span class="dot">3</span><div><strong>Editar las listas blancas y negras</strong><span class="sub">Agregar, cambiar y quitar hosts con validación en vivo. Al guardar, los servidores se reinician para releer la tabla.</span></div></li>
+    <li><span class="dot">4</span><div><strong>Medir de verdad</strong><span class="sub">Elegís variante e iteraciones, y corre el cliente real: el mismo programa que produce los resultados del informe.</span></div></li>
+  </ul>
+
+  <div class="keynote" style="margin-top:1.8em">
+    <p><strong>Pero ojo con la trampa:</strong> si la aplicación web fuera el sistema, el objetivo de
+    1&nbsp;ms estaría perdido de entrada. Un navegador vive en milisegundos.</p>
+    <p>Por eso hay <strong>dos planos</strong>: la web es el <em>plano de control</em> —enciende y
+    muestra— y el sistema medido es el <em>plano de datos</em>. <strong>El cronómetro vive en el
+    plano de datos, nunca en el navegador.</strong></p>
+  </div>
+
+  <div class="prose">
+    <h3 style="margin-top:1.8em">La prueba de que la separación funciona</h3>
+    <p>Las mismas mediciones, lanzadas desde la terminal y desde la aplicación web:</p>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <thead><tr><th>Variante</th><th>Desde <code>./run.sh</code></th><th>Desde la aplicación</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>B · TCP en Python</td><td>13,4 µs</td><td><strong>13,46 µs</strong></td><td><span class="badge b-ok">igual</span></td></tr>
+      <tr><td>Bc · TCP en C</td><td>11,5 µs</td><td><strong>11,67 µs</strong></td><td><span class="badge b-ok">igual</span></td></tr>
+      <tr><td>D · memoria compartida</td><td>83 ns</td><td><strong>83 ns</strong></td><td><span class="badge b-ok">exacto</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="cap">Quien aprieta el botón no cambia lo que se mide. Eso es lo que había que demostrar.</p>
+
+  <div class="prose">
+    <h3 style="margin-top:1.8em">Y el contraste que lo hace visible</h3>
+    <p>El formulario muestra <strong>dos números a la vez</strong>: lo que tardó el sistema y lo que
+    tardó el viaje completo desde el navegador. Ver <strong>13 µs al lado de 4 ms</strong> en la misma
+    fila es la demostración de por qué la web no puede ser el plano de datos.</p>
+
+    <h3 style="margin-top:1.8em">Sin interfaz, solo terminal</h3>
+  </div>
+
+  <pre>cd sistema
+./run.sh B 1 --iters 1000000        <i># una medición completa</i>
+./analyze.py --md resultados/*.csv  <i># tabla comparativa</i>
+python3 demo.py --variante B        <i># demo por línea de comandos</i></pre>
+
+  <p class="cap">Los resultados del informe salen de aquí, nunca de la aplicación web.</p>
+</section>
+
+<section>
+  <div class="shead"><h2>¿Hace falta medir de otras formas?</h2><span class="tag">pregunta abierta</span></div>
+
+  <div class="tbl">
+  <table>
+    <thead><tr><th>Forma de medir</th><th>¿La necesitamos?</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Con la máquina cargada</strong><span class="sub">hoy medimos con el equipo en reposo</span></td>
+        <td><span class="badge b-go">sí, falta</span></td>
+        <td>Es el experimento pendiente. Las mismas mediciones dieron 363 violaciones del umbral un día y cero otro día. Hasta no repetirlo bajo carga controlada no sabemos si la cola la pone el sistema o la ponía la máquina ocupada.</td>
+      </tr>
+      <tr>
+        <td><strong>Entre dos máquinas reales</strong><span class="sub">con red física de por medio</span></td>
+        <td><span class="badge b-go">depende</span></td>
+        <td>Es la pregunta 4 para el profesor. Ya tenemos la línea base de internet (17 ms) que da el orden de magnitud. Si él espera red física hay que montarlo; si acepta loopback, con lo que hay alcanza.</td>
+      </tr>
+      <tr>
+        <td><strong>Con muchos clientes a la vez</strong></td>
+        <td><span class="badge b-no">no</span></td>
+        <td>El enunciado no pide concurrencia ni throughput en ninguna parte. Agregarlo sería sobreingeniería, y el módulo la penaliza conceptualmente.</td>
+      </tr>
+      <tr>
+        <td><strong>Midiendo solo la ida</strong></td>
+        <td><span class="badge b-al">no se puede</span></td>
+        <td>Requeriría que los relojes de los dos procesos estuvieran sincronizados al nanosegundo. No lo están. Cualquier número de «solo ida» entre procesos es inválido.</td>
+      </tr>
+      <tr>
+        <td><strong>Reportando el promedio</strong></td>
+        <td><span class="badge b-al">error clásico</span></td>
+        <td>El promedio esconde la cola. Reportamos percentiles: mediana, 99, 99,9 y máximo. Es lo que separa un informe serio de uno que pasa por alto lo interesante.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>El reto, punto por punto</h2><span class="tag">qué cubre cada cosa</span></div>
+
+  <div class="prose" style="margin-bottom:1.4em">
+    <p>Esta es la tabla que respondés si el profesor pregunta «¿y dónde está esto en su entrega?».</p>
+  </div>
+
+  <h4>Requisitos del sistema</h4>
+  <div class="tbl" style="margin-bottom:2.4em">
+  <table>
+    <thead><tr><th></th><th>Lo que pide el enunciado</th><th>¿Aportan las listas?</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="idc">R1</td>
+        <td><strong>Escuchar permanentemente</strong><span class="sub">Los cinco servidores quedan en bucle infinito. D además gira sin dormirse nunca.</span></td>
+        <td><span class="badge b-no">no</span></td>
+        <td><span class="badge b-ok">listo</span></td>
+      </tr>
+      <tr>
+        <td class="idc">R2</td>
+        <td><strong>Retornar una respuesta específica</strong><span class="sub">Un veredicto que depende del estímulo, más el eco del host para poder verificarlo.</span></td>
+        <td><span class="badge b-go">sí — este</span></td>
+        <td><span class="badge b-ok">listo</span></td>
+      </tr>
+      <tr>
+        <td class="idc">R3</td>
+        <td><strong>Medir el tiempo transcurrido</strong><span class="sub">Ida y vuelta completa, reloj monótono, 9 millones de muestras.</span></td>
+        <td><span class="badge b-no">no</span></td>
+        <td><span class="badge b-ok">listo</span></td>
+      </tr>
+      <tr>
+        <td class="idc">R4</td>
+        <td><strong>Latencia menor a 1 ms</strong><span class="sub">0,08 µs de mediana: doce mil veces por debajo del objetivo.</span></td>
+        <td><span class="badge b-no">no</span></td>
+        <td><span class="badge b-ok">listo</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>Los cinco entregables</h4>
+  <div class="tbl">
+  <table>
+    <thead><tr><th></th><th>Qué tenemos</th><th>Falta</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="idc">E1<span class="sub">Código en ZIP</span></td>
+        <td>Cinco implementaciones, el harness común, el clasificador y la demo. Todo compila y corre desde cero.</td>
+        <td>Empaquetar · un README que le diga al profesor cómo ejecutarlo en dos minutos</td>
+        <td><span class="badge b-go">casi</span></td>
+      </tr>
+      <tr>
+        <td class="idc">E2<span class="sub">Documentación técnica PDF</span></td>
+        <td>Borrador de 548 líneas con arquitectura, atributos de calidad, trade-offs y cuatro decisiones registradas.</td>
+        <td>Actualizar cifras · exportar a PDF · esperar A y C</td>
+        <td><span class="badge b-go">en curso</span></td>
+      </tr>
+      <tr>
+        <td class="idc">E3<span class="sub">Logs de ejecución</span></td>
+        <td>Un log por corrida con procesador, sistema operativo, versiones y resultados. Más los CSV crudos.</td>
+        <td>Nada</td>
+        <td><span class="badge b-ok">listo</span></td>
+      </tr>
+      <tr>
+        <td class="idc">E4<span class="sub">Informe + comparación contra 1 ms</span></td>
+        <td>Análisis de resultados, percentiles y la comparación explícita contra el umbral.</td>
+        <td><strong>Reescribir una conclusión que la remedición contradijo</strong></td>
+        <td><span class="badge b-go">en curso</span></td>
+      </tr>
+      <tr>
+        <td class="idc">E5<span class="sub">Video ≤ 5 min o demo en vivo</span></td>
+        <td>Guion cronometrado de 4:40 y la demo interactiva funcionando.</td>
+        <td>Grabar</td>
+        <td><span class="badge b-go">casi</span></td>
+      </tr>
+      <tr>
+        <td class="idc">—<span class="sub">Autoevaluación M1</span></td>
+        <td>Cuestionario en Brightspace.</td>
+        <td><strong>Un solo intento permitido.</strong> Hacerla después de repasar el material</td>
+        <td><span class="badge b-al">pendiente</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="keynote" style="margin-top:1.8em">
+    <p><strong>Fijate en la tercera columna de la primera tabla.</strong> Las listas aportan a <em>exactamente uno</em> de los cuatro requisitos: R2. No aportan nada a la latencia, y no deberían. Lo que sí hacen —y no cabe en ninguna tabla— es darle al informe una respuesta para «¿y esto para qué sirve?», que es la pregunta que un eco puro no puede contestar.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>Nuestra propuesta, en una página</h2></div>
+
+  <div class="prose">
+    <p>La mayoría de los equipos va a entregar <em>una</em> implementación y un número. Nosotros entregamos <strong>un estudio comparativo</strong>: el mismo sistema construido cinco veces, cambiando solo por dónde viaja el mensaje, medido todo igual.</p>
+    <p>Eso cambia la tesis de la entrega. No es «logramos 0,08 µs». Es:</p>
+  </div>
+
+  <div class="keynote">
+    <p>Medimos cinco arquitecturas de comunicación en condiciones idénticas, obtuvimos un rango de <strong>seis órdenes de magnitud</strong>, y éstas son las razones para elegir una u otra según qué atributo priorice el negocio.</p>
+  </div>
+
+  <div class="prose"><h3>Por qué esto es mejor entrega</h3></div>
+  <ul class="plain">
+    <li><span class="dot">1</span><div><strong>El objetivo de 1 ms se cumple con casi cualquier cosa.</strong><span class="sub">Un socket TCP en Python ya está 75 veces por debajo. Perseguir el número más bajo es el error del ejercicio: la nota está en el método y en el análisis del trade-off.</span></div></li>
+    <li><span class="dot">2</span><div><strong>Divide el trabajo de verdad entre tres.</strong><span class="sub">Un servidor que devuelve 32 bytes no se parte en tres. Cinco variantes sí.</span></div></li>
+    <li><span class="dot">3</span><div><strong>Tenemos dos hallazgos que no salen de un tutorial.</strong><span class="sub">El lenguaje explicaba el 9 % de la diferencia y el transporte el 91 %. Y el comando <code>ping</code> es 12× más lento que el mismo protocolo medido con un socket propio. Las dos veces, la intuición apuntaba a la capa equivocada.</span></div></li>
+    <li><span class="dot">4</span><div><strong>Ejercita exactamente lo que enseña el módulo.</strong><span class="sub">Atributos de calidad medibles, restricciones, decisiones registradas y trade-offs explícitos. Una implementación sola no ejercita ninguno.</span></div></li>
+    <li><span class="dot">5</span><div><strong>La conclusión es incómoda, y por eso vale.</strong><span class="sub">La arquitectura que gana el reto —memoria compartida— es la que nadie debería usar en producción. Un informe que concluya «usen memoria compartida» habría aprendido a optimizar, no a arquitectar.</span></div></li>
+  </ul>
+</section>
+
+<section style="border-bottom:2px solid var(--ink)">
+  <div class="shead"><h2>Tablero de la reunión</h2><span class="tag">se puede marcar</span></div>
+
+  <div class="prose" style="margin-bottom:1.6em">
+    <p>Para ir revisando durante la reunión. Las marcas se guardan en tu navegador — cada uno ve las suyas.</p>
+  </div>
+
+  <div class="blockgroup">
+    <h4>Decisiones a confirmar con el equipo</h4>
+    <div class="board">
+      <div class="task"><input type="checkbox" id="t-d1"><label for="t-d1"><span class="tt">El dominio son listas de hosts, no un eco</span><span class="sub">Ya está implementado y medido. Si alguien objeta, se habla — pero reabrirlo cuesta días que no hay.</span></label><span class="owner">todos</span><span class="when">hoy</span></div>
+      <div class="task"><input type="checkbox" id="t-d2"><label for="t-d2"><span class="tt">Freddy toma la variante A (HTTP), puerto 9100</span><span class="sub">La más importante del informe: sin ella no podemos afirmar que la opción simple ya cumple.</span></label><span class="owner">Freddy</span><span class="when">hoy</span></div>
+      <div class="task"><input type="checkbox" id="t-d3"><label for="t-d3"><span class="tt">Camilo toma la variante C (socket Unix), puerto 9102</span><span class="sub">Prescindible si no alcanza el tiempo, pero cierra el rango del estudio.</span></label><span class="owner">Camilo</span><span class="when">hoy</span></div>
+      <div class="task"><input type="checkbox" id="t-d4"><label for="t-d4"><span class="tt">Cada uno elige su lenguaje y lo justifica en media página</span><span class="sub">Está medido que el lenguaje no es la variable que importa: 9 % contra 144×.</span></label><span class="owner">Freddy · Camilo</span><span class="when">hoy</span></div>
+      <div class="task"><input type="checkbox" id="t-d5"><label for="t-d5"><span class="tt">Entregamos el 27/09, no el 29</span><span class="sub">Dos días de colchón. Después del cierre no se califica, sin excepción.</span></label><span class="owner">todos</span><span class="when">hoy</span></div>
+    </div>
+  </div>
+
+  <div class="blockgroup">
+    <h4>Preguntas para el docente</h4>
+    <div class="board">
+      <div class="task"><input type="checkbox" id="t-p1"><label for="t-p1"><span class="tt">¿Qué frontera de medición espera?</span><span class="sub">¿Ida y vuelta completa en la aplicación, o acepta medidas parciales?</span></label><span class="owner">Danny</span><span class="when">15/09</span></div>
+      <div class="task"><input type="checkbox" id="t-p2"><label for="t-p2"><span class="tt">Mediana de 13 µs con máximo que varía entre 130 µs y 44 ms según el día: ¿cumple 1 ms?</span><span class="sub">Es la que decide cómo se redacta el informe entero.</span></label><span class="owner">Danny</span><span class="when">15/09</span></div>
+      <div class="task"><input type="checkbox" id="t-p3"><label for="t-p3"><span class="tt">¿La entrega es una por grupo o una por persona?</span><span class="sub">El enunciado está escrito en singular y el material no menciona entrega grupal.</span></label><span class="owner">Danny</span><span class="when">15/09</span></div>
+      <div class="task"><input type="checkbox" id="t-p4"><label for="t-p4"><span class="tt">¿Espera red física entre dos máquinas, o acepta loopback?</span><span class="sub">Cambia si hay que montar un experimento nuevo o no.</span></label><span class="owner">Danny</span><span class="when">15/09</span></div>
+    </div>
+  </div>
+
+  <div class="blockgroup">
+    <h4>Trabajo de la semana</h4>
+    <div class="board">
+      <div class="task"><input type="checkbox" id="t-w1"><label for="t-w1"><span class="tt">Implementar la variante A contra el contrato</span><span class="sub">Copiar el cliente de B, cambiar solo el transporte, correr <code>./run.sh A 1</code>. En cuanto exista <code>sistema/variante-A-http/server.py</code>, la aplicación la detecta sola y aparece con su botón de arrancar.</span></label><span class="owner">Freddy</span><span class="when">21/09</span></div>
+      <div class="task"><input type="checkbox" id="t-w2"><label for="t-w2"><span class="tt">Implementar la variante C contra el contrato</span></label><span class="owner">Camilo</span><span class="when">21/09</span></div>
+      <div class="task"><input type="checkbox" id="t-n1" checked><label for="t-n1"><span class="tt">✔ Aplicación web con panel, formularios y medición en vivo</span><span class="sub">Hecha el 14/09. Python stdlib + React desde CDN, sin build. Se arranca con <code>./iniciar.sh</code>.</span></label><span class="owner">Danny</span><span class="when">hecho</span></div>
+      <div class="task"><input type="checkbox" id="t-n2" checked><label for="t-n2"><span class="tt">✔ Visor de resultados con las cinco mediciones</span><span class="sub">9,15 M de muestras condensadas en 2,4 KB, con curva de percentiles e histogramas.</span></label><span class="owner">Danny</span><span class="when">hecho</span></div>
+      <div class="task"><input type="checkbox" id="t-n3" checked><label for="t-n3"><span class="tt">✔ Escenario del dominio: plataforma financiera</span><span class="sub">Servicios internos autorizados contra orígenes bloqueados. Direcciones RFC 1918 y RFC 5737.</span></label><span class="owner">Danny</span><span class="when">hecho</span></div>
+      <div class="task"><input type="checkbox" id="t-n4" checked><label for="t-n4"><span class="tt">✔ Carpeta del proyecto lista para compartir</span><span class="sub"><code>reto-latencia-group2/</code> — autocontenida, con su ZIP de 182 KB.</span></label><span class="owner">Danny</span><span class="when">hecho</span></div>
+      <div class="task"><input type="checkbox" id="t-w3"><label for="t-w3"><span class="tt">Abrir el repositorio Git compartido</span><span class="sub">Pendiente desde el 08/09. Con tres personas en paralelo ya bloquea.</span></label><span class="owner">Danny</span><span class="when">16/09</span></div>
+      <div class="task"><input type="checkbox" id="t-w4"><label for="t-w4"><span class="tt">Congelar la especificación de medición</span><span class="sub">Con las enmiendas del reloj, la frontera y el dominio.</span></label><span class="owner">Danny</span><span class="when">16/09</span></div>
+      <div class="task"><input type="checkbox" id="t-w5"><label for="t-w5"><span class="tt">Reescribir la conclusión que la remedición contradijo</span><span class="sub">El informe afirma que dos variantes incumplen el umbral. Al remedir dieron cero violaciones.</span></label><span class="owner">Danny</span><span class="when">18/09</span></div>
+      <div class="task"><input type="checkbox" id="t-w6"><label for="t-w6"><span class="tt">Medir con la máquina bajo carga controlada</span><span class="sub">Separa «el sistema tiene cola» de «la máquina estaba ocupada». Es el experimento que falta.</span></label><span class="owner">Danny</span><span class="when">18/09</span></div>
+      <div class="task"><input type="checkbox" id="t-w7"><label for="t-w7"><span class="tt">Probar que todo compila en Linux sobre x86</span><span class="sub">Solo se ha compilado en macOS con procesador ARM. Si el profesor lo corre en Linux y falla, el entregable 1 falla.</span></label><span class="owner">Danny</span><span class="when">21/09</span></div>
+    </div>
+  </div>
+
+  <div class="blockgroup">
+    <h4>Cierre</h4>
+    <div class="board">
+      <div class="task"><input type="checkbox" id="t-c1"><label for="t-c1"><span class="tt">Escribir el PDF con todas las variantes</span></label><span class="owner">Danny</span><span class="when">24/09</span></div>
+      <div class="task"><input type="checkbox" id="t-c2"><label for="t-c2"><span class="tt">README de raíz del ZIP para el evaluador</span><span class="sub">Que pueda descomprimir y ejecutar en dos minutos.</span></label><span class="owner">Danny</span><span class="when">24/09</span></div>
+      <div class="task"><input type="checkbox" id="t-c3"><label for="t-c3"><span class="tt">Grabar el video de 5 minutos</span><span class="sub">El guion cronometrado ya está escrito.</span></label><span class="owner">todos</span><span class="when">26/09</span></div>
+      <div class="task"><input type="checkbox" id="t-c4"><label for="t-c4"><span class="tt">Revisión cruzada: que los tres leamos el PDF completo</span></label><span class="owner">todos</span><span class="when">26/09</span></div>
+      <div class="task"><input type="checkbox" id="t-c5"><label for="t-c5"><span class="tt">Entregar</span></label><span class="owner">todos</span><span class="when">27/09</span></div>
+      <div class="task"><input type="checkbox" id="t-c6"><label for="t-c6"><span class="tt">Enviar la autoevaluación M1</span><span class="sub">Un solo intento permitido. No dejarla para el 29.</span></label><span class="owner">cada uno</span><span class="when">27/09</span></div>
+    </div>
+  </div>
+
+  <p class="note">Las marcas viven solo en tu navegador: no se comparten ni se guardan en ningún servidor.</p>
+</section>
+
+<footer>
+  Group 2 · Pontificia Universidad Javeriana Cali · Diplomado en Arquitectura de Software y Cloud Computing<br>
+  Todas las cifras son mediciones propias, reproducibles desde los CSV crudos del repositorio.
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var CLAVE = 'reto-m1-tareas';
+  var cajas = document.querySelectorAll('.task input[type=checkbox]');
+  var estado = {};
+  try {
+    var guardado = localStorage.getItem(CLAVE);
+    if (guardado) estado = JSON.parse(guardado) || {};
+  } catch (e) { estado = {}; }
+
+  cajas.forEach(function (caja) {
+    if (estado[caja.id]) caja.checked = true;
+    caja.addEventListener('change', function () {
+      estado[caja.id] = caja.checked;
+      try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) { /* almacenamiento bloqueado */ }
+    });
+  });
+})();
+</script>
+
+</body></html>

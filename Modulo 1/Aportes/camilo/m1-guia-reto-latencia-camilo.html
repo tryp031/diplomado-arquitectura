@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reto de Latencia Mínima — Guía de diseño y entrega</title>
+<style>
+:root{
+  --paper:#e9edf2; --card:#fff; --ink:#17212b; --muted:#5b6b7c;
+  --navy:#123252; --navy-2:#1f4e79; --navy-soft:#e2ebf3;
+  --gold:#b2802a; --gold-soft:#f8f1df;
+  --green:#256b47; --red:#a33a2b; --line:#d3dbe4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.62}
+
+/* ---- portada ---- */
+header.cover{background:var(--navy);color:#fff;padding:46px 32px 36px;border-bottom:4px solid var(--gold)}
+.cover-in{max-width:1180px;margin:0 auto}
+.cover .kicker{font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px}
+.cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;
+  font-size:2.25rem;line-height:1.2;margin:0 0 8px;max-width:22ch}
+.cover .sub{font-family:Georgia,serif;font-size:1.22rem;color:#f0d6a0;margin:0 0 18px}
+.cover p.lead{margin:0;max-width:66ch;color:#dbe6f0;font-size:1rem}
+
+/* ---- maquetación ---- */
+.shell{max-width:1180px;margin:0 auto;padding:26px 22px 70px;
+  display:grid;grid-template-columns:232px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px}
+nav.toc h2{font-family:Georgia,serif;font-weight:normal;font-size:1rem;color:var(--navy);
+  margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+nav.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);
+  font-size:.88rem;padding:5px 6px;border-radius:6px;line-height:1.35}
+nav.toc a:hover{background:var(--navy-soft);color:var(--navy)}
+nav.toc .tn{color:var(--gold);font-weight:700;flex:0 0 20px;text-align:right}
+
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:6px 30px 26px;margin:0 0 16px}
+
+h2{font-family:Georgia,serif;font-weight:normal;color:var(--navy);
+  font-size:1.5rem;margin:26px 0 6px;padding-bottom:9px;border-bottom:2px solid var(--navy-soft);
+  scroll-margin-top:16px}
+h3{font-size:1.1rem;color:var(--navy-2);margin:26px 0 6px}
+h4{font-size:1.02rem;color:var(--navy);margin:24px 0 6px}
+h4.nivel{display:flex;align-items:center;gap:11px;font-family:Georgia,serif;
+  font-weight:normal;font-size:1.22rem;margin:30px 0 10px;
+  padding-top:18px;border-top:1px solid var(--line)}
+.badge{background:var(--navy);color:#fff;font-family:"Segoe UI",sans-serif;
+  font-size:.74rem;font-weight:700;letter-spacing:.03em;
+  padding:4px 10px;border-radius:20px;flex:0 0 auto}
+
+p{margin:11px 0;max-width:76ch}
+ul,ol{padding-left:22px;margin:11px 0;max-width:76ch}
+li{margin:5px 0}
+strong{color:var(--navy)}
+
+blockquote{margin:16px 0;padding:13px 18px;background:var(--gold-soft);
+  border-left:4px solid var(--gold);border-radius:8px}
+blockquote p{margin:4px 0;max-width:72ch}
+blockquote strong{color:#8a6318}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.93rem}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#eef2f7;color:var(--navy);font-weight:600}
+tbody tr:nth-child(even){background:#fafbfd}
+td.lv{text-align:center;font-size:1.15rem;line-height:1}
+td.lv.hi{color:var(--green)}
+td.lv.me{color:var(--gold)}
+td.lv.lo{color:var(--red)}
+th[align=center],td[align=center]{text-align:center}
+
+code{background:#eef1f4;padding:2px 6px;border-radius:4px;font-size:.9em}
+
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:.88rem}
+
+@media(max-width:940px){
+  .shell{grid-template-columns:1fr;gap:18px}
+  nav.toc{position:static}
+  nav.toc a{display:inline-flex;margin:2px 4px 2px 0;border:1px solid var(--line)}
+}
+@media print{
+  body{background:#fff;font-size:10.5pt}
+  header.cover{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 14px}
+  .cover h1,.cover .sub{color:#000}
+  .cover .kicker,.cover p.lead{color:#333}
+  .shell{display:block;padding:0;max-width:none}
+  nav.toc{display:none}
+  section{border:0;padding:0;margin:0;break-inside:auto}
+  h2{break-after:avoid}
+  table,h4.nivel{break-inside:avoid}
+  td.lv.hi,td.lv.me,td.lv.lo{color:#000}
+}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-in">
+    <p class="kicker">Diplomado Arquitectura de Software y Cloud Computing · Módulo I</p>
+    <h1>Reto de Latencia Mínima</h1>
+    <p class="sub">Guía de diseño y entrega</p>
+    <p class="lead">Documento de trabajo. Organiza la estrategia para resolver el reto, las decisiones disponibles con sus contrapartidas, y el mapa explícito entre cada parte del trabajo, los atributos de calidad y las secciones del Módulo I.</p>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc">
+    <h2>Contenido</h2>
+    <a href="#1-lectura-del-reto-que-pide-y-que-evalua-realmente"><span class="tn">1</span>Lectura del reto: qué pide y qué evalúa realmente</a>
+<a href="#2-mapa-cada-parte-del-reto-contra-el-modulo-i"><span class="tn">2</span>Mapa: cada parte del reto contra el Módulo I</a>
+<a href="#3-restricciones-y-decisiones"><span class="tn">3</span>Restricciones y decisiones</a>
+<a href="#4-estrategia-recomendada-una-escalera-no-un-punto"><span class="tn">4</span>Estrategia recomendada: una escalera, no un punto</a>
+<a href="#5-la-medicion-el-verdadero-entregable"><span class="tn">5</span>La medición: el verdadero entregable</a>
+<a href="#6-optimizaciones-en-orden-de-impacto-real"><span class="tn">6</span>Optimizaciones, en orden de impacto real</a>
+<a href="#7-eleccion-de-lenguaje"><span class="tn">7</span>Elección de lenguaje</a>
+<a href="#8-las-distinciones-que-conviene-declarar-tu-mismo"><span class="tn">8</span>Las distinciones que conviene declarar tú mismo</a>
+<a href="#9-estructura-sugerida-de-los-entregables"><span class="tn">9</span>Estructura sugerida de los entregables</a>
+<a href="#10-plan-de-trabajo-sugerido"><span class="tn">10</span>Plan de trabajo sugerido</a>
+<a href="#11-conclusion-que-deberia-quedar-en-el-informe"><span class="tn">11</span>Conclusión que debería quedar en el informe</a>
+  </nav>
+  <main>
+
+<section><h2 id="1-lectura-del-reto-que-pide-y-que-evalua-realmente">1. Lectura del reto: qué pide y qué evalúa realmente</h2>
+<p>El enunciado fija la meta en <strong>menos de un milisegundo</strong>. Conviene decirlo de entrada: esa meta se cumple casi por accidente. Un socket TCP crudo en loopback entrega un ida y vuelta de 30 a 60 microsegundos, veinte veces mejor que el objetivo, sin optimizar nada. Un socket de dominio Unix baja a 10 microsegundos.</p>
+<p>Por lo tanto, entregar «logré 0,4 ms con un servicio REST» cumple la letra del reto y no demuestra nada arquitectónico.</p>
+<p>Lo que sí distingue un entregable de nivel de diplomado son tres cosas:</p>
+<ol>
+<li><strong>Rigor en la medición.</strong> Un número sin método es una anécdota.</li>
+<li><strong>Capacidad de explicar cada decisión como un trade-off</strong>, con lo que se ganó y lo que se sacrificó.</li>
+<li><strong>Conciencia del límite de validez.</strong> Saber hasta dónde la solución es una arquitectura y desde dónde es un truco de laboratorio.</li>
+</ol>
+<p>Las tres conectan directamente con el Módulo I, y las tres se pueden demostrar en el documento técnico mucho mejor que en el código.</p>
+<blockquote>
+<p><strong>Nota sobre la restricción del enunciado.</strong> El reto prohíbe pistas y guías, y establece que la investigación es parte del trabajo. Este documento organiza el <em>criterio de decisión</em> y el mapa conceptual con el módulo; la investigación técnica, la elección final y la implementación siguen siendo tuyas.</p>
+</blockquote>
+
+</section>
+<section><h2 id="2-mapa-cada-parte-del-reto-contra-el-modulo-i">2. Mapa: cada parte del reto contra el Módulo I</h2>
+<p>Esta tabla es el eje del documento. Conviene incluirla —adaptada— en el PDF de entrega: demuestra que el ejercicio se resolvió con el marco del módulo y no solo con intuición técnica.</p>
+<table>
+<thead>
+<tr>
+<th>Parte del reto</th>
+<th>Sección del Módulo I</th>
+<th>Atributos de calidad involucrados</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Elegir transporte (HTTP, TCP, UDP, IPC, memoria compartida)</td>
+<td>§4 Decisiones y restricciones</td>
+<td>Rendimiento, interoperabilidad, portabilidad</td>
+</tr>
+<tr>
+<td>Aceptar el entorno dado (una máquina, sin hardware especial, plazo)</td>
+<td>§4 Decisiones y restricciones</td>
+<td>— (son límites, no atributos)</td>
+</tr>
+<tr>
+<td>Reconocer que bajar latencia cuesta algo</td>
+<td>§2 Leyes · §10 Trade-offs</td>
+<td>Todos, por definición</td>
+</tr>
+<tr>
+<td>Justificar el porqué de cada decisión, no solo el cómo</td>
+<td>§2 Segunda ley</td>
+<td>Mantenibilidad, auditabilidad de la decisión</td>
+</tr>
+<tr>
+<td>Definir la meta como número verificable</td>
+<td>§11 ISO/IEC 25000</td>
+<td>Rendimiento (especificado y medible)</td>
+</tr>
+<tr>
+<td>Medir con percentiles y no con promedios</td>
+<td>§11 ISO/IEC 25000 · §9 Diferencias</td>
+<td>Rendimiento, fiabilidad</td>
+</tr>
+<tr>
+<td>Registrar muestras sin contaminar la medición</td>
+<td>§8 Observabilidad</td>
+<td>Observabilidad contra rendimiento</td>
+</tr>
+<tr>
+<td>Explicar por qué esto no escala</td>
+<td>§9 Rendimiento vs. escalabilidad</td>
+<td>Rendimiento, escalabilidad</td>
+</tr>
+<tr>
+<td>Reconocer qué pasa si el consumidor se cae</td>
+<td>§8 Tolerancia a fallos · §9</td>
+<td>Tolerancia a fallos, fiabilidad, recuperabilidad</td>
+</tr>
+<tr>
+<td>Discutir si el diseño sirve en producción</td>
+<td>§3 Importancia estratégica · §10</td>
+<td>Mantenibilidad, portabilidad, seguridad</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section><h2 id="3-restricciones-y-decisiones">3. Restricciones y decisiones</h2>
+<p>El Módulo I insiste en la distinción: <strong>la restricción se recibe, la decisión se elige</strong>. Separarlas explícitamente en el PDF es una de las formas más rápidas de demostrar dominio del marco.</p>
+<h3 id="31-restricciones-no-se-negocian">3.1 Restricciones (no se negocian)</h3>
+<table>
+<thead>
+<tr>
+<th>Restricción</th>
+<th>Tipo</th>
+<th>Cómo condiciona el diseño</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Una sola máquina disponible</td>
+<td>Recursos</td>
+<td>Elimina cualquier medición sobre red real; habilita IPC y memoria compartida</td>
+</tr>
+<tr>
+<td>Sin NIC de baja latencia ni kernel bypass</td>
+<td>Tecnología</td>
+<td>Descarta DPDK, Onload, RDMA</td>
+</tr>
+<tr>
+<td>Plazo del módulo</td>
+<td>Negocio</td>
+<td>Limita el número de niveles implementables</td>
+</tr>
+<tr>
+<td>Conocimiento del lenguaje elegido</td>
+<td>Recursos</td>
+<td>Condiciona si el nivel más agresivo es realista</td>
+</tr>
+<tr>
+<td>Debe existir un «sistema que escucha»</td>
+<td>Negocio (enunciado)</td>
+<td>Impide colapsar todo en una llamada a función dentro de un proceso</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-decisiones-se-eligen-y-se-justifican">3.2 Decisiones (se eligen, y se justifican)</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Alternativas</th>
+<th>Criterio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transporte</td>
+<td>HTTP · TCP · UDP · socket Unix · memoria compartida</td>
+<td>Latencia contra interoperabilidad</td>
+</tr>
+<tr>
+<td>Modelo de espera</td>
+<td>Bloqueante · <em>polling</em> · <em>busy-spin</em></td>
+<td>Latencia contra consumo de CPU</td>
+</tr>
+<tr>
+<td>Lenguaje y runtime</td>
+<td>C/C++/Rust/Zig · Go · Java · Python</td>
+<td>Control del camino crítico contra velocidad de desarrollo</td>
+</tr>
+<tr>
+<td>Formato del mensaje</td>
+<td>Texto · binario de tamaño fijo</td>
+<td>Latencia contra legibilidad y evolución</td>
+</tr>
+<tr>
+<td>Instrumentación</td>
+<td>En línea · en memoria y volcado al final</td>
+<td>Observabilidad contra rendimiento</td>
+</tr>
+<tr>
+<td>Alcance de la demostración</td>
+<td>Una implementación · escalera comparativa</td>
+<td>Esfuerzo contra valor demostrativo</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section><h2 id="4-estrategia-recomendada-una-escalera-no-un-punto">4. Estrategia recomendada: una escalera, no un punto</h2>
+<p>En lugar de construir una sola implementación «rápida», construir <strong>cuatro o cinco versiones del mismo sistema</strong>, medirlas con el mismo arnés y mostrar la caída de tres o cuatro órdenes de magnitud.</p>
+<p><strong>Por qué esta estrategia:</strong></p>
+<ul>
+<li>Cada peldaño es una decisión arquitectónica con contrapartida explícita: el reto se convierte en una demostración viva de la primera ley.</li>
+<li>La comparación es el resultado, no el número final. Un número aislado no se puede interpretar; una curva sí.</li>
+<li>Funciona muy bien en el video de cinco minutos y en la demostración presencial.</li>
+<li>Si el nivel más agresivo no sale a tiempo, los niveles anteriores ya constituyen una entrega completa y coherente.</li>
+</ul>
+<p><strong>Costo de la estrategia:</strong> más trabajo de implementación y la necesidad de un arnés de medición común. Es el trade-off de esta decisión y conviene declararlo.</p>
+<h3 id="41-los-peldanos">4.1 Los peldaños</h3>
+<p>Las cifras son órdenes de magnitud típicos de ida y vuelta en loopback sobre hardware de escritorio moderno. Tus números serán distintos: el objetivo es la relación entre niveles, no el valor absoluto.</p>
+
+<h4 id="nivel-0-httprest-sobre-loopback" class="nivel"><span class="badge">Nivel 0</span>HTTP/REST sobre loopback</h4>
+<p><strong>Ida y vuelta típico:</strong> 0,1 – 5 ms según el stack.</p>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Contras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interoperable con cualquier cliente</td>
+<td>Parsing de texto en el camino crítico</td>
+</tr>
+<tr>
+<td>Observable con herramientas estándar</td>
+<td>Cabeceras, negociación, posible reconexión</td>
+</tr>
+<tr>
+<td>Trivial de implementar y depurar</td>
+<td>Overhead del framework y del runtime</td>
+</tr>
+<tr>
+<td>Es lo que realmente existe en producción</td>
+<td>La latencia queda dominada por capas que no aportan al reto</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Atributos:</strong> rendimiento bajo; interoperabilidad, observabilidad y mantenibilidad altas.
+<strong>Módulo I:</strong> §5 funcionalidad contra calidad · §10 trade-offs.
+<strong>Rol en la entrega:</strong> línea base. Sin él no hay contra qué comparar.</p>
+
+<h4 id="nivel-1-tcp-crudo-conexion-persistente-tcp_nodelay" class="nivel"><span class="badge">Nivel 1</span>TCP crudo, conexión persistente, <code>TCP_NODELAY</code></h4>
+<p><strong>Ida y vuelta típico:</strong> 25 – 60 µs.</p>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Contras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sigue siendo comunicación de red real</td>
+<td>Se pierde toda la semántica de aplicación</td>
+</tr>
+<tr>
+<td>Confiable y ordenado</td>
+<td>El protocolo hay que inventarlo y documentarlo</td>
+</tr>
+<tr>
+<td>Portable entre máquinas sin cambios</td>
+<td>Sigue pagando el stack IP completo</td>
+</tr>
+<tr>
+<td>Demuestra el costo del handshake y del algoritmo de Nagle</td>
+<td>Cliente y servidor quedan acoplados al formato binario</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Atributos:</strong> rendimiento sube; interoperabilidad y mantenibilidad bajan; fiabilidad se conserva.
+<strong>Módulo I:</strong> §4 decisiones · §8 interoperabilidad.
+<strong>Punto de aprendizaje:</strong> medir con y sin <code>TCP_NODELAY</code> y mostrar el salto. Es el ejemplo más limpio de una decisión de una línea con impacto de orden de magnitud.</p>
+
+<h4 id="nivel-2-udp-en-loopback" class="nivel"><span class="badge">Nivel 2</span>UDP en loopback</h4>
+<p><strong>Ida y vuelta típico:</strong> 15 – 40 µs.</p>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Contras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sin handshake, sin confirmaciones, sin control de congestión</td>
+<td>Sin garantía de entrega ni de orden</td>
+</tr>
+<tr>
+<td>Camino de código más corto en el kernel</td>
+<td>La fiabilidad, si se necesita, hay que construirla encima</td>
+</tr>
+<tr>
+<td>Mensajes con frontera natural</td>
+<td>Un paquete perdido puede colgar la medición</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Atributos:</strong> rendimiento sube a costa de <strong>fiabilidad</strong> y <strong>tolerancia a fallos</strong>.
+<strong>Módulo I:</strong> §9 diferencias · §10 trade-offs.
+<strong>Punto de aprendizaje:</strong> aquí el sacrificio es de un atributo nombrado del módulo, no de una comodidad. Es el peldaño que mejor ilustra que la latencia se compra con otra cosa.</p>
+
+<h4 id="nivel-3-socket-de-dominio-unix" class="nivel"><span class="badge">Nivel 3</span>Socket de dominio Unix</h4>
+<p><strong>Ida y vuelta típico:</strong> 8 – 20 µs.</p>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Contras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Elimina el stack IP completo</td>
+<td>Solo funciona entre procesos de la misma máquina</td>
+</tr>
+<tr>
+<td>Conserva la semántica de socket y la confiabilidad</td>
+<td><strong>Portabilidad</strong> perdida: el sistema deja de ser distribuible</td>
+</tr>
+<tr>
+<td>Cambio pequeño en el código respecto al nivel 1</td>
+<td>Sigue habiendo llamada al sistema por mensaje</td>
+</tr>
+<tr>
+<td>Permisos del sistema de archivos como control de acceso</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Atributos:</strong> rendimiento sube; <strong>portabilidad</strong> cae drásticamente; seguridad cambia de modelo.
+<strong>Módulo I:</strong> §8 portabilidad · §4 decisiones.</p>
+
+<h4 id="nivel-4-memoria-compartida-con-espera-activa" class="nivel"><span class="badge">Nivel 4</span>Memoria compartida con espera activa</h4>
+<p><strong>Ida y vuelta típico:</strong> 150 – 600 ns.</p>
+<p>Dos procesos separados mapean la misma región (<code>mmap</code> sobre <code>/dev/shm</code>), se comunican por un buffer circular con índices atómicos alineados a línea de caché, y ambos lados giran en un bucle sin dormir.</p>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Contras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cero llamadas al sistema en el camino crítico</td>
+<td>Un núcleo consumido al 100 % por proceso, permanentemente</td>
+</tr>
+<tr>
+<td>Cero cambios de contexto</td>
+<td>Complejidad alta: memoria, atomicidad, ordenamiento</td>
+</tr>
+<tr>
+<td>Latencia cercana al costo físico de mover una línea de caché entre núcleos</td>
+<td>Si un proceso muere, el estado compartido queda inconsistente</td>
+</tr>
+<tr>
+<td>Demuestra el límite real del hardware</td>
+<td>No hay confiabilidad, ni reintentos, ni backpressure gratis</td>
+</tr>
+<tr>
+<td></td>
+<td>Nula interoperabilidad y nula portabilidad</td>
+</tr>
+<tr>
+<td></td>
+<td>Difícil de probar y de depurar</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Atributos:</strong> rendimiento y eficiencia de latencia en su máximo; <strong>eficiencia de recursos</strong>, <strong>mantenibilidad</strong>, <strong>testabilidad</strong>, <strong>portabilidad</strong>, <strong>interoperabilidad</strong> y <strong>tolerancia a fallos</strong> sacrificadas.
+<strong>Módulo I:</strong> §2 primera ley · §10 trade-offs · §7 atributos estructurales.
+<strong>Observación importante para el documento:</strong> este nivel es el argumento más fuerte del reto <em>y</em> el ejemplo más claro de por qué no se construye así un sistema de producción. Decir ambas cosas es lo que demuestra criterio.</p>
+
+<h3 id="42-matriz-de-atributos-por-nivel">4.2 Matriz de atributos por nivel</h3>
+<p>Esta es la tabla que resume el trabajo. Escala: ● alto · ◐ medio · ○ bajo.</p>
+<table>
+<thead>
+<tr>
+<th>Atributo</th>
+<th style="text-align: center;">N0 HTTP</th>
+<th style="text-align: center;">N1 TCP</th>
+<th style="text-align: center;">N2 UDP</th>
+<th style="text-align: center;">N3 Unix</th>
+<th style="text-align: center;">N4 Memoria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rendimiento (latencia)</td>
+<td class="lv lo">○</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+</tr>
+<tr>
+<td>Eficiencia de recursos</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Fiabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv lo">○</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+</tr>
+<tr>
+<td>Tolerancia a fallos</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Interoperabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Portabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv hi">●</td>
+<td class="lv lo">○</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Mantenibilidad</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Testabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Observabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+</tr>
+<tr>
+<td>Escalabilidad</td>
+<td class="lv hi">●</td>
+<td class="lv me">◐</td>
+<td class="lv me">◐</td>
+<td class="lv lo">○</td>
+<td class="lv lo">○</td>
+</tr>
+</tbody>
+</table>
+<p>La lectura de la tabla es el mensaje del trabajo: <strong>la columna que gana en la primera fila pierde en casi todas las demás.</strong></p>
+
+</section>
+<section><h2 id="5-la-medicion-el-verdadero-entregable">5. La medición: el verdadero entregable</h2>
+<p>Aquí se cae la mayoría de los trabajos, y es lo primero que un evaluador técnico va a cuestionar. El Módulo I ya da el marco: <strong>ISO/IEC 25000 y el requisito medible (§11)</strong>.</p>
+<h3 id="51-convertir-la-meta-en-requisito-verificable">5.1 Convertir la meta en requisito verificable</h3>
+<p>El enunciado dice «preferiblemente menor a un milisegundo». Eso es un enunciado vago, exactamente del tipo que el módulo enseña a rechazar. Reescríbelo tú y ponlo al inicio del PDF:</p>
+<blockquote>
+<p>El 99,9 % de los intercambios estímulo–respuesta debe completarse en menos de X, medido como ida y vuelta en el proceso cliente con reloj monotónico, sobre 1.000.000 de muestras, tras descartar las primeras 100.000, en el entorno declarado en el anexo.</p>
+</blockquote>
+<p>Ese solo párrafo demuestra §11 completo.</p>
+<h3 id="52-decisiones-de-medicion-con-sus-contrapartidas">5.2 Decisiones de medición, con sus contrapartidas</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Opción recomendada</th>
+<th>Por qué</th>
+<th>Contrapartida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reloj</td>
+<td>Monotónico de nanosegundos</td>
+<td><code>currentTimeMillis</code> o <code>Date.now()</code> reportarían 0 ms, que no informa nada</td>
+<td>Ninguna relevante</td>
+</tr>
+<tr>
+<td>Punto de medición</td>
+<td>Ida y vuelta en el cliente</td>
+<td>Un solo dominio de reloj, sin necesidad de sincronizar relojes</td>
+<td>No aísla la latencia de cada dirección</td>
+</tr>
+<tr>
+<td>Latencia unidireccional</td>
+<td>Reportarla solo como RTT/2 y declararlo</td>
+<td>Honestidad metodológica</td>
+<td>Asume simetría, que no siempre se cumple</td>
+</tr>
+<tr>
+<td>Volumen</td>
+<td>≥ 1.000.000 de muestras</td>
+<td>Los percentiles altos necesitan masa</td>
+<td>Tiempo de ejecución</td>
+</tr>
+<tr>
+<td>Warm-up</td>
+<td>Descartar 50.000 – 100.000</td>
+<td>Fallos de página, cachés frías, JIT</td>
+<td>Hay que justificar el corte</td>
+</tr>
+<tr>
+<td>Registro</td>
+<td>Arreglo preasignado, volcado al final</td>
+<td>Escribir en el camino crítico destruye la medición</td>
+<td>El registro no es en vivo</td>
+</tr>
+<tr>
+<td>Reporte</td>
+<td>p50, p99, p99.9, p99.99 y máximo</td>
+<td>El promedio oculta la cola</td>
+<td>Más trabajo de análisis</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-el-costo-del-instrumento">5.3 El costo del instrumento</h3>
+<p>Una llamada al reloj monotónico cuesta del orden de 20 a 25 nanosegundos. Si tu ida y vuelta es de 300 ns, <strong>el instrumento representa cerca del 8 % de lo que mides</strong>.</p>
+<p>Mide el costo del reloj en vacío, repórtalo, y decide si lo restas o solo lo declaras. Incluir esta medición secundaria es probablemente el detalle que más credibilidad le da a todo el informe.</p>
+<h3 id="54-por-que-percentiles-y-no-promedio">5.4 Por qué percentiles y no promedio</h3>
+<p>Un promedio de 400 ns con p99,9 de 80 µs y un promedio de 400 ns con p99,9 de 900 ns son dos sistemas completamente distintos, y la diferencia son exactamente las decisiones arquitectónicas que estás defendiendo: el cambio de contexto que no eliminaste, el núcleo que entró en estado de bajo consumo, la asignación de memoria que disparó una pausa.</p>
+<p><strong>La cola es donde vive la arquitectura. El promedio es donde se esconde.</strong></p>
+
+</section>
+<section><h2 id="6-optimizaciones-en-orden-de-impacto-real">6. Optimizaciones, en orden de impacto real</h2>
+<table>
+<thead>
+<tr>
+<th>Optimización</th>
+<th>Ganancia típica</th>
+<th>Costo / contrapartida</th>
+<th>Atributo sacrificado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Espera activa en vez de bloqueo</td>
+<td>Elimina 1 – 3 µs por cambio de contexto</td>
+<td>Un núcleo al 100 % permanentemente</td>
+<td>Eficiencia de recursos</td>
+</tr>
+<tr>
+<td>Fijar procesos a núcleos (afinidad)</td>
+<td>Elimina migraciones y fallos de caché</td>
+<td>Menos flexibilidad del planificador; hay que conocer la topología</td>
+<td>Portabilidad</td>
+</tr>
+<tr>
+<td>Cero asignaciones en el camino crítico</td>
+<td>Elimina picos en la cola</td>
+<td>Buffers preasignados, mensajes de tamaño fijo</td>
+<td>Modificabilidad</td>
+</tr>
+<tr>
+<td>Desactivar escalado de frecuencia y estados C</td>
+<td>Elimina microsegundos aleatorios</td>
+<td>Consumo energético alto; requiere privilegios</td>
+<td>Eficiencia, portabilidad</td>
+</tr>
+<tr>
+<td>Alinear estructuras a línea de caché (64 B)</td>
+<td>Evita <em>false sharing</em> entre índices</td>
+<td>Código más difícil de entender</td>
+<td>Mantenibilidad</td>
+</tr>
+<tr>
+<td>Mensajes binarios de tamaño fijo</td>
+<td>Elimina parsing</td>
+<td>No evoluciona sin romper compatibilidad</td>
+<td>Interoperabilidad, modificabilidad</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fuera de alcance para este reto, pero valiosas de mencionar como camino siguiente:</strong> <code>io_uring</code>, kernel bypass con DPDK o Solarflare Onload, RDMA, páginas enormes. Nombrarlas y explicar por qué quedaron fuera —restricción de hardware y de plazo— es mejor que ignorarlas.</p>
+
+</section>
+<section><h2 id="7-eleccion-de-lenguaje">7. Elección de lenguaje</h2>
+<table>
+<thead>
+<tr>
+<th>Opción</th>
+<th>Pros</th>
+<th>Contras</th>
+<th>Recomendación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C / C++ / Rust / Zig</td>
+<td>Control total del camino crítico; llega al nivel 4 sin pelear con el runtime; sin recolector de basura</td>
+<td>Más tiempo de implementación; errores de memoria en el caso de C/C++</td>
+<td>La opción natural si buscas el número más bajo</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>Llega cómodamente a microsegundos; concurrencia sencilla; desarrollo rápido</td>
+<td>El planificador y el recolector aportan cola; menos control fino</td>
+<td><strong>Mejor relación esfuerzo/resultado</strong> para este reto</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>Aeron IPC o LMAX Disruptor son referencias de la industria; muy defendible ante audiencia empresarial</td>
+<td>Exige disciplina de cero asignaciones, pre-tocar el heap y calentar el JIT</td>
+<td>Excelente si quieres impresionar en contexto corporativo</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Desarrollo inmediato</td>
+<td>Órdenes de magnitud por encima; no alcanza el nivel 3 ni 4</td>
+<td>Solo como nivel 0 de referencia</td>
+</tr>
+</tbody>
+</table>
+<p>Una opción honesta y muy defendible: <strong>niveles 0 a 3 en Go</strong> por velocidad de desarrollo, y <strong>nivel 4 en Rust o C</strong> donde el control importa. Justificar esa mezcla es en sí mismo una decisión arquitectónica documentable.</p>
+
+</section>
+<section><h2 id="8-las-distinciones-que-conviene-declarar-tu-mismo">8. Las distinciones que conviene declarar tú mismo</h2>
+<p>Adelantarse a las preguntas incómodas vale más que responderlas bien después.</p>
+<p><strong>Rendimiento no es escalabilidad (§9).</strong> Todo lo que hace este reto optimiza el comportamiento ante <em>una</em> carga determinada: un cliente, un mensaje a la vez. No dice nada sobre qué pasa con 10.000 clientes. De hecho, casi todas las optimizaciones del nivel 4 —un núcleo dedicado por proceso, memoria compartida punto a punto— <strong>empeoran</strong> la escalabilidad. Decirlo explícitamente demuestra que entiendes la diferencia que el módulo marca.</p>
+<p><strong>Disponibilidad y tolerancia a fallos (§8, §9).</strong> En el nivel 4, si el proceso consumidor muere, el productor sigue escribiendo en un buffer que nadie lee y el estado compartido queda inconsistente. No hay detección ni recuperación. Es una ausencia deliberada, no un olvido: dilo así.</p>
+<p><strong>Observabilidad contra rendimiento (§8, §10).</strong> El sistema más rápido es el que no se puede observar. Cada registro, métrica o traza que agregues al camino crítico degrada lo que estás midiendo. Este es el trade-off más elegante del trabajo y conviene dedicarle un párrafo propio.</p>
+<p><strong>Dónde empieza y termina la medición.</strong> Si el estímulo y la respuesta viven en el mismo proceso, ya no mides un sistema que escucha peticiones: mides una llamada a función. <strong>Dos procesos separados comunicándose por memoria compartida es el límite legítimo del reto.</strong> Declararlo tú, antes de que te lo señalen, es la diferencia entre parecer riguroso y parecer que te pillaron.</p>
+
+</section>
+<section><h2 id="9-estructura-sugerida-de-los-entregables">9. Estructura sugerida de los entregables</h2>
+<h3 id="91-documento-tecnico-y-de-resultados-en-pdf">9.1 Documento técnico y de resultados en PDF</h3>
+<p>El enunciado permite fusionar la documentación técnica y el informe de resultados. Hazlo.</p>
+<ol>
+<li><strong>Resumen ejecutivo</strong> — una página: el resultado en una tabla y la conclusión en tres líneas.</li>
+<li><strong>Reformulación del requisito</strong> — la meta vaga convertida en requisito medible (§11).</li>
+<li><strong>Restricciones y decisiones</strong> — las dos tablas de la sección 3, separadas.</li>
+<li><strong>Arquitectura de la solución</strong> — diagrama por nivel, protocolo de mensajes, estructuras de datos.</li>
+<li><strong>Método de medición</strong> — reloj, punto de medición, warm-up, volumen, costo del instrumento.</li>
+<li><strong>Resultados</strong> — tabla de percentiles por nivel, gráfica de distribución, gráfica comparativa en escala logarítmica.</li>
+<li><strong>Análisis de trade-offs</strong> — la matriz de atributos de la sección 4.2, comentada.</li>
+<li><strong>Comparación con la meta de 1 ms</strong> — y la discusión de por qué esa meta es el piso y no el techo.</li>
+<li><strong>Límites de validez y trabajo futuro</strong> — las distinciones de la sección 8 y las técnicas fuera de alcance.</li>
+<li><strong>Anexo: entorno de medición</strong> — modelo de CPU, núcleos, kernel, gobernador de frecuencia, núcleos aislados, carga del sistema.</li>
+</ol>
+<p>El anexo 10 no es relleno: <strong>sin él, los números no son reproducibles</strong> y un evaluador serio lo nota.</p>
+<h3 id="92-codigo-fuente-zip">9.2 Código fuente (ZIP)</h3>
+<ul>
+<li>Un directorio por nivel, con la misma interfaz de ejecución.</li>
+<li>Un arnés de medición compartido, no uno por nivel.</li>
+<li><code>README</code> con instrucciones exactas de compilación y ejecución.</li>
+<li>Script único que corre la escalera completa y produce los CSV.</li>
+</ul>
+<h3 id="93-logs">9.3 Logs</h3>
+<ul>
+<li>CSV crudo de muestras por nivel — es la evidencia primaria.</li>
+<li>Un <code>.txt</code> de resumen con la tabla de percentiles por nivel y la línea del entorno.</li>
+<li>Capturas solo como complemento, nunca como evidencia principal.</li>
+</ul>
+<h3 id="94-video-de-cinco-minutos">9.4 Video de cinco minutos</h3>
+<p>No expliques el código: <strong>ejecuta la escalera en vivo</strong>. Ver el número caer de milisegundos a nanosegundos en pantalla es el argumento completo.</p>
+<p>Reparto sugerido: 30 s de planteamiento, 60 s de arquitectura y decisiones, 120 s de demostración, 90 s de trade-offs y límites de validez. El último bloque es el que te separa del resto.</p>
+
+</section>
+<section><h2 id="10-plan-de-trabajo-sugerido">10. Plan de trabajo sugerido</h2>
+<table>
+<thead>
+<tr>
+<th>Etapa</th>
+<th>Trabajo</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Arnés de medición: reloj, warm-up, percentiles, volcado a CSV</td>
+<td>La herramienta con la que se mide todo lo demás</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Nivel 0 y nivel 1</td>
+<td>Línea base y primer salto de orden de magnitud</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Medir el costo del instrumento; caracterizar el entorno</td>
+<td>Anexo de reproducibilidad</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Niveles 2 y 3</td>
+<td>Escalera con los sacrificios de fiabilidad y portabilidad</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Nivel 4</td>
+<td>El resultado final (opcional si el plazo aprieta)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Análisis, matriz de atributos, redacción del PDF</td>
+<td>El entregable que realmente se califica</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Grabación o ensayo de la demostración</td>
+<td>Video o presentación presencial</td>
+</tr>
+</tbody>
+</table>
+<p>Construir el arnés primero, antes que cualquier implementación, es la decisión que más riesgo elimina: si el instrumento cambia a mitad del trabajo, todas las mediciones anteriores dejan de ser comparables.</p>
+
+</section>
+<section><h2 id="11-conclusion-que-deberia-quedar-en-el-informe">11. Conclusión que debería quedar en el informe</h2>
+<p>El reto pide latencia mínima. La respuesta arquitectónica completa no es un número, sino una frase que el Módulo I ya enunció:</p>
+<blockquote>
+<p><strong>No existe una arquitectura perfecta en términos absolutos; existe una arquitectura adecuada para un contexto determinado.</strong></p>
+</blockquote>
+<p>El nivel 4 es la mejor arquitectura posible para este contexto —un estímulo, una respuesta, dos procesos, una máquina, latencia como único objetivo— y sería una de las peores decisiones posibles para casi cualquier sistema real. Demostrar que entiendes <strong>ambas mitades de esa afirmación</strong> es el objetivo verdadero del reto.</p></section>
+  </main>
+</div>
+
+<footer>
+  Documento de trabajo · Diplomado Arquitectura de Software y Cloud Computing, Módulo I.
+</footer>
+
+</body>
+</html>

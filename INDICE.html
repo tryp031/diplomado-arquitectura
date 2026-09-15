@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Índice del proyecto</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+
+.docs{display:grid;gap:10px;margin:20px 0;grid-template-columns:1fr}
+@media (min-width:720px){.docs{grid-template-columns:1fr 1fr}}
+a.doc{display:block;background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:15px 17px;text-decoration:none;color:inherit;transition:border-color .12s}
+a.doc:hover{border-color:var(--accent)}
+a.doc .t{font-family:var(--sans);font-weight:600;font-size:.97rem;line-height:1.35;
+  display:block;margin-bottom:5px;color:var(--ink)}
+a.doc:hover .t{color:var(--accent)}
+a.doc .d{font-family:var(--sans);font-size:.85rem;line-height:1.5;color:var(--ink-2);
+  display:block;margin-bottom:9px}
+a.doc .f{font-family:var(--mono);font-size:.67rem;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+a.doc.destacado{border-left:3px solid var(--accent)}
+a.doc.apagado{opacity:.62}
+.tipo{font-family:var(--mono);font-size:.6rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;padding:.2em .5em;border-radius:2px;white-space:nowrap}
+.t-consolidado{background:var(--accent-soft);color:var(--accent)}
+.t-oficial{background:var(--signal-soft);color:var(--signal)}
+.t-aporte{background:var(--surface-2);color:var(--ink-2)}
+.t-herramienta{background:var(--ok-soft);color:var(--ok)}
+.t-md{background:var(--surface-2);color:var(--ink-3)}
+.vacio{font-family:var(--sans);font-size:.9rem;color:var(--ink-3);
+  border:1px dashed var(--rule);border-radius:3px;padding:14px 16px;margin:20px 0}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Índice del proyecto</h1>
+  <p class="meta">14 documentos HTML · generado el 15/09/2026 08:40</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#empieza-aqui">Empieza aquí</a></li><li><a href="#modulo-0">Modulo 0</a></li><li><a href="#modulo-1">Modulo 1</a></li><li><a href="#transversal">Base de conocimiento y decisiones</a></li><li><a href="#reto-m1">Reto de Latencia Mínima — documentos</a></li></ol></nav>
+<main><h2 id="empieza-aqui">Empieza aquí</h2><div class="docs"><a class="doc destacado" href="Modulo%201/Consolidado/m1-consolidado.html"><span class="t">Consolidado — Módulo 1</span><span class="d">Las notas de estudio del Módulo 1: las 5 fuentes fusionadas, con las contradicciones registradas.</span><span class="f"><span class="tipo t-consolidado">CONSOLIDADO</span><span>44 KB</span><span>Modulo 1/Consolidado/</span></span></a><a class="doc destacado" href="Modulo%201/Aportes/danny/m1-clasificador-hosts-danny.html"><span class="t">Clasificador de Hosts</span><span class="d">Qué construimos en el reto, cómo funciona y dónde encaja cada pieza. El documento de la reunión.</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>52 KB</span><span>Modulo 1/Aportes/danny/</span></span></a><a class="doc destacado" href="README.md"><span class="t">README — puerta de entrada</span><span class="d">Qué es este repositorio, cómo está organizado y cuál es el flujo de trabajo.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>5 KB</span><span>./</span></span></a><a class="doc destacado" href="CONTRIBUIR.md"><span class="t">CONTRIBUIR — cómo aportar</span><span class="d">Dónde va cada cosa, nombres de archivo, ficha de autoría y lo que no se hace.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>4 KB</span><span>./</span></span></a></div><h2 id="modulo-0">Modulo 0</h2><h3>Material oficial</h3><div class="docs"><a class="doc" href="Modulo%200/Acerca%20de%20este%20mo%CC%81dulo.html/Acerca%20de%20este%20mo%CC%81dulo.html"><span class="t">Acerca de este módulo</span><span class="d">Bienvenido al Módulo 0. En este módulo reconocerás la estructuración pedagógica y las herramientas del Aula Virtual que utilizarás durante el diplomado, conocerás los foros de discusión, los…</span><span class="f"><span class="tipo t-oficial">MATERIAL OFICIAL</span><span>3 KB</span><span>Modulo 0/Acerca de este módulo.html/</span></span></a><a class="doc" href="Modulo%200/Cronograma%20del%20Diplomado.html/Cronograma%20del%20Diplomado.html"><span class="t">Cronograma del Diplomado</span><span class="d">Durante las 10 semanas de duración del diplomado, tendrás acceso a todos los módulos y contenidos para que los puedas revisar y realizar las actividades a tu propio ritmo, sin embargo, el di…</span><span class="f"><span class="tipo t-oficial">MATERIAL OFICIAL</span><span>6 KB</span><span>Modulo 0/Cronograma del Diplomado.html/</span></span></a><a class="doc" href="Modulo%200/Equipo%20del%20diplomado.html/Equipo%20del%20diplomado.html"><span class="t">Equipo del diplomado</span><span class="d">Facilitador del diplomado y encargada de ser ese canal de comunicación entre el equipo académico y el estudiante.</span><span class="f"><span class="tipo t-oficial">MATERIAL OFICIAL</span><span>5 KB</span><span>Modulo 0/Equipo del diplomado.html/</span></span></a><a class="doc" href="Modulo%200/Foro%20de%20bienvenida%20y%20presentacio%CC%81n.html/Foro%20de%20bienvenida%20y%20presentacio%CC%81n.html"><span class="t">Foro de bienvenida y presentación</span><span class="d">Participa del siguiente foro para que conozcas a los demás participantes y equipo del diplomado, pero antes revisa con atención las siguientes reglas básicas de Netiqueta que deberás seguir …</span><span class="f"><span class="tipo t-oficial">MATERIAL OFICIAL</span><span>5 KB</span><span>Modulo 0/Foro de bienvenida y presentación.html/</span></span></a></div><h2 id="modulo-1">Modulo 1</h2><h3>Conocimiento consolidado</h3><div class="docs"><a class="doc" href="Modulo%201/Consolidado/m1-consolidado.html"><span class="t">Consolidado — Módulo 1</span><span class="d">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</span><span class="f"><span class="tipo t-consolidado">CONSOLIDADO</span><span>44 KB</span><span>Modulo 1/Consolidado/</span></span></a></div><h3>Material oficial</h3><div class="docs"><a class="doc" href="Modulo%201/Material-Clase/Modulo1-ArquitecturaSoftware.html"><span class="t">Módulo 1 — Arquitectura de Software y Cloud Computing</span><span class="d">Fuente: https://educacioncontinua.javerianacali.edu.co/d2l/le/enhancedSequenceViewer/402764</span><span class="f"><span class="tipo t-oficial">MATERIAL OFICIAL</span><span>21 KB</span><span>Modulo 1/Material-Clase/</span></span></a></div><h3>Aportes individuales</h3><div class="docs"><a class="doc" href="Modulo%201/Aportes/camilo/m1-cuadernillo-estudio-camilo.html"><span class="t">Diplomado Arquitectura de Software y Cloud Computing — Cuadernillo de estudio · Módulo I</span><span class="d">Material organizado para estudiar por partes, descubrir las respuestas antes de leerlas y practicar con casos reales. Cada sección se abre y se cierra de forma independiente.</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>camilo</span><span>64 KB</span><span>Modulo 1/Aportes/camilo/</span></span></a><a class="doc" href="Modulo%201/Aportes/camilo/m1-guia-reto-latencia-camilo.html"><span class="t">Reto de Latencia Mínima — Guía de diseño y entrega</span><span class="d">Documento de trabajo. Organiza la estrategia para resolver el reto, las decisiones disponibles con sus contrapartidas, y el mapa explícito entre cada parte del trabajo, los atributos de cali…</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>camilo</span><span>34 KB</span><span>Modulo 1/Aportes/camilo/</span></span></a><a class="doc" href="Modulo%201/Aportes/danny/m1-clasificador-hosts-danny.html"><span class="t">Clasificador de Hosts</span><span class="d">Qué construimos, cómo funciona, cómo se usa, y en qué punto exacto del reto encaja cada pieza.</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>danny</span><span>52 KB</span><span>Modulo 1/Aportes/danny/</span></span></a><a class="doc apagado" href="Modulo%201/Aportes/danny/m1-fundamentos-arquitectura-danny-v1-superada.html"><span class="t">Fundamentos de Arquitectura de Software</span><span class="d">Este módulo se resume en una sola idea: la arquitectura es el conjunto de decisiones difíciles de revertir. Todo lo demás es diseño. De ahí sale el resto — por qué los atributos de calidad s…</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>danny</span><span>57 KB</span><span>Modulo 1/Aportes/danny/</span></span></a><a class="doc" href="Modulo%201/Aportes/danny/m1-fundamentos-arquitectura-danny.html"><span class="t">Fundamentos de Arquitectura de Software</span><span class="d">Este módulo se resume en una sola idea: la arquitectura es el conjunto de decisiones difíciles de revertir. Todo lo demás es diseño. De ahí sale el resto — por qué los atributos de calidad s…</span><span class="f"><span class="tipo t-aporte">APORTE</span><span>danny</span><span>58 KB</span><span>Modulo 1/Aportes/danny/</span></span></a></div><h3>Herramientas del reto</h3><div class="docs"><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/harness/visor/index.html"><span class="t">Visor de Latencia</span><span class="d">Las mediciones de las cinco arquitecturas, lado a lado. Elegí una para ver su distribución completa.</span><span class="f"><span class="tipo t-herramienta">HERRAMIENTA</span><span>21 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/visor/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/app/index.html"><span class="t">Clasifica · Laboratorio de hosts — Group 2</span><span class="f"><span class="tipo t-herramienta">HERRAMIENTA</span><span>53 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/app/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/visor/index.html"><span class="t">Visor de Latencia</span><span class="d">Las mediciones de las cinco arquitecturas, lado a lado. Elegí una para ver su distribución completa.</span><span class="f"><span class="tipo t-herramienta">HERRAMIENTA</span><span>21 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/visor/</span></span></a></div><div class="vacio">Sin aportes todavía: <strong>freddy</strong>.</div><h2 id="transversal">Base de conocimiento y decisiones</h2><div class="docs"><a class="doc" href="_Base-Conocimiento/INDICE.md"><span class="t">Índice maestro y estado</span><span class="d">Estado por módulo, entregas pendientes y preguntas abiertas del diplomado.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>7 KB</span><span>_Base-Conocimiento/</span></span></a><a class="doc" href="_Base-Conocimiento/CRONOGRAMA.md"><span class="t">Cronograma</span><span class="d">Fechas, sesiones y análisis de riesgos del calendario.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>1 KB</span><span>_Base-Conocimiento/</span></span></a><a class="doc" href="_Base-Conocimiento/EQUIPO.md"><span class="t">Equipo — Group 2</span><span class="d">Quién es quién, reparto del reto y ambigüedades pendientes de confirmar.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>2 KB</span><span>_Base-Conocimiento/</span></span></a><a class="doc" href="_Base-Conocimiento/GLOSARIO.md"><span class="t">Glosario</span><span class="d">Términos con definición contextual.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>3 KB</span><span>_Base-Conocimiento/</span></span></a><a class="doc" href="_Base-Conocimiento/MAPA-CONCEPTUAL.md"><span class="t">Mapa conceptual</span><span class="d">Grafo acumulativo de conceptos entre módulos.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>2 KB</span><span>_Base-Conocimiento/</span></span></a><a class="doc" href="_Base-Conocimiento/Aprendizajes/LEEME.md"><span class="t">Aprendizajes reutilizables</span><span class="d">Lo que sale de un módulo cerrado y sirve para los siguientes.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>1 KB</span><span>_Base-Conocimiento/Aprendizajes/</span></span></a><a class="doc" href="CLAUDE.md"><span class="t">CLAUDE.md — contrato para IA</span><span class="d">Resumen ejecutable del contrato de trabajo.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>6 KB</span><span>./</span></span></a><a class="doc" href="PROMPT-MAESTRO.md"><span class="t">PROMPT-MAESTRO.md</span><span class="d">El contrato completo, fuente de verdad.</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>15 KB</span><span>./</span></span></a><a class="doc" href="_Base-Conocimiento/ADR/ADR-000-plantilla.md"><span class="t">ADR-000 — Plantilla</span><span class="d">**Estado:** Propuesta | Aceptada | Rechazada | Supersedida por ADR-NNN</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>1 KB</span><span>_Base-Conocimiento/ADR/</span></span></a><a class="doc" href="_Base-Conocimiento/ADR/ADR-001-frontera-de-medicion.md"><span class="t">ADR-001 — Frontera de medición de la latencia</span><span class="d">**Estado:** Propuesta *(pendiente de aceptación por Group 2)*</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>8 KB</span><span>_Base-Conocimiento/ADR/</span></span></a><a class="doc" href="_Base-Conocimiento/ADR/ADR-002-variante-D-memoria-compartida.md"><span class="t">ADR-002 — Variante D: mecanismo, lenguaje y estrategia de planificación</span><span class="d">**Estado:** Propuesta</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>10 KB</span><span>_Base-Conocimiento/ADR/</span></span></a><a class="doc" href="_Base-Conocimiento/ADR/ADR-003-resolucion-del-reloj.md"><span class="t">ADR-003 — Resolución del reloj: enmienda a ESPEC §2</span><span class="d">**Estado:** Propuesta *(enmienda a `ESPEC-MEDICION.md` §2; requiere acuerdo del equipo antes de congelar)*</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>8 KB</span><span>_Base-Conocimiento/ADR/</span></span></a><a class="doc" href="_Base-Conocimiento/ADR/ADR-004-dominio-listas-de-hosts.md"><span class="t">ADR-004 — El dominio del sistema: clasificación de hosts contra listas</span><span class="d">[ADR-003](ADR-003-resolucion-del-reloj.md) (granularidad del reloj)</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>10 KB</span><span>_Base-Conocimiento/ADR/</span></span></a></div><h2 id="reto-m1">Reto de Latencia Mínima — documentos</h2><div class="docs"><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/PLAN-DE-TRABAJO.md"><span class="t">PLAN-DE-TRABAJO.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>11 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/ENUNCIADO.md"><span class="t">ENUNCIADO.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>2 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/DISENO-ARQUITECTURA.md"><span class="t">DISENO-ARQUITECTURA.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>22 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/ESPEC-MEDICION.md"><span class="t">ESPEC-MEDICION.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>6 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/INFORME.md"><span class="t">INFORME.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>28 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/INFORME.pdf"><span class="t">INFORME.pdf</span><span class="f"><span class="tipo t-md">PDF</span><span>577 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/GUION-VIDEO.md"><span class="t">GUION-VIDEO.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>10 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/PLAN-EQUIPO.md"><span class="t">PLAN-EQUIPO.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>7 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a><a class="doc" href="Modulo%201/Ejercicios/Reto-Latencia-Minima/OPCIONES-SISTEMA.md"><span class="t">OPCIONES-SISTEMA.md</span><span class="f"><span class="tipo t-md">MARKDOWN</span><span>13 KB</span><span>Modulo 1/Ejercicios/Reto-Latencia-Minima/</span></span></a></div></main>
+<footer><p>Generado con <code>_Base-Conocimiento/generar-indice.py</code>. No editar a mano: se regenera. Vuelve a ejecutarlo cada vez que añadas un documento.</p></footer>
+</div></body></html>

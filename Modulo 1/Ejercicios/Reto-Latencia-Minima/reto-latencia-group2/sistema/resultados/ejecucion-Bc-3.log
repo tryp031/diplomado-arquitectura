@@ -1,0 +1,52 @@
+fecha:     2026-09-14T12:22:59-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  Bc   ronda: 3
+args:      --warmup 100000 --iters 1000000
+---
+compilando Bc...
+make: Nothing to be done for `all'.
+ejecutable: /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/control-Bc-tcp-c/server
+[servidor Bc] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[servidor Bc] escuchando en 127.0.0.1:9111, payload=32B (control: TCP en C)
+[cliente Bc] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[servidor Bc] conexion aceptada
+[cliente Bc] reloj: granularidad=41 ns  sobrecoste(par de lecturas) p50=0 ns p99=42 ns  deltas-cero=76.2%
+[cliente Bc] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente Bc] warmup 100000 iteraciones...
+[cliente Bc] midiendo 1000000 iteraciones...
+[servidor Bc] conexion cerrada
+[cliente Bc] integridad OK: 1000000/1000000 intercambios completos
+[cliente Bc] 1000000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-Bc-3.csv
+
+=== resultados-Bc-3 ===
+  n              1,000,000
+  mín                    6.62 µs
+  p50                   11.54 µs
+  p90                   13.67 µs
+  p99                   15.67 µs
+  p99.9                 18.79 µs
+  p99.99                33.38 µs
+  máx                  132.92 µs
+  desv. est.             1.64 µs
+  media                 11.65 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-Bc-3
+        6.310 µs | #                                                           14,604 ( 1.46%)
+        7.943 µs | ###########                                                112,442 (11.24%)
+       10.000 µs | ########################################################   586,162 (58.62%)
+       12.589 µs | ###########################                                278,425 (27.84%)
+       15.849 µs | #                                                            7,817 ( 0.78%)
+       19.953 µs |                                                                374 ( 0.04%)
+       25.119 µs |                                                                 62 ( 0.01%)
+       31.623 µs |                                                                 49 ( 0.00%)
+       39.811 µs |                                                                 20 ( 0.00%)
+       50.119 µs |                                                                 16 ( 0.00%)
+       63.096 µs |                                                                 14 ( 0.00%)
+       79.433 µs |                                                                 11 ( 0.00%)
+      100.000 µs |                                                                  3 ( 0.00%)
+      125.893 µs |                                                                  1 ( 0.00%)

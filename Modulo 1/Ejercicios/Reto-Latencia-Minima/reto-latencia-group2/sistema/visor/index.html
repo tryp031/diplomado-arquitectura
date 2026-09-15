@@ -1,0 +1,453 @@
+<title>Visor de Latencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root{
+    --ink:#10171C; --text:#24333A; --muted:#5E717A;
+    --paper:#EFF3F4; --surface:#FFFFFF;
+    --rule:#CFDADE; --rule-soft:#E3EAEC; --grid:#E8EEEF;
+    --accent:#0C6173; --accent-soft:#E0EFF2;
+    --signal:#A85C0C;
+    --ok:#2B6A4B; --alert:#9C2B26; --alert-soft:#F7E6E5;
+
+    /* Paleta categórica — validada con validate_palette.js (los seis chequeos).
+       Orden fijo: la variante 1 toma el slot 1; nunca se recicla ni se reasigna. */
+    --s1:#0F7BA8; --s2:#E08A00; --s3:#A64DC4; --s4:#CC3A2E; --s5:#00806B;
+
+    --display:"Chivo","Helvetica Neue",Arial,sans-serif;
+    --body:"Source Serif 4",Georgia,serif;
+    --mono:"IBM Plex Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#E6EDEF; --text:#C6D3D7; --muted:#8A9CA3;
+      --paper:#0D1417; --surface:#131C20;
+      --rule:#2A3940; --rule-soft:#1E2A30; --grid:#223036;
+      --accent:#55B6C7; --accent-soft:#102E36;
+      --signal:#D9993F;
+      --ok:#5FB584; --alert:#E0736C; --alert-soft:#2C1513;
+      --s1:#3B9BC4; --s2:#B8791A; --s3:#AE6BD1; --s4:#DB5A52; --s5:#28997F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E6EDEF; --text:#C6D3D7; --muted:#8A9CA3;
+    --paper:#0D1417; --surface:#131C20;
+    --rule:#2A3940; --rule-soft:#1E2A30; --grid:#223036;
+    --accent:#55B6C7; --accent-soft:#102E36;
+    --signal:#D9993F;
+    --ok:#5FB584; --alert:#E0736C; --alert-soft:#2C1513;
+    --s1:#3B9BC4; --s2:#B8791A; --s3:#AE6BD1; --s4:#DB5A52; --s5:#28997F;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--paper); color:var(--text); font-family:var(--body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px; margin:0 auto; padding-inline:24px; padding-block:0 60px}
+
+  h1,h2,h3,.eyebrow,.lbl{font-family:var(--display)}
+  h1{font-size:clamp(1.9rem,5vw,2.8rem); line-height:1.06; font-weight:900; letter-spacing:-.025em; color:var(--ink); margin:.1em 0 .3em}
+  h2{font-size:1.18rem; font-weight:700; letter-spacing:-.01em; color:var(--ink); margin:0}
+  h3{font-size:.95rem; font-weight:700; color:var(--ink); margin:0 0 .3em}
+  p{margin:0 0 1em}
+  .eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 .8em}
+  .lbl{font-size:.7rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--muted)}
+  strong{font-weight:600; color:var(--ink)}
+  em{font-style:italic}
+
+  header{border-bottom:2px solid var(--ink); padding-block:44px 26px}
+  .lede{font-size:1.05rem; max-width:58ch; margin:0}
+  .prov{font-family:var(--mono); font-size:.74rem; color:var(--muted); margin-top:1.3em; display:flex; flex-wrap:wrap; gap:.35em 1.3em}
+  .prov b{color:var(--ink); font-weight:600}
+
+  section{padding-block:34px; border-bottom:1px solid var(--rule-soft)}
+
+  .switch{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px}
+  .switch button{
+    font-family:var(--display); font-size:.82rem; font-weight:700; cursor:pointer;
+    background:var(--surface); color:var(--text); border:1px solid var(--rule);
+    padding:.5em .85em; border-radius:2px; display:inline-flex; align-items:center; gap:.5em;
+    transition:border-color .12s, background .12s;
+  }
+  .switch button:hover{border-color:var(--accent)}
+  .switch button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--ink)}
+  .switch .chip{width:11px; height:11px; border-radius:2px; flex:none}
+  .switch button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:14px; margin-top:22px}
+  .tile{background:var(--surface); border:1px solid var(--rule); padding:16px 18px}
+  .tile .v{font-family:var(--mono); font-size:1.5rem; font-weight:600; color:var(--ink); letter-spacing:-.02em; display:block; margin:.15em 0 .05em; font-variant-numeric:tabular-nums}
+  .tile .u{font-family:var(--mono); font-size:.72rem; color:var(--muted); display:block}
+  .tile.hero{border-top:3px solid var(--signal)}
+  .tile.pass{border-top:3px solid var(--ok)} .tile.pass .v{color:var(--ok)}
+  .tile.fail{border-top:3px solid var(--alert)} .tile.fail .v{color:var(--alert)}
+
+  figure{margin:0}
+  figcaption{font-family:var(--mono); font-size:.73rem; color:var(--muted); margin-top:.85em; line-height:1.55; max-width:76ch}
+  .scroller{overflow-x:auto}
+  .scroller svg{width:100%; min-width:620px; height:auto; display:block}
+
+  .legend{display:flex; flex-wrap:wrap; gap:.5em 1.2em; margin:14px 0 4px; font-family:var(--mono); font-size:.76rem}
+  .legend span{display:inline-flex; align-items:center; gap:.45em; color:var(--muted)}
+  .legend i{width:13px; height:3px; border-radius:2px; display:inline-block}
+
+  #tip{
+    position:fixed; pointer-events:none; opacity:0; transition:opacity .1s;
+    background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:.72rem;
+    padding:.5em .65em; border-radius:3px; z-index:50; line-height:1.5; white-space:nowrap;
+    left:0; top:0;
+  }
+
+  .tbl{overflow-x:auto; margin-top:6px}
+  table{border-collapse:collapse; width:100%; font-size:.88rem; min-width:660px}
+  th,td{padding:.55em .7em; border-bottom:1px solid var(--rule-soft); text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  th:first-child,td:first-child{text-align:left; font-family:var(--body)}
+  thead th{font-family:var(--display); font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--rule)}
+  tbody tr.sel{background:var(--accent-soft)}
+  tbody tr:last-child td{border-bottom:0}
+  td .chip{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:.5em}
+
+  .badge{font-family:var(--mono); font-size:.67rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:.18em .45em; border-radius:2px}
+  .b-ok{color:var(--ok); background:var(--rule-soft)}
+  .b-no{color:var(--alert); background:var(--alert-soft)}
+
+  .arch{background:var(--surface); border:1px solid var(--rule); border-left:4px solid var(--signal); padding:20px 22px; max-width:68ch}
+  .arch h3{color:var(--signal)}
+  .arch p:last-child{margin-bottom:0}
+  code{font-family:var(--mono); font-size:.86em; background:var(--accent-soft); padding:.08em .32em; border-radius:2px; color:var(--ink)}
+
+  footer{padding-block:30px; font-family:var(--mono); font-size:.74rem; color:var(--muted); line-height:1.7}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:560px){ .wrap{padding-inline:16px} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Group 2 · Módulo 1 · Reto de Latencia Mínima</p>
+  <h1>Visor de Latencia</h1>
+  <p class="lede">Las mediciones de las cinco arquitecturas, lado a lado. Elegí una para ver su distribución completa.</p>
+  <div class="prov">
+    <span><b>9 150 300</b> muestras</span>
+    <span><b>Apple M4</b> · macOS 26.6 · arm64</span>
+    <span><b>14/09/2026</b></span>
+    <span>frontera F1 · reloj monótono</span>
+  </div>
+</header>
+
+<section>
+  <p class="lbl" style="margin-bottom:10px">Elegí una medición</p>
+  <div class="switch" id="switch" role="group" aria-label="Seleccionar medición"></div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section>
+  <h2>Curva de percentiles</h2>
+  <p style="max-width:64ch; margin-top:.5em">Cuánto tarda el <em>peor</em> 1 %, el peor 0,1 %, el peor 0,01 %. Una mediana baja no dice nada si la cola se dispara: <strong>ésta es la curva que decide si un sistema cumple.</strong></p>
+
+  <div class="legend" id="leg1"></div>
+  <figure>
+    <div class="scroller">
+      <svg id="curva" viewBox="0 0 900 400" role="img" aria-label="Curva de percentiles de latencia de cinco arquitecturas, eje vertical logarítmico, con la línea del objetivo de 1 milisegundo."></svg>
+    </div>
+    <figcaption id="cap1"></figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Distribución completa</h2>
+  <p style="max-width:64ch; margin-top:.5em">Dónde caen todas las muestras de la medición elegida. El eje horizontal es logarítmico: cada marca vale diez veces la anterior.</p>
+
+  <figure>
+    <div class="scroller">
+      <svg id="hist" viewBox="0 0 900 300" role="img" aria-label="Histograma de la distribución de latencias de la medición seleccionada, en escala logarítmica."></svg>
+    </div>
+    <figcaption id="cap2"></figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Los números</h2>
+  <p style="max-width:64ch; margin-top:.5em">El umbral del reto son 1 000 µs, y se evalúa contra el <strong>p99,9</strong> — no contra la media, que esconde la cola.</p>
+  <div class="tbl">
+    <table id="tabla">
+      <thead><tr>
+        <th>Medición</th><th>Muestras</th><th>mín</th><th>p50</th><th>p90</th><th>p99</th><th>p99,9</th><th>máx</th><th>&gt; 1 ms</th><th>Umbral</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <figcaption style="margin-top:1em">La media no aparece a propósito. Reportar el promedio de una distribución con cola larga es el error clásico: oculta justo lo que decide el cumplimiento.</figcaption>
+</section>
+
+<section style="border-bottom:2px solid var(--ink)">
+  <div class="arch">
+    <h3>Este visor no mide. Lee.</h3>
+    <p>Un navegador añade milisegundos: renderizado, JavaScript, el bucle de eventos. Si midiera desde aquí, los números serían del navegador y no del sistema — mil veces peores, y sin ningún valor.</p>
+    <p>La cadena es: <code>harness (C/Python)</code> → <code>CSV crudo</code> → <code>generar-datos.py</code> → <code>este visor</code>. Las nueve millones de muestras se condensan en 2,4 KB de percentiles e histogramas; el dato crudo queda versionado en <code>resultados/</code>.</p>
+    <p><strong>El visor es un instrumento de lectura y no forma parte del sistema medido.</strong> Eso va declarado en el informe.</p>
+  </div>
+</section>
+
+<footer>
+  Group 2 · Pontificia Universidad Javeriana Cali<br>
+  Reproducible: <code>./run.sh &lt;variante&gt; &lt;ronda&gt;</code> → <code>python3 visor/generar-datos.py &gt; visor/datos.js</code>
+</footer>
+
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script src="datos.js"></script>
+<script>
+(function () {
+  var D = window.DATOS;
+  if (!D || !D.variantes || !D.variantes.length) return;
+
+  var V = D.variantes;
+  var COLOR = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)'];
+  V.forEach(function (v, i) { v.color = COLOR[i % COLOR.length]; });
+
+  var UMBRAL = 1000000;                       // 1 ms en nanosegundos
+  var sel = V[0].id;
+  var tip = document.getElementById('tip');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function us(ns) {
+    var v = ns / 1000;
+    if (v >= 1000) return v.toLocaleString('es', {maximumFractionDigits: 0}) + ' µs';
+    if (v >= 10)   return v.toLocaleString('es', {maximumFractionDigits: 1}) + ' µs';
+    if (v >= 1)    return v.toLocaleString('es', {maximumFractionDigits: 2}) + ' µs';
+    return ns.toLocaleString('es') + ' ns';
+  }
+  function miles(n) { return n.toLocaleString('es'); }
+  function el(tag, attrs, txt) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function variante(id) {
+    for (var i = 0; i < V.length; i++) if (V[i].id === id) return V[i];
+    return V[0];
+  }
+
+  function verTip(ev, html) {
+    tip.innerHTML = html;
+    tip.style.opacity = '1';
+    var x = ev.clientX + 14, y = ev.clientY - 12;
+    if (x + 230 > window.innerWidth) x = Math.max(8, ev.clientX - 236);
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function sinTip() { tip.style.opacity = '0'; }
+
+  /* ---------- conmutador ---------- */
+  var sw = document.getElementById('switch');
+  V.forEach(function (v) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'sw-' + v.id;
+    b.setAttribute('aria-pressed', v.id === sel ? 'true' : 'false');
+    b.innerHTML = '<span class="chip" style="background:' + v.color + '"></span>' + v.nombre;
+    b.addEventListener('click', function () { sel = v.id; pintar(); });
+    sw.appendChild(b);
+  });
+
+  /* ---------- tiles ---------- */
+  function pintarTiles() {
+    var v = variante(sel);
+    var cumple = v.p999 < UMBRAL;
+    var razon = v.sobre1ms === 0
+      ? 'ninguna muestra supera 1 ms'
+      : miles(v.sobre1ms) + ' muestras sobre 1 ms';
+    document.getElementById('tiles').innerHTML =
+      '<div class="tile hero"><span class="lbl">Mediana (p50)</span><span class="v">' + us(v.p50) + '</span>'
+        + '<span class="u">la mitad de las veces tarda menos</span></div>'
+      + '<div class="tile"><span class="lbl">Cola (p99,9)</span><span class="v">' + us(v.p999) + '</span>'
+        + '<span class="u">1 de cada 1 000 tarda más</span></div>'
+      + '<div class="tile"><span class="lbl">Máximo</span><span class="v">' + us(v.max) + '</span>'
+        + '<span class="u">de ' + miles(v.n) + ' muestras</span></div>'
+      + '<div class="tile ' + (cumple ? 'pass' : 'fail') + '"><span class="lbl">Objetivo 1 ms</span>'
+        + '<span class="v">' + (cumple ? 'CUMPLE' : 'NO CUMPLE') + '</span>'
+        + '<span class="u">' + razon + '</span></div>';
+  }
+
+  /* ---------- curva de percentiles ---------- */
+  var PCT = [
+    {k: 'p50',   q: 0.30103, t: 'p50'},
+    {k: 'p75',   q: 0.60206, t: 'p75'},
+    {k: 'p90',   q: 1.0,     t: 'p90'},
+    {k: 'p99',   q: 2.0,     t: 'p99'},
+    {k: 'p999',  q: 3.0,     t: 'p99,9'},
+    {k: 'p9999', q: 4.0,     t: 'p99,99'},
+    {k: 'max',   q: 5.0,     t: 'máx'}
+  ];
+  var CX0 = 78, CX1 = 856, CY0 = 46, CY1 = 330;
+  var QMIN = 0.30103, QSPAN = 5.0 - QMIN;
+  var LMIN = 1, LSPAN = 7;                     // 10 ns → 100 ms
+  var DEC = ['10 ns', '100 ns', '1 µs', '10 µs', '100 µs', '1 ms', '10 ms', '100 ms'];
+
+  function cx(q) { return CX0 + (q - QMIN) / QSPAN * (CX1 - CX0); }
+  function cy(ns) {
+    var l = Math.log(Math.max(ns, 10)) / Math.LN10;
+    l = Math.min(Math.max(l, LMIN), LMIN + LSPAN);
+    return CY1 - (l - LMIN) / LSPAN * (CY1 - CY0);
+  }
+
+  function pintarCurva() {
+    var s = document.getElementById('curva');
+    while (s.firstChild) s.removeChild(s.firstChild);
+
+    for (var d = 0; d <= 7; d++) {
+      var y = CY1 - d / LSPAN * (CY1 - CY0);
+      s.appendChild(el('line', {x1: CX0, y1: y, x2: CX1, y2: y, stroke: 'var(--grid)', 'stroke-width': 1}));
+      s.appendChild(el('text', {x: CX0 - 10, y: y + 3.5, 'text-anchor': 'end',
+        'font-family': 'IBM Plex Mono, monospace', 'font-size': 10, fill: 'var(--muted)'}, DEC[d]));
+    }
+    PCT.forEach(function (p) {
+      s.appendChild(el('text', {x: cx(p.q), y: CY1 + 21, 'text-anchor': 'middle',
+        'font-family': 'IBM Plex Mono, monospace', 'font-size': 10.5, fill: 'var(--muted)'}, p.t));
+    });
+
+    var yu = cy(UMBRAL);
+    s.appendChild(el('line', {x1: CX0, y1: yu, x2: CX1, y2: yu,
+      stroke: 'var(--signal)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}));
+    s.appendChild(el('text', {x: CX1, y: yu - 8, 'text-anchor': 'end',
+      'font-family': 'Chivo, sans-serif', 'font-size': 11.5, 'font-weight': 700,
+      fill: 'var(--signal)'}, 'OBJETIVO DEL RETO · 1 ms'));
+
+    // las no seleccionadas primero, para que la elegida quede encima
+    var orden = V.filter(function (v) { return v.id !== sel; })
+                 .concat(V.filter(function (v) { return v.id === sel; }));
+
+    orden.forEach(function (v) {
+      var act = v.id === sel;
+      var pts = PCT.map(function (p) { return cx(p.q) + ',' + cy(v[p.k]); }).join(' ');
+      s.appendChild(el('polyline', {points: pts, fill: 'none', stroke: v.color,
+        'stroke-width': act ? 3 : 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round',
+        opacity: act ? 1 : 0.32}));
+
+      PCT.forEach(function (p) {
+        var X = cx(p.q), Y = cy(v[p.k]);
+        s.appendChild(el('circle', {cx: X, cy: Y, r: act ? 5 : 3.5, fill: v.color,
+          stroke: 'var(--surface)', 'stroke-width': 2, opacity: act ? 1 : 0.32}));
+        var hit = el('circle', {cx: X, cy: Y, r: 15, fill: 'transparent', style: 'cursor:pointer'});
+        hit.addEventListener('mousemove', function (ev) {
+          verTip(ev, v.nombre + '<br>' + p.t + ' &nbsp;' + us(v[p.k]));
+        });
+        hit.addEventListener('mouseleave', sinTip);
+        hit.addEventListener('click', function () { sel = v.id; pintar(); });
+        s.appendChild(hit);
+      });
+
+      if (act) {
+        s.appendChild(el('text', {x: CX1 - 4, y: cy(v.max) - 12, 'text-anchor': 'end',
+          'font-family': 'Chivo, sans-serif', 'font-size': 11.5, 'font-weight': 700,
+          fill: v.color}, v.nombre));
+      }
+    });
+
+    s.appendChild(el('line', {x1: CX0, y1: CY1, x2: CX1, y2: CY1, stroke: 'var(--rule)', 'stroke-width': 1}));
+    s.appendChild(el('text', {x: CX0, y: 388, 'font-family': 'IBM Plex Mono, monospace',
+      'font-size': 10, fill: 'var(--muted)'},
+      'eje vertical logarítmico: cada línea vale 10× la anterior · tocá un punto para ver su valor'));
+
+    document.getElementById('leg1').innerHTML = V.map(function (v) {
+      return '<span style="' + (v.id === sel ? 'color:var(--ink)' : '') + '">'
+        + '<i style="background:' + v.color + '"></i>' + v.nombre + '</span>';
+    }).join('');
+
+    var v0 = variante(sel);
+    document.getElementById('cap1').textContent =
+      'Seleccionada: ' + v0.nombre + ' — ' + v0.detalle + '. '
+      + 'Mientras más plana la curva, más predecible el sistema. Una curva que sube hacia la derecha '
+      + 'tiene cola: casi siempre es rápida, pero de vez en cuando no.';
+  }
+
+  /* ---------- histograma ---------- */
+  var HX0 = 78, HX1 = 856, HY0 = 44, HY1 = 244;
+
+  function pintarHist() {
+    var s = document.getElementById('hist');
+    while (s.firstChild) s.removeChild(s.firstChild);
+
+    var v = variante(sel);
+    var nb = D.bins.n, pd = D.bins.porDec, d0 = D.bins.decIni;
+    var w = (HX1 - HX0) / nb;
+    var maxc = 1;
+    v.hist.forEach(function (c) { if (c > maxc) maxc = c; });
+
+    for (var d = 0; d <= 7; d++) {
+      var x = HX0 + d * pd * w;
+      s.appendChild(el('line', {x1: x, y1: HY0, x2: x, y2: HY1, stroke: 'var(--grid)', 'stroke-width': 1}));
+      s.appendChild(el('text', {x: x, y: HY1 + 20, 'text-anchor': 'middle',
+        'font-family': 'IBM Plex Mono, monospace', 'font-size': 10, fill: 'var(--muted)'}, DEC[d]));
+    }
+
+    var xu = HX0 + 5 * pd * w;
+    s.appendChild(el('line', {x1: xu, y1: HY0 - 16, x2: xu, y2: HY1,
+      stroke: 'var(--signal)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}));
+    s.appendChild(el('text', {x: xu + 8, y: HY0 - 20, 'font-family': 'Chivo, sans-serif',
+      'font-size': 11.5, 'font-weight': 700, fill: 'var(--signal)'}, 'OBJETIVO 1 ms'));
+
+    v.hist.forEach(function (c, i) {
+      if (!c) return;
+      var h = Math.max(2, c / maxc * (HY1 - HY0));
+      var x = HX0 + i * w;
+      s.appendChild(el('rect', {x: x, y: HY1 - h, width: Math.max(1, w - 2), height: h,
+        fill: v.color, rx: Math.min(2, w / 3)}));
+
+      var lo = Math.round(Math.pow(10, d0 + i / pd));
+      var hi = Math.round(Math.pow(10, d0 + (i + 1) / pd));
+      var hit = el('rect', {x: x - 2, y: HY0, width: w + 4, height: HY1 - HY0,
+        fill: 'transparent', style: 'cursor:crosshair'});
+      hit.addEventListener('mousemove', function (ev) {
+        verTip(ev, us(lo) + ' – ' + us(hi) + '<br>' + miles(c) + ' muestras &nbsp;'
+          + (c / v.n * 100).toFixed(2) + ' %');
+      });
+      hit.addEventListener('mouseleave', sinTip);
+      s.appendChild(hit);
+    });
+
+    s.appendChild(el('line', {x1: HX0, y1: HY1, x2: HX1, y2: HY1, stroke: 'var(--rule)', 'stroke-width': 1}));
+    s.appendChild(el('text', {x: HX0, y: 288, 'font-family': 'IBM Plex Mono, monospace',
+      'font-size': 10, fill: 'var(--muted)'},
+      'altura = cuántas muestras cayeron ahí · el pico tiene ' + miles(maxc) + ' de ' + miles(v.n)));
+
+    var nota;
+    if (v.id === 'D') {
+      nota = 'La distribución se ve en escalones porque el reloj de esta máquina avanza de a 41,67 ns: a 83 ns de mediana, el instrumento ya no es despreciable frente a lo medido. Documentado en ADR-003.';
+    } else if (v.id === 'E0') {
+      nota = 'La única medición que no cumple: las 300 muestras están por encima del umbral. No es un defecto del sistema — es lo que cuesta una red real, y por eso está aquí.';
+    } else {
+      nota = 'El grueso de las muestras se agolpa en un rango estrecho y unas pocas se van hacia la derecha. Esa minoría de la derecha es la cola, y es lo que decide el cumplimiento.';
+    }
+    document.getElementById('cap2').textContent = v.nombre + ' · ' + miles(v.n) + ' muestras. ' + nota;
+  }
+
+  /* ---------- tabla ---------- */
+  function pintarTabla() {
+    document.getElementById('tbody').innerHTML = V.map(function (v) {
+      var ok = v.p999 < UMBRAL;
+      return '<tr class="' + (v.id === sel ? 'sel' : '') + '">'
+        + '<td><span class="chip" style="background:' + v.color + '"></span>' + v.nombre + '</td>'
+        + '<td>' + miles(v.n) + '</td>'
+        + '<td>' + us(v.min) + '</td><td>' + us(v.p50) + '</td><td>' + us(v.p90) + '</td>'
+        + '<td>' + us(v.p99) + '</td><td>' + us(v.p999) + '</td><td>' + us(v.max) + '</td>'
+        + '<td>' + miles(v.sobre1ms) + '</td>'
+        + '<td><span class="badge ' + (ok ? 'b-ok' : 'b-no') + '">' + (ok ? 'cumple' : 'no') + '</span></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function pintar() {
+    V.forEach(function (v) {
+      var b = document.getElementById('sw-' + v.id);
+      if (b) b.setAttribute('aria-pressed', v.id === sel ? 'true' : 'false');
+    });
+    pintarTiles(); pintarCurva(); pintarHist(); pintarTabla();
+  }
+
+  pintar();
+  window.addEventListener('resize', sinTip);
+})();
+</script>

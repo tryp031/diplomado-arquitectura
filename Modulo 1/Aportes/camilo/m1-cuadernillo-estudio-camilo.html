@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diplomado Arquitectura de Software y Cloud Computing — Cuadernillo de estudio · Módulo I</title>
+<style>
+  :root{
+    --paper:#e9edf2;
+    --card:#ffffff;
+    --ink:#17212b;
+    --muted:#5b6b7c;
+    --navy:#123252;
+    --navy-2:#1f4e79;
+    --navy-soft:#e2ebf3;
+    --gold:#b2802a;
+    --gold-soft:#f8f1df;
+    --green:#256b47;
+    --green-soft:#e4f1e9;
+    --red:#a33a2b;
+    --red-soft:#faeae7;
+    --line:#d3dbe4;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+    font-size:16.5px;line-height:1.62;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 18px 70px}
+
+  /* ---------- Portada ---------- */
+  header.cover{
+    background:var(--navy);color:#fff;
+    margin:0 -18px 0;padding:44px 32px 34px;
+    border-bottom:4px solid var(--gold);
+  }
+  .cover-inner{max-width:900px;margin:0 auto}
+  .cover .programa{
+    font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px;
+  }
+  .cover h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:normal;font-size:2.2rem;line-height:1.22;margin:0 0 6px;
+    max-width:24ch;
+  }
+  .cover .modulo{
+    font-family:Georgia,serif;font-size:1.32rem;color:#f0d6a0;margin:0 0 18px;
+  }
+  .cover p.lead{margin:0;max-width:62ch;color:#dbe6f0;font-size:1rem}
+
+  /* ---------- Barra de herramientas ---------- */
+  .toolbar{
+    position:sticky;top:0;z-index:20;
+    background:#f4f7faee;backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    margin:0 -18px 22px;padding:9px 18px;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .toolbar .sep{flex:1}
+  .toolbar .ref{font-size:.85rem;color:var(--muted)}
+
+  button{
+    font-family:inherit;font-size:.9rem;font-weight:600;
+    background:var(--navy);color:#fff;border:1px solid var(--navy);
+    border-radius:7px;padding:7px 13px;cursor:pointer;
+  }
+  button:hover{background:var(--navy-2);border-color:var(--navy-2)}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  button.ghost{background:#fff;color:var(--navy);border-color:var(--line)}
+  button.ghost:hover{background:var(--navy-soft);color:var(--navy)}
+
+  /* ---------- Secciones ---------- */
+  details.sec{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);margin:0 0 12px;overflow:hidden;
+  }
+  details.sec > summary{
+    cursor:pointer;list-style:none;padding:15px 18px 15px 16px;
+    display:flex;align-items:center;gap:13px;
+    font-weight:600;font-size:1.04rem;background:#fbfcfd;
+  }
+  details.sec > summary::-webkit-details-marker{display:none}
+  details.sec[open] > summary{border-bottom:1px solid var(--line)}
+  summary:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+  .num{
+    flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+    background:var(--navy-soft);color:var(--navy);
+    font-size:.88rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  details.sec[open] .num{background:var(--navy);color:#fff}
+  .chev{margin-left:auto;color:var(--muted);transition:transform .15s}
+  details.sec[open] .chev{transform:rotate(90deg)}
+  .body{padding:6px 24px 24px}
+
+  h2{
+    font-family:Georgia,serif;font-weight:normal;
+    color:var(--navy);font-size:1.28rem;margin:22px 0 8px;
+  }
+  h3{font-size:1.02rem;color:var(--navy-2);margin:18px 0 4px}
+  p{margin:9px 0;max-width:72ch}
+  ul,ol{padding-left:22px;margin:9px 0;max-width:72ch}
+  li{margin:4px 0}
+
+  .box{
+    padding:13px 16px;border-radius:8px;margin:14px 0;
+    background:var(--navy-soft);border-left:4px solid var(--navy-2);
+  }
+  .box.ejemplo{background:var(--gold-soft);border-left-color:var(--gold)}
+  .box.clave{background:var(--green-soft);border-left-color:var(--green)}
+  .box .rot{font-weight:700;color:var(--navy);display:block;margin-bottom:2px;font-size:.92rem}
+  .box.ejemplo .rot{color:#8a6318}
+  .box.clave .rot{color:var(--green)}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95rem}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;color:var(--navy);font-weight:600}
+  tbody tr:nth-child(even){background:#fafbfd}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(236px,1fr));gap:12px;margin:14px 0}
+  .card{border:1px solid var(--line);border-radius:8px;padding:13px 15px;background:#fff}
+  .card h4{margin:0 0 4px;font-size:.98rem;color:var(--navy)}
+  .card p{margin:0;font-size:.94rem}
+
+  .attr{border-left:3px solid var(--navy-soft);padding:2px 0 2px 15px;margin:18px 0}
+  .attr h3{margin:0 0 2px}
+  .pregunta{
+    display:inline-block;background:#fff;border:1px dashed var(--navy-2);
+    color:var(--navy-2);border-radius:20px;padding:3px 13px;
+    font-size:.92rem;font-style:italic;margin:4px 0 6px;
+  }
+
+  .small{font-size:.9rem;color:var(--muted)}
+  .instr{
+    background:#fbfcfd;border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:8px;padding:13px 16px;margin:14px 0;font-size:.95rem;
+  }
+  .instr b{color:var(--navy)}
+
+  /* ---------- Casos prácticos ---------- */
+  .caso{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0;background:#fff}
+  .caso .rotulo{font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:.02em}
+  .caso .ctx{color:var(--muted);font-size:.93rem;margin:5px 0 7px}
+  .caso .preg{font-weight:600;margin:0 0 10px}
+  .caso .resp{
+    display:none;margin-top:11px;padding:11px 14px;
+    background:var(--green-soft);border-left:4px solid var(--green);border-radius:6px;font-size:.95rem;
+  }
+  .caso .resp.show{display:block}
+  .caso .resp b{color:var(--green)}
+
+  /* ---------- Emparejamiento ---------- */
+  .match th:first-child{width:56px;text-align:center}
+  .match td:first-child{text-align:center}
+  .match select{
+    font-family:inherit;font-size:.95rem;padding:5px 7px;
+    border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);width:68px;
+  }
+  .match select:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+  tr.ok{background:var(--green-soft)!important}
+  tr.bad{background:var(--red-soft)!important}
+  .mark{font-weight:700;font-size:.9rem}
+  .mark.ok{color:var(--green)}
+  .mark.bad{color:var(--red)}
+  .leyenda{background:#fbfcfd;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .leyenda ul{columns:2;column-gap:28px;margin:6px 0 0;padding-left:20px;font-size:.95rem}
+  @media(max-width:620px){.leyenda ul{columns:1}}
+
+  /* ---------- Quiz ---------- */
+  .bloque{font-family:Georgia,serif;color:var(--navy);font-size:1.1rem;margin:26px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--navy-soft)}
+  .q{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:11px 0;background:#fff}
+  .q.ok{border-color:#9ecab2;background:var(--green-soft)}
+  .q.bad{border-color:#e0b0a7;background:var(--red-soft)}
+  .q .enun{font-weight:600;margin:0 0 9px}
+  .q .enun .n{color:var(--navy-2);margin-right:5px}
+  .q label{display:block;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:.97rem;max-width:72ch}
+  .q label:hover{background:#f1f5f9}
+  .q input{margin-right:8px}
+  .fb{display:none;margin-top:9px;padding:9px 12px;border-radius:6px;font-size:.92rem;background:#fff;border-left:4px solid var(--navy-2)}
+  .fb.show{display:block}
+  .barra{
+    position:sticky;bottom:0;background:#f4f7faee;backdrop-filter:blur(6px);
+    border-top:1px solid var(--line);padding:11px 0;margin-top:18px;
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  }
+  .score{font-weight:700;color:var(--navy);font-size:1rem}
+  .score .pct{color:var(--gold)}
+
+  .resumen li{margin:7px 0}
+  .cadena{
+    font-family:Georgia,serif;font-size:1.02rem;color:var(--navy);
+    background:var(--navy-soft);border-radius:8px;padding:14px 16px;margin:14px 0;line-height:1.9;
+  }
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+
+  @media print{
+    body{background:#fff;font-size:11pt}
+    .toolbar,.barra,button,.chev{display:none!important}
+    header.cover{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 14px}
+    .cover h1,.cover .modulo{color:#000}
+    .cover .programa,.cover p.lead{color:#333}
+    details.sec{break-inside:avoid;border-color:#999}
+    details.sec > summary{background:#fff}
+    .num{background:#fff;color:#000;border:1px solid #000}
+    .caso .resp{display:block!important}
+    .fb{display:block!important}
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <p class="programa">Pontificia Universidad Javeriana Cali</p>
+    <h1>Diplomado Arquitectura de Software y Cloud Computing</h1>
+    <p class="modulo">Cuadernillo de estudio — Módulo I</p>
+    <p class="lead">Material organizado para estudiar por partes, descubrir las respuestas antes de leerlas y practicar con casos reales. Cada sección se abre y se cierra de forma independiente.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="toolbar">
+  <button class="ghost" onclick="abrirTodo(true)">Abrir todo</button>
+  <button class="ghost" onclick="abrirTodo(false)">Cerrar todo</button>
+  <button class="ghost" onclick="window.print()">Imprimir</button>
+  <span class="sep"></span>
+  <span class="ref">Módulo I · Fundamentos, decisiones y atributos de calidad</span>
+</div>
+
+<!-- ============ 0 ============ -->
+<details class="sec" open>
+  <summary><span class="num">0</span> Cómo estudiar este cuadernillo <span class="chev">›</span></summary>
+  <div class="body">
+    <p>La ruta va de lo conceptual a lo aplicado. Recórrela en orden la primera vez; después usa las secciones 12 a 14 como repaso activo.</p>
+    <div class="grid">
+      <div class="card"><h4>1. Comprender</h4><p>Lee la explicación y el ejemplo de cada concepto.</p></div>
+      <div class="card"><h4>2. Recordar</h4><p>Asocia cada atributo con su pregunta mental.</p></div>
+      <div class="card"><h4>3. Descubrir</h4><p>Resuelve los ejercicios <em>antes</em> de revelar la respuesta.</p></div>
+      <div class="card"><h4>4. Aplicar</h4><p>Analiza los casos prácticos y justifica tu elección.</p></div>
+    </div>
+    <div class="box clave">
+      <span class="rot">Regla de oro</span>
+      No memorices solo nombres. Aprende a reconocer el <b>problema</b> que describe cada atributo y la <b>decisión</b> que lo atiende.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 1 ============ -->
+<details class="sec">
+  <summary><span class="num">1</span> Fundamentos de la arquitectura de software <span class="chev">›</span></summary>
+  <div class="body">
+    <h2>¿Qué es?</h2>
+    <p>La arquitectura de software es la organización fundamental de un sistema: sus elementos principales, las relaciones entre ellos y las decisiones que determinan su estructura y su evolución.</p>
+    <div class="box">
+      <span class="rot">Idea central del módulo</span>
+      La arquitectura <b>no es una estructura estática</b>. Es un conjunto dinámico de elementos interrelacionados que define cómo opera y cómo se desarrolla un sistema a lo largo del tiempo.
+    </div>
+
+    <h2>La analogía de la casa</h2>
+    <p>Antes de construir una casa se decide la distribución, la estructura, las instalaciones y las posibilidades de ampliación. En software ocurre algo semejante: se toman decisiones sobre componentes, comunicación, almacenamiento, seguridad, rendimiento, despliegue y evolución. Cambiar un tabique es barato; mover los cimientos, no.</p>
+
+    <h2>Arquitectura y código no son lo mismo</h2>
+    <p>El código implementa decisiones. La arquitectura establece las decisiones estructurales que organizan el sistema y que son costosas de revertir.</p>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo</span>
+      Elegir que varios servicios se comuniquen mediante una cola de mensajes es una decisión arquitectónica. Elegir el nombre de una variable pertenece a la implementación.
+    </div>
+    <div class="box clave">
+      <span class="rot">Para recordar</span>
+      Arquitectura = estructura + relaciones + decisiones + evolución.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 2 ============ -->
+<details class="sec">
+  <summary><span class="num">2</span> Leyes y alcance de la arquitectura <span class="chev">›</span></summary>
+  <div class="body">
+    <h2>Las leyes fundamentales</h2>
+    <p>Son los principios que guían cualquier decisión arquitectónica, independientemente de la tecnología empleada.</p>
+    <table>
+      <thead><tr><th style="width:170px">Ley</th><th>Enunciado y consecuencia práctica</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Primera ley</b></td>
+          <td>Todo en arquitectura de software es un <i>trade-off</i>. Ninguna opción es buena en términos absolutos: lo es respecto de un contexto y a costa de algo.</td>
+        </tr>
+        <tr>
+          <td><b>Corolario</b></td>
+          <td>Si crees que algo no tiene contrapartida, es que todavía no has identificado cuál es. Búscala antes de decidir.</td>
+        </tr>
+        <tr>
+          <td><b>Segunda ley</b></td>
+          <td>El <i>por qué</i> es más importante que el <i>cómo</i>. Una decisión sin justificación registrada es una decisión que nadie podrá revisar ni revertir con criterio.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo</span>
+      Separar el sistema en microservicios mejora la independencia de despliegue, pero introduce latencia de red, complejidad operativa y problemas de consistencia de datos. Ambas caras forman parte de la misma decisión.
+    </div>
+
+    <h2>El alcance: cuatro dimensiones</h2>
+    <div class="grid">
+      <div class="card"><h4>Estructura</h4><p>El estilo con el que se organiza el sistema: capas, monolito, microservicios, orientado a eventos, microkernel.</p></div>
+      <div class="card"><h4>Características arquitectónicas</h4><p>Los atributos de calidad que el sistema debe cumplir: disponibilidad, seguridad, escalabilidad y demás.</p></div>
+      <div class="card"><h4>Decisiones</h4><p>Las reglas sobre cómo debe construirse el sistema y qué está permitido o prohibido.</p></div>
+      <div class="card"><h4>Principios de diseño</h4><p>Las guías recomendadas, no obligatorias, que orientan al equipo cuando debe elegir.</p></div>
+    </div>
+
+    <h3>Estilos y patrones más citados en la industria</h3>
+    <ul>
+      <li><b>Monolítico en capas:</b> simple de desarrollar y desplegar; se vuelve rígido al crecer.</li>
+      <li><b>Cliente-servidor:</b> separa la presentación del procesamiento y los datos.</li>
+      <li><b>Microservicios:</b> servicios pequeños y desplegables de forma independiente; alto costo operativo.</li>
+      <li><b>Orientado a eventos:</b> comunicación asíncrona, buen desacoplamiento, trazabilidad más difícil.</li>
+      <li><b>Microkernel (plug-in):</b> un núcleo estable más extensiones, útil para productos configurables.</li>
+    </ul>
+
+    <h2>Responsabilidades del arquitecto</h2>
+    <ul>
+      <li>Tomar decisiones arquitectónicas y dejar registrada su justificación.</li>
+      <li>Analizar la arquitectura de forma continua, no solo al inicio del proyecto.</li>
+      <li>Mantenerse al día con las tendencias tecnológicas relevantes para el contexto.</li>
+      <li>Velar por el cumplimiento de las decisiones adoptadas.</li>
+      <li>Conocer el dominio del negocio para traducir necesidades en atributos de calidad.</li>
+      <li>Ejercer habilidades de comunicación, negociación y liderazgo técnico.</li>
+    </ul>
+    <p class="small">Nota de estudio: contrasta esta síntesis con la infografía «Leyes y alcance de la arquitectura de software» del aula, que es la fuente oficial del curso.</p>
+  </div>
+</details>
+
+<!-- ============ 3 ============ -->
+<details class="sec">
+  <summary><span class="num">3</span> Importancia estratégica <span class="chev">›</span></summary>
+  <div class="body">
+    <p>La arquitectura es más que una estructura técnica: permite a las organizaciones innovar, crecer y enfrentar desafíos futuros. Debe alinearse con los objetivos del negocio para producir soluciones efectivas y sostenibles.</p>
+    <div class="cadena">
+      Objetivos del negocio → necesidades → decisiones arquitectónicas → estructura → calidad → evolución
+    </div>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo</span>
+      Una tienda pasa de 1.000 a 100.000 usuarios durante una campaña. Las decisiones tomadas al diseñar el sistema —no el esfuerzo del equipo esa noche— determinan si puede crecer sin colapsar.
+    </div>
+    <div class="box clave">
+      <span class="rot">Consecuencia</span>
+      Una arquitectura adecuada reduce el costo del cambio. Una arquitectura inadecuada convierte cada requisito nuevo en un proyecto.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 4 ============ -->
+<details class="sec">
+  <summary><span class="num">4</span> Decisiones y restricciones arquitectónicas <span class="chev">›</span></summary>
+  <div class="body">
+    <h2>Decisiones</h2>
+    <p>Son elecciones que afectan de forma significativa la estructura, el comportamiento, la calidad o la evolución del sistema.</p>
+    <ul>
+      <li>Monolito o servicios distribuidos.</li>
+      <li>Tipo de almacenamiento: relacional, documental, clave-valor.</li>
+      <li>Comunicación síncrona o asíncrona.</li>
+      <li>Estrategia de autenticación y autorización.</li>
+      <li>Uso de caché y dónde ubicarla.</li>
+      <li>Estrategia de despliegue y de versionado.</li>
+    </ul>
+
+    <h2>Restricciones</h2>
+    <p>Son condiciones o límites que reducen las alternativas disponibles. No se eligen: se reciben.</p>
+    <div class="grid">
+      <div class="card"><h4>De negocio</h4><p>Presupuesto, plazos, regulación, contratos, necesidades del cliente.</p></div>
+      <div class="card"><h4>De tecnología</h4><p>Plataformas existentes, compatibilidad, sistemas heredados, proveedor cloud ya contratado.</p></div>
+      <div class="card"><h4>De recursos</h4><p>Personal disponible, tiempo, conocimiento del equipo, infraestructura.</p></div>
+    </div>
+
+    <div class="box clave">
+      <span class="rot">Fórmula mental</span>
+      Decisión = elección. Restricción = límite que condiciona esa elección.
+    </div>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo</span>
+      El negocio exige alta disponibilidad, pero el presupuesto no permite infraestructura redundante en dos regiones. La restricción económica condiciona la decisión arquitectónica y obliga a negociar el objetivo de disponibilidad.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 5 ============ -->
+<details class="sec">
+  <summary><span class="num">5</span> Atributos de calidad: concepto <span class="chev">›</span></summary>
+  <div class="body">
+    <p>Un atributo de calidad describe una característica importante de <b>cómo</b> debe comportarse o mantenerse un sistema, más allá de las funciones que ofrece.</p>
+    <table>
+      <thead><tr><th style="width:50%">Funcionalidad</th><th>Calidad</th></tr></thead>
+      <tbody>
+        <tr><td>¿Qué hace el sistema?</td><td>¿Cómo lo hace?</td></tr>
+        <tr><td>Permite transferir dinero.</td><td>Lo hace de forma segura, rápida, disponible, auditable y mantenible.</td></tr>
+      </tbody>
+    </table>
+    <div class="box">
+      <span class="rot">Clasificación del material</span>
+      Los atributos se organizan en <b>operacionales</b>, <b>estructurales</b> y <b>transversales</b>, y se toma <b>ISO/IEC 25000</b> como referencia para evaluar la calidad.
+    </div>
+    <p class="small">Nota: esta clasificación es la utilizada en el módulo. Otros estándares, como ISO/IEC 25010, organizan las características de calidad de otra manera.</p>
+  </div>
+</details>
+
+<!-- ============ 6 ============ -->
+<details class="sec">
+  <summary><span class="num">6</span> Atributos operacionales <span class="chev">›</span></summary>
+  <div class="body">
+    <p class="small">Describen cómo se comporta el sistema mientras está en operación.</p>
+
+    <div class="attr">
+      <h3>Disponibilidad</h3>
+      <div class="pregunta">¿Está disponible cuando lo necesito?</div>
+      <p>Capacidad del sistema para estar operativo y accesible cuando se requiere.</p>
+      <p class="small"><b>Ejemplo:</b> un sistema bancario debe operar las 24 horas. Si permanece fuera de servicio varias horas, su disponibilidad es deficiente.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Escalabilidad</h3>
+      <div class="pregunta">¿Puede crecer sin colapsar?</div>
+      <p>Capacidad para manejar aumentos de usuarios, datos o carga sin una degradación inaceptable.</p>
+      <p class="small"><b>Ejemplo:</b> una plataforma soporta 1.000 usuarios pero falla con 100.000. <b>Horizontal:</b> agregar instancias. <b>Vertical:</b> aumentar la capacidad de una máquina.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Usabilidad</h3>
+      <div class="pregunta">¿Qué tan fácil es utilizarlo?</div>
+      <p>Facilidad con la que los usuarios aprenden, comprenden y utilizan el sistema.</p>
+      <p class="small"><b>Ejemplo:</b> una aplicación puede ser segura y rápida, pero si una operación sencilla exige demasiados pasos, tiene un problema de usabilidad.</p>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 7 ============ -->
+<details class="sec">
+  <summary><span class="num">7</span> Atributos estructurales <span class="chev">›</span></summary>
+  <div class="body">
+    <p class="small">Describen cómo se comporta el sistema frente a quienes lo construyen y lo mantienen.</p>
+
+    <div class="attr">
+      <h3>Mantenibilidad</h3>
+      <div class="pregunta">¿Qué tan fácil será mantenerlo?</div>
+      <p>Facilidad para comprender, corregir, modificar, probar y actualizar el sistema.</p>
+      <p class="small"><b>Ejemplo:</b> si cambiar una regla de negocio exige modificar una sola parte bien aislada, se favorece la mantenibilidad.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Modificabilidad</h3>
+      <div class="pregunta">¿Qué tan fácil es cambiarlo sin romper otras cosas?</div>
+      <p>Facilidad para introducir cambios con un impacto acotado y previsible.</p>
+      <p class="small"><b>Ejemplo:</b> una modificación que obliga a tocar 25 componentes independientes indica baja modificabilidad.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Testabilidad</h3>
+      <div class="pregunta">¿Qué tan fácil es comprobar que funciona?</div>
+      <p>Facilidad para verificar el comportamiento del sistema mediante pruebas.</p>
+      <p class="small"><b>Ejemplo:</b> componentes independientes suelen ser más fáciles de probar que un sistema donde todo depende de todo.</p>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 8 ============ -->
+<details class="sec">
+  <summary><span class="num">8</span> Atributos transversales y relacionados <span class="chev">›</span></summary>
+  <div class="body">
+    <p class="small">Atraviesan todo el sistema y rara vez pueden añadirse al final.</p>
+
+    <div class="attr">
+      <h3>Seguridad</h3>
+      <div class="pregunta">¿Está protegido?</div>
+      <p>Protección de información, usuarios, recursos y operaciones frente a accesos o acciones no autorizadas: autenticación, autorización, cifrado, confidencialidad e integridad.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Rendimiento</h3>
+      <div class="pregunta">¿Qué tan rápido y eficientemente responde?</div>
+      <p>Tiempos de respuesta, latencia, capacidad de procesamiento y uso de recursos bajo una carga determinada.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Fiabilidad</h3>
+      <div class="pregunta">¿Puedo confiar en que funcionará correctamente?</div>
+      <p>Capacidad de funcionar de forma correcta y consistente bajo condiciones determinadas.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Tolerancia a fallos</h3>
+      <div class="pregunta">¿Qué pasa cuando algo falla?</div>
+      <p>Capacidad de continuar funcionando, total o parcialmente, ante un fallo de alguno de sus componentes.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Recuperabilidad</h3>
+      <div class="pregunta">¿Qué tan bien se recupera después de una falla?</div>
+      <p>Capacidad para restaurar datos, operaciones o servicios después de una interrupción.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Interoperabilidad</h3>
+      <div class="pregunta">¿Puede comunicarse con otros sistemas?</div>
+      <p>Capacidad para intercambiar información e interactuar con otros sistemas.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Compatibilidad</h3>
+      <div class="pregunta">¿Puede convivir con otros entornos o productos?</div>
+      <p>Capacidad de coexistir y funcionar adecuadamente junto a otros sistemas o versiones.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Portabilidad</h3>
+      <div class="pregunta">¿Puede trasladarse a otro entorno?</div>
+      <p>Facilidad para mover el sistema a otra plataforma, sistema operativo o proveedor.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Observabilidad</h3>
+      <div class="pregunta">¿Puedo saber qué está ocurriendo internamente?</div>
+      <p>Capacidad de entender el estado interno del sistema desde el exterior, apoyada en registros, métricas y trazas.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Auditabilidad</h3>
+      <div class="pregunta">¿Puedo saber quién hizo qué y cuándo?</div>
+      <p>Capacidad de registrar evidencia verificable de las operaciones realizadas.</p>
+    </div>
+
+    <div class="attr">
+      <h3>Eficiencia</h3>
+      <div class="pregunta">¿Utiliza adecuadamente sus recursos?</div>
+      <p>Relación entre el resultado obtenido y los recursos consumidos: cómputo, memoria, red, costo.</p>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 9 ============ -->
+<details class="sec">
+  <summary><span class="num">9</span> Diferencias que suelen confundir <span class="chev">›</span></summary>
+  <div class="body">
+    <table>
+      <thead><tr><th style="width:230px">Par</th><th>Cómo distinguirlos</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Disponibilidad</b> vs. <b>rendimiento</b></td>
+          <td>Disponibilidad: ¿funciona? Rendimiento: ¿qué tan rápido funciona? Un sistema que responde en 30 segundos está disponible, pero con mal rendimiento.</td>
+        </tr>
+        <tr>
+          <td><b>Rendimiento</b> vs. <b>escalabilidad</b></td>
+          <td>Rendimiento: comportamiento ante una carga concreta. Escalabilidad: capacidad de soportar el crecimiento de esa carga.</td>
+        </tr>
+        <tr>
+          <td><b>Disponibilidad</b> vs. <b>tolerancia a fallos</b></td>
+          <td>Disponibilidad: ¿está operativo? Tolerancia a fallos: ¿puede seguir operativo <i>cuando</i> ocurre un fallo?</td>
+        </tr>
+        <tr>
+          <td><b>Tolerancia a fallos</b> vs. <b>recuperabilidad</b></td>
+          <td>Tolerancia: sigue funcionando durante el fallo. Recuperabilidad: vuelve a funcionar después del fallo.</td>
+        </tr>
+        <tr>
+          <td><b>Mantenibilidad</b> vs. <b>modificabilidad</b></td>
+          <td>La mantenibilidad es más amplia: comprender, corregir, modificar, probar y actualizar. La modificabilidad se concentra en introducir cambios sin efectos excesivos o inesperados.</td>
+        </tr>
+        <tr>
+          <td><b>Observabilidad</b> vs. <b>auditabilidad</b></td>
+          <td>Observabilidad responde a una necesidad técnica (¿qué ocurre?). Auditabilidad responde a una necesidad de control (¿quién hizo qué y cuándo?).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<!-- ============ 10 ============ -->
+<details class="sec">
+  <summary><span class="num">10</span> Trade-offs arquitectónicos <span class="chev">›</span></summary>
+  <div class="body">
+    <p>Un <i>trade-off</i> ocurre cuando favorecer una característica afecta a otra. Es la aplicación directa de la primera ley.</p>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo</span>
+      Aumentar los controles de seguridad puede añadir pasos adicionales para el usuario y afectar la usabilidad y el rendimiento.
+    </div>
+    <p>Por eso no existe una arquitectura perfecta en términos absolutos: existe una arquitectura <b>adecuada para un contexto determinado</b>. Cada dominio prioriza atributos distintos.</p>
+    <div class="grid">
+      <div class="card"><h4>Banca</h4><p>Seguridad, disponibilidad, fiabilidad y auditabilidad.</p></div>
+      <div class="card"><h4>Videojuego en línea</h4><p>Rendimiento, escalabilidad y disponibilidad.</p></div>
+      <div class="card"><h4>Sistema médico</h4><p>Seguridad, disponibilidad, integridad, fiabilidad y auditabilidad.</p></div>
+      <div class="card"><h4>Herramienta interna pequeña</h4><p>Simplicidad, mantenibilidad y costo suelen pesar más.</p></div>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 11 ============ -->
+<details class="sec">
+  <summary><span class="num">11</span> ISO/IEC 25000 y requisitos medibles <span class="chev">›</span></summary>
+  <div class="body">
+    <p>La familia <b>ISO/IEC 25000</b> se relaciona con la calidad de los productos de software y los sistemas. El módulo la presenta como marco de referencia para <b>definir, especificar, medir y evaluar</b> los atributos de calidad.</p>
+    <div class="box ejemplo">
+      <span class="rot">De enunciado vago a requisito medible</span>
+      En lugar de «el sistema debe ser rápido», se especifica: «el 95 % de las solicitudes debe responder en menos de 2 segundos con una carga de 500 usuarios concurrentes».
+    </div>
+    <div class="box clave">
+      <span class="rot">Idea para el estudio</span>
+      Un atributo de calidad que no se puede medir no se puede verificar, y por lo tanto no se puede exigir ni negociar.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 12 ============ -->
+<details class="sec">
+  <summary><span class="num">12</span> Casos prácticos <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> Cada caso describe una situación real de un dominio concreto. Lee el contexto, identifica cuál es el atributo de calidad —o la decisión o restricción— que está en juego y escríbelo antes de pulsar <b>Ver respuesta</b>. Si dudas entre dos atributos, apunta ambos: en varios casos hay un atributo principal y otros relacionados, y reconocerlos también forma parte del ejercicio.
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 1 · Comercio electrónico</div>
+      <p class="ctx">Una tienda en línea opera normalmente con 1.000 usuarios simultáneos. Durante el Black Friday la campaña de marketing lleva el tráfico a 100.000 usuarios en pocos minutos y el sitio deja de responder.</p>
+      <p class="preg">¿Qué atributo de calidad falló?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Escalabilidad.</b> El sistema no absorbe el crecimiento de carga. También se ven comprometidas la <b>disponibilidad</b> (el sitio queda inaccesible) y el <b>rendimiento</b> (los tiempos se degradan antes de caer).</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 2 · Banca en línea</div>
+      <p class="ctx">Durante una revisión se detecta que, modificando un identificador en la URL, un cliente puede consultar el saldo y los movimientos de la cuenta de otro cliente.</p>
+      <p class="preg">¿Qué atributo está comprometido?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Seguridad</b>, concretamente el control de autorización. La autenticación funciona —el usuario es quien dice ser— pero no se verifica que tenga permiso sobre el recurso solicitado.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 3 · Portal de trámites</div>
+      <p class="ctx">El portal está operativo y ningún componente está caído, pero cada pantalla tarda entre 12 y 15 segundos en cargar. Los usuarios abandonan el trámite a la mitad.</p>
+      <p class="preg">¿Disponibilidad o rendimiento?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Rendimiento.</b> El sistema está disponible: responde. El problema es el tiempo de respuesta. Es el ejemplo clásico para distinguir ambos atributos.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 4 · Sistema de facturación</div>
+      <p class="ctx">El área comercial pide cambiar el porcentaje de un impuesto. El equipo estima tres semanas porque la regla está replicada en 25 componentes distintos y cada uno debe probarse por separado.</p>
+      <p class="preg">¿Qué atributos están fallando?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Modificabilidad</b> y <b>mantenibilidad.</b> Un cambio conceptualmente pequeño tiene un impacto desproporcionado. La duplicación de la regla revela una decisión estructural inadecuada.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 5 · Plataforma de streaming</div>
+      <p class="ctx">Uno de los servidores del clúster se apaga por un fallo de hardware. Los usuarios conectados no notan nada: otro nodo continúa atendiendo las peticiones.</p>
+      <p class="preg">¿Qué atributos se están cumpliendo?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Tolerancia a fallos</b> —el sistema sigue operando pese al fallo— y, como consecuencia, se preserva la <b>disponibilidad</b>.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 6 · Sector salud</div>
+      <p class="ctx">Un hospital necesita que su historia clínica electrónica reciba automáticamente los resultados de un laboratorio externo que utiliza otro proveedor de software y otro formato de mensajes.</p>
+      <p class="preg">¿Qué atributo se requiere?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Interoperabilidad.</b> Dos sistemas independientes deben intercambiar información y entenderse, normalmente mediante un estándar de mensajería acordado.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 7 · Sistema de nómina</div>
+      <p class="ctx">Se detecta que un registro de pago fue eliminado. Auditoría interna necesita saber qué usuario lo hizo, desde qué equipo y en qué momento exacto.</p>
+      <p class="preg">¿Qué atributo permite responder esa pregunta?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Auditabilidad.</b> Requiere registros de eventos íntegros, con identidad, acción y marca de tiempo, y que no puedan alterarse. Distinto de la <b>observabilidad</b>, que atiende necesidades técnicas de diagnóstico.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 8 · Aplicación logística</div>
+      <p class="ctx">El área de operaciones reporta intermitencias. El equipo técnico no logra reproducir el problema: no hay registros útiles, no se miden los tiempos de las llamadas entre servicios y no se puede seguir una petición de extremo a extremo.</p>
+      <p class="preg">¿Qué atributo falta en el diseño?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Observabilidad.</b> Sin registros, métricas y trazas no es posible conocer el estado interno del sistema desde fuera, y el diagnóstico se vuelve adivinanza.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 9 · Migración a la nube</div>
+      <p class="ctx">La organización quiere mover una aplicación a otro proveedor cloud, pero el sistema usa intensivamente servicios propietarios de la plataforma actual. La migración exigiría reescribir buena parte del código.</p>
+      <p class="preg">¿Qué atributo está comprometido?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Portabilidad.</b> El acoplamiento a servicios propietarios reduce la capacidad de trasladar el sistema a otro entorno. Es un <i>trade-off</i> consciente: esos servicios suelen aportar velocidad de desarrollo a cambio de dependencia del proveedor.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 10 · Entidad financiera regulada</div>
+      <p class="ctx">El equipo propone alojar la base de datos en una región de otro país porque resulta más económica. El área legal informa que la normativa obliga a almacenar los datos de clientes dentro del territorio nacional.</p>
+      <p class="preg">¿Se trata de una decisión o de una restricción? ¿De qué tipo?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Restricción de negocio</b> de origen regulatorio. No se elige ni se negocia con el equipo técnico: es un límite que reduce las alternativas. La <b>decisión</b> arquitectónica es lo que se elige <i>dentro</i> de ese límite, por ejemplo qué región nacional usar y cómo lograr redundancia sin salir del país.</div>
+    </div>
+
+    <div class="barra">
+      <button onclick="todasResp(true)">Ver todas las respuestas</button>
+      <button class="ghost" onclick="todasResp(false)">Ocultar todas</button>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 13 ============ -->
+<details class="sec">
+  <summary><span class="num">13</span> Empareja atributo y significado <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> A la izquierda tienes diez atributos identificados con una letra. En la tabla, los significados aparecen <b>en orden distinto</b>. Escoge en cada fila la letra del atributo que le corresponde y pulsa <b>Calificar emparejamiento</b>. Resuelve primero de memoria; solo después vuelve a las secciones 6, 7 y 8 para verificar.
+    </div>
+
+    <div class="leyenda">
+      <b>Atributos</b>
+      <ul>
+        <li><b>A.</b> Disponibilidad</li>
+        <li><b>B.</b> Escalabilidad</li>
+        <li><b>C.</b> Rendimiento</li>
+        <li><b>D.</b> Seguridad</li>
+        <li><b>E.</b> Mantenibilidad</li>
+        <li><b>F.</b> Usabilidad</li>
+        <li><b>G.</b> Interoperabilidad</li>
+        <li><b>H.</b> Portabilidad</li>
+        <li><b>I.</b> Testabilidad</li>
+        <li><b>J.</b> Observabilidad</li>
+      </ul>
+    </div>
+
+    <table class="match" id="tablaMatch">
+      <thead><tr><th>Letra</th><th>Significado</th><th style="width:96px">Resultado</th></tr></thead>
+      <tbody>
+        <tr data-ok="J"><td><select aria-label="Letra para el significado 1"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Puedo saber qué está ocurriendo internamente mientras el sistema opera?</td><td></td></tr>
+        <tr data-ok="C"><td><select aria-label="Letra para el significado 2"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Con qué rapidez y eficiencia responde ante una carga determinada?</td><td></td></tr>
+        <tr data-ok="F"><td><select aria-label="Letra para el significado 3"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Qué tan fácil resulta aprender y utilizar el sistema?</td><td></td></tr>
+        <tr data-ok="A"><td><select aria-label="Letra para el significado 4"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Está operativo y accesible cuando se necesita?</td><td></td></tr>
+        <tr data-ok="I"><td><select aria-label="Letra para el significado 5"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Qué tan fácil es comprobar mediante pruebas que funciona?</td><td></td></tr>
+        <tr data-ok="H"><td><select aria-label="Letra para el significado 6"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Puede trasladarse a otro entorno o plataforma?</td><td></td></tr>
+        <tr data-ok="D"><td><select aria-label="Letra para el significado 7"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Está protegido frente a accesos o acciones no autorizadas?</td><td></td></tr>
+        <tr data-ok="B"><td><select aria-label="Letra para el significado 8"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Puede soportar un aumento de carga sin degradarse de forma inaceptable?</td><td></td></tr>
+        <tr data-ok="G"><td><select aria-label="Letra para el significado 9"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Puede intercambiar información y operar con otros sistemas?</td><td></td></tr>
+        <tr data-ok="E"><td><select aria-label="Letra para el significado 10"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>¿Qué tan fácil es comprender, corregir, actualizar y evolucionar el sistema?</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="barra">
+      <button onclick="calificarMatch()">Calificar emparejamiento</button>
+      <button class="ghost" onclick="reiniciarMatch()">Reiniciar</button>
+      <span class="score" id="scoreMatch"></span>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 14 ============ -->
+<details class="sec">
+  <summary><span class="num">14</span> Quiz final: 20 preguntas <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> Selecciona una opción por pregunta y pulsa <b>Calificar quiz</b>. El cuestionario cubre los cuatro ejes del módulo: concepto y alcance de la arquitectura, leyes y <i>trade-offs</i>, decisiones y restricciones, y atributos de calidad. Al calificar verás la retroalimentación de cada pregunta.
+    </div>
+
+    <form id="quiz">
+
+      <p class="bloque">Fundamentos y alcance</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">1.</span> ¿Qué describe mejor la arquitectura de software?</p>
+        <label><input type="radio" name="q1" value="a"> El conjunto de colores y estilos de la interfaz.</label>
+        <label><input type="radio" name="q1" value="b"> La estructura del sistema, sus elementos, las relaciones entre ellos y las decisiones relevantes.</label>
+        <label><input type="radio" name="q1" value="c"> Únicamente el código de los módulos principales.</label>
+        <label><input type="radio" name="q1" value="d"> La documentación de usuario del producto.</label>
+        <div class="fb">La arquitectura es estructura, relaciones, decisiones y evolución. La interfaz, el código y la documentación son consecuencias o complementos, no la definición.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">2.</span> Según la idea central del módulo, la arquitectura de software es...</p>
+        <label><input type="radio" name="q2" value="a"> Una estructura estática que se define al inicio y no cambia.</label>
+        <label><input type="radio" name="q2" value="b"> Un diagrama que se elabora al final del proyecto.</label>
+        <label><input type="radio" name="q2" value="c"> Un conjunto dinámico de elementos interrelacionados que define cómo opera y evoluciona el sistema.</label>
+        <label><input type="radio" name="q2" value="d"> Un requisito funcional más dentro del backlog.</label>
+        <div class="fb">El material insiste en que no es estática: evoluciona con el sistema y debe revisarse de forma continua.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">3.</span> ¿Cuál de estas actividades pertenece a la implementación y no a la arquitectura?</p>
+        <label><input type="radio" name="q3" value="a"> Definir si los servicios se comunican de forma síncrona o asíncrona.</label>
+        <label><input type="radio" name="q3" value="b"> Elegir el tipo de almacenamiento de datos.</label>
+        <label><input type="radio" name="q3" value="c"> Establecer la estrategia de autenticación del sistema.</label>
+        <label><input type="radio" name="q3" value="d"> Escoger el nombre de una variable dentro de un método.</label>
+        <div class="fb">La arquitectura recoge las decisiones estructurales y costosas de revertir. El nombre de una variable es una elección local de implementación.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">4.</span> La primera ley de la arquitectura de software afirma que...</p>
+        <label><input type="radio" name="q4" value="a"> Siempre existe una arquitectura óptima, independiente del contexto.</label>
+        <label><input type="radio" name="q4" value="b"> Los microservicios son superiores al monolito en cualquier escenario.</label>
+        <label><input type="radio" name="q4" value="c"> Todo en arquitectura de software es un <i>trade-off</i>.</label>
+        <label><input type="radio" name="q4" value="d"> La arquitectura debe congelarse antes de empezar a programar.</label>
+        <div class="fb">Y su corolario: si crees que algo no tiene contrapartida, es que todavía no la has identificado.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">5.</span> ¿Qué significa que «el <i>por qué</i> es más importante que el <i>cómo</i>»?</p>
+        <label><input type="radio" name="q5" value="a"> Que no hace falta documentar la implementación técnica.</label>
+        <label><input type="radio" name="q5" value="b"> Que registrar la justificación de cada decisión permite revisarla o revertirla con criterio en el futuro.</label>
+        <label><input type="radio" name="q5" value="c"> Que las decisiones técnicas las debe tomar exclusivamente el negocio.</label>
+        <label><input type="radio" name="q5" value="d"> Que basta con explicar la arquitectura de forma verbal en las reuniones.</label>
+        <div class="fb">Una decisión sin justificación registrada no puede evaluarse después: nadie sabe qué restricción la motivó ni si esa restricción sigue vigente.</div>
+      </div>
+
+      <p class="bloque">Decisiones y restricciones</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">6.</span> Una decisión arquitectónica es principalmente...</p>
+        <label><input type="radio" name="q6" value="a"> Una tarea administrativa sin impacto técnico.</label>
+        <label><input type="radio" name="q6" value="b"> Una elección que influye de forma relevante en la estructura, el comportamiento o las cualidades del sistema.</label>
+        <label><input type="radio" name="q6" value="c"> Un comentario explicativo dentro del código fuente.</label>
+        <label><input type="radio" name="q6" value="d"> Una preferencia estética del equipo de desarrollo.</label>
+        <div class="fb">Decisión = elección con impacto estructural y costo de reversión alto.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">7.</span> ¿Cuál de las siguientes es una <b>restricción</b> y no una decisión?</p>
+        <label><input type="radio" name="q7" value="a"> Optar por una base de datos documental en lugar de una relacional.</label>
+        <label><input type="radio" name="q7" value="b"> Introducir una caché para reducir el tiempo de respuesta.</label>
+        <label><input type="radio" name="q7" value="c"> La normativa del sector obliga a almacenar los datos de clientes dentro del país.</label>
+        <label><input type="radio" name="q7" value="d"> Dividir el sistema en tres servicios independientes.</label>
+        <div class="fb">La restricción se recibe, no se elige. Las otras tres opciones son elecciones del equipo dentro del margen disponible.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">8.</span> «Debemos integrarnos con un sistema heredado que solo expone archivos planos». ¿Qué tipo de restricción es?</p>
+        <label><input type="radio" name="q8" value="a"> De tecnología.</label>
+        <label><input type="radio" name="q8" value="b"> De negocio.</label>
+        <label><input type="radio" name="q8" value="c"> De recursos.</label>
+        <label><input type="radio" name="q8" value="d"> No es una restricción, es un atributo de calidad.</label>
+        <div class="fb">Las restricciones tecnológicas provienen de plataformas existentes, compatibilidad y sistemas heredados.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">9.</span> «El equipo dispone de tres personas y dos meses para entregar». ¿Qué tipo de restricción es?</p>
+        <label><input type="radio" name="q9" value="a"> De tecnología.</label>
+        <label><input type="radio" name="q9" value="b"> No aplica: el tiempo no condiciona la arquitectura.</label>
+        <label><input type="radio" name="q9" value="c"> Es una decisión arquitectónica.</label>
+        <label><input type="radio" name="q9" value="d"> De recursos, con un componente de negocio por el plazo.</label>
+        <div class="fb">Personal, tiempo, conocimiento e infraestructura son restricciones de recursos y condicionan directamente qué arquitectura es viable.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">10.</span> ¿Por qué las decisiones arquitectónicas suelen implicar <i>trade-offs</i>?</p>
+        <label><input type="radio" name="q10" value="a"> Porque mejorar una cualidad puede afectar a otra o aumentar el costo y la complejidad.</label>
+        <label><input type="radio" name="q10" value="b"> Porque todas las cualidades mejoran siempre de forma conjunta.</label>
+        <label><input type="radio" name="q10" value="c"> Porque las decisiones técnicas no tienen consecuencias medibles.</label>
+        <label><input type="radio" name="q10" value="d"> Porque los atributos de calidad solo existen en el plano teórico.</label>
+        <div class="fb">Reforzar la seguridad puede afectar la usabilidad; distribuir el sistema mejora la escalabilidad y complica la consistencia.</div>
+      </div>
+
+      <p class="bloque">Atributos de calidad</p>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">11.</span> «El sistema permite transferir dinero» frente a «lo hace de forma segura y en menos de dos segundos». ¿Qué distingue a la segunda frase?</p>
+        <label><input type="radio" name="q11" value="a"> Describe una restricción de negocio.</label>
+        <label><input type="radio" name="q11" value="b"> Describe un caso de uso adicional.</label>
+        <label><input type="radio" name="q11" value="c"> Describe atributos de calidad: el <i>cómo</i>, no el <i>qué</i>.</label>
+        <label><input type="radio" name="q11" value="d"> Describe un principio de diseño del equipo.</label>
+        <div class="fb">La funcionalidad responde a qué hace el sistema; la calidad, a cómo lo hace.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">12.</span> Si el sistema debe seguir atendiendo usuarios cuando un nodo falla, el atributo más relacionado es...</p>
+        <label><input type="radio" name="q12" value="a"> Tolerancia a fallos.</label>
+        <label><input type="radio" name="q12" value="b"> Usabilidad.</label>
+        <label><input type="radio" name="q12" value="c"> Portabilidad.</label>
+        <label><input type="radio" name="q12" value="d"> Auditabilidad.</label>
+        <div class="fb">La tolerancia a fallos permite seguir operando durante el fallo; su efecto visible es preservar la disponibilidad.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">13.</span> Agregar instancias para atender más demanda corresponde a...</p>
+        <label><input type="radio" name="q13" value="a"> Escalabilidad vertical.</label>
+        <label><input type="radio" name="q13" value="b"> Escalabilidad horizontal.</label>
+        <label><input type="radio" name="q13" value="c"> Recuperabilidad.</label>
+        <label><input type="radio" name="q13" value="d"> Compatibilidad.</label>
+        <div class="fb">Horizontal: más instancias. Vertical: más capacidad en la misma máquina.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">14.</span> Tiempos de respuesta bajos ante una carga determinada se relacionan principalmente con...</p>
+        <label><input type="radio" name="q14" value="a"> Rendimiento.</label>
+        <label><input type="radio" name="q14" value="b"> Interoperabilidad.</label>
+        <label><input type="radio" name="q14" value="c"> Portabilidad.</label>
+        <label><input type="radio" name="q14" value="d"> Auditabilidad.</label>
+        <div class="fb">El rendimiento se evalúa siempre respecto de una carga concreta; si lo que cambia es la carga, hablamos de escalabilidad.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">15.</span> Modificar una parte del sistema con poco impacto en las demás corresponde a...</p>
+        <label><input type="radio" name="q15" value="a"> Disponibilidad.</label>
+        <label><input type="radio" name="q15" value="b"> Rendimiento.</label>
+        <label><input type="radio" name="q15" value="c"> Seguridad.</label>
+        <label><input type="radio" name="q15" value="d"> Modificabilidad.</label>
+        <div class="fb">Forma parte de la mantenibilidad, que es más amplia: comprender, corregir, modificar, probar y actualizar.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">16.</span> La protección frente a accesos o acciones no autorizadas corresponde a...</p>
+        <label><input type="radio" name="q16" value="a"> Fiabilidad.</label>
+        <label><input type="radio" name="q16" value="b"> Seguridad.</label>
+        <label><input type="radio" name="q16" value="c"> Eficiencia.</label>
+        <label><input type="radio" name="q16" value="d"> Compatibilidad.</label>
+        <div class="fb">Incluye autenticación, autorización, cifrado, confidencialidad e integridad.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">17.</span> Registrar qué usuario realizó una operación, desde dónde y cuándo corresponde a...</p>
+        <label><input type="radio" name="q17" value="a"> Escalabilidad.</label>
+        <label><input type="radio" name="q17" value="b"> Usabilidad.</label>
+        <label><input type="radio" name="q17" value="c"> Auditabilidad.</label>
+        <label><input type="radio" name="q17" value="d"> Portabilidad.</label>
+        <div class="fb">La auditabilidad responde a una necesidad de control; la observabilidad, a una necesidad técnica de diagnóstico.</div>
+      </div>
+
+      <p class="bloque">Distinciones, medición y criterio</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">18.</span> ¿Cuál diferencia mejor disponibilidad y rendimiento?</p>
+        <label><input type="radio" name="q18" value="a"> Son exactamente lo mismo expresado con dos nombres.</label>
+        <label><input type="radio" name="q18" value="b"> La disponibilidad indica si el sistema está operativo y accesible; el rendimiento, con qué rapidez responde.</label>
+        <label><input type="radio" name="q18" value="c"> El rendimiento solo se refiere a aspectos de seguridad.</label>
+        <label><input type="radio" name="q18" value="d"> La disponibilidad solo aplica a las interfaces gráficas.</label>
+        <div class="fb">Un sistema que tarda 30 segundos en responder está disponible, pero tiene mal rendimiento.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">19.</span> ¿Cuál de estos enunciados es un requisito de calidad correctamente especificado?</p>
+        <label><input type="radio" name="q19" value="a"> El sistema debe ser rápido.</label>
+        <label><input type="radio" name="q19" value="b"> El sistema debe ser seguro y confiable.</label>
+        <label><input type="radio" name="q19" value="c"> El sistema debe tener buena experiencia de usuario.</label>
+        <label><input type="radio" name="q19" value="d"> El 95 % de las solicitudes debe responder en menos de 2 segundos con 500 usuarios concurrentes.</label>
+        <div class="fb">ISO/IEC 25000 aporta el marco para definir, especificar, medir y evaluar. Un atributo que no se puede medir no se puede verificar ni exigir.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">20.</span> ¿Qué debe buscar una buena arquitectura?</p>
+        <label><input type="radio" name="q20" value="a"> Optimizar un único atributo al máximo, ignorando el contexto.</label>
+        <label><input type="radio" name="q20" value="b"> Equilibrar requisitos, restricciones, atributos de calidad, costo, riesgo y evolución para un contexto concreto.</label>
+        <label><input type="radio" name="q20" value="c"> Evitar toda documentación para no frenar al equipo.</label>
+        <label><input type="radio" name="q20" value="d"> Adoptar siempre la tecnología más reciente disponible.</label>
+        <div class="fb">No existe una arquitectura perfecta en términos absolutos: existe una arquitectura adecuada para un contexto determinado.</div>
+      </div>
+
+    </form>
+
+    <div class="barra">
+      <button onclick="calificarQuiz()">Calificar quiz</button>
+      <button class="ghost" onclick="reiniciarQuiz()">Reiniciar</button>
+      <span class="score" id="scoreQuiz"></span>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 15 ============ -->
+<details class="sec">
+  <summary><span class="num">15</span> Resumen de cinco minutos <span class="chev">›</span></summary>
+  <div class="body">
+    <ul class="resumen">
+      <li><b>Arquitectura</b> = estructura + relaciones + decisiones + evolución.</li>
+      <li><b>Primera ley:</b> todo es un <i>trade-off</i>. <b>Segunda ley:</b> el porqué importa más que el cómo.</li>
+      <li><b>Decisión</b> = elección con impacto estructural. <b>Restricción</b> = límite que reduce las alternativas.</li>
+      <li><b>Funcionalidad</b> = qué hace el sistema. <b>Calidad</b> = cómo lo hace.</li>
+      <li><b>Disponibilidad:</b> ¿está operativo? · <b>Escalabilidad:</b> ¿puede crecer? · <b>Rendimiento:</b> ¿qué tan rápido responde?</li>
+      <li><b>Seguridad:</b> ¿está protegido? · <b>Mantenibilidad:</b> ¿es fácil evolucionarlo? · <b>Usabilidad:</b> ¿es fácil usarlo?</li>
+      <li><b>ISO/IEC 25000:</b> los atributos se definen, se especifican, se miden y se evalúan.</li>
+    </ul>
+    <div class="cadena">
+      Negocio → necesidades → restricciones → decisiones → estructura → atributos de calidad → evolución
+    </div>
+  </div>
+</details>
+
+<footer>
+  Diplomado Arquitectura de Software y Cloud Computing · Cuadernillo de estudio, Módulo I.
+  Material de apoyo para el estudio; la fuente oficial son los recursos del aula.
+</footer>
+
+</div>
+
+<script>
+  var LETRAS = ["A","B","C","D","E","F","G","H","I","J"];
+
+  function abrirTodo(abrir){
+    document.querySelectorAll("details.sec").forEach(function(d){ d.open = abrir; });
+  }
+
+  /* ---- Casos prácticos ---- */
+  function verResp(btn){
+    var r = btn.parentNode.querySelector(".resp");
+    var visible = r.classList.toggle("show");
+    btn.textContent = visible ? "Ocultar respuesta" : "Ver respuesta";
+  }
+  function todasResp(mostrar){
+    document.querySelectorAll(".caso").forEach(function(c){
+      var r = c.querySelector(".resp");
+      var b = c.querySelector("button");
+      if(!r || !b) return;
+      r.classList.toggle("show", mostrar);
+      b.textContent = mostrar ? "Ocultar respuesta" : "Ver respuesta";
+    });
+  }
+
+  /* ---- Emparejamiento ---- */
+
+  function calificarMatch(){
+    var filas = document.querySelectorAll("#tablaMatch tbody tr");
+    var aciertos = 0, sinResponder = 0;
+    filas.forEach(function(tr){
+      var sel = tr.querySelector("select");
+      var celda = tr.cells[2];
+      tr.classList.remove("ok","bad");
+      if(!sel.value){ sinResponder++; celda.innerHTML = '<span class="mark">Sin responder</span>'; return; }
+      if(sel.value === tr.dataset.ok){
+        aciertos++;
+        tr.classList.add("ok");
+        celda.innerHTML = '<span class="mark ok">Correcto</span>';
+      }else{
+        tr.classList.add("bad");
+        celda.innerHTML = '<span class="mark bad">Es ' + tr.dataset.ok + '</span>';
+      }
+    });
+    var pct = Math.round(aciertos / filas.length * 100);
+    var msg = "Resultado: " + aciertos + " de " + filas.length + ' <span class="pct">(' + pct + '%)</span>';
+    if(sinResponder) msg += ' <span class="small">· ' + sinResponder + " sin responder</span>";
+    document.getElementById("scoreMatch").innerHTML = msg;
+  }
+
+  function reiniciarMatch(){
+    document.querySelectorAll("#tablaMatch tbody tr").forEach(function(tr){
+      tr.classList.remove("ok","bad");
+      tr.querySelector("select").value = "";
+      tr.cells[2].innerHTML = "";
+    });
+    document.getElementById("scoreMatch").innerHTML = "";
+  }
+
+  /* ---- Quiz ---- */
+  function calificarQuiz(){
+    var preguntas = document.querySelectorAll("#quiz .q");
+    var aciertos = 0, sinResponder = 0;
+    preguntas.forEach(function(q, i){
+      var elegido = q.querySelector('input[type=radio]:checked');
+      q.classList.remove("ok","bad");
+      var fb = q.querySelector(".fb");
+      fb.classList.add("show");
+      if(!elegido){
+        sinResponder++;
+        q.classList.add("bad");
+        fb.innerHTML = "<b>Sin responder.</b> Respuesta correcta: opción " +
+          q.dataset.ok.toUpperCase() + ". " + fb.dataset.txt;
+        return;
+      }
+      if(elegido.value === q.dataset.ok){
+        aciertos++;
+        q.classList.add("ok");
+        fb.innerHTML = "<b>Correcto.</b> " + fb.dataset.txt;
+      }else{
+        q.classList.add("bad");
+        fb.innerHTML = "<b>Incorrecto.</b> La respuesta es la opción " +
+          q.dataset.ok.toUpperCase() + ". " + fb.dataset.txt;
+      }
+    });
+    var pct = Math.round(aciertos / preguntas.length * 100);
+    var msg = "Resultado: " + aciertos + " de " + preguntas.length + ' <span class="pct">(' + pct + '%)</span>';
+    if(sinResponder) msg += ' <span class="small">· ' + sinResponder + " sin responder</span>";
+    document.getElementById("scoreQuiz").innerHTML = msg;
+    preguntas[0].scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+  function reiniciarQuiz(){
+    document.querySelectorAll("#quiz .q").forEach(function(q){
+      q.classList.remove("ok","bad");
+      var fb = q.querySelector(".fb");
+      fb.classList.remove("show");
+      fb.innerHTML = fb.dataset.txt;
+    });
+    document.getElementById("quiz").reset();
+    document.getElementById("scoreQuiz").innerHTML = "";
+  }
+
+  /* Guarda el texto original de cada retroalimentación */
+  document.querySelectorAll("#quiz .fb").forEach(function(fb){
+    fb.dataset.txt = fb.innerHTML.trim();
+  });
+</script>
+
+</body>
+</html>
