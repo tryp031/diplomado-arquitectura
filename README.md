@@ -22,6 +22,7 @@ conocimiento acumulado, no empezar de cero.
 | **Buscas fechas y entregas** | `_Base-Conocimiento/CRONOGRAMA.md` |
 | **Quieres estudiar un módulo** | `Modulo N/Consolidado/mN-consolidado.html` — ábrelo en el navegador |
 | **Vas a trabajar el reto del M1** | `Modulo 1/Aportes/danny/m1-clasificador-hosts-danny.html` (ábrelo en el navegador) |
+| **Vas a usar IA sobre el proyecto** | La sección *Trabajar con IA* de este README — hay skills que debes invocar |
 | **Eres un agente de IA** | `CLAUDE.md` y `PROMPT-MAESTRO.md` — el contrato de trabajo |
 
 ---
@@ -46,7 +47,9 @@ conocimiento acumulado, no empezar de cero.
 │   └── Aprendizajes/          ← lo reutilizable que sale de cada módulo cerrado
 │
 ├── _Plantillas/               ← plantillas para aportes, ADR, consolidados, entregables
-├── .claude/skills/            ← skills compartidas (los tres usamos IA)
+├── .claude/skills/            ← skills compartidas. Se invocan con /nombre
+│   ├── reto-latencia/         ← invariantes del reto M1: qué rompe el experimento
+│   └── consolidar-conocimiento/  ← fusión de aportes en la nota del módulo
 │
 └── Modulo N/
     ├── README.md              ← estado del módulo: qué hay, quién lo hizo, qué falta
@@ -98,6 +101,51 @@ Aprendizajes reutilizables → _Base-Conocimiento/Aprendizajes/
 
 Al cerrar un módulo: lo que sirva para los siguientes **sube** a `_Base-Conocimiento/`.
 Ese es el punto del repositorio — que el Módulo 4 arranque con lo aprendido en el 1.
+
+---
+
+## Trabajar con IA — las skills del equipo
+
+Los tres usamos IA sobre esta misma base. Para que no cada uno improvise su propio criterio,
+hay **skills compartidas** en `.claude/skills/`: instrucciones versionadas que el asistente
+carga antes de trabajar, de modo que los tres obtengamos el mismo comportamiento.
+
+Se invocan **por nombre, con barra**, al inicio del mensaje:
+
+| Skill | Invócala cuando… | Qué aporta |
+|---|---|---|
+| `/reto-latencia` | vayas a ejecutar, medir, implementar una variante o tocar **cualquier archivo** bajo `Reto-Latencia-Minima/` | Los invariantes del experimento: qué no se puede cambiar sin invalidar una conclusión del informe, y en qué ADR está registrada cada decisión |
+| `/consolidar-conocimiento` | haya que fusionar los aportes de varios en una nota consolidada del módulo | El procedimiento de fusión: conserva las fuentes, registra las contradicciones y genera el `.html` que se lee |
+
+### Por qué esto no es decoración
+
+`/reto-latencia` existe por un motivo concreto, y conviene entenderlo antes de tocar el reto:
+
+> Un cambio puede dejar el sistema **funcionando perfectamente** y a la vez **destruir la validez
+> de las conclusiones del informe**. Sin error, sin caída, sin que nadie se entere hasta la
+> sustentación.
+
+Ejemplos reales que la skill documenta: subir el límite de 16 hosts saca la tabla de la caché L1
+y tumba la afirmación «clasificar no contamina la medición»; convertir las IPs en literales del
+código hace que el compilador **elimine el clasificador del binario** y la medición de control dé
+cero. Ninguno de los dos rompe nada visible.
+
+El `README.md` del reto explica **cómo se arranca**. La skill explica **qué se rompe en silencio**.
+Son complementarios, no redundantes.
+
+### Reglas que aplican a los tres
+
+- **La IA no inventa material del diplomado.** Si algo no está en el material, la respuesta
+  correcta es «no está en el material».
+- Todo documento generado con IA es `investigacion`, **nunca** `material-oficial` — aunque lo
+  parezca. Verifica la ficha en el `FUENTES.md` del autor (`Aportes/<autor>/FUENTES.md`).
+- Diferenciar siempre: **(a)** contenido del diplomado · **(b)** conocimiento complementario ·
+  **(c)** recomendación propia.
+- El contrato completo está en `CLAUDE.md` (resumen ejecutable) y `PROMPT-MAESTRO.md` (fuente de
+  verdad). El asistente los lee al inicio de cada sesión.
+
+Al cerrar cualquier trabajo sobre el reto: `python3 verificar.py`. No comprueba que el código
+funcione — comprueba que el experimento **siga midiendo lo que dice medir**.
 
 ---
 
