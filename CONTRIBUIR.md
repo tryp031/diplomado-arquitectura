@@ -45,7 +45,78 @@ regeneración y tu cambio se pierde.
 
 ---
 
-## 2. Nombres de archivo
+## 2. El flujo de trabajo en git
+
+**Regla del equipo: nadie commitea directo a `main`.** Todo cambio entra por una rama y se
+mezcla con un Pull Request.
+
+> ⚠️ Hoy esto **no está impuesto técnicamente**: GitHub solo permite proteger ramas en repos
+> privados con cuenta de pago. O sea que `main` acepta un push directo si alguien lo hace.
+> Es una regla que sostenemos entre los tres, no un candado. Respétala igual.
+
+### Por qué
+
+Somos tres personas y los tres usamos IA sobre los mismos archivos. Sin ramas, dos sesiones de
+IA trabajando a la vez sobre `Consolidado/` o `INFORME.md` se pisan sin que nadie se entere.
+Además, el PR **es** la trazabilidad de autoría que exige `CLAUDE.md`: queda registrado quién
+aportó qué, cuándo y sobre qué base.
+
+### Cómo
+
+```bash
+git checkout main
+git pull                              # 1. parte de lo último. Siempre.
+git checkout -b aporte/danny-m1-latencia   # 2. rama nueva
+# ... trabajás ...
+git add -A && git commit -m "Describe el aporte, no los archivos"
+git push -u origin aporte/danny-m1-latencia   # 3. subís la rama
+```
+
+Después, en GitHub: **Compare & pull request**. La plantilla del PR trae la lista de
+verificación; recórrela antes de pedir revisión.
+
+### Nombres de rama
+
+| Prefijo | Para | Ejemplo |
+|---|---|---|
+| `aporte/` | trabajo individual de `Aportes/<autor>/` | `aporte/camilo-m1-patrones` |
+| `consolidado/` | fusión de aportes de un módulo | `consolidado/m1` |
+| `reto/` | código, harness o medición del reto | `reto/variante-a-http` |
+| `docs/` | README, ADR, contrato, plantillas | `docs/adr-006-concurrencia` |
+| `fix/` | corrección puntual | `fix/tabla-hosts-tor` |
+
+Siempre `<prefijo>/<autor>-<tema>`, en minúsculas y con guiones. El autor en la rama importa:
+es la primera señal de quién trabaja en qué, antes de abrir el PR.
+
+### Qué mira quien revisa
+
+No es un control de calidad del contenido —cada uno es dueño de su aporte—. Se revisan
+**cuatro cosas concretas**:
+
+1. ¿Está en la carpeta correcta según el flujo? (`Aportes/` vs `Consolidado/` vs `Entregables/`)
+2. ¿Tiene ficha de autoría?
+3. ¿Toca `Material-Clase/` o el aporte firmado de otro? → **eso se rechaza siempre**
+4. Si contradice algo existente, ¿lo declara en vez de borrarlo?
+
+### Conflictos
+
+Si git marca conflicto, no lo resuelvas borrando lo del otro. Las contradicciones **se
+registran**, no se eliminan. Orden de autoridad para decidir cuál se adopta:
+
+```text
+material oficial  >  dato medido propio  >  fuente externa citada  >  afirmación sin fuente
+```
+
+Y dejá escrito en el consolidado cuál se adoptó y por qué.
+
+### Lo único que puede ir directo a main
+
+Un `README` mal escrito, un typo, un enlace roto. Nada que cambie contenido, datos o
+decisiones. Ante la duda: rama.
+
+---
+
+## 3. Nombres de archivo
 
 ```text
 m<módulo>-<tema>-<autor>.<ext>
@@ -62,7 +133,7 @@ Sin mayúsculas, sin espacios, sin tildes en el nombre del archivo. Guiones, no 
 
 ---
 
-## 3. Ficha de autoría — obligatoria
+## 4. Ficha de autoría — obligatoria
 
 Todo aporte lleva ficha. En un `.md` va como cabecera; en un `.html` o un PDF va en el
 `FUENTES.md` de tu carpeta.
@@ -84,14 +155,14 @@ verificar. Un documento generado con IA es `investigacion`, nunca `material-ofic
 
 ---
 
-## 4. Fuentes externas
+## 5. Fuentes externas
 
 Toda fuente externa lleva: **autor o entidad · URL · fecha de consulta · qué parte del análisis la
 usa**. Una URL suelta no es una fuente, es un marcador.
 
 ---
 
-## 5. Lo que NO se hace
+## 6. Lo que NO se hace
 
 | ❌ | Por qué |
 |---|---|
@@ -105,7 +176,7 @@ usa**. Una URL suelta no es una fuente, es un marcador.
 
 ---
 
-## 6. Al cerrar un reto o un módulo
+## 7. Al cerrar un reto o un módulo
 
 Preguntarse: **¿qué de esto sirve para el módulo siguiente?**
 Lo que sirva sube a `_Base-Conocimiento/Aprendizajes/`. Lo que no, se queda en su módulo.
@@ -114,7 +185,7 @@ Si un módulo no deja nada en `Aprendizajes/`, o no se aprendió nada, o no se h
 
 ---
 
-## 7. Si usas IA
+## 8. Si usas IA
 
 Los tres del equipo usamos IA. Para que las respuestas sean consistentes:
 

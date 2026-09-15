@@ -18,7 +18,7 @@ conocimiento acumulado, no empezar de cero.
 |---|---|
 | **Acabas de entrar al repo** | La sección *Obtener el proyecto*, aquí abajo — clonar, requisitos por sistema operativo y arrancar |
 | **Nuevo en el proyecto** | `INDICE.html`, luego este README y `CONTRIBUIR.md` |
-| **Vas a aportar algo** | `CONTRIBUIR.md` — nombres, fichas de autoría, dónde va cada cosa |
+| **Vas a aportar algo** | `CONTRIBUIR.md` — **nadie commitea directo a `main`**: rama + PR. Además nombres, fichas de autoría y dónde va cada cosa |
 | **Buscas el estado de todo** | `_Base-Conocimiento/INDICE.md` |
 | **Buscas fechas y entregas** | `_Base-Conocimiento/CRONOGRAMA.md` |
 | **Quieres estudiar un módulo** | `Modulo N/Consolidado/mN-consolidado.html` — ábrelo en el navegador |

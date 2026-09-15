@@ -1,0 +1,26 @@
+# Quién revisa qué. Es documentación del criterio de revisión: en un repositorio
+# privado con cuenta gratuita GitHub no puede imponerlo, pero deja claro a quién
+# hay que pedirle revisión en cada caso.
+
+# Por defecto, cualquier cambio lo revisa Danny (arquitectura, harness e informe).
+*                       @tryp031
+
+# Material OFICIAL: no se edita NUNCA. Si un PR lo toca, algo va mal.
+**/Material-Clase/      @tryp031
+
+# El contrato de trabajo y las skills afectan a los tres.
+/CLAUDE.md              @tryp031
+/PROMPT-MAESTRO.md      @tryp031
+/CONTRIBUIR.md          @tryp031
+/.claude/skills/        @tryp031
+
+# El reto: cambiar el método invalida conclusiones del informe.
+**/Reto-Latencia-Minima/ @tryp031
+
+# Cada quien es dueño de su propia carpeta de aportes.
+**/Aportes/danny/       @tryp031
+
+# PENDIENTE: faltan los usuarios de GitHub de Camilo y Freddy. Cuando se sepan,
+# añadir aquí sus carpetas para que cada uno sea dueño de su propio aporte:
+#   **/Aportes/camilo/     @usuario-de-camilo
+#   **/Aportes/freddy/     @usuario-de-freddy
