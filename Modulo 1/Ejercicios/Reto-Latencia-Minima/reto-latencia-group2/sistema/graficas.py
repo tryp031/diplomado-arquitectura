@@ -32,18 +32,34 @@ ORDEN = ["B", "D"]
 PERCENTILES = [0, 50, 90, 99, 99.9, 99.99, 99.999]
 
 
-def cargar(dir_res):
-    """Agrega las rondas 1..N de cada variante. resultados-<VAR>-<RONDA>.csv"""
+# Las rondas que sustentan el informe son 1, 2 y 3: 1 000 000 de iteraciones cada una,
+# 3 000 000 por variante. Cualquier otra numeracion es exploratoria — la 0 son corridas
+# de validacion y la 9 pruebas rapidas de 20 000 iteraciones— y NO entra en las figuras.
+# Hasta el 17/09 este filtro solo excluia la ronda 0: la 9 se colaba y las figuras decian
+# n=3 020 000 mientras la tabla del informe decia 3 000 000. No fallaba: mentia en silencio.
+RONDAS_DEL_INFORME = (1, 2, 3)
+
+
+def cargar(dir_res, rondas=RONDAS_DEL_INFORME):
+    """Agrega las rondas del informe de cada variante. resultados-<VAR>-<RONDA>.csv"""
     series = defaultdict(list)
     for ruta in sorted(glob.glob(os.path.join(dir_res, "resultados-*.csv"))):
         m = re.match(r"resultados-([A-Za-z]+)-(\d+)\.csv$", os.path.basename(ruta))
         if not m:
             continue
         var, ronda = m.group(1), int(m.group(2))
-        if ronda == 0:
-            continue  # ronda 0 = corridas de validación, no entran en el informe
+        if ronda not in rondas:
+            continue
         with open(ruta) as fh:
-            series[var] += [int(r[1]) for r in list(csv.reader(fh))[1:]]
+            lector = csv.DictReader(fh)
+            # Por NOMBRE, nunca por posicion: el 15/09 se anadio la columna `hilo` al final
+            # y analyze.py, que leia la ultima, empezo a reportar ceros sin dar error.
+            if not lector.fieldnames or "latencia_ns" not in lector.fieldnames:
+                raise SystemExit(
+                    f"{ruta}: no tiene columna 'latencia_ns' (cabecera: {lector.fieldnames}).\n"
+                    "El formato del CSV cambio: revisa el cliente antes de generar figuras."
+                )
+            series[var] += [int(fila["latencia_ns"]) for fila in lector]
     return {v: sorted(d) for v, d in series.items() if d}
 
 

@@ -111,8 +111,10 @@ no es verificable; lo que sigue sí.
 **[REC]** Este atributo **no lo pide el enunciado; lo añado yo**, y es el que convierte el
 ejercicio en arquitectura. En sistemas de baja latencia reales —trading, telecomunicaciones,
 control industrial— el requisito nunca es «que sea rápido», es «que la cola sea acotada». El
-hallazgo de la variante B (p50 = 13 µs, máx = 2 202 µs, relación **164×**) es precisamente el
-incumplimiento de AC-2 con AC-1 aprobado. Ahí está el contenido del informe.
+hallazgo de la variante B —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
+encima de 1 ms en 3 M)— es precisamente ese caso. Y hay un matiz que lo hace mejor: el 14/09,
+con el mismo código, B dio **0**. Su cumplimiento depende del estado de la máquina, no de su
+arquitectura. Ahí está el contenido del informe.
 
 ### AC-3 · Comparabilidad entre variantes (estructural, del *proceso* de medición)
 
@@ -335,51 +337,48 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 
 ---
 
-## 7 bis. Resultados al 10/09 — tres puntos medidos
+## 7 bis. Resultados — corrida oficial del 17/09
 
-Agregado de 3 rondas × 1 000 000 por fila (3 M de muestras). Nanosegundos.
+Agregado de 3 rondas × 1 000 000 por columna (3 M de muestras). Nanosegundos.
 
-| | **B** Python+TCP | **Bc** C+TCP *(control)* | **D** C+shm |
-|---|---|---|---|
-| p50 | 13 209 | 12 000 | **83** |
-| p99.9 | 184 083 | 107 458 | **167** |
-| máx | 44 020 084 | 29 423 042 | **34 833** |
-| **muestras > 1 ms** (de 3 M) | **363** ❌ | **141** ❌ | **0** ✅ |
+| | **B** Python+TCP | **D** C+shm |
+|---|---|---|
+| p50 | 13 458 | **83** |
+| p99.9 | 116 209 | **167** |
+| máx | 13 649 750 | **37 125** |
+| **muestras > 1 ms** (de 3 M) | **136** ❌ | **0** ✅ |
 
-`Bc` no es una cuarta variante: es un **experimento de control** que mantiene el
-transporte de B y cambia solo el lenguaje. Sin él, el factor de 159× entre B y D no se
-puede atribuir a ninguna causa concreta, porque ambas variables cambian a la vez.
-
-### Descomposición — dónde estaba realmente el coste
-
-| Salto | Δ p50 | Factor | Peso |
-|---|---|---|---|
-| **Lenguaje** (B → Bc) | 1 209 ns | **1,1×** | **9,2 %** |
-| **Transporte** (Bc → D) | 11 917 ns | **144,6×** | **90,8 %** |
+> **La comparación mezcla dos variables.** Entre B y D cambian el transporte *y* el
+> lenguaje a la vez, así que el factor de 162× **no se puede atribuir a ninguna causa
+> concreta**. Un control que sí las separaba (`Bc`, TCP en C) se midió y se retiró del
+> árbol con el ADR-007. El informe **declara la limitación** en vez de ocultarla; ver
+> `INFORME.md` §7.2 y limitación 3.
 
 **Cuatro conclusiones sostenidas con datos propios:**
 
-1. **El objetivo de 1 ms se cumple por la mediana con cualquiera de las tres.** El reto
-   nunca estuvo en alcanzar el número.
-2. **El lenguaje era ruido; la capa de comunicación era todo.** Reescribir en C compró un
-   9 %. Cambiar de transporte compró 144×. El reflejo habitual ante un requisito de
-   latencia —«usemos un lenguaje más rápido»— habría optimizado la capa equivocada.
-   **[REC]** Este es el titular del informe: es la diferencia entre una decisión de
-   arquitectura y un detalle de implementación, que es el tema del módulo.
-3. **Solo la cola distingue cumplir de no cumplir.** Por p50 las tres aprueban con holgura.
-   Por máximo, B y Bc tienen 363 y 141 muestras sobre el umbral; D, ninguna. Un informe
-   basado en promedios habría dado las tres por buenas.
-4. **El máximo no es una propiedad del sistema, sino de la ventana de observación.** La
-   corrida de B del 08/09 con 100 k muestras dio un máximo de 2,2 ms; con 3 M subió a
-   44 ms, **20× peor, sin cambiar nada del sistema**. Por eso un máximo sin su `n` al lado
-   no significa nada, y por eso los sistemas serios se especifican en percentiles: el
-   p99.9 de Bc se mantuvo entre 97 y 114 µs entre rondas mientras su máximo saltaba de
-   13 a 29 ms.
+1. **El objetivo de 1 ms se cumple por la mediana con las dos.** El reto nunca estuvo en
+   alcanzar el número: B está 74× por debajo del umbral y D, 12 048×.
+2. **Solo la cola distingue cumplir de no cumplir.** Por p50 las dos aprueban con holgura.
+   Por máximo, B tiene 136 muestras sobre el umbral; D, ninguna. Un informe basado en
+   promedios (14,7 µs frente a 79 ns) habría dado las dos por buenas.
+   **[REC]** Este es el titular del informe: **la métrica elegida, no el sistema, decide el
+   veredicto.**
+3. **El veredicto de B no es reproducible, y eso es un resultado, no un problema.** Misma
+   máquina, mismo código, mismo `n`: el 14/09 dio **0** muestras sobre 1 ms y el 17/09 dio
+   **136**. Afirmar «esta arquitectura incumple» desde una sola corrida es afirmar algo
+   **sobre la máquina, no sobre la arquitectura**. La diferencia real con D no es velocidad:
+   es que el peor caso de D **está acotado por construcción** —sin llamadas al sistema no hay
+   planificador que le robe 13 ms— y el de B no.
+4. **El máximo no es una propiedad del sistema, sino de la ventana de observación.** Leyendo
+   **la misma corrida** de B con ventanas crecientes: 167 µs con 10 k muestras, 3,1 ms con
+   100 k, 6,4 ms con 1 M y 13,6 ms con 3 M. **81× peor sin cambiar nada del sistema.** Por eso
+   un máximo sin su `n` al lado no significa nada, y por eso los sistemas serios se
+   especifican en percentiles.
 
 ### Lo que queda sin cerrar
 
 **Eliminar el software de la ruta caliente no elimina la cola.** D no hace una sola
-llamada al sistema y aun así tiene máximos de 17–35 µs, 420× su p50. La cola la ponen el
+llamada al sistema y aun así tiene máximos de 16–37 µs, 447× su p50. La cola la ponen el
 planificador y el hardware, y en macOS/arm64 no hay afinidad de núcleo para evitarlo
 (`KERN_NOT_SUPPORTED`, verificado). **El sistema operativo y el hardware son restricciones
 arquitectónicas de primer orden**, no un detalle de despliegue: es el frente «tecnología»

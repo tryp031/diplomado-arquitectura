@@ -138,17 +138,17 @@ llamada, con acumulador `volatile` para que el optimizador no borre el bucle.
 |---|---|
 | Bucle de referencia | 0,27 |
 | Bucle con `clasificar()` | 2,14 |
-| **Coste del clasificador** | **≈ 1,9** (1,55 · 1,87 · 1,87) |
+| **Coste del clasificador** | **≈ 1,9** (1,55 · 1,87 · 1,87; 1,945 al reproducirlo el 17/09) |
 
 | Frente a | Peso |
 |---|---|
-| Variante D (64 ns) | **3 %** |
-| Control Bc (12 000 ns) | 0,016 % |
+| Variante D (p50 83 ns) | **2,3 %** |
+| Variante B (p50 13 458 ns) | 0,014 % |
 | Granularidad del reloj (41,67 ns) | por debajo de un tic |
 
-**Conclusión:** el dominio no altera ninguna conclusión del estudio; el factor transporte
-(~144×) es dos órdenes de magnitud mayor. **Matiz obligatorio:** en D es el 3 %, no cero.
-A 64 ns nada es gratis.
+**Conclusión:** el dominio no altera ninguna conclusión del estudio; el salto de B a D (162×)
+es dos órdenes de magnitud mayor. **Matiz obligatorio:** en D es el 2,3 %, no cero.
+A 83 ns nada es gratis.
 
 ## 6. Trampa verificada — no convertir la tabla en constantes
 

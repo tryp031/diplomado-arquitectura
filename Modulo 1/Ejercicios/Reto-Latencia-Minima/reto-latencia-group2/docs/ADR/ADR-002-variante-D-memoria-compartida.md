@@ -150,7 +150,7 @@ Detalles de implementación que quedan fijados por esta decisión:
 | Migración a núcleo de eficiencia → saltos en p99.9 | **Alta** | Medio | QoS `USER_INTERACTIVE`; reportar la cola como hallazgo, no ocultarla; 3 rondas independientes |
 | El sobrecoste del reloj es comparable a la latencia medida | **Alta** | Medio | Medir el coste del par de llamadas al reloj en vacío y reportarlo como piso de medición junto a cada cifra |
 | Termorregulación en un portátil durante 1 M de iteraciones a 100 % de dos núcleos | Media | Medio | Registrar la duración de la corrida; comparar las 3 rondas; si divergen, reducir iteraciones |
-| Se lee como «C es más rápido que Python» en vez de «memoria compartida evita el kernel» | **Alta** | Medio | ✅ **CERRADO el 10/09.** Se midió el control `Bc` (TCP en C): el lenguaje explica el 9,2 % de la diferencia y el transporte el 90,8 %. El riesgo ya no es hipotético, está cuantificado |
+| Se lee como «C es más rápido que Python» en vez de «memoria compartida evita el kernel» | **Alta** | Medio | ⚠️ **REABIERTO el 17/09.** Se cerró el 10/09 midiendo el control `Bc` (TCP en C): 9,2 % lenguaje, 90,8 % transporte. El ADR-007 retiró `Bc` del árbol, así que esa cuantificación ya no se reproduce y el riesgo vuelve a estar vivo. El informe lo neutraliza **declarando la limitación** en vez de ocultarla (§7.2 y limitación 3): no atribuye el factor 162× a ninguna de las dos causas |
 
 ## Consecuencias
 
