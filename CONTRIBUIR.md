@@ -13,7 +13,8 @@ Reglas mínimas. Son pocas a propósito: una convención que nadie sigue no sirv
 | Una investigación tuya (o hecha con IA) | `Modulo N/Aportes/<tu-nombre>/` |
 | Notas de un encuentro sincrónico | `Modulo N/Notas/` |
 | Algo que fusiona varios aportes | `Modulo N/Consolidado/` |
-| Una decisión técnica del equipo | `_Base-Conocimiento/ADR/` |
+| Una decisión técnica **de un ejercicio** | el `docs/ADR/` de ese ejercicio |
+| Una decisión técnica **transversal al diplomado** | `_Base-Conocimiento/ADR/` |
 | Lo que se sube a Brightspace | `Modulo N/Entregables/` |
 | Un concepto que sirve en varios módulos | `_Base-Conocimiento/` |
 
