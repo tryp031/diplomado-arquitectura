@@ -179,11 +179,20 @@ Lo único que importa es que produzcas el mismo CSV.
 
 ---
 
-## Resultados al 14/09 — 3 rondas × 1 M por variante (dominio de listas, ADR-004)
+## Resultados — 3 rondas × 1 M por variante (dominio de listas, ADR-004)
 
 Agregado por variante. Microsegundos. El umbral se evalúa contra **p99.9**, no contra la media.
 
-Reproducibles desde el árbol:
+**Corrida oficial del 17/09** (la del informe), reproducible desde el árbol:
+
+| | **D** shm | **B** Python+TCP |
+|---|---|---|
+| p50 | **0,083** | 13,46 |
+| p99.9 | **0,167** | 116,2 |
+| máx | 37,1 | 13 650 |
+| **muestras > 1 ms** | **0** / 3 M | **136** / 3 M ❌ |
+
+Corrida del 14/09, conservada en `resultados/archivo/` — mismo código, otro veredicto:
 
 | | **D** shm | **B** Python+TCP |
 |---|---|---|
@@ -210,28 +219,49 @@ Archivadas — medidas de verdad, código retirado del árbol el 16/09 (ADR-007)
 3. **ICMP en loopback (9,7 µs) es MÁS RÁPIDO que TCP en C (11,5 µs).** No hay que
    despertar ningún proceso de usuario: responde el kernel. Es el único punto del estudio
    donde el respondedor no es código nuestro — y por eso mismo **no cumple el enunciado**
-   (ver `variante-E-icmp/README.md`).
+   (ver `../docs/archivo/variante-E-icmp.md`).
 4. **El comando `ping` da 111 µs contra los 9,7 µs del mismo ICMP con socket propio: 12×.**
    La diferencia es la herramienta de medición, no el transporte.
-5. **⚠️ Los máximos cambiaron radicalmente frente al 10/09 sin que el sistema cambiara.**
-   Ver el aviso siguiente. Es el hallazgo más importante de esta ronda.
+5. **⚠️ El veredicto de B cambia entre corridas sin que el sistema cambie.** Ver el aviso
+   siguiente. Es el hallazgo más importante del trabajo, y está en el informe §7.1.
 
-### ⚠️ Aviso de reproducibilidad — afecta a una conclusión del informe
+> Las lecturas 3 y 4 salen de mediciones reales cuyo código se retiró del árbol con el
+> ADR-007. Se conservan aquí como contexto del estudio; **el informe no se apoya en ellas.**
 
-El 10/09, con el eco puro y el mismo tamaño de muestra (3 M), B registró **363** muestras
-por encima de 1 ms y Bc **141**. El 14/09, con 3 M de nuevo, **ambas registran 0**.
+### ⚠️ La cola de B no es reproducible — ya es una conclusión del informe
+
+Tres corridas del **mismo código**, con el mismo tamaño de muestra (3 M), sobre la misma
+máquina. Muestras por encima de 1 ms en la variante B:
+
+| Corrida | B | D | Evidencia |
+|---|---|---|---|
+| 10/09 | **363** | 0 | ❌ el log no se conservó — no se usa como evidencia |
+| 14/09 | **0** | 0 | ✅ `resultados/archivo/` |
+| 17/09 | **136** | 0 | ✅ `resultados/` — corrida oficial |
 
 El sistema no cambió en nada que explique eso: el dominio añade 1,9 ns. Lo que cambió fue
 **el estado de la máquina**.
 
-> **Consecuencia para el informe:** la conclusión anterior —«B y Bc incumplen el umbral por
-> el máximo»— **no era una propiedad de la arquitectura, sino del entorno durante aquella
-> corrida.** Afirmar «esta arquitectura incumple 1 ms» a partir de una sola corrida es
-> afirmar algo sobre la máquina, no sobre la arquitectura.
+> **Afirmar «esta arquitectura incumple 1 ms» a partir de una sola corrida es afirmar algo
+> sobre la máquina, no sobre la arquitectura.** Lo correcto es reportar cuántas corridas se
+> hicieron y el rango entre ellas, nunca un máximo suelto.
 >
-> Esto **refuerza** la tesis del trabajo (el entorno es una restricción arquitectónica de
-> primer orden) y **obliga a reescribir** la conclusión 1 del informe. Lo correcto es
-> reportar el rango entre rondas y el número de rondas, nunca un máximo suelto.
+> Esto **refuerza** la tesis del trabajo —el entorno es una restricción arquitectónica de
+> primer orden— y **ya está incorporado** al informe (§5.2, §6, §7.1 y limitación 7). La
+> diferencia real entre B y D no es que una sea lenta, sino que **el peor caso de D está
+> acotado por construcción** y el de B queda a merced del planificador.
+
+### Convención de rondas — cuáles entran en el informe
+
+| Ronda | Qué es | ¿Entra en tablas y figuras? |
+|---|---|---|
+| **1, 2, 3** | Las del informe: 1 000 000 de iteraciones cada una | ✅ sí |
+| 0 | Corridas de validación | ❌ no |
+| 9 | Pruebas rápidas (20 000 iteraciones) | ❌ no |
+
+`graficas.py` aplica este filtro. Hasta el 17/09 solo excluía la ronda 0: la 9 se colaba y las
+figuras decían `n = 3 020 000` mientras la tabla del informe decía 3 000 000. No fallaba —
+mentía en silencio, que es peor.
 
 **Pendiente:** repetir bajo carga controlada para separar «el sistema tiene cola» de «la
 máquina estaba ocupada». Es el experimento que falta.

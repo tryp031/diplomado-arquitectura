@@ -1,4 +1,4 @@
-fecha:     2026-09-14T12:22:42-05:00
+fecha:     2026-09-17T11:01:42-05:00
 host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
 cpu:       Apple M4
 nucleos:   10
@@ -7,42 +7,100 @@ compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
 variante:  B   ronda: 3
 args:      --warmup 100000 --iters 1000000
 ---
-ejecutable: python3 /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/variante-B-tcp/server.py
-[cliente B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
-[servidor B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+ejecutable: python3 /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/variante-B-tcp/server.py
+[cliente B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[cliente B] midiendo 1,000,000 iteraciones x 1 hilo(s) en 100 lote(s) de 10,000…
+[servidor B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
 [servidor B] escuchando en 127.0.0.1:9101, payload=32B
-[servidor B] conexión de ('127.0.0.1', 55698)
+[servidor B] HILOS vivos=1 atendidas=1 conexión de ('127.0.0.1', 51642)
 [cliente B] autoprueba OK: 16 hosts de tabla + 1 desconocido
-[cliente B] warmup 100,000 iteraciones…
-[cliente B] midiendo 1,000,000 iteraciones…
-[servidor B] conexión cerrada
-[cliente B] 1,000,000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/harness/resultados/resultados-B-3.csv
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=1/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=4/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=6/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=9/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=12/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=15/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=18/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=21/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=24/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=26/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=29/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=32/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=34/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=37/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=40/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=43/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=46/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=49/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=52/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=55/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=58/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=61/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=63/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=66/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=69/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=72/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=75/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=78/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=81/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=84/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=87/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=90/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=93/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=96/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=99/100 iters_por_lote=10000
+[servidor B] HILOS vivos=0 conexión cerrada
+[cliente B] 1,000,000 muestras (1 hilo[s]) -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/resultados/resultados-B-3.csv
+plataforma: Darwin/arm64 · Apple M4
 
 === resultados-B-3 ===
   n              1,000,000
-  mín                    7.38 µs
-  p50                   13.33 µs
-  p90                   14.04 µs
-  p99                   16.96 µs
-  p99.9                 20.67 µs
-  p99.99                36.25 µs
-  máx                  133.38 µs
-  desv. est.             1.30 µs
-  media                 13.27 µs   <- NO usar como métrica principal
+  mín                    7.62 µs
+  p50                   13.42 µs
+  p90                   15.29 µs
+  p99                   33.04 µs
+  p99.9                 72.54 µs
+  p99.99               178.29 µs
+  máx               13,649.75 µs
+  desv. est.            15.17 µs
+  media                 13.79 µs   <- NO usar como métrica principal
   ¿p99.9 < 1 ms?           SÍ
 
   histograma (log, 10 cubos/década) — resultados-B-3
-        6.310 µs |                                                                370 ( 0.04%)
-        7.943 µs | ##                                                          23,437 ( 2.34%)
-       10.000 µs | ########                                                   118,154 (11.82%)
-       12.589 µs | ########################################################   834,289 (83.43%)
-       15.849 µs | #                                                           22,221 ( 2.22%)
-       19.953 µs |                                                              1,352 ( 0.14%)
-       25.119 µs |                                                                 68 ( 0.01%)
-       31.623 µs |                                                                 28 ( 0.00%)
-       39.811 µs |                                                                 27 ( 0.00%)
-       50.119 µs |                                                                 17 ( 0.00%)
-       63.096 µs |                                                                 14 ( 0.00%)
-       79.433 µs |                                                                 15 ( 0.00%)
-      100.000 µs |                                                                  7 ( 0.00%)
-      125.893 µs |                                                                  1 ( 0.00%)
+        6.310 µs |                                                                180 ( 0.02%)
+        7.943 µs | #####                                                       66,160 ( 6.62%)
+       10.000 µs | #############                                              162,572 (16.26%)
+       12.589 µs | ########################################################   690,854 (69.09%)
+       15.849 µs | ####                                                        50,015 ( 5.00%)
+       19.953 µs | #                                                           12,945 ( 1.29%)
+       25.119 µs | #                                                            6,247 ( 0.62%)
+       31.623 µs |                                                              5,020 ( 0.50%)
+       39.811 µs |                                                              3,124 ( 0.31%)
+       50.119 µs |                                                              1,407 ( 0.14%)
+       63.096 µs |                                                                717 ( 0.07%)
+       79.433 µs |                                                                370 ( 0.04%)
+      100.000 µs |                                                                198 ( 0.02%)
+      125.893 µs |                                                                 65 ( 0.01%)
+      158.489 µs |                                                                 44 ( 0.00%)
+      199.526 µs |                                                                 25 ( 0.00%)
+      251.189 µs |                                                                 12 ( 0.00%)
+      316.228 µs |                                                                 12 ( 0.00%)
+      398.107 µs |                                                                 11 ( 0.00%)
+      501.187 µs |                                                                  8 ( 0.00%)
+      630.957 µs |                                                                  4 ( 0.00%)
+      794.328 µs |                                                                  4 ( 0.00%)
+     1000.000 µs |                                                                  2 ( 0.00%)
+     1258.925 µs |                                                                  2 ( 0.00%)
+     1584.893 µs |                                                                  0 ( 0.00%)
+     1995.262 µs |                                                                  1 ( 0.00%)
+     2511.886 µs |                                                                  0 ( 0.00%)
+     3162.278 µs |                                                                  0 ( 0.00%)
+     3981.072 µs |                                                                  0 ( 0.00%)
+     5011.872 µs |                                                                  0 ( 0.00%)
+     6309.573 µs |                                                                  0 ( 0.00%)
+     7943.282 µs |                                                                  0 ( 0.00%)
+    10000.000 µs |                                                                  0 ( 0.00%)
+    12589.254 µs |                                                                  1 ( 0.00%)

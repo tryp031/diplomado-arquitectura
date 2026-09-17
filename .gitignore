@@ -26,8 +26,13 @@ venv/
 # --- Datos crudos de medición (≈220 MB) ---
 # Los CSV por muestra NO se versionan: se regeneran con ./run.sh
 # Lo que sí se versiona: los .log de ejecución y las gráficas SVG del informe
+#
+# A CUALQUIER PROFUNDIDAD, no solo en resultados/: el 17/09 run.sh archivó la corrida
+# anterior en resultados/archivo/ y esos 68 MB de CSV quedaron FUERA de la regla, que
+# solo cubría un nivel. Los .log archivados sí entran: son la evidencia de que aquella
+# corrida existió y en qué máquina se tomó.
+**/resultados/**/*.csv
 **/resultados/*.csv
-**/resultados/resultados-*.csv
 
 # --- Capturas y artefactos de herramientas ---
 .playwright-mcp/

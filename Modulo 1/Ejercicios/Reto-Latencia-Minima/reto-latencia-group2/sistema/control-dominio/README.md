@@ -50,13 +50,12 @@ make && ./micro ../tabla-hosts.csv
 
 | Frente a | Peso del clasificador |
 |---|---|
-| Variante D (64 ns) | **3 %** |
-| Control Bc (12 000 ns) | **0,016 %** |
-| Variante B (13 200 ns) | **0,014 %** |
+| Variante D (p50 83 ns) | **2,3 %** |
+| Variante B (p50 13 458 ns) | **0,014 %** |
 | Granularidad del reloj (41,67 ns) | **por debajo de un solo tic** |
 
-**Conclusión:** el dominio no cambia ninguna conclusión del estudio. El factor
-transporte (~144×) sigue siendo dos órdenes de magnitud mayor que este efecto.
+**Conclusión:** el dominio no cambia ninguna conclusión del estudio. El salto de B a D
+(162×) es dos órdenes de magnitud mayor que este efecto.
 
 **Y el matiz honesto:** en D es el 3 %, no cero. A 64 ns ya nada es gratis. Decir
 «despreciable» sin el número sería la misma clase de afirmación sin respaldo que el

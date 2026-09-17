@@ -205,29 +205,32 @@ Los resultados del informe salen de aquí, nunca de la aplicación web.
 
 ## Resultados
 
-| Arquitectura | Mediana | Cola p99,9 | Objetivo 1 ms | |
-|---|---|---|---|---|
-| D · memoria compartida | **0,08 µs** | 0,12 µs | ✅ 12 000× por debajo | reproducible |
-| B · TCP en Python | 13,4 µs | 39,0 µs | ✅ | reproducible |
-| *E · ICMP (el kernel)* | *9,7 µs* | *14,8 µs* | *✅* | archivada |
-| *Bc · TCP en C* | *11,5 µs* | *30,1 µs* | *✅* | archivada |
-| *— red real a internet* | *16 984 µs* | *52 111 µs* | *❌ 17× por encima* | archivada |
+Corrida oficial del **17/09/2026**, 3 rondas × 1 000 000 por arquitectura.
 
-Sobre 9,15 millones de muestras. **Equipo de referencia: Apple M4, macOS 26.6, arm64.**
+| Arquitectura | Mediana | Cola p99,9 | Peor caso | > 1 ms (de 3 M) | Objetivo 1 ms |
+|---|---|---|---|---|---|
+| D · memoria compartida | **0,08 µs** | 0,17 µs | 37 µs | **0** | ✅ 12 048× por debajo |
+| B · TCP en Python | 13,5 µs | 116,2 µs | 13 650 µs | **136** | ✅ por mediana · ❌ por cola |
 
-Las filas en cursiva se midieron de verdad, pero su código ya no está en el árbol
-(ADR-007): se recalculan solo desde el historial de git. Las dos primeras se
-reproducen hoy con `./run.sh`.
+**Equipo de referencia: Apple M4, macOS 26.6, arm64.** Se reproducen con `./run.sh`.
+
+> **El resultado de B no es reproducible entre corridas, y ese es el hallazgo.** El
+> 14/09, con el mismo código y el mismo `n`, B dio **0** muestras por encima de 1 ms;
+> el 17/09 dio **136**. Lo único que cambió fue el estado de la máquina. Afirmar «esta
+> arquitectura incumple» a partir de una sola corrida es afirmar algo sobre la máquina,
+> no sobre la arquitectura. Análisis completo en `INFORME.md` §7.1; la evidencia de la
+> corrida anterior se conserva en `sistema/resultados/archivo/`.
 
 > **Matiz obligatorio al comparar B con D:** entre las dos cambian **el transporte y el
-> lenguaje a la vez**, así que el factor 159× no es atribuible a ninguno de los dos por
-> sí solo. Quien ya separó las causas es el control `Bc` —9 % el lenguaje, 91 % el
-> transporte—, y ese trabajo está en
-> [`docs/archivo/control-Bc-tcp-c.md`](docs/archivo/control-Bc-tcp-c.md).
+> lenguaje a la vez**, así que el factor 162× **no es atribuible a ninguno de los dos por
+> sí solo**, y el informe no lo atribuye. Un control que sí separaba las causas (`Bc`,
+> TCP en C) se midió y se retiró del árbol con el ADR-007; su trabajo queda como historia
+> del proyecto en [`docs/archivo/control-Bc-tcp-c.md`](docs/archivo/control-Bc-tcp-c.md),
+> **no como sustento de ninguna conclusión vigente**.
 
-**El objetivo se cumple con cualquiera de las opciones locales.** El reto nunca
-estuvo en alcanzar el número: está en el método, y en explicar qué se compra y
-qué se paga con cada arquitectura.
+**El objetivo se cumple con las dos opciones por mediana.** El reto nunca estuvo en
+alcanzar el número: está en el método, y en explicar qué se compra y qué se paga con
+cada arquitectura.
 
 ---
 

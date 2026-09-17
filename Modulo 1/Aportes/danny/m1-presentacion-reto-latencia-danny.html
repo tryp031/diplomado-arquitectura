@@ -447,43 +447,42 @@ body.con-notas .notas{display:block}
 <section class="lamina">
   <div class="caja">
     <span class="kicker">Resultado 1 de 4</span>
-    <h2>Se optimizó la capa equivocada</h2>
-    <p class="lede">Frente a un requisito de latencia, el reflejo habitual es «usemos un
-      lenguaje más rápido». Lo medimos por separado.</p>
-    <div class="barras">
-      <div class="fila"><span class="nom">Lenguaje<br><small style="color:var(--soft)">Python → C, mismo TCP</small></span>
-        <span class="pista"><span class="relleno" style="width:9.2%"></span></span>
-        <span class="val">1,1× · 9,2 %</span></div>
-      <div class="fila"><span class="nom">Transporte<br><small style="color:var(--soft)">TCP → memoria compartida</small></span>
-        <span class="pista"><span class="relleno alto" style="width:100%"></span></span>
-        <span class="val">144,6× · 90,8 %</span></div>
+    <h2>La métrica decide el veredicto</h2>
+    <p class="lede">Las mismas dos configuraciones, el mismo umbral de 1 ms.
+      Cambia solo <strong>qué estadístico se mira</strong>.</p>
+    <div class="tabox">
+      <table>
+        <thead><tr><th>Configuración</th><th class="n">Mediana</th><th>¿Cumple por mediana?</th>
+          <th class="n">Muestras &gt; 1 ms</th><th>¿Cumple por máximo?</th></tr></thead>
+        <tbody>
+          <tr><td>B · Python + TCP</td><td class="n">13,5 µs</td><td class="si">SÍ</td>
+            <td class="n">136 / 3 M</td><td class="no">NO</td></tr>
+          <tr class="destaca"><td>D · memoria compartida</td><td class="n">0,083 µs</td>
+            <td class="si">SÍ</td><td class="n">0 / 3 M</td><td class="si">SÍ</td></tr>
+        </tbody>
+      </table>
     </div>
     <div class="aviso clave">
-      <p><b>Reescribir el servicio en C habría comprado un 9 %. Cambiar de capa de
-        comunicación compró 144×.</b> El intérprete de Python añade ~1,2 µs por intercambio:
-        es real y medible, pero está sepultado bajo los ~12 µs que cuestan las dos llamadas
-        al sistema, las copias del kernel y el despertar del planificador. Esos 12 µs los
-        paga C exactamente igual.</p>
+      <p><b>Por mediana las dos cumplen con holgura: 74× y 12 048× por debajo del umbral.
+        Por máximo, una incumple.</b> Un informe que solo reporta el promedio —14,7 µs
+        frente a 79 ns— habría dado las dos por buenas. Y en un control de acceso
+        financiero, 136 transacciones lentas de cada 3 millones no son ruido: son
+        incidentes.</p>
     </div>
     <div class="aviso ojo">
-      <p><b>Matiz obligatorio, para no exagerar:</b> el efecto del lenguaje es pequeño
-        <i>en este servicio</i>, que no hace nada — recibe 32 bytes y devuelve 32 bytes.
-        En cuanto haya lógica de negocio, serialización o acceso a datos, el peso del
-        lenguaje crece. Lo demostrado es que <b>el transporte domina cuando el trabajo útil
-        es despreciable</b>, no que el lenguaje nunca importe.</p>
+      <p><b>Lo que este experimento NO puede afirmar.</b> Entre B y D cambian el transporte
+        <i>y</i> el lenguaje a la vez, así que el factor de 162× <b>no se puede atribuir a
+        ninguna de las dos causas</b>. Separarlo exigiría un control que cambiara una sola
+        variable. Lo decimos nosotros antes de que lo pregunte un revisor.</p>
     </div>
     <div class="notas">
       <span class="tag">Notas del orador</span>
       <p class="tiempo">3:05 – 3:45 · 40 s</p>
-      <p><b>Este es el titular del informe.</b> Si hay que cortar algo por tiempo, no es esto.</p>
-      <p>⚠️ <b>Procedencia del dato:</b> la descomposición viene del control <code>Bc</code>
-        (TCP en C), medido el 10/09 con 3 M de muestras. Su código se retiró del árbol el
-        16/09 (ADR-007) y el hallazgo está archivado en
-        <code>docs/archivo/control-Bc-tcp-c.md</code>. <b>Si alguien pide reproducirlo en
-        vivo, hoy no se puede</b> — habría que recuperarlo del historial de git. Decidir
-        antes del 21/09 si esta lámina se queda así o se recupera el código.</p>
-      <p>El matiz final no es humildad decorativa: es lo que separa un hallazgo de una
-        consigna. <b>Decirlo siempre.</b></p>
+      <p>Conecta con el atributo de calidad del módulo: <b>un requisito de latencia sin
+        percentil declarado es un requisito incompleto</b>. «Menos de 1 ms» no dice nada
+        hasta que se dice «en el p99.9».</p>
+      <p><b>No presentar esta lámina sin la siguiente.</b> Sola, invita a concluir «B
+        incumple», y eso es justo lo que la lámina 8 desmonta.</p>
     </div>
   </div>
 </section>
@@ -492,43 +491,42 @@ body.con-notas .notas{display:block}
 <section class="lamina">
   <div class="caja">
     <span class="kicker">Resultado 2 de 4</span>
-    <h2>La métrica decide el veredicto</h2>
-    <p class="lede">Las mismas tres configuraciones, el mismo umbral de 1 ms.
-      Cambia solo <strong>qué estadístico se mira</strong>.</p>
-    <div class="tabox">
-      <table>
-        <thead><tr><th>Configuración</th><th class="n">Mediana</th><th>¿Cumple por mediana?</th>
-          <th class="n">Muestras &gt; 1 ms</th><th>¿Cumple por máximo?</th></tr></thead>
-        <tbody>
-          <tr><td>B · Python + TCP</td><td class="n">13,2 µs</td><td class="si">SÍ</td>
-            <td class="n">363 / 3 M</td><td class="no">NO</td></tr>
-          <tr class="tenue"><td>Bc · C + TCP <span class="pill arch">archivada</span></td>
-            <td class="n">12,0 µs</td><td class="si">SÍ</td>
-            <td class="n">141 / 3 M</td><td class="no">NO</td></tr>
-          <tr class="destaca"><td>D · memoria compartida</td><td class="n">0,083 µs</td>
-            <td class="si">SÍ</td><td class="n">0 / 3 M</td><td class="si">SÍ</td></tr>
-        </tbody>
-      </table>
+    <h2>El mismo sistema, dos veredictos</h2>
+    <p class="lede">Mismo código, misma máquina, mismo número de muestras.
+      Tres días de diferencia. <strong>Y un resultado distinto.</strong></p>
+    <div class="rej d2">
+      <div class="card bien"><span class="et">corrida del 14/09 · variante B</span>
+        <span class="g">0</span><small>muestras por encima de 1 ms, de 3 M.
+        <b>Cumple.</b></small></div>
+      <div class="card mal"><span class="et">corrida del 17/09 · variante B</span>
+        <span class="g">136</span><small>muestras por encima de 1 ms, de 3 M.
+        <b>Incumple.</b></small></div>
+    </div>
+    <div class="aviso pare">
+      <p><b>Afirmar «esta arquitectura incumple 1 ms» a partir de una sola corrida es
+        afirmar algo sobre la máquina, no sobre la arquitectura.</b> El sistema no cambió
+        en nada que lo explique: el dominio añade 1,9 ns. Lo que cambió fue el estado del
+        sistema operativo durante la medición.</p>
+      <p>Lo correcto es reportar <b>cuántas corridas se hicieron y el rango entre ellas</b>,
+        nunca un máximo suelto.</p>
     </div>
     <div class="aviso clave">
-      <p><b>Por mediana las tres cumplen con holgura. Por máximo, dos incumplen.</b>
-        Un informe que solo reporta el promedio habría dado las tres por buenas —
-        y en un control de acceso financiero, 363 transacciones lentas de cada
-        3 millones no son ruido: son incidentes.</p>
-    </div>
-    <div class="aviso ojo">
-      <p><b>Pasar a C no arregla el incumplimiento: lo reduce de 363 a 141 casos.</b>
-        El problema no era el lenguaje. Era atravesar el kernel.</p>
+      <p><b>Y aquí está la diferencia real con D, que no es la velocidad.</b> D dio 0
+        incumplimientos en las dos corridas, 6 millones de muestras. No porque sea rápida,
+        sino porque <b>su peor caso está acotado por construcción</b>: sin llamadas al
+        sistema no hay planificador que pueda robarle 13 ms. El de B queda a merced del
+        sistema operativo.</p>
     </div>
     <div class="notas">
       <span class="tag">Notas del orador</span>
       <p class="tiempo">3:45 – 4:25 · 40 s</p>
-      <p>Conecta con el atributo de calidad del módulo: <b>un requisito de latencia sin
-        percentil declarado es un requisito incompleto</b>. «Menos de 1 ms» no dice nada
-        hasta que se dice «en el p99.9».</p>
-      <p>⚠️ Los datos de esta tabla son de la corrida del 10/09. En la remedición del 14/09
-        <b>ambas dieron 0</b> — ver lámina siguiente, que es precisamente sobre eso. No
-        presentar esta tabla sin la que viene detrás.</p>
+      <p>Esta es la lámina más honesta del trabajo y probablemente la que más valora un
+        revisor con criterio: <b>encontramos un error en nuestra propia conclusión anterior
+        y lo publicamos</b> en vez de quedarnos con el número que quedaba mejor.</p>
+      <p>Hubo una tercera corrida, del 10/09, con 363 incumplimientos. <b>No la usamos como
+        evidencia porque su log no se conservó</b> — y eso también se dice, si preguntan.</p>
+      <p>Si preguntan «¿entonces cuál es el número bueno?»: para un requisito absoluto, una
+        arquitectura cuyo cumplimiento depende del día <b>no cumple</b>.</p>
     </div>
   </div>
 </section>
@@ -538,26 +536,31 @@ body.con-notas .notas{display:block}
   <div class="caja">
     <span class="kicker">Resultado 3 de 4</span>
     <h2>El máximo no es del sistema: es de la ventana</h2>
-    <p class="lede">La misma configuración, sin cambiar una línea de código.
-      Lo único que cambió fue <strong>cuánto se miró</strong>.</p>
-    <div class="rej d2">
-      <div class="card"><span class="et">observando 100 000 muestras</span>
-        <span class="g">2,2 ms</span><small>Máximo registrado de la variante B.</small></div>
-      <div class="card mal"><span class="et">observando 3 000 000</span>
-        <span class="g">44 ms</span><small>Mismo sistema. <b>20× peor.</b></small></div>
+    <p class="lede"><strong>Una sola corrida de la variante B</strong>, leída con ventanas
+      de observación cada vez más grandes. No cambia el sistema: cambia cuánto se mira.</p>
+    <div class="rej d4">
+      <div class="card"><span class="et">10 000 muestras</span>
+        <span class="g">167 µs</span><small>Cumple con holgura.</small></div>
+      <div class="card"><span class="et">100 000 muestras</span>
+        <span class="g">3,1 ms</span><small>Ya incumple.</small></div>
+      <div class="card"><span class="et">1 000 000 muestras</span>
+        <span class="g">6,4 ms</span><small>Sigue creciendo.</small></div>
+      <div class="card mal"><span class="et">3 000 000 muestras</span>
+        <span class="g">13,6 ms</span><small>Mismo sistema. <b>81× peor.</b></small></div>
     </div>
     <div class="aviso pare">
       <p><b>Reportar un máximo sin decir sobre cuántas muestras es una cifra sin
         significado.</b> Cuanto más se mide, peores colas aparecen: se capturan eventos más
         raros — planificación, interrupciones, presión de memoria, termorregulación.</p>
       <p>Por eso los sistemas serios se especifican con <b>percentiles</b>, no con máximos:
-        el p99.9 se mantuvo estable entre rondas mientras el máximo saltaba de 13 a 29 ms.</p>
+        el p99.9 describe la experiencia del 99,9 % de las peticiones; el máximo describe
+        una sola.</p>
     </div>
     <div class="aviso ojo">
-      <p><b>Y nos pasó a nosotros.</b> El 10/09, B registró 363 muestras sobre 1 ms.
-        El 14/09, con el mismo tamaño de muestra, registró <b>0</b>. El sistema no cambió:
-        cambió el estado de la máquina. La conclusión «esta arquitectura incumple 1 ms»
-        <b>era una afirmación sobre el computador, no sobre la arquitectura</b>.</p>
+      <p><b>La consecuencia incómoda, y hay que decirla en voz alta:</b> una demostración
+        de 10 000 mensajes —como la que se haría en vivo— <b>no habría visto ni uno solo de
+        los 136 incumplimientos</b>. Habríamos presentado un sistema que cumple, y habría
+        sido falso sin que nadie mintiera.</p>
     </div>
     <div class="notas">
       <span class="tag">Notas del orador</span>
@@ -567,6 +570,8 @@ body.con-notas .notas{display:block}
         y lo publicamos</b> en vez de quedarnos con el número que quedaba mejor.</p>
       <p>Si preguntan «¿entonces cuál es el número bueno?»: el rango entre rondas y el
         número de rondas. Nunca un máximo suelto.</p>
+      <p>Enlaza con la lámina anterior: allí el veredicto cambiaba entre corridas; aquí
+        cambia <b>dentro de la misma corrida</b> según cuánto se observe.</p>
     </div>
   </div>
 </section>
@@ -584,8 +589,8 @@ body.con-notas .notas{display:block}
         <small>Cero llamadas al sistema.</small></div>
       <div class="card"><span class="et">p99.9</span><span class="g">167 ns</span>
         <small>La cola cercana es estrechísima: 2× la mediana.</small></div>
-      <div class="card mal"><span class="et">máximo</span><span class="g">34 833 ns</span>
-        <small><b>420×</b> su propia mediana.</small></div>
+      <div class="card mal"><span class="et">máximo</span><span class="g">37 125 ns</span>
+        <small><b>447×</b> su propia mediana.</small></div>
     </div>
     <div class="aviso clave">
       <p><b>Eliminar el software de la ruta crítica no elimina la latencia impredecible.</b>
@@ -596,8 +601,9 @@ body.con-notas .notas{display:block}
     <div class="notas">
       <span class="tag">Notas del orador</span>
       <p class="tiempo">5:05 – 5:35 · 30 s</p>
-      <p>Cierra el arco: primero creímos que era el lenguaje (no), luego que era el
-        transporte (sí, el 91 %), y aquí aparece <b>lo que no es de nadie</b>.</p>
+      <p>Cierra el arco: primero la métrica decide el veredicto, luego el veredicto
+        depende del día, y aquí aparece <b>el suelo que no es de nadie</b> — el que queda
+        cuando ya no hay software que quitar.</p>
       <p>Enlace directo con el módulo: <b>el entorno de despliegue es una restricción
         arquitectónica de primer orden</b>, no un detalle de operaciones.</p>
     </div>
@@ -615,7 +621,8 @@ body.con-notas .notas{display:block}
       <table>
         <thead><tr><th>Atributo</th><th>B · TCP</th><th>D · memoria compartida</th></tr></thead>
         <tbody>
-          <tr><td>Latencia p50</td><td class="m">13,2 µs</td><td class="m"><b>83 ns</b></td></tr>
+          <tr><td>Latencia p50</td><td class="m">13,5 µs</td><td class="m"><b>83 ns</b></td></tr>
+          <tr><td>Peor caso acotado por diseño</td><td class="no">NO</td><td class="si">SÍ</td></tr>
           <tr><td>Llamadas al sistema por intercambio</td><td class="m">2</td><td class="m"><b>0</b></td></tr>
           <tr><td>Funciona entre máquinas</td><td class="si">SÍ</td><td class="no">NO</td></tr>
           <tr><td>Interoperabilidad</td><td>media</td><td class="no">nula</td></tr>
@@ -689,13 +696,13 @@ body.con-notas .notas{display:block}
     <span class="kicker">Conclusión</span>
     <h2>El reto no se gana optimizando</h2>
     <div class="rej d4">
-      <div class="card acento"><span class="et">1</span><span class="g">13 µs</span>
+      <div class="card acento"><span class="et">1</span><span class="g">13,5 µs</span>
         <small>El objetivo estaba cumplido desde la primera implementación ingenua.</small></div>
-      <div class="card acento"><span class="et">2</span><span class="g">9 % / 91 %</span>
-        <small>Lenguaje frente a arquitectura. El reflejo apuntaba a la capa equivocada.</small></div>
-      <div class="card acento"><span class="et">3</span><span class="g">363 / 0</span>
-        <small>La métrica elegida decide el veredicto. Percentiles, no máximos.</small></div>
-      <div class="card acento"><span class="et">4</span><span class="g">420×</span>
+      <div class="card acento"><span class="et">2</span><span class="g">136 / 0</span>
+        <small>La métrica elegida decide el veredicto. Percentiles, no promedios.</small></div>
+      <div class="card acento"><span class="et">3</span><span class="g">136 ↔ 0</span>
+        <small>El mismo código, dos corridas, dos veredictos. El entorno es arquitectura.</small></div>
+      <div class="card acento"><span class="et">4</span><span class="g">447×</span>
         <small>La cola que queda cuando ya no hay software que quitar.</small></div>
     </div>
     <div class="portada" style="margin-top:26px">
@@ -717,22 +724,45 @@ body.con-notas .notas{display:block}
   <div class="caja">
     <span class="kicker" style="background:var(--warn-soft); color:var(--warn)">Lámina interna · no se presenta</span>
     <h2>Qué falta decidir antes del 21/09</h2>
-    <p class="lede">Este es un <strong>draft</strong>. Lo que sigue son las decisiones
-      abiertas que afectan al contenido de arriba.</p>
+    <p class="lede">Las decisiones que estaban abiertas <strong>se resolvieron el
+      17/09</strong> midiendo de nuevo. Esto es lo que cambió y lo que sigue pendiente.</p>
 
-    <h3>Decisiones que cambian láminas</h3>
+    <h3>Decisiones ya cerradas — por qué estas láminas cambiaron</h3>
     <div class="tabox">
       <table>
-        <thead><tr><th>Decisión</th><th>Afecta a</th><th>Si se decide que no…</th></tr></thead>
+        <thead><tr><th>Decisión</th><th>Resuelta así</th><th>Efecto en la presentación</th></tr></thead>
         <tbody>
-          <tr><td>¿Usamos las cifras archivadas de <code>Bc</code>?</td><td>láminas 7 y 8</td>
-            <td>cae la descomposición 9 % / 91 %, que es el titular</td></tr>
-          <tr><td>¿Usamos la línea base de internet (<code>E</code>)?</td><td>no está incluida aún</td>
-            <td>el trabajo queda sin contraste con red real</td></tr>
-          <tr><td>¿Qué corrida es la oficial: 10/09 o 14/09?</td><td>lámina 8</td>
-            <td>la tabla de «363 / 141 / 0» cambia a «0 / 0 / 0»</td></tr>
+          <tr><td>¿Usamos las cifras archivadas de <code>Bc</code>?</td>
+            <td class="no">NO</td>
+            <td>cayó la lámina «se optimizó la capa equivocada». Ninguna conclusión se apoya
+              ya en <code>Bc</code>; en su lugar <b>se declara la limitación</b>: el 162×
+              mezcla transporte y lenguaje</td></tr>
+          <tr><td>¿Usamos la línea base de internet (<code>E</code>)?</td>
+            <td class="no">NO</td>
+            <td>el trabajo queda sin contraste con red real, y así se dice en las
+              limitaciones del informe</td></tr>
+          <tr><td>¿Qué corrida es la oficial?</td>
+            <td class="si">Ninguna de las dos: <b>se midió de nuevo el 17/09</b></td>
+            <td>la del 10/09 no tenía log versionado, así que no era usable como evidencia.
+              Las láminas 7 a 11 usan las cifras nuevas, con CSV y log en la entrega</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="aviso clave">
+      <p><b>El hallazgo que salió de volver a medir:</b> B dio 0 incumplimientos el 14/09 y
+        136 el 17/09, con el mismo código. Eso pasó de ser un problema a ser la lámina 8 —
+        y es, probablemente, lo mejor del trabajo.</p>
+    </div>
+
+    <h3>Lo que sigue abierto</h3>
+    <div class="tabox">
+      <table>
+        <thead><tr><th>Pendiente</th><th>Afecta a</th><th>Riesgo si no se decide</th></tr></thead>
+        <tbody>
           <tr><td>¿Cuánto dura la presentación?</td><td>todo</td>
             <td>hoy son ~7 min de contenido; el video son <b>5 min máximo</b></td></tr>
+          <tr><td>¿Video grabado o demo en vivo el 29/09?</td><td>formato</td>
+            <td>la demo cae el mismo día del cierre: si falla, no hay plan B</td></tr>
         </tbody>
       </table>
     </div>
@@ -744,7 +774,7 @@ body.con-notas .notas{display:block}
       <div class="card"><span class="et">Camilo</span><span class="g" style="font-size:17px">Doc. técnica<br>variante D</span>
         <small><code>sistema/variante-D-shm/</code></small></div>
       <div class="card acento"><span class="et">Daniel</span><span class="g" style="font-size:17px">CSV · limpieza ·<br>presentación</span>
-        <small>CSV y limpieza hechos el 16/09. Esta presentación, en borrador.</small></div>
+        <small>CSV y limpieza el 16/09. Remedición, informe y esta presentación el 17/09.</small></div>
     </div>
     <div class="aviso ojo">
       <p><b>Los tres manuales siguen sin dueño:</b> instalación, uso y técnico.
@@ -762,6 +792,10 @@ body.con-notas .notas{display:block}
       <span class="tag">Notas del orador</span>
       <p>Esta lámina se borra antes de presentar. Está aquí para que Freddy y Camilo vean
         el estado real al abrir el archivo, sin tener que leer el ADR-007.</p>
+      <p><b>Las cifras de las láminas 7 a 11 salen de la corrida del 17/09</b> y se
+        reproducen con <code>./run.sh B 1</code> · <code>./run.sh D 1</code> (rondas 1-3) y
+        <code>./analyze.py --md resultados/resultados-{B,D}-{1,2,3}.csv</code>. Si alguien
+        vuelve a medir y los números cambian, <b>esta presentación cambia con ellos</b>.</p>
     </div>
   </div>
 </section>
