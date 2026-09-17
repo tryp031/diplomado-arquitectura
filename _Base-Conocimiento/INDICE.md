@@ -61,11 +61,17 @@ hosts) bajaron a `Modulo 1/Aportes/danny/` como HTML. Se eliminó un duplicado e
 - `CRONOGRAMA.md` — fechas y análisis de riesgos del calendario.
 - `MAPA-CONCEPTUAL.md` — grafo acumulativo de conceptos.
 - `GLOSARIO.md` — términos con definición contextual.
-- `ADR/` — decisiones arquitectónicas:
-  - `ADR-000-plantilla.md`
-  - `ADR-001-frontera-de-medicion.md` — dónde empiezan y terminan las sondas (F1). *Propuesta.*
-  - `ADR-002-variante-D-memoria-compartida.md` — mecanismo, lenguaje y planificación de la variante D. *Propuesta.*
-  - `ADR-003-resolucion-del-reloj.md` — enmienda a ESPEC §2: granularidad ≠ unidades. *Propuesta.*
+- `ADR/` — **solo la plantilla y las decisiones transversales al diplomado.**
+  Los ADR de un ejercicio viven con el ejercicio: no se duplican aquí.
+  - `ADR-000-plantilla.md` — la plantilla. Se copia, no se edita.
+  - `LEEME.md` — qué ADR va dónde.
+
+  Los siete del Reto de Latencia Mínima (M1) están en
+  `Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/`:
+  - `ADR-001` frontera de medición (F1) · `ADR-002` variante D, memoria compartida
+  - `ADR-003` resolución del reloj · `ADR-004` dominio, listas de hosts
+  - `ADR-005` comparabilidad entre máquinas · `ADR-006` concurrencia y hilos
+  - `ADR-007` reducción de alcance a B y D
 
 ## Preguntas abiertas del diplomado
 

@@ -196,7 +196,13 @@ def main():
         ("PROMPT-MAESTRO.md", "PROMPT-MAESTRO.md", "El contrato completo, fuente de verdad."),
     ]
     tarjetas = [tarjeta(pathlib.Path(r), t, d, "md") for r, t, d in trans if (RAIZ / r).is_file()]
+    # Los ADR de un ejercicio viven CON el ejercicio (ver _Base-Conocimiento/ADR/LEEME.md),
+    # asi que el indice los recoge de los dos sitios en vez de exigir que se dupliquen.
     adr = sorted((RAIZ / "_Base-Conocimiento/ADR").glob("ADR-*.md"))
+    adr += sorted(RAIZ.glob("Modulo */Ejercicios/*/*/docs/ADR/ADR-*.md"))
+    # ADR-000 es la PLANTILLA, no una decision: no va en el listado de decisiones.
+    # Ademas existe en los dos sitios, asi que filtrarla evita listarla por duplicado.
+    adr = [a for a in adr if not a.stem.startswith("ADR-000")]
     for a in adr:
         rel = a.relative_to(RAIZ)
         titulo = a.stem.replace("-", " ")

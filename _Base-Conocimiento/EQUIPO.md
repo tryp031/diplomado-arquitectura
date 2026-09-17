@@ -46,4 +46,4 @@ es individual, cada uno entrega el trabajo completo citando su variante como apo
 
 - Plan de trabajo del reto: `Modulo 1/Ejercicios/Reto-Latencia-Minima/PLAN-EQUIPO.md`
 - Contrato para implementar una variante: `.../harness/README.md`
-- Decisión del dominio (13–14/09): `ADR/ADR-004-dominio-listas-de-hosts.md`
+- Decisión del dominio (13–14/09): `Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/ADR-004-dominio-listas-de-hosts.md`

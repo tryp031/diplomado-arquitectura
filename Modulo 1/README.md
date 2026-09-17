@@ -67,8 +67,12 @@ en el navegador.
 | `ADR-002` | Variante D — memoria compartida: mecanismo, lenguaje, planificación | propuesta |
 | `ADR-003` | Resolución del reloj — granularidad ≠ unidades | propuesta |
 | `ADR-004` | Dominio del reto: listas de hosts en vez de eco puro | propuesta |
+| `ADR-005` | Comparabilidad entre máquinas — no mezclar corridas de equipos distintos | propuesta |
+| `ADR-006` | Concurrencia: un hilo por conexión, y por qué D no puede tenerla | propuesta |
+| `ADR-007` | Reducción de alcance a las variantes B y D | propuesta |
 
-Todas en `_Base-Conocimiento/ADR/`.
+Todas en [`Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/`](Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/),
+que es donde viven: **un ADR viaja con el ejercicio que lo produjo.**
 
 ## Entregables
 
