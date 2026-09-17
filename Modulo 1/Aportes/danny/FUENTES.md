@@ -54,3 +54,37 @@ con decisiones, preguntas al docente y trabajo de la semana.
 
 > **Este es el documento para compartir con Freddy y Camilo.** Explica el sistema sin asumir que
 > ya conocen el harness, y contiene el reparto de tareas con fechas.
+
+---
+
+## `m1-presentacion-reto-latencia-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-09-16 |
+| **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
+| **Tema** | Draft de presentación del Reto de Latencia Mínima |
+| **Tipo** | `borrador` — presentación en elaboración, no aprobada por el equipo |
+| **Fuentes** | `INFORME.md` · `GUION-VIDEO.md` · `docs/archivo/control-Bc-tcp-c.md` · ADR-001, 004 y 007 · mediciones propias del reto |
+| **Estado** | **DRAFT** · ⬜ sin revisar por Freddy ni Camilo · pendiente de la reunión del 21/09 |
+| **Origen** | Elaborado con Claude Code sobre el material del repositorio. Ninguna cifra es inventada: todas salen del informe o de `analyze.py` |
+
+**Qué contiene:** 13 láminas de presentación + 1 lámina interna de control. El arco es
+anticlímax (el objetivo ya estaba cumplido) → reformulación de la pregunta → diseño del
+experimento → la frontera de medición F1 → el dominio → cuatro resultados → trade-offs →
+cierre. Notas del orador en cada lámina, con tiempos.
+
+**Cómo se usa:** se abre en cualquier navegador, sin servidor. `←/→` o espacio para navegar,
+`N` muestra las notas del orador, `T` alterna claro/oscuro. Imprimir a PDF da una lámina por
+página con las notas incluidas.
+
+**Decisiones abiertas que afectan al contenido** (lámina 14, no se presenta):
+
+- Si se usan o no las cifras archivadas de `Bc` — de ellas depende el titular del 9 % / 91 %.
+- Qué corrida es la oficial, la del 10/09 o la del 14/09: cambia la tabla de la lámina 8.
+- Duración: hoy suma ~7 min y el video son 5 como máximo.
+
+**Advertencia de trazabilidad:** la lámina 7 usa datos de un experimento cuyo código ya no
+está en el árbol (ADR-007). Está marcado como «archivada» en la propia lámina y explicado en
+las notas del orador. **No presentarlo como reproducible en vivo.**
