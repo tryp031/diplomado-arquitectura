@@ -91,7 +91,6 @@ Las mismas mediciones, lanzadas desde el navegador y desde la línea de comandos
 | Variante | Desde `./run.sh` | Desde la aplicación web |
 |---|---|---|
 | B · TCP en Python | 13,4 µs | 13,46 µs |
-| Bc · TCP en C | 11,5 µs | 11,67 µs |
 | D · memoria compartida | 83 ns | 83 ns |
 
 Idénticos. Quien aprieta el botón no cambia lo que se mide.
@@ -161,12 +160,8 @@ reto-latencia-group2/
 │   ├── tabla-hosts.csv     el dominio: fuente única de verdad
 │   ├── clasificador.h/.py  la clasificación, en C y en Python
 │   ├── reloj.h             el instrumento de medición, compartido
-│   ├── variante-B-tcp/     TCP crudo en Python
-│   ├── control-Bc-tcp-c/   TCP crudo en C (control: aísla el lenguaje)
-│   ├── variante-D-shm/     memoria compartida + espera activa
-│   ├── variante-E-icmp/    ICMP (línea base: responde el kernel)
-│   ├── variante-A-http/    ⬜ Freddy
-│   ├── variante-C-ipc/     ⬜ Camilo
+│   ├── variante-B-tcp/     TCP crudo en Python        → documenta Freddy
+│   ├── variante-D-shm/     memoria compartida en C    → documenta Camilo
 │   ├── control-dominio/    mide cuánto cuesta clasificar
 │   ├── run.sh · analyze.py el harness de MEDICIÓN
 │   ├── demo.py             demostración por línea de comandos
@@ -176,8 +171,15 @@ reto-latencia-group2/
 └── docs/
     ├── ENUNCIADO.md        el reto, literal
     ├── DISENO-ARQUITECTURA.md
-    └── ADR/                las cinco decisiones registradas
+    ├── archivo/            hallazgos de lo que se retiró del árbol (ADR-007)
+    └── ADR/                las siete decisiones registradas
 ```
+
+> **Alcance de la entrega: B y D.** El 16/09 se retiraron del árbol las variantes A y C
+> (nunca implementadas) y los experimentos `Bc` (TCP en C) y `E` (ICMP). Sus mediciones
+> eran reales y siguen en [`docs/archivo/`](docs/archivo/); su código, en el historial de
+> git. El porqué y lo que eso cuesta, en
+> [ADR-007](docs/ADR/ADR-007-reduccion-de-alcance.md).
 
 > **Dos cosas distintas se llaman «harness» en este proyecto.** `sistema/run.sh` +
 > `analyze.py` son el **harness de medición**: orquestan una corrida. `verificar.py`
@@ -203,15 +205,25 @@ Los resultados del informe salen de aquí, nunca de la aplicación web.
 
 ## Resultados
 
-| Arquitectura | Mediana | Cola p99,9 | Objetivo 1 ms |
-|---|---|---|---|
-| D · memoria compartida | **0,08 µs** | 0,12 µs | ✅ 12 000× por debajo |
-| E · ICMP (el kernel) | 9,7 µs | 14,8 µs | ✅ |
-| Bc · TCP en C | 11,5 µs | 30,1 µs | ✅ |
-| B · TCP en Python | 13,4 µs | 39,0 µs | ✅ |
-| — red real a internet | 16 984 µs | 52 111 µs | ❌ 17× por encima |
+| Arquitectura | Mediana | Cola p99,9 | Objetivo 1 ms | |
+|---|---|---|---|---|
+| D · memoria compartida | **0,08 µs** | 0,12 µs | ✅ 12 000× por debajo | reproducible |
+| B · TCP en Python | 13,4 µs | 39,0 µs | ✅ | reproducible |
+| *E · ICMP (el kernel)* | *9,7 µs* | *14,8 µs* | *✅* | archivada |
+| *Bc · TCP en C* | *11,5 µs* | *30,1 µs* | *✅* | archivada |
+| *— red real a internet* | *16 984 µs* | *52 111 µs* | *❌ 17× por encima* | archivada |
 
 Sobre 9,15 millones de muestras. **Equipo de referencia: Apple M4, macOS 26.6, arm64.**
+
+Las filas en cursiva se midieron de verdad, pero su código ya no está en el árbol
+(ADR-007): se recalculan solo desde el historial de git. Las dos primeras se
+reproducen hoy con `./run.sh`.
+
+> **Matiz obligatorio al comparar B con D:** entre las dos cambian **el transporte y el
+> lenguaje a la vez**, así que el factor 159× no es atribuible a ninguno de los dos por
+> sí solo. Quien ya separó las causas es el control `Bc` —9 % el lenguaje, 91 % el
+> transporte—, y ese trabajo está en
+> [`docs/archivo/control-Bc-tcp-c.md`](docs/archivo/control-Bc-tcp-c.md).
 
 **El objetivo se cumple con cualquiera de las opciones locales.** El reto nunca
 estuvo en alcanzar el número: está en el método, y en explicar qué se compra y
@@ -222,12 +234,13 @@ qué se paga con cada arquitectura.
 ## Para el equipo
 
 - El contrato para implementar una variante está en [`sistema/README.md`](sistema/README.md).
-- Freddy → variante A (HTTP/1.1), puerto 9100. Camilo → variante C (socket Unix), puerto 9102.
-- En cuanto exista `sistema/variante-A-http/server.py`, la aplicación la detecta sola
-  y aparece en la lista con su botón de arrancar. No hay que tocar nada más.
-- Las variantes en Python se desarrollan en cualquier máquina, Windows nativo incluido.
-  El contrato es de **correctitud**, no de velocidad: la corrida final de medición son
-  minutos en el equipo de referencia.
+- **División acordada el 15/09:** Freddy documenta la variante B (TCP en Python);
+  Camilo documenta la variante D (memoria compartida en C); Daniel se ocupa del CSV
+  del plano de control, la limpieza del código y la presentación.
+- Los tres documentos a producir son **manual de instalación**, **manual de uso** y
+  **manual técnico**. Quién firma cada uno se concreta en la reunión del **21/09**.
+- Si aparece una variante nueva en `sistema/`, la aplicación la detecta sola en cuanto
+  exista su `server.py`. No hay que registrarla en ningún sitio.
 - Si trabajás con Claude Code, la skill `reto-latencia` carga el criterio del proyecto
   (qué no se toca y por qué). Invocala con `/reto-latencia` antes de empezar.
 - Antes de decir «listo»: `python3 verificar.py`.

@@ -1,3 +1,15 @@
+> **DOCUMENTO ARCHIVADO.** El código que produjo estas mediciones fue eliminado del
+> árbol el 16/09/2026 al reducir el alcance de la entrega a las variantes B y D
+> (ver `docs/ADR/ADR-007-reduccion-de-alcance.md`).
+>
+> - **Qué era:** Control Bc — TCP crudo en C, en `sistema/control-Bc-tcp-c/`.
+> - **Por qué se conserva este texto:** las mediciones son reales, fueron tomadas el
+>   10/09/2026 sobre el equipo de referencia y sostienen conclusiones del informe.
+>   El código se borró; el hallazgo no.
+> - **Cómo recuperar el código:** `git log --all -- "sistema/control-Bc-tcp-c/"` y `git checkout <sha> -- "sistema/control-Bc-tcp-c/"`.
+>
+---
+
 # Control Bc — TCP crudo en C
 
 **No es una quinta variante del estudio. Es un experimento de control.**

@@ -2,13 +2,21 @@
 
 **Diplomado en Arquitectura de Software y Cloud Computing** · Pontificia Universidad Javeriana Cali  
 **Módulo 1** — Fundamentos de la Arquitectura de Software · **Group 2**  
-Daniel Mazo Serna · Freddy Aparicio Marín · Bryan Brack Perilla · Camilo Céspedes Leguizamón
+Daniel Mazo Serna · Freddy Aparicio Marín · Camilo Céspedes Leguizamón
 
 > Este documento cubre los **entregables 2 y 4** del enunciado (documentación técnica e informe
 > de resultados), que el enunciado permite fusionar.
 >
-> **Estado: BORRADOR del 10/09/2026.** Contiene resultados reales y verificables de tres
-> configuraciones medidas. Las secciones marcadas ⬜ esperan las variantes A y C.
+> **Estado: BORRADOR. Resultados del 10/09 y 14/09/2026.** Contiene mediciones reales y
+> verificables.
+>
+> ⚠️ **Pendiente de actualizar tras el [ADR-007](reto-latencia-group2/docs/ADR/ADR-007-reduccion-de-alcance.md)
+> (16/09).** El alcance se redujo a las variantes **B** y **D**: las variantes A y C nunca se
+> implementaron, y los experimentos `Bc` (TCP en C) y `E` (ICMP) se midieron y se retiraron del
+> árbol. Sus cifras siguen siendo válidas y están en
+> `reto-latencia-group2/docs/archivo/`, pero **ya no se reproducen desde el código**.
+> Las secciones marcadas ⬜ y toda mención a A, C, `Bc` o `E` deben revisarse contra ese ADR
+> antes de entregar.
 
 ---
 
@@ -305,8 +313,8 @@ Agregado de 3 rondas × 1 000 000 por fila. Todo en **nanosegundos**.
 | **muestras > 1 ms** | **363** | **141** | **0** |
 | Integridad | — | 3 000 000 OK | 3 000 000 OK |
 
-**Figuras:** `harness/graficas/percentiles.svg` y `harness/graficas/histograma.svg`.
-Se regeneran con `python3 harness/graficas.py` (sin dependencias externas).
+**Figuras:** `reto-latencia-group2/sistema/graficas/percentiles.svg` y `…/histograma.svg`.
+Se regeneran con `python3 reto-latencia-group2/sistema/graficas.py` (sin dependencias externas).
 
 ### 6.1 Contraste por lotes para la variante D
 
@@ -539,10 +547,11 @@ runtime en el log, y ejecuta el mismo analizador para todas las configuraciones.
 
 | Entregable del enunciado | Ubicación |
 |---|---|
-| 1 · Código fuente | `harness/` completo |
+| 1 · Código fuente | `reto-latencia-group2/` completo |
 | 2 · Documentación técnica | este documento, §§ 2–5 |
-| 3 · Logs de ejecución | `harness/resultados/ejecucion-*.log` |
+| 3 · Logs de ejecución | `reto-latencia-group2/sistema/resultados/ejecucion-*.log` |
 | 4 · Informe de resultados vs 1 ms | este documento, §§ 6–8 |
 | 5 · Video ≤ 5 min o demo en vivo | ⬜ pendiente |
 
-Muestras crudas: `harness/resultados/resultados-{B,Bc,D}-{1,2,3}.csv`, 9 000 000 de filas.
+Muestras crudas: `reto-latencia-group2/sistema/resultados/resultados-{B,D}-{1,2,3}.csv`.
+Las de `Bc` se retiraron con el ADR-007; sus cifras quedan en `docs/archivo/`.

@@ -1,3 +1,11 @@
+> **DOCUMENTO ARCHIVADO** el 16/09/2026. Planeación ya ejecutada: se conserva por
+> trazabilidad de cómo se decidió, no como guía vigente. El estado actual está en
+> `reto-latencia-group2/README.md` y en los ADR.
+>
+> ⚠️ Menciona variantes y controles retirados del árbol (ver ADR-007).
+
+---
+
 # Qué sistema construir — menú de opciones para el equipo
 
 > Para discutir en el grupo y elegir. 10/09/2026.

@@ -24,12 +24,11 @@ UMBRAL_NS = 1_000_000  # el objetivo del enunciado: 1 ms
 
 ESTILO = {
     "B":  ("#2563eb", "B · Python + TCP"),
-    "Bc": ("#ea580c", "Bc · C + TCP (control)"),
     "C":  ("#16a34a", "C · Unix socket / UDP"),
     "A":  ("#a16207", "A · HTTP/REST"),
     "D":  ("#7c3aed", "D · C + memoria compartida"),
 }
-ORDEN = ["A", "B", "Bc", "C", "D"]
+ORDEN = ["B", "D"]
 PERCENTILES = [0, 50, 90, 99, 99.9, 99.99, 99.999]
 
 

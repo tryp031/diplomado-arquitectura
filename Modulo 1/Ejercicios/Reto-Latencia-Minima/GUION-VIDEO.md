@@ -6,6 +6,11 @@
 
 ---
 
+> ⚠️ **Pendiente de revisar tras el ADR-007 (16/09).** El guion cita el control `Bc` y la
+> variante `E`, que ya no están en el árbol. Sus mediciones siguen siendo válidas
+> (`reto-latencia-group2/docs/archivo/`) pero no se reproducen en vivo. Ver también el draft
+> de presentación en `Modulo 1/Aportes/danny/m1-presentacion-reto-latencia-danny.html`.
+
 ## Principio rector
 
 **Cinco minutos no alcanzan para explicar el sistema. Alcanzan para defender una tesis.**

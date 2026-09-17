@@ -27,20 +27,46 @@ PERCENTILES = [50.0, 90.0, 99.0, 99.9, 99.99]
 
 
 def leer_csv(ruta: Path) -> list[int]:
-    """Lee un CSV 'iteracion,latencia_ns' y devuelve las latencias en ns."""
+    """Lee un CSV de muestras y devuelve las latencias en ns.
+
+    La columna se localiza POR NOMBRE, no por posicion. Leer `fila[-1]` funciono
+    mientras el formato fue `iteracion,latencia_ns`, y se rompio en silencio el 15/09
+    cuando la concurrencia (ADR-006) anadio una tercera columna `hilo`: la ultima
+    columna paso a ser el numero de hilo, que vale 0 en una corrida de un solo hilo.
+    El resultado no era un error sino un analisis de puros ceros, informando ademas
+    «p99.9 < 1 ms: SI» sobre datos inexistentes.
+
+    Por eso aqui se prefiere fallar ruidosamente a adivinar: un CSV cuyo formato no
+    se reconoce detiene el analisis en vez de producir un numero que nadie verifica.
+    """
     muestras: list[int] = []
     with ruta.open(newline="") as fh:
         lector = csv.reader(fh)
         cabecera = next(lector, None)
-        # Tolera CSV con o sin cabecera.
-        if cabecera and not cabecera[0].strip().lstrip("-").isdigit():
-            pass  # era cabecera, ya consumida
-        elif cabecera:
-            muestras.append(int(cabecera[-1]))
-        for fila in lector:
+        if cabecera is None:
+            raise SystemExit(f"error: {ruta} esta vacio")
+
+        hay_cabecera = not cabecera[0].strip().lstrip("-").isdigit()
+        if hay_cabecera:
+            nombres = [c.strip().lower() for c in cabecera]
+            if "latencia_ns" not in nombres:
+                raise SystemExit(
+                    f"error: {ruta} tiene cabecera pero no una columna 'latencia_ns'.\n"
+                    f"       columnas encontradas: {', '.join(nombres)}")
+            col = nombres.index("latencia_ns")
+        else:
+            # Sin cabecera: el formato historico es `iteracion,latencia_ns`.
+            col = 1 if len(cabecera) >= 2 else 0
+            muestras.append(int(cabecera[col]))
+
+        for n, fila in enumerate(lector, start=2):
             if not fila:
                 continue
-            muestras.append(int(fila[-1]))
+            if len(fila) <= col:
+                raise SystemExit(f"error: {ruta}:{n} tiene {len(fila)} columnas, "
+                                 f"se esperaba la latencia en la {col + 1}")
+            muestras.append(int(fila[col]))
+
     if not muestras:
         raise SystemExit(f"error: {ruta} no contiene muestras")
     return muestras

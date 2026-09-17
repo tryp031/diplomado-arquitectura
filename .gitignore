@@ -12,11 +12,16 @@ __pycache__/
 venv/
 
 # --- Binarios compilados del reto de latencia ---
+# Se regeneran con `make`. La carpeta se llamo `harness/` hasta el 15/09 y las reglas
+# apuntaban ahi: nunca llegaron a activarse y los binarios entraron al repo. Ahora
+# se excluyen por NOMBRE, que es estable aunque el arbol se reorganice otra vez.
 *.o
 *.out
-Modulo*/Ejercicios/*/harness/control-*/client
-Modulo*/Ejercicios/*/harness/control-*/server
-Modulo*/Ejercicios/*/harness/control-*/micro
+**/sistema/*/client
+**/sistema/*/server
+**/sistema/*/micro
+**/sistema/*/veredicto
+**/contrato/coherencia
 
 # --- Datos crudos de medición (≈220 MB) ---
 # Los CSV por muestra NO se versionan: se regeneran con ./run.sh
