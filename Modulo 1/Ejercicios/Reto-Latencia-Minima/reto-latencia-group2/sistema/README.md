@@ -12,10 +12,10 @@ buena voluntad.
 ## Cómo se usa
 
 ```bash
-cd harness
+cd sistema
 ./run.sh B 1                            # variante B, ronda 1, valores por defecto
 ./run.sh B 1 --warmup 20000 --iters 100000   # corrida corta de prueba
-./run.sh E 1 --destino 127.0.0.1        # línea base ICMP (sin servidor propio)
+./run.sh D 1                            # variante D, memoria compartida
 ./analyze.py --md resultados/*.csv      # tabla comparativa final
 
 # Demostración en vivo — servidor aparte, NUNCA el cliente medidor
@@ -33,33 +33,36 @@ nunca se mide un binario obsoleto y el lenguaje sigue siendo libre por variante.
 ## Estructura
 
 ```text
-harness/
+sistema/
 ├── README.md            ← este archivo: el contrato
 ├── analyze.py           ← ÚNICO script de métricas. No tocar por variante.
 ├── run.sh               ← orquestador de una corrida
-├── variante-B-tcp/      ← IMPLEMENTACIÓN DE REFERENCIA (probada)
+├── variante-B-tcp/      ← TCP en Python · referencia — documenta Freddy
 │   ├── server.py
 │   └── client.py        ← plantilla del bucle de medición
-├── variante-A-http/     ← por implementar
-├── variante-C-ipc/      ← por implementar
-├── variante-D-shm/      ← IMPLEMENTADA en C11 (Daniel) — ver su README
-├── variante-E-icmp/     ← LÍNEA BASE: ICMP. Responde el KERNEL, no un proceso nuestro
-├── control-Bc-tcp-c/    ← CONTROL: TCP en C. No es variante; aisla lenguaje vs transporte
+├── variante-D-shm/      ← memoria compartida en C11 — documenta Camilo
 ├── control-dominio/     ← CONTROL: cuánto cuesta clasificar (~1,9 ns)
 ├── tabla-hosts.csv      ← EL DOMINIO. Fuente única de verdad. No duplicar.
-├── clasificador.h       ← el dominio en C   (Bc, D, E)
-├── clasificador.py      ← el dominio en Python (A, B)
+├── clasificador.h       ← el dominio en C      (D)
+├── clasificador.py      ← el dominio en Python (B)
 ├── demo.py              ← DEMOSTRACIÓN EN VIVO (entregable 5). No sirve para medir.
 ├── reloj.h              ← instrumento compartido por las variantes compiladas
+├── graficas.py          ← figuras SVG del informe, sin dependencias
+├── visor/               ← visor estático de resultados
 └── resultados/          ← CSV + logs de ejecución
 ```
+
+> **Alcance: B y D.** Las variantes A y C nunca se implementaron; los experimentos `Bc`
+> (TCP en C) y `E` (ICMP) se midieron y se retiraron el 16/09. Sus hallazgos están en
+> [`../docs/archivo/`](../docs/archivo/) y el porqué en
+> [ADR-007](../docs/ADR/ADR-007-reduccion-de-alcance.md).
 
 ---
 
 ## ⭐ EL DOMINIO — leer antes de implementar A o C
 
 **Cambió el 14/09.** El sistema ya no es un eco puro: es un **clasificador de hosts**.
-Decisión completa en [`ADR-004`](../../../_Base-Conocimiento/ADR/ADR-004-dominio-listas-de-hosts.md).
+Decisión completa en [`ADR-004`](../docs/ADR/ADR-004-dominio-listas-de-hosts.md).
 
 ```text
 ESTÍMULO — 32 B                            RESPUESTA — 32 B
@@ -180,12 +183,23 @@ Lo único que importa es que produzcas el mismo CSV.
 
 Agregado por variante. Microsegundos. El umbral se evalúa contra **p99.9**, no contra la media.
 
-| | **D** shm | **E** ICMP *(línea base)* | **Bc** C+TCP *(control)* | **B** Python+TCP | **E-0** internet *(línea base)* |
-|---|---|---|---|---|---|
-| p50 | **0,08** | 9,62–10,00 | 11,54–11,62 | 13,33–13,46 | 16 984 |
-| p99.9 | **0,12** | 13,88–14,83 | 18,79–30,12 | 20,67–38,96 | 52 111 |
-| máx | 1,71–1,88 | 17,0–67,9 | 111–154 | 133–345 | 52 111 |
-| **muestras > 1 ms** | **0** / 3 M | **0** / 150 k | **0** / 3 M | **0** / 3 M | **300** / 300 ❌ |
+Reproducibles desde el árbol:
+
+| | **D** shm | **B** Python+TCP |
+|---|---|---|
+| p50 | **0,08** | 13,33–13,46 |
+| p99.9 | **0,12** | 20,67–38,96 |
+| máx | 1,71–1,88 | 133–345 |
+| **muestras > 1 ms** | **0** / 3 M | **0** / 3 M |
+
+Archivadas — medidas de verdad, código retirado del árbol el 16/09 (ADR-007):
+
+| | **E** ICMP *(línea base)* | **Bc** C+TCP *(control)* | **E-0** internet *(línea base)* |
+|---|---|---|---|
+| p50 | 9,62–10,00 | 11,54–11,62 | 16 984 |
+| p99.9 | 13,88–14,83 | 18,79–30,12 | 52 111 |
+| máx | 17,0–67,9 | 111–154 | 52 111 |
+| **muestras > 1 ms** | **0** / 150 k | **0** / 3 M | **300** / 300 ❌ |
 
 ### Cinco lecturas
 
@@ -238,16 +252,19 @@ resultados crudos son la evidencia del informe (AC-4); perderlos rompe la cadena
 macOS (medido). Para A, B y C da igual —`time.perf_counter_ns()` de Python ya usa el contador
 de hardware de 41,67 ns—, pero la regla estaba mal escrita y se corrigió:
 **verificar y reportar la granularidad real del reloj que use tu variante.**
-Ver [`ADR-003`](../../../../_Base-Conocimiento/ADR/ADR-003-resolucion-del-reloj.md).
+Ver [`ADR-003`](../docs/ADR/ADR-003-resolucion-del-reloj.md).
 
 ## Siguientes pasos
 
-- [x] ~~Rehacer la variante B en C~~ → `control-Bc-tcp-c/`
+- [x] ~~Rehacer la variante B en C~~ → medido 10/09, archivado en `docs/archivo/`
 - [x] ~~Decidir el dominio~~ → ADR-004, clasificador de hosts, implementado y remedido
-- [x] ~~Línea base de red real~~ → `variante-E-icmp/`, ICMP loopback + internet
+- [x] ~~Línea base de red real~~ → medida 13/09, archivada en `docs/archivo/`
 - [x] ~~Demostración en vivo~~ → `demo.py`
-- [ ] **Implementar A (HTTP) — Freddy.** Puerto 9100. La más importante del informe
-- [ ] **Implementar C (Unix socket) — Camilo.** Puerto 9102
+- [x] ~~Reducir el alcance a B y D~~ → ADR-007, 16/09
+- [ ] **Documentación técnica de la variante B — Freddy.**
+- [ ] **Documentación técnica de la variante D — Camilo.**
+- [ ] **Repetir bajo carga controlada**, para separar «el sistema tiene cola» de «la
+      máquina estaba ocupada». Es el experimento que sigue faltando.
 - [ ] Congelar `../ESPEC-MEDICION.md` con las enmiendas de ADR-001, ADR-003 y ADR-004
 - [ ] Repositorio Git compartido
 - [ ] Repetir bajo carga controlada (ver aviso de reproducibilidad)

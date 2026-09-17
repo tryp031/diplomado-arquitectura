@@ -215,7 +215,7 @@ def incrustar_figuras(cuerpo, dir_graficas):
         svg = re.sub(r'<\?xml[^>]*\?>', '', svg).strip()
         bloque.append(f"<figure>{svg}<figcaption>{html.escape(pie)}</figcaption></figure>")
     if not bloque:
-        print("  aviso: no se encontraron los SVG; ejecuta antes harness/graficas.py")
+        print("  aviso: no se encontraron los SVG; ejecuta antes reto-latencia-group2/sistema/graficas.py")
         return cuerpo
 
     ancla = re.search(r"<p><strong>Figuras:</strong>.*?</p>", cuerpo, re.S)
@@ -229,7 +229,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--md", default=os.path.join(aqui, "INFORME.md"))
     ap.add_argument("--pdf", default=os.path.join(aqui, "INFORME.pdf"))
-    ap.add_argument("--graficas", default=os.path.join(aqui, "harness", "graficas"))
+    ap.add_argument("--graficas", default=os.path.join(aqui, "reto-latencia-group2", "sistema", "graficas"))
     ap.add_argument("--html", default=None, help="conservar el HTML intermedio")
     a = ap.parse_args()
 

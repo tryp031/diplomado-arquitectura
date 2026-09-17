@@ -41,10 +41,7 @@ def pct(ordenados, p):
 
 VARIANTES = {
     "D":  {"nombre": "Memoria compartida",  "detalle": "C11 · espera activa · cero llamadas al sistema", "lenguaje": "C"},
-    "E":  {"nombre": "ICMP (kernel)",       "detalle": "socket propio · responde el sistema operativo",  "lenguaje": "C"},
-    "Bc": {"nombre": "TCP crudo en C",      "detalle": "control: aísla lenguaje de transporte",          "lenguaje": "C"},
     "B":  {"nombre": "TCP crudo en Python", "detalle": "TCP_NODELAY · conexión persistente",             "lenguaje": "Python"},
-    "E0": {"nombre": "Red real a internet", "detalle": "línea base · ICMP a 1.1.1.1",                    "lenguaje": "C"},
 }
 
 def cargar(patron):

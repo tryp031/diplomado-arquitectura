@@ -522,42 +522,120 @@
   }
 
   /* ═══════════ Historial ═══════════ */
-  var COLS = ['seq', 'ts_control_recibe', 'ts_control_responde', 'ts_nav_envio', 'ts_nav_recibe',
-              'variante', 'host', 'ip', 'veredicto', 'latencia_sistema_ns', 'control_overhead_ns',
-              'latencia_web_ns', 't0_f1_ns', 't1_f1_ns', 'ok', 'nota', 'error'];
+  /*
+   * Columnas del CSV. Una por cada cosa que la tabla de la interfaz muestra, con
+   * los MISMOS valores ya formateados: lo que se ve en pantalla es lo que se abre
+   * en Excel. Sin columnas tecnicas —la frontera F1 y el overhead del control se
+   * sustentan con sistema/resultados/, que es la medicion oficial; esto es el
+   * registro de lo que se pregunto desde la web, no evidencia del informe—.
+   *
+   * La UNIDAD VA EN EL ENCABEZADO, no en la celda. `fmt()` es adaptativa (elige
+   * ns, us o ms segun la magnitud) y eso en pantalla esta bien, pero en una
+   * columna mezclaria unidades: 83 ns junto a 13,5 us deja de poder ordenarse.
+   * Aqui cada columna tiene una unidad fija y la celda lleva solo el numero.
+   */
+  var SEP = ',';
 
-  function aCSV(es) {
-    var L = [];
-    L.push('# Estimulos del plano de control - Reto de Latencia Minima - Group 2');
-    L.push('# generado: ' + new Date().toISOString() + '  ·  ' + es.length + ' entradas');
-    L.push('#');
-    L.push('# RELOJES (no mezclar, no restar entre si):');
-    L.push('#   latencia_sistema_ns, control_overhead_ns, t0_f1_ns, t1_f1_ns');
-    L.push('#       -> reloj MONOTONO del servidor (time.perf_counter_ns). Origen arbitrario.');
-    L.push('#   latencia_web_ns');
-    L.push('#       -> reloj MONOTONO del navegador (performance.now). Otro origen, otro proceso.');
-    L.push('#   ts_*  -> reloj de PARED. Dicen a que hora ocurrio; no sirven para medir.');
-    L.push('#');
-    L.push('# latencia_sistema_ns es el UNICO numero que cuenta para el reto:');
-    L.push('#   es t1-t0 alrededor del intercambio real, frontera F1 (ADR-001).');
-    L.push('# latencia_web_ns incluye HTTP, JSON, React y el bucle de eventos: es el contraste.');
-    L.push(COLS.join(','));
-    es.forEach(function (e) {
-      L.push(COLS.map(function (c) {
-        var v = e[c];
-        if (v === null || v === undefined) return '';
-        v = String(v);
-        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
-      }).join(','));
-    });
-    return L.join('\n') + '\n';
+  /* Coma como separador de campos: es el estandar y lo lee cualquier herramienta
+     sin configurar nada. Obliga a que el decimal sea PUNTO, y de ahi sale la unica
+     trampa del archivo: en Excel con configuracion regional es-CO el punto es
+     separador de MILES, asi que `75.792` puede leerse como 75792. Por eso el
+     archivo abre con la directiva `sep=,` —que Excel reconoce— y por eso se emite
+     sin separador de miles: si no hay puntos de millar, no hay ambiguedad que
+     resolver mal. Ver la nota al pie de la cabecera. */
+  function dec(v, max) {
+    if (v === null || v === undefined || isNaN(v)) return '';
+    return v.toLocaleString('en-US', {maximumFractionDigits: max, useGrouping: false});
+  }
+  function fecha(iso) { var m = /^(\d{4}-\d{2}-\d{2})/.exec(iso || ''); return m ? m[1] : ''; }
+  /* Hora de pared con milisegundos, IGUAL que la tabla de la interfaz.
+     Va envuelta en ="..." porque Excel reconoce 21:02:08.754 como una hora y la
+     reformatea a su manera: se come las horas y redondea a decimas, con lo que
+     inicio y fin —que difieren en 1-4 ms— salen identicos en pantalla. El prefijo
+     `=` la fija como texto y se ve el valor exacto. Excel y Sheets lo evaluan; una
+     herramienta que lea el CSV en crudo vera el envoltorio, que es el precio de que
+     esto se abra bien en la hoja de calculo, que es para lo que existe.
+     Solo se aplica a las horas: hacerlo con texto de entrada como `detalle` abriria
+     la puerta a inyeccion de formulas. */
+  function horaTexto(iso) {
+    var m = /T(\d{2}:\d{2}:\d{2}\.\d{1,6})/.exec(iso || '');
+    return m ? '="' + m[1].slice(0, 12) + '"' : '';
   }
 
+  var COLS = [
+    ['n',           function (e) { return e.seq; }],
+    ['fecha',       function (e) { return fecha(e.ts_nav_envio || e.ts_control_recibe); }],
+    ['hora_inicio', function (e) { return horaTexto(e.ts_nav_envio || e.ts_control_recibe); }],
+    ['hora_fin',    function (e) { return horaTexto(e.ts_nav_recibe || e.ts_control_responde); }],
+    ['variante',    function (e) { return e.variante; }],
+    ['host',        function (e) { return e.host; }],
+    ['ip',          function (e) { return e.ip; }],
+    ['veredicto',   function (e) { return e.veredicto; }],
+    /* Dos decimales, no uno. `fmt()` en pantalla usa 1 decimal a partir de 10 us,
+       pero aqui la columna cubre TODO el rango del reto de una vez: con un solo
+       decimal la variante D (0,083 us) se redondea a 0,1 y desaparece la cifra que
+       sostiene el informe. Con dos queda 0,08, que es como la reportan analyze.py
+       y la tabla de resultados. */
+    ['sistema_us',  function (e) { return e.latencia_sistema_ns == null ? '' : dec(e.latencia_sistema_ns / 1000, 2); }],
+    ['web_ms',      function (e) { return e.latencia_web_ns == null ? '' : dec(e.latencia_web_ns / 1000000, 1); }],
+    ['resultado',   function (e) { return e.ok ? 'OK' : 'ERROR'; }],
+    ['detalle',     function (e) { return e.error || e.nota || ''; }]
+  ];
+
+  function celda(v) {
+    if (v === null || v === undefined) return '';
+    v = String(v);
+    // Las horas ya vienen como ="hh:mm:ss.mmm": entrecomillarlas otra vez las romperia.
+    if (/^="[\d:.]+"$/.test(v)) return v;
+    return (v.indexOf(SEP) >= 0 || /["\n]/.test(v)) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+
+  function aCSV(es) {
+    var vars = {}; es.forEach(function (e) { if (e.variante) vars[e.variante] = 1; });
+    var ms = mediana(es.map(function (e) { return e.latencia_sistema_ns; }).filter(Boolean));
+
+    /* Encabezado ejecutivo: cuatro lineas de clave;valor, sin `#`. Excel no trata
+       `#` como comentario —lo mete como fila de datos—, asi que un bloque
+       clave/valor se lee como el encabezado de un informe en vez de como basura. */
+    var L = [
+      /* Excel respeta esta directiva por encima de su configuracion regional: sin
+         ella, un Excel es-CO abre el archivo entero en la columna A. */
+      'sep=' + SEP,
+      celda('Reto de Latencia Minima') + SEP + celda('Group 2'),
+      celda('Generado') + SEP + celda(new Date().toLocaleString('es-CO', {hour12: false}).replace(',', '')),
+      celda('Estimulos') + SEP + celda(es.length) +
+        SEP + celda('variante ' + (Object.keys(vars).join(' y ') || '-')) +
+        SEP + celda(ms ? 'mediana sistema ' + dec(ms / 1000, 2) + ' us' : ''),
+      '',
+      celda('UNIDADES') + SEP + celda('el sufijo del nombre de la columna dice en que esta medida'),
+      celda('  _us') + SEP + celda('MICROsegundos - millonesima de segundo') + SEP + celda('1 us = 0.001 ms'),
+      celda('  _ms') + SEP + celda('MILIsegundos - milesima de segundo') + SEP + celda('1 ms = 1000 us'),
+      celda('  referencia') + SEP + celda('el objetivo del enunciado es 1 ms = 1000 us'),
+      '',
+      celda('COLUMNAS'),
+      celda('  sistema_us') + SEP + celda('lo que tarda el SISTEMA, frontera F1 - es la UNICA medicion del reto'),
+      celda('  web_ms') + SEP + celda('lo que anade el navegador (HTTP + JSON + React) - solo contraste'),
+      celda('  hora_inicio / hora_fin') + SEP + celda('reloj de PARED: dicen cuando paso, no cuanto tardo'),
+      celda('  veredicto') + SEP + celda('LOCAL = lista blanca / EXTERNO = lista negra / DESCONOCIDO = no esta en la tabla'),
+      celda('  detalle') + SEP + celda('solo se llena cuando la fila necesita explicacion: un DESCONOCIDO o un ERROR'),
+      '',
+      celda('Decimales con PUNTO') + SEP + celda('si Excel muestra 7596 donde deberia decir 75.96, su regional usa coma decimal'),
+      ''
+    ];
+    L.push(COLS.map(function (c) { return c[0]; }).join(SEP));
+    es.forEach(function (e) {
+      L.push(COLS.map(function (c) { return celda(c[1](e)); }).join(SEP));
+    });
+    /* BOM UTF-8: sin el, Excel en Windows abre los acentos corruptos. */
+    return '\ufeff' + L.join('\r\n') + '\r\n';
+  }
+
+
   /*
-   * Tabla plana, una fila por estímulo. El desglose completo —las marcas de F1,
-   * el overhead del control, el reloj de cada número— sigue viajando en el CSV
-   * y en el NDJSON: acá se muestra lo que se mira de un vistazo, no todo lo que
-   * se registra. Son dos audiencias distintas y no tienen por qué coincidir.
+   * Tabla plana, una fila por estímulo. Desde el 16/09 esta tabla y el CSV
+   * muestran LO MISMO, a propósito: lo que se ve en pantalla es lo que se abre en
+   * Excel. Las marcas de F1 y el overhead del control ya no se exportan desde
+   * aquí —los sustenta sistema/resultados/, que es la medición oficial—.
    *
    * inicio/fin son las marcas del NAVEGADOR cuando existen; para las entradas
    * que vienen del buffer del servidor tras un F5 se cae a las del servidor,
@@ -581,12 +659,6 @@
         b({className: 'btn alt', type: 'button', disabled: !vistos.length,
            onClick: function () { descargar(nombreArchivo('csv', fv), aCSV(vistos), 'text/csv'); }},
           'Descargar CSV'),
-        b({className: 'btn ghost', type: 'button', disabled: !vistos.length,
-           onClick: function () {
-             descargar(nombreArchivo('ndjson', fv),
-               vistos.map(function (e) { return JSON.stringify(e); }).join('\n') + '\n',
-               'application/x-ndjson');
-           }}, 'NDJSON'),
         b({className: 'btn ghost', type: 'button', disabled: !es.length, onClick: props.limpiar}, 'Limpiar')),
       div({className: 'filtros'},
         div({className: 'control'},
@@ -628,8 +700,12 @@
                 td({className: 'num w'}, fmt(e.latencia_web_ns)));
             })))),
       h(Porque, {titulo: 'qué se descarga'},
-        p(null, 'El CSV y el NDJSON llevan TODO el detalle que la tabla no muestra: las marcas de la ' +
-          'frontera F1, el overhead del plano de control y de qué reloj vino cada número.'),
+        p(null, 'El ', bold(null, 'CSV'), ' trae exactamente lo que ves en esta tabla, con los ' +
+          'mismos valores: se abre en Excel y se entiende sin convertir nada. La unidad va en el ' +
+          'nombre de la columna —', bold(null, 'sistema_us'), ' en microsegundos, ',
+          bold(null, 'web_ms'), ' en milisegundos— para que cada columna se pueda ordenar y graficar.'),
+        p(null, 'Las marcas de la frontera F1 no viajan aquí: la medición oficial del reto no sale ' +
+          'del plano de control, sale de ', code(null, 'sistema/run.sh'), '.'),
         p(null, 'El log vive en el navegador y en un buffer circular de 500 entradas en el plano de ' +
           'control, así sobrevive a un F5. No toca disco ni la ruta caliente del plano de datos.')));
   }

@@ -1,3 +1,11 @@
+> **DOCUMENTO ARCHIVADO** el 16/09/2026. Planeación ya ejecutada: se conserva por
+> trazabilidad de cómo se decidió, no como guía vigente. El estado actual está en
+> `reto-latencia-group2/README.md` y en los ADR.
+>
+> ⚠️ Menciona variantes y controles retirados del árbol (ver ADR-007).
+
+---
+
 # Plan de trabajo — Reto de Latencia Mínima (Group 2)
 
 > **Este es el documento maestro del reto.** Si algo no está aquí, no está planificado.

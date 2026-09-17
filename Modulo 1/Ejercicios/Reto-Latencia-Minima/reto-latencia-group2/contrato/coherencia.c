@@ -6,11 +6,12 @@
  * clasificador.h, para que verificar.py compare esa salida con la de
  * clasificador.py sobre las mismas entradas.
  *
- * Por que importa: `control-Bc-tcp-c` existe para AISLAR el efecto del lenguaje,
- * manteniendo todo lo demas igual. Si los dos clasificadores dejan de coincidir,
- * B y Bc pasan a hacer trabajos distintos y el control deja de controlar nada
- * —sin que ningun test falle y sin que nadie se entere—. Esta comprobacion es
- * barata y cierra ese agujero.
+ * Por que importa: B clasifica con clasificador.py y D con clasificador.h. El
+ * informe compara sus latencias, y esa comparacion solo vale si ambas hacen el
+ * MISMO trabajo. Si los dos clasificadores dejan de coincidir, B y D pasan a
+ * hacer trabajos distintos y la comparacion deja de significar nada —sin que
+ * ningun test falle y sin que nadie se entere—. Esta comprobacion es barata y
+ * cierra ese agujero.
  *
  *   cc -O2 -I../sistema -o coherencia coherencia.c
  */

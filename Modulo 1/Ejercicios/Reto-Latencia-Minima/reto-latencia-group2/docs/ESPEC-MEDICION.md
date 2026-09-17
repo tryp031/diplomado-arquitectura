@@ -57,7 +57,7 @@ conexión (se hace una vez, en el warmup) ni arranque del proceso.
 >
 > **No afecta a A, B ni C** — `time.perf_counter_ns()` ya usa el contador de hardware en macOS.
 > Justificación completa y consecuencias en
-> [`ADR-003`](../../../_Base-Conocimiento/ADR/ADR-003-resolucion-del-reloj.md).
+> [`ADR-003`](ADR/ADR-003-resolucion-del-reloj.md).
 
 ## 3. Métricas obligatorias
 

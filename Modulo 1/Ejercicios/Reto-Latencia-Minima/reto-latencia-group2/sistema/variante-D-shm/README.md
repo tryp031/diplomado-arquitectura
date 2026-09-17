@@ -1,8 +1,8 @@
 # Variante D — memoria compartida + espera activa
 
 **Responsable:** Daniel Mazo Serna · **Estado:** implementada y medida (3 rondas) · 2026-09-10
-**Decisiones de diseño:** [`ADR-002`](../../../../../_Base-Conocimiento/ADR/ADR-002-variante-D-memoria-compartida.md)
-**Frontera de medición:** [`ADR-001`](../../../../../_Base-Conocimiento/ADR/ADR-001-frontera-de-medicion.md) (F1, idéntica a las demás variantes)
+**Decisiones de diseño:** [`ADR-002`](../../docs/ADR/ADR-002-variante-D-memoria-compartida.md)
+**Frontera de medición:** [`ADR-001`](../../docs/ADR/ADR-001-frontera-de-medicion.md) (F1, idéntica a las demás variantes)
 
 Función en el estudio: marcar el extremo inferior. No es «la mejor arquitectura» —
 es el límite físico, y sirve para cuantificar qué hay que sacrificar para llegar ahí.
@@ -70,7 +70,7 @@ Granularidad real de cada reloj, medida en este equipo (Apple M4 / macOS 26.6):
 | Contador de hardware (timebase 125/3) | **41,67 ns** | piso físico de la máquina |
 
 La especificación del equipo obligaba a un reloj **diez veces más grueso que el fenómeno**.
-Enmienda propuesta en [`ADR-003`](../../../../../_Base-Conocimiento/ADR/ADR-003-resolucion-del-reloj.md).
+Enmienda propuesta en [`ADR-003`](../../docs/ADR/ADR-003-resolucion-del-reloj.md).
 
 **Consecuencia que hay que reportar siempre:** las muestras individuales están **cuantizadas
 en múltiplos de 41,67 ns**. No es ruido, es el tamaño del tic.

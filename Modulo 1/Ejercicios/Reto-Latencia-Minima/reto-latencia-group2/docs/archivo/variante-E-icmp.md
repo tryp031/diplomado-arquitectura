@@ -1,3 +1,15 @@
+> **DOCUMENTO ARCHIVADO.** El código que produjo estas mediciones fue eliminado del
+> árbol el 16/09/2026 al reducir el alcance de la entrega a las variantes B y D
+> (ver `docs/ADR/ADR-007-reduccion-de-alcance.md`).
+>
+> - **Qué era:** Variante E — ICMP echo, en `sistema/variante-E-icmp/`.
+> - **Por qué se conserva este texto:** las mediciones son reales, fueron tomadas el
+>   10/09/2026 sobre el equipo de referencia y sostienen conclusiones del informe.
+>   El código se borró; el hallazgo no.
+> - **Cómo recuperar el código:** `git log --all -- "sistema/variante-E-icmp/"` y `git checkout <sha> -- "sistema/variante-E-icmp/"`.
+>
+---
+
 # Variante E — ICMP echo · la idea del equipo, hecha bien
 
 > **Esta variante NO cumple el enunciado. Ese es exactamente su valor.**
@@ -31,7 +43,7 @@ que justificar — que es el entregable 2.
 ## Por qué un socket propio y no el comando `ping`
 
 Invocar `/sbin/ping` por iteración paga un `fork`+`exec`: **1–5 ms solo en arrancar el
-proceso.** Eso es la frontera **F4** que [ADR-001](../../../../_Base-Conocimiento/ADR/ADR-001-frontera-de-medicion.md)
+proceso.** Eso es la frontera **F4** que [ADR-001](../ADR/ADR-001-frontera-de-medicion.md)
 descarta por medir el lanzador de procesos en vez del sistema.
 
 Con `SOCK_DGRAM + IPPROTO_ICMP` la frontera sigue siendo **F1**, igual que A, B, C y D, y

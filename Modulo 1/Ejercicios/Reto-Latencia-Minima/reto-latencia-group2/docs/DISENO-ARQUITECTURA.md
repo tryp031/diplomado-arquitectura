@@ -186,7 +186,7 @@ El mismo sistema, sin cambiar una línea, reporta números distintos según la f
 | F5 — «solo ida» | t0 al enviar, t1 en el servidor al recibir | ~6 µs | ❌ Requiere relojes sincronizados; **inválido entre procesos** |
 
 **Se adopta F1.** Justificación completa y consecuencias en
-[`ADR-001`](../../../_Base-Conocimiento/ADR/ADR-001-frontera-de-medicion.md).
+[`ADR-001`](ADR/ADR-001-frontera-de-medicion.md).
 
 > **[REC] El mejor argumento del informe frente al docente es este:** no «logramos 13 µs», sino
 > «podríamos haber reportado 5 µs eligiendo otra frontera igual de defendible, y explicamos por

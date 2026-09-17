@@ -13,14 +13,13 @@ RONDA="${2:?uso: ./run.sh <VARIANTE> <RONDA> [args extra del cliente]}"
 shift 2
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# El alcance de la entrega son B y D (ADR-007). Las variantes A y C nunca se
+# implementaron; los controles Bc y E se midieron y se retiraron del arbol el 16/09.
+# Sus hallazgos siguen en docs/archivo/ y su codigo en el historial de git.
 case "$VARIANTE" in
-  A) DIR="$AQUI/variante-A-http" ;;
   B) DIR="$AQUI/variante-B-tcp" ;;
-  C) DIR="$AQUI/variante-C-ipc" ;;
   D) DIR="$AQUI/variante-D-shm" ;;
-  E) DIR="$AQUI/variante-E-icmp" ;;     # linea base: responde el KERNEL, no un proceso nuestro
-  Bc) DIR="$AQUI/control-Bc-tcp-c" ;;   # control: mismo transporte que B, otro lenguaje
-  *) echo "variante desconocida: $VARIANTE (use A|B|C|D|E|Bc)" >&2; exit 2 ;;
+  *) echo "variante desconocida: $VARIANTE (use B|D)" >&2; exit 2 ;;
 esac
 [[ -d "$DIR" ]] || { echo "falta el directorio $DIR" >&2; exit 2; }
 

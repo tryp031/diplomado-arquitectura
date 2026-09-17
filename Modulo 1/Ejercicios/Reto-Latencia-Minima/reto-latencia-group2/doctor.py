@@ -109,8 +109,8 @@ def main() -> int:
         linea(OK, f"compilador de C ({compilador}) y make")
     elif WINDOWS:
         linea(AVISO, "no hay compilador de C — es lo esperado en Windows nativo",
-              "Las variantes D (memoria compartida), E (ICMP) y el control Bc usan\n"
-              "POSIX y no existen en Windows. Para tenerlas, instalá WSL2:\n"
+              "La variante D (memoria compartida) usa POSIX y no existe en\n"
+              "Windows. Para tenerla, instalá WSL2:\n"
               "  wsl --install\n"
               "Sin eso el resto del sistema funciona igual (ver README, «Tres caminos»).")
     else:
@@ -131,13 +131,11 @@ def main() -> int:
     # ── Qué variantes existen hoy ────────────────────────────────────────────
     print()
     print("  VARIANTES DISPONIBLES AQUÍ")
+    # Alcance de la entrega: B y D (ADR-007). A y C nunca se implementaron; Bc y E
+    # se midieron y se retiraron del arbol el 16/09 — ver docs/archivo/.
     catalogo = [
         ("B",  "variante-B-tcp",      "TCP crudo (Python)",     "python"),
-        ("Bc", "control-Bc-tcp-c",    "TCP crudo (C) · control", "c"),
         ("D",  "variante-D-shm",      "Memoria compartida (C)",  "c"),
-        ("E",  "variante-E-icmp",     "ICMP · línea base (C)",   "c"),
-        ("A",  "variante-A-http",     "HTTP/1.1 — Freddy",       "python"),
-        ("C",  "variante-C-ipc",      "Socket Unix — Camilo",    "python"),
     ]
     for vid, carpeta, nombre, lenguaje in catalogo:
         d = SISTEMA / carpeta
