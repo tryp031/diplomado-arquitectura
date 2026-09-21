@@ -12,6 +12,34 @@ el detalle línea por línea está en `git log`.
 
 ---
 
+## 2026-09-21
+
+### Añadido
+- **README general:** pasos para ejecutar todo el sistema en Windows con WSL2
+  (`wsl -l -v`, `sudo apt update && sudo apt install -y build-essential make`, `./iniciar.sh`). (Camilo)
+- **README de la variante D:** secciones «Otras plataformas» y «Límites conocidos». La primera documenta una
+  corrida de D en Linux x86-64 sobre WSL2 (20/09, 3 × 1 M, 0 muestras sobre 1 ms); es una corrida propia y no
+  se mezcla con la del equipo de referencia (ADR-005). (Camilo)
+
+### Cambiado
+- **README general, «Arrancar»:** distingue Windows nativo (interfaz y variantes en Python) de WSL2 (todo el
+  sistema) y aclara que `iniciar.cmd` **no** arranca la variante D. (Camilo)
+- **README de la variante D:** tabla de archivos actualizada (`server.c` clasifica, `common.h` ya no contiene el
+  reloj, se listan `clasificador.h` y `reloj.h`), y la granularidad del reloj se presenta como dependiente de la
+  plataforma. (Camilo)
+- **`sistema/variante-D-shm/Makefile`:** añade `-D_GNU_SOURCE`. Es necesario para compilar en Linux/WSL2: sin él
+  falla (`clock_gettime`, `ftruncate` y `usleep` quedan sin declarar bajo `-std=c11`). El README de D ya lo
+  documenta, así que entran juntos. (Camilo)
+
+### Detectado, sin corregir
+- `reloj_verificar()` (`reloj.h`) no se invoca y el cliente de D imprime siempre «granularidad ~41.67 ns»; el ADR-003
+  pide verificar y reportar la granularidad real. (Camilo)
+- `analyze.py` (`plataforma_de`) identifica una plataforma Linux por la línea «Architecture» de `lscpu`, no por el
+  modelo de CPU: dos equipos Linux distintos tendrían la misma identidad y el ADR-005 no los distinguiría. (Camilo)
+- `iniciar.sh` compila `sistema/control-dominio/`, pero falla en Linux (falta `_GNU_SOURCE`) y lo silencia. (Camilo)
+
+---
+
 ## 2026-09-17
 
 ### Cambiado
