@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de instalación — Reto de Latencia Mínima</title>
+<style>
+:root{
+  --paper:#e9edf2; --card:#fff; --ink:#17212b; --muted:#5b6b7c;
+  --navy:#123252; --navy-2:#1f4e79; --navy-soft:#e2ebf3;
+  --gold:#b2802a; --gold-soft:#f8f1df;
+  --green:#256b47; --green-soft:#e3f1e9; --red:#a33a2b; --red-soft:#f7e6e2;
+  --line:#d3dbe4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.62}
+
+header.cover{background:var(--navy);color:#fff;padding:46px 32px 36px;border-bottom:4px solid var(--gold)}
+.cover-in{max-width:1180px;margin:0 auto}
+.cover .kicker{font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px}
+.cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;
+  font-size:2.25rem;line-height:1.2;margin:0 0 8px;max-width:24ch}
+.cover .sub{font-family:Georgia,serif;font-size:1.22rem;color:#f0d6a0;margin:0 0 18px}
+.cover p.lead{margin:0;max-width:72ch;color:#dbe6f0;font-size:1rem}
+.cover p.by{margin:18px 0 0;color:#a9c4dd;font-size:.9rem}
+
+.shell{max-width:1180px;margin:0 auto;padding:26px 22px 70px;
+  display:grid;grid-template-columns:232px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px}
+nav.toc h2{font-family:Georgia,serif;font-weight:normal;font-size:1rem;color:var(--navy);
+  margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+nav.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);
+  font-size:.88rem;padding:5px 6px;border-radius:6px;line-height:1.35}
+nav.toc a:hover{background:var(--navy-soft);color:var(--navy)}
+nav.toc .tn{color:var(--gold);font-weight:700;flex:0 0 22px;text-align:right}
+
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:6px 30px 26px;margin:0 0 16px}
+h2{font-family:Georgia,serif;font-weight:normal;color:var(--navy);
+  font-size:1.5rem;margin:26px 0 6px;padding-bottom:9px;border-bottom:2px solid var(--navy-soft);scroll-margin-top:16px}
+h3{font-size:1.1rem;color:var(--navy-2);margin:26px 0 6px;scroll-margin-top:16px}
+p{margin:11px 0;max-width:78ch}
+ul,ol{padding-left:22px;margin:11px 0;max-width:78ch}
+li{margin:5px 0}
+strong{color:var(--navy)}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#eef2f7;
+  padding:1px 5px;border-radius:4px}
+pre{background:#0f2237;color:#e7eef6;padding:14px 16px;border-radius:8px;overflow-x:auto;
+  font-size:.86rem;line-height:1.5;margin:14px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+a{color:var(--navy-2)}
+
+blockquote{margin:16px 0;padding:13px 18px;background:var(--gold-soft);
+  border-left:4px solid var(--gold);border-radius:8px}
+blockquote p{margin:4px 0;max-width:76ch}
+blockquote strong{color:#8a6318}
+.ok{background:var(--green-soft);border-left-color:var(--green)}
+.ok strong{color:var(--green)}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eef2f7;color:var(--navy);font-weight:600}
+tbody tr:nth-child(even){background:#fafbfd}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+tbody tr.res-d td{background:var(--gold-soft)}
+tbody tr.res-b td{background:var(--navy-soft)}
+p.leyenda{font-size:.86rem;color:var(--muted);margin-top:-6px}
+figure.grafica img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.mirada{border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:14px 18px 12px;margin:14px 0}
+.mirada h4{margin:0 0 10px;font-family:Georgia,serif;font-weight:normal;font-size:1.02rem;color:var(--navy)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:8px;padding:10px 14px}
+.tile .num{font-family:Georgia,serif;font-size:1.7rem;line-height:1.15;color:var(--navy)}
+.tile .lbl{font-size:.86rem;color:var(--muted)}
+.mirada .fuente{font-size:.84rem;color:var(--muted);margin:10px 0 0}
+details{margin:12px 0}
+details summary{cursor:pointer;color:var(--navy-2);font-weight:600}
+
+figure{margin:18px 0}
+figure svg{width:100%;height:auto;background:#fbfcfe;border:1px solid var(--line);border-radius:8px}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:6px}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;fill:#17212b}
+svg .sm{font-size:11.5px;fill:#5b6b7c}
+svg .b{font-weight:700}
+svg .w{fill:#fff}
+
+.dec{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:14px 0}
+.dec div{border:1px solid var(--line);border-radius:8px;padding:4px 16px 10px}
+.dec h4{margin:10px 0 4px;font-size:1rem}
+.si h4{color:var(--green)} .no h4{color:var(--red)}
+.si{background:#f6fbf8;border-color:#b9d9c6!important}
+.no{background:#fdf6f4;border-color:#e8c4bd!important}
+
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:.85rem}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;padding:18px 14px 50px}
+  nav.toc{position:static}
+  section{padding:4px 16px 20px}
+  .cover h1{font-size:1.7rem}
+}
+@media print{
+  details::details-content{content-visibility:visible}
+  nav.toc{display:none} .shell{display:block} section{break-inside:avoid-page;border:none}
+}
+</style>
+</head>
+<body>
+
+<header class="cover"><div class="cover-in">
+  <p class="kicker">Módulo 1 · Reto de Latencia Mínima · Group 2</p>
+  <h1>Manual de instalación</h1>
+  <p class="sub">Interfaz web, variante B (TCP) y variante D (memoria compartida)</p>
+  <p class="lead">Cómo dejar funcionando el sistema completo en macOS, Linux y Windows: qué instalar, cómo arrancarlo,
+  cómo comprobar que quedó bien y qué hacer cuando algo falla. Versión inicial.</p>
+  <p class="by">Camilo Céspedes · 20/09/2026</p>
+</div></header>
+
+<div class="shell">
+<nav class="toc" aria-label="Contenido">
+  <h2>Contenido</h2>
+  <a href="#alcance"><span class="tn">1</span>Alcance y requisitos</a>
+  <a href="#camino"><span class="tn">2</span>Elegir el camino</a>
+  <a href="#plat"><span class="tn">3</span>Instalación por plataforma</a>
+  <a href="#arranque"><span class="tn">4</span>Arranque</a>
+  <a href="#verif"><span class="tn">5</span>Verificar la instalación</a>
+  <a href="#fallos"><span class="tn">6</span>Problemas frecuentes</a>
+</nav>
+
+<main>
+
+<section id="alcance">
+<h2>1. Alcance y requisitos</h2>
+<p>El proyecto es el Reto de Latencia Mínima: un sistema que recibe un estímulo y responde con la menor latencia posible. Se resuelve de dos maneras distintas, llamadas <strong>variantes</strong>, para poder compararlas:</p>
+<ul>
+<li><strong>Variante B:</strong> cliente y servidor que se comunican por <strong>TCP</strong>, escritos en <strong>Python</strong>.</li>
+<li><strong>Variante D:</strong> cliente y servidor escritos en <strong>C</strong> que se comunican por <strong>memoria compartida</strong>, sin pasar por la red.</li>
+</ul>
+<p>Una <strong>interfaz web</strong> enciende las variantes y permite probarlas desde el navegador. El proyecto tiene, entonces, tres piezas. Este manual cubre la instalación de las tres:</p>
+<div class="tw"><table>
+<thead><tr><th>Pieza</th><th>Qué es</th><th>Qué necesita</th></tr></thead>
+<tbody>
+<tr><td><strong>Interfaz web</strong></td><td>Enciende los servidores y permite probarlos desde el navegador</td><td>Python 3.9 o superior</td></tr>
+<tr><td><strong>Variante B</strong></td><td>Cliente y servidor TCP en Python</td><td>Python 3.9 o superior</td></tr>
+<tr><td><strong>Variante D</strong></td><td>Cliente y servidor en C que se comunican por memoria compartida</td><td>Compilador de C, <code>make</code> y un sistema POSIX (macOS, Linux o WSL2)</td></tr>
+</tbody></table></div>
+<p>No hay que instalar bibliotecas: sin <code>pip install</code>, sin <code>npm</code>, sin <code>node_modules</code>. Todo usa la biblioteca estándar de Python y de C. Para instalar Python, el compilador o WSL2 hace falta internet. Además, la interfaz web carga React y las tipografías desde un CDN (cdnjs.cloudflare.com y Google Fonts), así que necesita conexión a internet cada vez que se abre en el navegador; las variantes y el resto del sistema no la necesitan.</p>
+</section>
+
+<section id="camino">
+<h2>2. Elegir el camino</h2>
+<p>La interfaz y B corren en cualquier sistema. D usa memoria compartida POSIX, que Windows nativo no ofrece, así que hay tres caminos:</p>
+<div class="tw"><table>
+<thead><tr><th>Camino</th><th>Qué corre</th><th>Para qué sirve</th></tr></thead>
+<tbody>
+<tr><td><strong>macOS o Linux</strong></td><td>Todo: interfaz, B y D</td><td>Todo el sistema</td></tr>
+<tr><td><strong>Windows con WSL2</strong></td><td>Todo: interfaz, B y D</td><td>Todo el sistema, dentro de Windows</td></tr>
+<tr><td><strong>Windows nativo</strong></td><td>Interfaz y B</td><td>Usar la interfaz y B, sin D</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="plat">
+<h2>3. Instalación por plataforma</h2>
+
+<h3>3.1 macOS</h3>
+<ol>
+<li>Instalar las herramientas de línea de comandos, que traen el compilador y <code>make</code>:
+<pre><code>xcode-select --install</code></pre></li>
+<li>Comprobar Python: <code>python3 --version</code> debe mostrar 3.9 o superior. Si no, instalarlo desde <code>https://www.python.org/downloads/</code>.</li>
+</ol>
+
+<h3>3.2 Linux</h3>
+<p>En Debian o Ubuntu:</p>
+<pre><code>sudo apt update &amp;&amp; sudo apt install -y build-essential make python3</code></pre>
+<p>En otras distribuciones se instalan los equivalentes: un compilador de C (<code>gcc</code> o <code>clang</code>), <code>make</code> y Python 3.9 o superior.</p>
+
+<h3>3.3 Windows nativo (interfaz y B)</h3>
+<ol>
+<li>Instalar Python 3.9 o superior desde <code>https://www.python.org/downloads/</code>. <strong>Marcar la casilla «Add python.exe to PATH»</strong> durante la instalación.</li>
+<li>Copiar la carpeta del proyecto en el equipo (ZIP o clon del repositorio).</li>
+</ol>
+<p>No se necesita nada más. Con este camino la variante D no está disponible. Para tenerla, seguir con 3.4.</p>
+
+<h3>3.4 Windows con WSL2 (sistema completo)</h3>
+<ol>
+<li><strong>Verificar que WSL está instalado.</strong> En PowerShell:
+<pre><code>wsl -l -v</code></pre>
+Tiene que aparecer al menos una distribución (por ejemplo <code>Ubuntu</code>) con <code>VERSION 2</code>. Si no aparece ninguna, ejecutar <code>wsl --install</code>, reiniciar el equipo y volver a comprobar.</li>
+<li><strong>Entrar a WSL y ubicarse en el proyecto.</strong> La unidad <code>C:</code> de Windows es <code>/mnt/c</code> dentro de WSL (<code>D:</code> es <code>/mnt/d</code>, y así con las demás). Si la ruta tiene espacios, va entre comillas:
+<pre><code>wsl
+cd "/mnt/c/ruta/al/proyecto/reto-latencia-group2"</code></pre></li>
+<li><strong>Instalar <code>make</code> y el compilador</strong>, si faltan. Se comprueba con <code>make --version</code> y <code>cc --version</code>; si alguno dice <code>command not found</code>:
+<pre><code>sudo apt update &amp;&amp; sudo apt install -y build-essential make</code></pre></li>
+<li>Comprobar Python dentro de WSL: <code>python3 --version</code>. Ubuntu suele traerlo; si no, <code>sudo apt install -y python3</code>.</li>
+</ol>
+<p>Desde aquí, todo el trabajo con el proyecto se hace dentro de WSL. El navegador sigue siendo el de Windows.</p>
+</section>
+
+<section id="arranque">
+<h2>4. Arranque</h2>
+<div class="tw"><table>
+<thead><tr><th>Sistema</th><th>Comando</th></tr></thead>
+<tbody>
+<tr><td>macOS, Linux o WSL2</td><td><code>./iniciar.sh</code></td></tr>
+<tr><td>Windows nativo</td><td>Doble clic en <code>iniciar.cmd</code>, o desde PowerShell: <code>.\iniciar.ps1</code></td></tr>
+</tbody></table></div>
+<p>El arranque hace tres cosas, en este orden:</p>
+<ol>
+<li><strong>Compila</strong> las variantes en C que la máquina pueda compilar (D) y lo indica con una línea «variante-D-shm ok» en pantalla. Si no hay compilador, sigue sin ellas.</li>
+<li><strong>Levanta la interfaz web</strong>, que queda escuchando en <code>http://127.0.0.1:8080</code>.</li>
+<li><strong>Abre el navegador</strong> en esa dirección. Si no se abre solo, abrirla a mano.</li>
+</ol>
+<p>Para usar otro puerto: <code>./iniciar.sh 8081</code> o <code>.\iniciar.ps1 8081</code>.</p>
+<blockquote><p><strong>Windows: <code>iniciar.cmd</code> no arranca D.</strong> En Windows nativo no hay compilador ni memoria compartida POSIX; el script continúa y deja funcionando la interfaz y B. Para D hay que arrancar desde WSL2 con <code>./iniciar.sh</code>. No ejecutar los dos a la vez: comparten el puerto 8080.</p></blockquote>
+
+<h3>4.1 Puertos que usa el sistema</h3>
+<div class="tw"><table>
+<thead><tr><th>Puerto</th><th>Quién lo usa</th></tr></thead>
+<tbody>
+<tr><td>8080</td><td>Interfaz web</td></tr>
+<tr><td>9101</td><td>Servidor de la variante B</td></tr>
+<tr><td>9103</td><td>Identificador de la variante D. D no abre un socket: el número solo da nombre a su región de memoria compartida</td></tr>
+</tbody></table></div>
+
+<h3>4.2 Encender las variantes y detener todo</h3>
+<p>Desde la interfaz, cada variante se enciende y se apaga con el botón <strong>Arrancar / Parar</strong>, o todas a la vez con <strong>Arrancar todas</strong>. Para detener el sistema completo, <code>Ctrl+C</code> en la terminal donde se ejecutó el arranque.</p>
+</section>
+
+<section id="verif">
+<h2>5. Verificar la instalación</h2>
+<h3>5.1 Diagnóstico automático</h3>
+<p>Antes de arrancar, o cuando algo no funciona, el propio proyecto dice qué tiene la máquina y qué le falta, con el comando para conseguirlo:</p>
+<div class="tw"><table>
+<thead><tr><th>Sistema</th><th>Comando</th></tr></thead>
+<tbody>
+<tr><td>macOS, Linux o WSL2</td><td><code>python3 doctor.py</code></td></tr>
+<tr><td>Windows</td><td><code>doctor.cmd</code> (doble clic) o <code>.\iniciar.ps1 -Doctor</code></td></tr>
+</tbody></table></div>
+<p>El diagnóstico revisa la versión de Python, que los archivos del proyecto estén completos, que el puerto 8080 esté libre, si hay compilador y <code>make</code>, si hay WSL2 (en Windows) y qué variantes están disponibles en esa máquina. Termina con un veredicto y el comando de arranque que corresponde.</p>
+
+<h3>5.2 Lista de comprobación</h3>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>Comprobación</th><th>Resultado esperado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>doctor</code> (5.1)</td><td>Termina con «Todo listo» o, en Windows nativo, con «Podés arrancar el proyecto»</td></tr>
+<tr><td>2</td><td>Arranque (4)</td><td>La terminal muestra la dirección <code>http://127.0.0.1:8080</code> y el navegador abre la interfaz</td></tr>
+<tr><td>3</td><td>Durante el arranque, línea <code>variante-D-shm ok</code> (macOS, Linux, WSL2)</td><td>D compiló. Si no aparece, ver 6</td></tr>
+<tr><td>4</td><td>En la interfaz, arrancar B</td><td>B figura como en ejecución</td></tr>
+<tr><td>5</td><td>En la interfaz, arrancar D (macOS, Linux, WSL2)</td><td>D figura como en ejecución</td></tr>
+<tr><td>6</td><td>En la interfaz, enviar un estímulo a B con la IP <code>192.168.1.10</code></td><td>B responde con un veredicto (esa IP no está en la tabla, así que devuelve <code>DESCONOCIDO</code>). Los estímulos desde la interfaz son solo para B; D no los admite</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="fallos">
+<h2>6. Problemas frecuentes</h2>
+<div class="tw"><table>
+<thead><tr><th>Síntoma</th><th>Causa</th><th>Qué hacer</th></tr></thead>
+<tbody>
+<tr><td>Windows: «No encontre Python 3»</td><td>Python no está instalado o no está en el PATH</td><td>Instalarlo (3.3) marcando «Add python.exe to PATH» y volver a abrir la terminal</td></tr>
+<tr><td>El puerto 8080 está ocupado</td><td>Otra aplicación, u otra copia del proyecto, lo usa</td><td>Arrancar en otro puerto: <code>./iniciar.sh 8081</code></td></tr>
+<tr><td>Un mensaje dice que el puerto 9101 ya está ocupado</td><td>Un proceso ajeno a la interfaz lo tiene</td><td>La interfaz muestra el comando para ver quién lo usa y liberarlo</td></tr>
+<tr><td>Windows: la interfaz abre pero D no arranca</td><td>Windows nativo no tiene memoria compartida POSIX ni compilador</td><td>La interfaz lo avisa al intentar arrancar D, con el comando <code>wsl --install</code>. Usar WSL2 (3.4) y <code>./iniciar.sh</code></td></tr>
+<tr><td><code>make: command not found</code> o <code>cc: command not found</code></td><td>Falta el compilador</td><td>Instalarlo según la plataforma (3.1, 3.2 o 3.4)</td></tr>
+<tr><td>D no aparece como compilada</td><td>Error de compilación</td><td>Ejecutar <code>make -C sistema/variante-D-shm</code> y leer el error. El <code>Makefile</code> ya define lo que Linux necesita; una copia antigua del proyecto puede no tenerlo</td></tr>
+<tr><td>Al volver a arrancar, el puerto 9101 aparece ocupado sin haber nada abierto</td><td>La ventana de la interfaz se cerró de golpe y dejó el servidor de B en marcha</td><td>Ver quién lo tiene y cerrarlo: en Windows <code>netstat -ano | findstr :9101</code> y <code>taskkill /PID &lt;número&gt; /F</code>; en macOS, Linux y WSL2 <code>lsof -nP -iTCP:9101 -sTCP:LISTEN</code> y <code>kill &lt;número&gt;</code>. Para evitarlo, cerrar con <code>Ctrl+C</code></td></tr>
+<tr><td>La interfaz no se muestra aunque el servidor esté en marcha</td><td>La página carga React desde un CDN y el equipo no tiene conexión a internet</td><td>Conectarse a internet y recargar. El servidor y las variantes funcionan sin conexión</td></tr>
+<tr><td>Dentro de WSL, la ruta no existe</td><td>Los espacios de la ruta rompen el comando</td><td>Poner la ruta entre comillas, con <code>/mnt/c</code> en lugar de <code>C:\</code></td></tr>
+<tr><td>El navegador abrió antes de que el servidor estuviera listo</td><td>El arranque abre la pestaña tras una espera corta</td><td>Recargar la página</td></tr>
+</tbody></table></div>
+<p>Si nada de esto resuelve el problema, ejecutar el diagnóstico (5.1) y compartir su salida completa: dice el sistema, la versión de Python y qué falta.</p>
+</section>
+
+</main>
+</div>
+<footer>Manual de instalación · Camilo Céspedes · Group 2 · Módulo 1 · 20/09/2026 · versión inicial</footer>
+</body>
+</html>
