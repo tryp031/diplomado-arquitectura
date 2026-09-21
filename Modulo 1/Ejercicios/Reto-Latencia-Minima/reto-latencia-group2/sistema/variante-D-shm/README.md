@@ -19,6 +19,10 @@ make                                  # compila server y client
 
 `run.sh` compila antes de medir, así que nunca se mide un binario obsoleto.
 
+**Plataformas.** macOS (equipo de referencia) y Linux compilan y corren con el mismo código.
+En **Windows** hay que usar **WSL2**: la variante usa `shm_open` y `mmap` (POSIX), que Win32
+no ofrece. Los pasos están en el [README general](../../README.md#arrancar).
+
 ## Cómo funciona
 
 Dos procesos comparten 256 bytes de memoria física (`shm_open` + `mmap`). No hay sockets,
@@ -74,6 +78,10 @@ Enmienda propuesta en [`ADR-003`](../../docs/ADR/ADR-003-resolucion-del-reloj.md
 
 **Consecuencia que hay que reportar siempre:** las muestras individuales están **cuantizadas
 en múltiplos de 41,67 ns**. No es ruido, es el tamaño del tic.
+
+Los 41,67 ns son del Apple M4. En otra plataforma el tic es distinto (en Linux/WSL2 se observó
+100 ns: ver «Otras plataformas»). El cliente imprime siempre el aviso de 41,67 ns —es texto
+fijo—; la granularidad real de cada equipo se lee del «piso de medición» que imprime justo antes.
 
 ---
 
@@ -151,13 +159,57 @@ devuelve `KERN_NOT_SUPPORTED`, verificado).
 
 ---
 
+## Otras plataformas
+
+La variante también se ejecutó en **Linux x86-64 sobre WSL2** (Intel Core i5-8300H, kernel 6.18,
+gcc 15.2, `CLOCK_MONOTONIC`) el 20/09/2026. Es una corrida propia con su equipo declarado y
+**no se mezcla** con la tabla del equipo de referencia
+([ADR-005](../../docs/ADR/ADR-005-comparabilidad-entre-maquinas.md)).
+
+3 rondas × 1 000 000, integridad 3 000 000 / 3 000 000. Nanosegundos:
+
+| Ronda | p50 | p99.9 | p99.99 | máx | > 1 ms | Mediana por lotes |
+|---|---|---|---|---|---|---|
+| 1 | 100 | 200 | 13 800 | 44 000 | 0 | 122 |
+| 2 | 100 | 300 | 13 000 | 224 500 | 0 | 127 |
+| 3 | 100 | 200 | 16 200 | 228 700 | 0 | 120 |
+
+- **Granularidad observada: 100 ns** (piso del instrumento: p50 0 ns, p99 100 ns), no los
+  41,67 ns del M4. Con un p50 igual al tic, el contraste por lotes (120–127 ns por intercambio)
+  es la medida que fija el orden de magnitud.
+- **Se reproduce la forma del resultado:** escalones de un tic, ninguna muestra sobre 1 ms en
+  3 M y una cola de decenas a cientos de µs sin bloquear en el intercambio (el cliente hizo 1
+  cambio de contexto voluntario en 1 100 017 intercambios; el cliente de B, uno por intercambio).
+- **No se reproducen las cifras absolutas ni se prueban las barreras de arm64.** x86-64 tiene
+  un modelo de memoria fuertemente ordenado: no puede detectar un error de ordenación que solo
+  existiría en arm64.
+
+---
+
+## Límites conocidos
+
+Comprobados ejecutando el código en Linux/WSL2. Ninguno afecta a las mediciones de una corrida
+normal: se producen fuera del intercambio o ante un uso distinto del previsto.
+
+| Situación | Qué pasa |
+|---|---|
+| **Dos clientes contra un mismo servidor** | Uno aborta con «eco incorrecto… revisar barreras» (la causa real es el otro cliente). El otro **termina con código 0** y escribe el CSV con el aviso «respuestas con contenido inesperado». Un solo cliente por región es una convención, no algo que el código haga cumplir |
+| **El servidor muere (`kill -9`) con el cliente en marcha** | El cliente sigue girando al ~100 % de CPU sin terminar. `LIMITE_SPIN` (5×10⁹ giros) equivale a ≈ 21 s por intercambio perdido en esa CPU; el comentario del código dice «~segundos». Queda `/dev/shm/latm-D-9103` huérfana; el siguiente arranque del servidor la recrea |
+| **Un segundo servidor D con el mismo puerto** | Reemplaza la región sin error (`shm_unlink` incondicional); el primero queda girando sobre una región sin nombre. La interfaz solo comprueba un puerto TCP que D no usa |
+| **El cliente abre la región entre `shm_open` y `ftruncate` del servidor** | Termina con SIGBUS y sin mensaje. Es improbable (0 fallos en 200 arranques simultáneos) pero existe |
+| **Barra de progreso de la interfaz** | No avanza con D: el cliente no imprime las líneas `PROGRESO` que la interfaz espera (solo B las emite) |
+
+---
+
 ## Archivos
 
 | Archivo | Contenido |
 |---|---|
-| `common.h` | Región compartida, alineación a línea de caché, reloj, pausa de spin |
-| `server.c` | Servidor: gira sobre la bandera, responde payload fijo. Escucha permanentemente |
-| `client.c` | Cliente medidor: piso de medición, warmup, medición, contraste por lotes, CSV |
-| `Makefile` | `-std=c11 -O2 -Wall -Wextra -pedantic` (no `-O3`: ver comentario en el archivo) |
+| `common.h` | Región compartida (dos ranuras de 128 B alineadas), nombre del objeto y límite de espera. Incluye `../reloj.h` |
+| `server.c` | Servidor: crea la región, gira sobre la bandera de petición, **clasifica el host** y responde el veredicto. `--sin-clasificar` lo desactiva para medir el coste del dominio. Escucha permanentemente |
+| `client.c` | Cliente medidor: abre la región, autoprueba, piso de medición, warmup, medición, contraste por lotes, CSV |
+| `Makefile` | `-std=c11 -O2 -Wall -Wextra -pedantic -D_GNU_SOURCE` (no `-O3`: ver comentario en el archivo). `_GNU_SOURCE` expone en Linux las funciones POSIX que `-std=c11` estricto oculta (`clock_gettime`, `ftruncate`, `usleep`); sin él no compila |
+| `../clasificador.h` | El dominio: tabla de 16 hosts, `clasificar()` de tiempo constante y formato de los mensajes de 32 B |
+| `../reloj.h` | El instrumento compartido: `ahora_ns()` y `pausa_spin()` |
 
 Resultados en `../resultados/resultados-D-{1,2,3}.csv` y `../resultados/ejecucion-D-{1,2,3}.log`.
