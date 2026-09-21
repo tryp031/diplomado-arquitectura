@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variante D — Memoria compartida: arquitectura, justificación y medición</title>
+<style>
+:root{
+  --paper:#e9edf2; --card:#fff; --ink:#17212b; --muted:#5b6b7c;
+  --navy:#123252; --navy-2:#1f4e79; --navy-soft:#e2ebf3;
+  --gold:#b2802a; --gold-soft:#f8f1df;
+  --green:#256b47; --green-soft:#e3f1e9; --red:#a33a2b; --red-soft:#f7e6e2;
+  --line:#d3dbe4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.62}
+
+header.cover{background:var(--navy);color:#fff;padding:46px 32px 36px;border-bottom:4px solid var(--gold)}
+.cover-in{max-width:1180px;margin:0 auto}
+.cover .kicker{font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px}
+.cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;
+  font-size:2.25rem;line-height:1.2;margin:0 0 8px;max-width:24ch}
+.cover .sub{font-family:Georgia,serif;font-size:1.22rem;color:#f0d6a0;margin:0 0 18px}
+.cover p.lead{margin:0;max-width:72ch;color:#dbe6f0;font-size:1rem}
+.cover p.by{margin:18px 0 0;color:#a9c4dd;font-size:.9rem}
+
+.shell{max-width:1180px;margin:0 auto;padding:26px 22px 70px;
+  display:grid;grid-template-columns:232px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px}
+nav.toc h2{font-family:Georgia,serif;font-weight:normal;font-size:1rem;color:var(--navy);
+  margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+nav.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);
+  font-size:.88rem;padding:5px 6px;border-radius:6px;line-height:1.35}
+nav.toc a:hover{background:var(--navy-soft);color:var(--navy)}
+nav.toc .tn{color:var(--gold);font-weight:700;flex:0 0 22px;text-align:right}
+
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:6px 30px 26px;margin:0 0 16px}
+h2{font-family:Georgia,serif;font-weight:normal;color:var(--navy);
+  font-size:1.5rem;margin:26px 0 6px;padding-bottom:9px;border-bottom:2px solid var(--navy-soft);scroll-margin-top:16px}
+h3{font-size:1.1rem;color:var(--navy-2);margin:26px 0 6px;scroll-margin-top:16px}
+p{margin:11px 0;max-width:78ch}
+ul,ol{padding-left:22px;margin:11px 0;max-width:78ch}
+li{margin:5px 0}
+strong{color:var(--navy)}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#eef2f7;
+  padding:1px 5px;border-radius:4px}
+pre{background:#0f2237;color:#e7eef6;padding:14px 16px;border-radius:8px;overflow-x:auto;
+  font-size:.86rem;line-height:1.5;margin:14px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+a{color:var(--navy-2)}
+
+blockquote{margin:16px 0;padding:13px 18px;background:var(--gold-soft);
+  border-left:4px solid var(--gold);border-radius:8px}
+blockquote p{margin:4px 0;max-width:76ch}
+blockquote strong{color:#8a6318}
+.ok{background:var(--green-soft);border-left-color:var(--green)}
+.ok strong{color:var(--green)}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eef2f7;color:var(--navy);font-weight:600}
+tbody tr:nth-child(even){background:#fafbfd}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+tbody tr.res-d td{background:var(--gold-soft)}
+tbody tr.res-b td{background:var(--navy-soft)}
+p.leyenda{font-size:.86rem;color:var(--muted);margin-top:-6px}
+figure.grafica img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.mirada{border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:14px 18px 12px;margin:14px 0}
+.mirada h4{margin:0 0 10px;font-family:Georgia,serif;font-weight:normal;font-size:1.02rem;color:var(--navy)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:8px;padding:10px 14px}
+.tile .num{font-family:Georgia,serif;font-size:1.7rem;line-height:1.15;color:var(--navy)}
+.tile .lbl{font-size:.86rem;color:var(--muted)}
+.mirada .fuente{font-size:.84rem;color:var(--muted);margin:10px 0 0}
+details{margin:12px 0}
+details summary{cursor:pointer;color:var(--navy-2);font-weight:600}
+
+figure{margin:18px 0}
+figure svg{width:100%;height:auto;background:#fbfcfe;border:1px solid var(--line);border-radius:8px}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:6px}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;fill:#17212b}
+svg .sm{font-size:11.5px;fill:#5b6b7c}
+svg .b{font-weight:700}
+svg .w{fill:#fff}
+
+.dec{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:14px 0}
+.dec div{border:1px solid var(--line);border-radius:8px;padding:4px 16px 10px}
+.dec h4{margin:10px 0 4px;font-size:1rem}
+.si h4{color:var(--green)} .no h4{color:var(--red)}
+.si{background:#f6fbf8;border-color:#b9d9c6!important}
+.no{background:#fdf6f4;border-color:#e8c4bd!important}
+
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:.85rem}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;padding:18px 14px 50px}
+  nav.toc{position:static}
+  section{padding:4px 16px 20px}
+  .cover h1{font-size:1.7rem}
+}
+@media print{
+  details::details-content{content-visibility:visible}
+  nav.toc{display:none} .shell{display:block} section{break-inside:avoid-page;border:none}
+}
+</style>
+</head>
+<body>
+
+<header class="cover"><div class="cover-in">
+  <p class="kicker">Módulo 1 · Reto de Latencia Mínima · Group 2</p>
+  <h1>Variante D — Memoria compartida</h1>
+  <p class="sub">Arquitectura, justificación, criterios de uso y medición</p>
+  <p class="lead">Documentación técnica de la variante que lleva la comunicación entre procesos a su límite físico:
+  dos procesos que se leen y escriben directamente en la misma memoria, sin pasar por el kernel en el intercambio.
+  El documento describe la arquitectura tal como está implementada, justifica sus decisiones, explica cuándo
+  conviene y cuándo no una arquitectura de este tipo, y presenta cómo se mide y qué resultados produce.</p>
+  <p class="by">Camilo Céspedes · 19/09/2026</p>
+</div></header>
+
+<div class="shell">
+<nav class="toc" aria-label="Contenido">
+  <h2>Contenido</h2>
+  <a href="#resumen"><span class="tn">1</span>Resumen</a>
+  <a href="#arq"><span class="tn">2</span>Arquitectura</a>
+  <a href="#just"><span class="tn">3</span>Justificación</a>
+  <a href="#uso"><span class="tn">4</span>Cuándo usar memoria compartida</a>
+  <a href="#med"><span class="tn">5</span>Medición y resultados</a>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<section id="resumen">
+<h2>1. Resumen</h2>
+<p>El Reto de Latencia Mínima compara varias formas de comunicar un cliente con un servidor, llamadas variantes. Este documento trata la <strong>variante D</strong>, que usa memoria compartida; se la contrasta con la <strong>variante B</strong>, que usa TCP.</p>
+<ul>
+<li><strong>Qué es.</strong> Dos procesos en C, en el mismo host, comparten 256 B (dos ranuras de 128 B) mediante
+<code>shm_open</code> + <code>mmap</code>. Se coordinan con contadores atómicos (<code>acquire</code>/<code>release</code>)
+y espera activa. En el intercambio no hay llamadas al sistema que bloqueen ni paso por el planificador.</li>
+<li><strong>Qué logra.</strong> Que la comunicación entre los dos procesos ocurra directamente en memoria, sin pasar
+por el kernel. Con ello obtiene una latencia muy inferior al objetivo de 1 ms. Las cifras
+están en la sección 5.</li>
+<li><strong>Qué cuesta.</strong> Dos núcleos al 100 % de forma permanente, un solo cliente por región, un solo host y
+solo interfaces POSIX. En macOS sobre Apple Silicon se suma otra limitación: el sistema operativo no permite fijar
+un hilo a un núcleo, de modo que el planificador (<em>scheduler</em>) puede mover los procesos a núcleos más lentos y
+eso ensancha la cola de latencia (5.5). En Linux sí existe esa posibilidad,
+por eso la limitación se menciona solo para macOS.</li>
+<li><strong>Lectura arquitectónica.</strong> La memoria compartida es la respuesta a sistemas de alto rendimiento y baja
+latencia en un único host: saca al kernel de la ruta de comunicación y, con él, la variabilidad que introducen las
+llamadas al sistema. Otras alternativas, como TCP, atraviesan el kernel en cada mensaje y producen latencias mayores
+y colas de milisegundos; la memoria compartida ofrece un comportamiento más predecible. Ese resultado se paga con
+portabilidad, escalabilidad, interoperabilidad y eficiencia de recursos, así que solo es proporcionado cuando la
+latencia es el atributo dominante (4).</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="arq">
+<h2>2. Arquitectura</h2>
+
+<h3>2.1 Qué hace el sistema</h3>
+<p>Esta sección describe la variante D (memoria compartida) del reto. El sistema <strong>escucha permanentemente</strong> y, ante cada estímulo, <strong>retorna una respuesta
+específica</strong>. Un proceso cliente envía un mensaje de 32 bytes que identifica un host (una dirección IPv4);
+un proceso servidor lo clasifica como <code>LOCAL</code>, <code>EXTERNO</code> o <code>DESCONOCIDO</code> y devuelve
+otro mensaje de 32 bytes con ese veredicto y el identificador recibido, para que el cliente verifique que la
+respuesta corresponde a su petición. Los dos procesos corren en el mismo equipo y se comunican a través de una región
+de memoria compartida. Cada intercambio es una petición con su respuesta, y hay una sola en curso a la vez.</p>
+<p>La clasificación consulta una tabla de como máximo 16 hosts × 4 B = 64 B, es decir, una línea de caché. El barrido
+es de tiempo constante: recorre siempre las 16 ranuras con selección condicional, sin saltos, de modo que la latencia
+no depende del dato consultado. La tabla se lee de un archivo en tiempo de ejecución, una sola vez al arrancar; si
+las direcciones fueran literales del código, el compilador plegaría el bucle y el clasificador desaparecería del
+binario.</p>
+
+<h3>2.2 Vista de componentes</h3>
+<figure>
+<svg viewBox="0 0 760 330" role="img" aria-label="Componentes de la variante D y del plano de control">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f4e79"/></marker>
+</defs>
+<rect x="10" y="10" width="740" height="88" rx="8" fill="#f3f6fa" stroke="#9db2c7" stroke-dasharray="6 4"/>
+<text x="24" y="30" class="b">PLANO DE CONTROL · milisegundos · no se mide</text>
+<rect x="40" y="42" width="150" height="42" rx="6" fill="#fff" stroke="#123252"/><text x="115" y="68" text-anchor="middle">Navegador</text>
+<rect x="300" y="42" width="180" height="42" rx="6" fill="#fff" stroke="#123252"/><text x="390" y="68" text-anchor="middle">app/servidor.py</text>
+<line x1="190" y1="63" x2="300" y2="63" stroke="#1f4e79" marker-end="url(#ah)"/><text x="245" y="57" text-anchor="middle" class="sm">HTTP/JSON</text>
+
+<rect x="10" y="126" width="740" height="196" rx="8" fill="#fffdf7" stroke="#b2802a" stroke-dasharray="6 4"/>
+<text x="24" y="146" class="b">PLANO DE DATOS · nanosegundos · aquí vive el cronómetro</text>
+<rect x="30" y="170" width="190" height="72" rx="6" fill="#fff" stroke="#123252" stroke-width="1.5"/>
+<text x="125" y="196" text-anchor="middle" class="b">client (C)</text><text x="125" y="214" text-anchor="middle" class="sm">productor + medidor F1</text><text x="125" y="229" text-anchor="middle" class="sm">client.c</text>
+<rect x="285" y="166" width="190" height="80" rx="6" fill="#f8f1df" stroke="#b2802a" stroke-width="1.5"/>
+<text x="380" y="192" text-anchor="middle" class="b">/latm-D-9103</text><text x="380" y="210" text-anchor="middle" class="sm">region_t · 256 B · MAP_SHARED</text><text x="380" y="226" text-anchor="middle" class="sm">2 ranuras de 128 B</text>
+<rect x="540" y="170" width="190" height="72" rx="6" fill="#fff" stroke="#123252" stroke-width="1.5"/>
+<text x="635" y="196" text-anchor="middle" class="b">server (C)</text><text x="635" y="214" text-anchor="middle" class="sm">gira · clasifica · responde</text><text x="635" y="229" text-anchor="middle" class="sm">server.c</text>
+<line x1="220" y1="206" x2="285" y2="206" stroke="#1f4e79" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<line x1="475" y1="206" x2="540" y2="206" stroke="#1f4e79" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<text x="252" y="198" text-anchor="middle" class="sm">load/store</text><text x="507" y="198" text-anchor="middle" class="sm">load/store</text>
+
+<line x1="350" y1="84" x2="150" y2="170" stroke="#5b6b7c" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+<line x1="430" y1="84" x2="610" y2="170" stroke="#5b6b7c" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+<text x="215" y="118" class="sm" text-anchor="middle">Popen + lee CSV</text><text x="565" y="118" class="sm" text-anchor="middle">Popen / terminate</text>
+
+<rect x="285" y="272" width="190" height="34" rx="6" fill="#fff" stroke="#5b6b7c"/><text x="380" y="294" text-anchor="middle">tabla-hosts.csv</text>
+<line x1="330" y1="272" x2="170" y2="242" stroke="#5b6b7c" stroke-dasharray="2 3" marker-end="url(#ah)"/>
+<line x1="430" y1="272" x2="590" y2="242" stroke="#5b6b7c" stroke-dasharray="2 3" marker-end="url(#ah)"/>
+<text x="380" y="264" text-anchor="middle" class="sm">se lee 1 vez al arrancar</text>
+<rect x="30" y="272" width="190" height="34" rx="6" fill="#fff" stroke="#5b6b7c"/><text x="125" y="294" text-anchor="middle">resultados-D-N.csv</text>
+<line x1="125" y1="242" x2="125" y2="272" stroke="#5b6b7c" marker-end="url(#ah)"/>
+</svg>
+<figcaption>La web arranca y detiene procesos y lee resultados; <strong>no toca la región compartida</strong>. El cronómetro vive en <code>client</code>.</figcaption>
+</figure>
+
+<div class="tw"><table>
+<thead><tr><th>Componente</th><th>Responsabilidad</th><th>Archivo</th></tr></thead>
+<tbody>
+<tr><td>Cliente medidor</td><td>Abre la región, verifica que el sistema clasifica bien, hace warmup, mide cada intercambio, valida el eco y vuelca el CSV</td><td><code>variante-D-shm/client.c</code></td></tr>
+<tr><td>Servidor</td><td>Crea la región, gira sobre la bandera de petición, clasifica y publica la respuesta</td><td><code>variante-D-shm/server.c</code></td></tr>
+<tr><td>Región compartida</td><td>Estructura de datos y protocolo de sincronización</td><td><code>variante-D-shm/common.h</code></td></tr>
+<tr><td>Dominio</td><td><code>clasificar()</code>, carga de la tabla, formato de 32 B</td><td><code>sistema/clasificador.h</code></td></tr>
+<tr><td>Instrumento</td><td><code>ahora_ns()</code> y <code>pausa_spin()</code>, compartidos con las demás variantes en C</td><td><code>sistema/reloj.h</code></td></tr>
+<tr><td>Plano de control</td><td>Ciclo de vida de procesos, edición de la tabla, lectura de resultados</td><td><code>app/servidor.py</code></td></tr>
+</tbody></table></div>
+
+
+<h3>2.3 Vista de datos: la región compartida</h3>
+<figure>
+<svg viewBox="0 0 760 250" role="img" aria-label="Layout de region_t">
+<text x="40" y="22" class="b">region_t · 256 B · cada ranura alineada a 128 B (una línea de caché en Apple Silicon)</text>
+<text x="40" y="52" class="sm">ranura peticion · cliente escribe → servidor lee</text>
+<rect x="40" y="60" width="42" height="56" fill="#123252"/><text x="61" y="84" text-anchor="middle" class="w sm b">seq</text><text x="61" y="100" text-anchor="middle" class="w sm">8 B</text>
+<rect x="82" y="60" width="167" height="56" fill="#f0d6a0" stroke="#b2802a"/><text x="165" y="84" text-anchor="middle" class="b">payload usado</text><text x="165" y="100" text-anchor="middle" class="sm">32 B</text>
+<rect x="249" y="60" width="461" height="56" fill="#eef2f7" stroke="#9db2c7"/><text x="480" y="84" text-anchor="middle">capacidad libre</text><text x="480" y="100" text-anchor="middle" class="sm">88 B (dato[120] en total)</text>
+
+<text x="40" y="152" class="sm">ranura respuesta · servidor escribe → cliente lee</text>
+<rect x="40" y="160" width="42" height="56" fill="#123252"/><text x="61" y="184" text-anchor="middle" class="w sm b">seq</text><text x="61" y="200" text-anchor="middle" class="w sm">8 B</text>
+<rect x="82" y="160" width="167" height="56" fill="#f0d6a0" stroke="#b2802a"/><text x="165" y="184" text-anchor="middle" class="b">payload usado</text><text x="165" y="200" text-anchor="middle" class="sm">32 B</text>
+<rect x="249" y="160" width="461" height="56" fill="#eef2f7" stroke="#9db2c7"/><text x="480" y="184" text-anchor="middle">capacidad libre</text><text x="480" y="200" text-anchor="middle" class="sm">88 B</text>
+<text x="40" y="240" class="sm">seq = _Atomic uint64_t · la bandera vive en la misma línea que su payload</text>
+</svg>
+<figcaption>Fuente: <code>common.h:36-54</code>. Las dos ranuras están en líneas distintas para evitar <em>false sharing</em>.</figcaption>
+</figure>
+<ul>
+<li><strong>Un único escritor por ranura.</strong> Elimina la contención de escritura; es, en efecto, un canal de un productor y un consumidor con capacidad 1.</li>
+<li><strong>Bandera y payload en la misma línea.</strong> El dato viaja entre núcleos en una sola transferencia de línea de caché.</li>
+<li><strong>Tamaños verificados en compilación.</strong> Dos <code>_Static_assert</code> fijan <code>sizeof(ranura_t) == 128</code> y <code>sizeof(region_t) == 256</code>.</li>
+<li><strong>El «puerto» 9103 no abre ningún socket:</strong> solo deriva el nombre del objeto (<code>/latm-D-%d</code>).</li>
+<li>El tamaño de línea de 128 B corresponde a Apple Silicon. En x86-64, con líneas de 64 B, cada ranura ocupa dos líneas, pero la bandera y los 32 B de payload siguen dentro de la primera (offsets 0–39), así que la propiedad de una sola transferencia se conserva.</li>
+</ul>
+
+<h3>2.4 Vista de comportamiento: el protocolo</h3>
+<figure>
+<svg viewBox="0 0 760 340" role="img" aria-label="Secuencia de un intercambio">
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4e79"/></marker></defs>
+<text x="170" y="22" text-anchor="middle" class="b">Cliente</text>
+<text x="400" y="22" text-anchor="middle" class="b">Región compartida</text>
+<text x="630" y="22" text-anchor="middle" class="b">Servidor</text>
+<line x1="170" y1="30" x2="170" y2="330" stroke="#9db2c7"/><line x1="400" y1="30" x2="400" y2="330" stroke="#9db2c7"/><line x1="630" y1="30" x2="630" y2="330" stroke="#9db2c7"/>
+<rect x="24" y="50" width="12" height="262" fill="#f0d6a0" stroke="#b2802a"/>
+<text x="44" y="44" class="sm">F1: t0</text><text x="44" y="326" class="sm">F1: t1</text>
+<text x="620" y="50" text-anchor="end" class="sm">(girando: load(acquire) de peticion.seq)</text>
+<line x1="170" y1="76" x2="400" y2="76" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="285" y="70" text-anchor="middle" class="sm">1 · memcpy(dato ← estímulo)</text>
+<line x1="170" y1="104" x2="400" y2="104" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="285" y="98" text-anchor="middle" class="sm">2 · store(release) seq = ++n</text>
+<line x1="400" y1="132" x2="630" y2="132" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="515" y="126" text-anchor="middle" class="sm">3 · load(acquire): seq ≠ ultima</text>
+<rect x="560" y="146" width="140" height="34" rx="5" fill="#fff" stroke="#123252"/><text x="630" y="161" text-anchor="middle" class="sm">4 · copia a buffer local</text><text x="630" y="174" text-anchor="middle" class="sm">+ clasificar() · 16 csel</text>
+<line x1="630" y1="204" x2="400" y2="204" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="515" y="198" text-anchor="middle" class="sm">5 · memcpy(dato ← respuesta)</text>
+<line x1="630" y1="232" x2="400" y2="232" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="515" y="226" text-anchor="middle" class="sm">6 · store(release) seq = s</text>
+<line x1="400" y1="260" x2="170" y2="260" stroke="#1f4e79" marker-end="url(#ah2)"/><text x="285" y="254" text-anchor="middle" class="sm">7 · load(acquire): seq == n</text>
+<rect x="100" y="276" width="140" height="22" rx="5" fill="#fff" stroke="#123252"/><text x="170" y="291" text-anchor="middle" class="sm">8 · copia a buffer local</text>
+</svg>
+<figcaption>Fuente: <code>client.c:158-168</code> y <code>server.c:122-148</code>.</figcaption>
+</figure>
+
+<p><strong>Por qué el protocolo es correcto:</strong></p>
+<ol>
+<li>Cada <code>store(release)</code> de <code>seq</code> publica el dato que lo precede, y cada <code>load(acquire)</code> que lo observa garantiza verlo. Es imprescindible en arm64, donde el hardware reordena accesos; <code>volatile</code> no bastaría, porque solo restringe al compilador.</li>
+<li>El cliente no reescribe la ranura de petición hasta ver la respuesta, y el servidor responde después de copiar la petición a su buffer local. Nunca coexisten una lectura y una escritura sobre la misma ranura, y por eso no hace falta ningún lock.</li>
+</ol>
+<blockquote><p><strong>Condición de la corrección:</strong> una sola petición en curso y un solo cliente por región. Esa exclusividad es una convención de uso: el código no la impone.</p></blockquote>
+
+<h3>2.5 Ciclo de vida y acoplamiento con el plano de control</h3>
+<div class="tw"><table>
+<thead><tr><th>Fase</th><th>Servidor</th><th>Cliente</th></tr></thead>
+<tbody>
+<tr><td>Arranque</td><td>Carga la tabla de hosts y crea la región compartida, siempre nueva</td><td>Carga la tabla de hosts y exige que tenga exactamente 16</td></tr>
+<tr><td>«Conexión»</td><td>(crea la región)</td><td>Abre la región, con reintentos hasta que el servidor la cree. Es el análogo del <code>connect()</code> de B y, como allí, queda fuera de la medición</td></tr>
+<tr><td>Verificación</td><td>—</td><td>Autoprueba: los 16 hosts de la tabla más uno desconocido (203.0.113.77, rango RFC 5737) antes de medir</td></tr>
+<tr><td>Parada</td><td>Al recibir la señal de terminación, libera la región</td><td>Vuelca el CSV y termina</td></tr>
+</tbody></table></div>
+<ul>
+<li>Como el servidor crea la región de nuevo en cada arranque, si un proceso termina de forma abrupta el siguiente arranque limpia lo que quedó.</li>
+<li>D <strong>no participa en el formulario de estímulos</strong> de la web, porque no hay un socket al que hablarle. Tampoco admite <code>--hilos</code>, porque una ranura por sentido no soporta dos clientes.</li>
+<li>Cambiar la tabla desde la web reinicia los servidores en ejecución, porque solo la leen al arrancar.</li>
+</ul>
+
+<h3>2.6 Portabilidad</h3>
+<p>La variante D corre en macOS, Linux y Windows. En Windows requiere un paso adicional.</p>
+<ul>
+<li><strong>macOS (Apple Silicon).</strong> Plataforma de referencia de las mediciones.</li>
+<li><strong>Linux (x86-64 y arm64).</strong> Compila y corre con el mismo código.</li>
+<li><strong>Windows.</strong> Hay que instalar una distribución de Linux mediante <strong>WSL2</strong> (<code>wsl --install</code>). D se apoya en la memoria compartida POSIX, que Windows no ofrece con la misma interfaz. Portarla a Windows exigiría una segunda implementación, y cualquier diferencia entre las dos sería indistinguible de una diferencia de arquitectura (ADR-005). El plano de control sí corre en Windows nativo.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="just">
+<h2>3. Justificación de las decisiones</h2>
+<h3>3.1 Decisiones principales</h3>
+<div class="tw"><table>
+<thead><tr><th>Decisión</th><th>Por qué</th></tr></thead>
+<tbody>
+<tr><td>Memoria compartida POSIX + espera activa</td><td>Saca al kernel y al planificador de la ruta del mensaje, para bajar la latencia y acotar el peor caso</td></tr>
+<tr><td>Lenguaje C11 con <code>stdatomic.h</code></td><td>Sin intérprete ni recolector de basura entre el código y lo que se mide; control exacto de copias y barreras de memoria</td></tr>
+<tr><td><code>acquire</code>/<code>release</code>, no <code>volatile</code></td><td>Corrección en arm64: el hardware reordena accesos y <code>volatile</code> no impone barreras de CPU</td></tr>
+<tr><td>Ranuras de 128 B, una por sentido</td><td>Evitar <em>false sharing</em> entre petición y respuesta</td></tr>
+<tr><td>Sin ring buffer</td><td>Hay una sola petición en curso: un anillo añadiría complejidad sin reducir la latencia</td></tr>
+<tr><td>Reloj de máxima resolución disponible</td><td>El reloj de la especificación original (1000 ns) era más grueso que el fenómeno medido</td></tr>
+<tr><td>Frontera de medición F1 (ida y vuelta medida en el cliente)</td><td>Es la única con el mismo significado en TCP y en memoria compartida, y la más desfavorable de las defendibles</td></tr>
+</tbody></table></div>
+
+<h3>3.2 Opciones consideradas</h3>
+<p>El reto deja libre el mecanismo de comunicación entre el cliente y el sistema, y de esa elección sale casi toda la latencia: lo que cambia de una opción a otra es <strong>cuántas capas del sistema atraviesa cada mensaje</strong>. Estas fueron las opciones que se consideraron:</p>
+<div class="tw"><table>
+<thead><tr><th>Opción</th><th>Qué es</th></tr></thead>
+<tbody>
+<tr><td><strong>A · HTTP/1.1 (REST)</strong></td><td>Un protocolo de aplicación de texto sobre TCP, con un framework web. Es la línea base de «así se construye normalmente».</td></tr>
+<tr class="res-b"><td><strong>B · TCP en Python **</strong></td><td>TCP crudo con conexión persistente y <code>TCP_NODELAY</code>: sin protocolo de aplicación, queda solo el transporte.</td></tr>
+<tr><td><strong>Bc · TCP en C</strong> (control)</td><td>El mismo TCP de B programado en C. No es una opción del sistema: es el experimento que separa el efecto del lenguaje del efecto del transporte (3.4).</td></tr>
+<tr><td><strong>C · Socket Unix (o UDP)</strong></td><td>Sockets locales sin IP ni TCP (Unix), o sin conexión ni reintentos (UDP): quitan parte de la pila de red.</td></tr>
+<tr><td><strong>E · ICMP (<code>ping</code>)</strong></td><td>El eco lo devuelve el propio kernel; se midió con un socket ICMP propio.</td></tr>
+<tr class="res-d"><td><strong>D · Memoria compartida + espera activa *</strong></td><td>Dos procesos que leen y escriben la misma memoria, sin pasar por el kernel en el intercambio.</td></tr>
+</tbody></table></div>
+<p class="leyenda">* Variante que se documenta (fila dorada). &nbsp; ** Variante contra la que se compara (fila azul).</p>
+
+<p><strong>Por qué memoria compartida.</strong></p>
+<ul>
+<li>Todas las demás opciones atraviesan el kernel en cada mensaje y pagan por ello. El control Bc muestra que ese costo es del transporte, no del lenguaje (3.4).</li>
+<li>La memoria compartida es la única que saca al kernel y al planificador de la ruta del mensaje. Con ello la latencia pasa de microsegundos a decenas de nanosegundos, y el peor caso deja de depender de lo ocupado que esté el sistema operativo (5.4).</li>
+<li>Con 1 ms como objetivo, opciones como B ya cumplen por la mediana: elegir D no era una necesidad del reto sino una decisión sobre el peor caso y sobre mostrar el límite de lo posible y su precio. Ese precio (3.3) es justamente lo que permite responder cuándo conviene una arquitectura así y cuándo no (4).</li>
+</ul>
+
+<p><strong>Alternativas dentro de D.</strong> Una vez elegida la memoria compartida, hubo dos decisiones más:</p>
+<div class="tw"><table>
+<thead><tr><th></th><th>Opción</th><th>Por qué se descartó o se eligió</th></tr></thead>
+<tbody>
+<tr><td rowspan="3"><strong>Sincronización</strong></td><td>Memoria compartida + semáforo o futex</td><td>Reintroduce el planificador, que es lo que D quiere eliminar; el despertar cuesta ~1–10 µs y D se parecería demasiado a las opciones con sockets</td></tr>
+<tr><td>Mutex entre procesos</td><td>Con contención bloquea y vuelve al kernel, con menos claridad conceptual</td></tr>
+<tr><td><strong>Espera activa (elegida)</strong></td><td>Única opción que saca al planificador de la ruta caliente</td></tr>
+<tr><td rowspan="3"><strong>Lenguaje</strong></td><td>Java 21</td><td>El recolector de basura y el JIT introducen pausas justo en los percentiles que se quieren demostrar</td></tr>
+<tr><td>Python</td><td>El sobrecoste del intérprete (microsegundos) supera la latencia a medir: mediría Python, no memoria compartida</td></tr>
+<tr><td><strong>C11 (elegido)</strong></td><td>Control exacto de asignaciones, copias y barreras de memoria</td></tr>
+</tbody></table></div>
+
+<h3>3.3 Trade-offs por atributo de calidad</h3>
+<p>Como en toda decisión de arquitectura, todo es un trade-off: la memoria compartida no es mejor ni peor, intercambia unos atributos por otros.</p>
+<div class="tw"><table>
+<thead><tr><th>Atributo</th><th>Categoría</th><th>Qué gana o pierde D</th><th>Evidencia</th></tr></thead>
+<tbody>
+<tr><td>Eficiencia de desempeño: comportamiento temporal</td><td>Operacional</td><td><strong>Gana</strong>: latencia del orden de decenas a centenas de nanosegundos y ninguna muestra sobre 1 ms</td><td>5.3, 5.6</td></tr>
+<tr><td>Eficiencia de desempeño: utilización de recursos</td><td>Operacional</td><td><strong>Pierde</strong>: dos núcleos al 100 % siempre, haya trabajo o no</td><td><code>server.c:126</code>, <code>client.c:163</code></td></tr>
+<tr><td>Escalabilidad</td><td>Operacional</td><td><strong>Pierde</strong>: un cliente por región; ni <code>--hilos</code> ni varias instancias</td><td>2.4, 2.5</td></tr>
+<tr><td>Compatibilidad: interoperabilidad</td><td>Estructural</td><td><strong>Pierde</strong>: solo procesos del mismo host y sin protocolo estándar</td><td>Diseño</td></tr>
+<tr><td>Portabilidad</td><td>Estructural</td><td><strong>Pierde</strong>: POSIX, y el modelo de memoria condiciona la corrección</td><td>2.6</td></tr>
+<tr><td>Mantenibilidad</td><td>Estructural</td><td><strong>Pierde</strong>: errores de visibilidad de memoria que no aparecen en pruebas cortas</td><td>2.4</td></tr>
+<tr><td>Seguridad</td><td>Transversal</td><td><strong>Pierde</strong>: sin autenticación ni validación; solo el permiso 0600 del objeto</td><td><code>server.c:96</code></td></tr>
+<tr><td>Determinismo (AC-2)</td><td>Operacional</td><td><strong>Parcial</strong>: sin bloqueos, pero la cola persiste</td><td>5.5</td></tr>
+</tbody></table></div>
+
+<h3>3.4 Qué explica la diferencia entre B y D</h3>
+<p>Comparar B (Python + TCP) con D (C + memoria compartida) cambia a la vez el transporte y el lenguaje. Para separar las dos causas se midió un <strong>control</strong>, llamado <strong>Bc</strong>: la misma comunicación TCP de B, con la misma frontera de medición, el mismo reloj y el mismo payload, pero programada en C. Con tres puntos en lugar de dos, el efecto se descompone:</p>
+<pre><code>B  (Python + TCP) ── cambia el LENGUAJE ──▶ Bc (C + TCP)
+Bc (C + TCP)      ── cambia el TRANSPORTE ─▶ D  (C + memoria compartida)</code></pre>
+<p>Medido sobre el equipo de referencia con 3 × 1 000 000 de muestras:</p>
+<div class="tw"><table>
+<thead><tr><th>Salto</th><th class="n">p50 antes → después (ns)</th><th class="n">Factor</th><th class="n">Peso</th></tr></thead>
+<tbody>
+<tr><td><strong>Lenguaje</strong> (B → Bc): Python → C</td><td class="n">13 209 → 12 000</td><td class="n">1,1×</td><td class="n">9,2 %</td></tr>
+<tr><td><strong>Transporte</strong> (Bc → D): TCP → memoria compartida</td><td class="n">12 000 → 83</td><td class="n">144,6×</td><td class="n">90,8 %</td></tr>
+<tr><td>Total (B → D)</td><td class="n">13 209 → 83</td><td class="n">159,1×</td><td class="n">100 %</td></tr>
+</tbody></table></div>
+<p>Reescribir el servicio en C mejora un 9 %; cambiar de capa de comunicación mejora 144×. Bc también incumple el objetivo en la cola (141 muestras sobre 1 ms de 3 M): pasar a C no corrige el problema, solo lo reduce; lo corrige no atravesar el kernel.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="uso">
+<h2>4. Cuándo usar memoria compartida</h2>
+
+<h3>4.1 El problema que resuelve</h3>
+<p>Cuando dos procesos del mismo host intercambian datos por un socket, una cola de mensajes o una tubería, <strong>cada mensaje pasa por el kernel</strong>: llamadas al sistema, copias entre espacio de usuario y kernel y, con frecuencia, una espera que involucra al planificador. La memoria compartida elimina ese intermediario: ambos procesos mapean <em>la misma</em> memoria física y la leen y escriben directamente. Lo que se ahorra es el camino por el kernel; lo que se hereda es <strong>la responsabilidad de sincronizar</strong>.</p>
+<div class="tw"><table>
+<thead><tr><th>Mecanismo (mismo host)</th><th>Copias por el kernel</th><th>Llamadas al sistema por mensaje</th><th>Cruza hosts</th><th>Quién sincroniza</th></tr></thead>
+<tbody>
+<tr><td>Socket TCP (loopback)</td><td>Sí</td><td>≥ 2 (envío + lectura)</td><td>Sí</td><td>El kernel</td></tr>
+<tr><td>Socket Unix, tubería, cola POSIX</td><td>Sí</td><td>≥ 2</td><td>No</td><td>El kernel</td></tr>
+<tr><td>Memoria compartida + semáforo/futex</td><td>No</td><td>Solo al bloquear o despertar</td><td>No</td><td>La aplicación, con ayuda del kernel</td></tr>
+<tr><td><strong>Memoria compartida + espera activa (D)</strong></td><td>No</td><td><strong>Ninguna que bloquee</strong> en el intercambio</td><td>No</td><td><strong>La aplicación, por completo</strong></td></tr>
+</tbody></table></div>
+<p>La fila de D se contrastó en ejecución (5.6): el cliente de D hizo 1 cambio de contexto voluntario en 1 100 017 intercambios; el cliente de B, uno por intercambio.</p>
+
+<h3>4.2 Cuándo sí y cuándo no</h3>
+<div class="dec">
+<div class="si"><h4>Cuándo sí</h4>
+<ul>
+<li>Los procesos <strong>están en el mismo host</strong> y seguirán estándolo.</li>
+<li>La <strong>latencia o el jitter</strong> es el atributo dominante y ya se midió que un socket no alcanza.</li>
+<li>Se comparten <strong>datos grandes o de solo lectura</strong> entre muchos procesos (cachés, tablas, búferes): copiarlos por mensaje sería absurdo.</li>
+<li>El <strong>par de procesos es estable y de confianza</strong>, con ciclo de vida acoplado.</li>
+<li>El equipo <strong>domina el modelo de memoria</strong> del hardware y del compilador.</li>
+<li>Hay <strong>núcleos que dedicar</strong> (solo si se usa espera activa).</li>
+</ul></div>
+<div class="no"><h4>Cuándo no</h4>
+<ul>
+<li>Puede haber <strong>más de un host</strong> o migrar a contenedores en nodos distintos: no cruza máquinas.</li>
+<li>Un <strong>socket ya cumple</strong> el objetivo medido. Aquí, B ya cumple 1 ms por la mediana.</li>
+<li>Hay <strong>clientes desconocidos o no confiables</strong>: no hay autenticación por mensaje, solo permisos del SO.</li>
+<li>Se necesita <strong>portabilidad</strong> (Windows nativo, otras arquitecturas).</li>
+<li>Se requiere <strong>durabilidad, reintento o repetición</strong> de mensajes.</li>
+<li>Hay <strong>varios productores o consumidores</strong> y no se quiere diseñar colas sin locks.</li>
+<li>Se necesita <strong>depuración y observabilidad</strong> con herramientas comunes.</li>
+<li>Los núcleos son escasos y no se pueden quemar en espera activa.</li>
+</ul></div>
+</div>
+<p>Ambas listas se derivan de los trade-offs de 3.3.</p>
+
+</section>
+
+<!-- ============================================================ -->
+<section id="med">
+<h2>5. Medición y resultados</h2>
+
+<div class="mirada">
+<h4>Resultado en una mirada</h4>
+<div class="tiles">
+<div class="tile"><div class="num">83 ns</div><div class="lbl">latencia mediana (p50) de D</div></div>
+<div class="tile"><div class="num">0 de 3 000 000</div><div class="lbl">muestras por encima de 1 ms</div></div>
+<div class="tile"><div class="num">≈ 12 048×</div><div class="lbl">por debajo del objetivo de 1 ms, por la mediana</div></div>
+</div>
+<p class="fuente">Equipo de referencia (Apple M4, macOS, arm64) · corrida oficial del 17/09/2026 · 3&nbsp;rondas&nbsp;×&nbsp;1&nbsp;000&nbsp;000 de iteraciones.</p>
+</div>
+
+<h3>5.1 La frontera de medición (F1)</h3>
+<p>Latencia de ida y vuelta medida en el cliente: <code>t0</code> justo antes de escribir el estímulo y <code>t1</code> justo después de tener la respuesta completa. Es la misma frontera que en B (ADR-001), elegida por ser la única con significado idéntico en ambos transportes y la más desfavorable entre las defendibles. En D corresponde a <code>client.c:207-212</code>.</p>
+<div class="tw"><table>
+<thead><tr><th>Elemento</th><th>¿Dentro de la medición?</th></tr></thead>
+<tbody>
+<tr><td>Dos lecturas del reloj</td><td>Sí. El reloj avanza a saltos de decenas de ns, así que el instrumento es comparable al fenómeno</td></tr>
+<tr><td><code>memcpy</code> del estímulo, <code>++n</code>, <code>store(release)</code></td><td>Sí</td></tr>
+<tr><td>Bucle de espera con pausa y contador de giros</td><td>Sí</td></tr>
+<tr><td>Todo el trabajo del servidor (copia, <code>clasificar</code>, copia, publicar)</td><td>Sí</td></tr>
+<tr><td><code>memcpy</code> de la respuesta al buffer local</td><td>Sí</td></tr>
+<tr><td>Validación del eco</td><td><strong>No</strong>: es posterior a <code>t1</code></td></tr>
+<tr><td>Abrir la región, warmup, autoprueba, piso del reloj, volcado del CSV</td><td><strong>No</strong></td></tr>
+<tr><td>El navegador y <code>servidor.py</code></td><td><strong>No</strong></td></tr>
+</tbody></table></div>
+<p>Sobre las copias: en el código hay <strong>4 <code>memcpy</code> de 32 B por intercambio</strong> (cliente→región, región→buffer del servidor, servidor→región, región→cliente). Lo que no hay son copias del kernel; «cero copias» solo es exacto con esa lectura.</p>
+
+<h3>5.2 El instrumento y su límite</h3>
+<ul>
+<li>El reloj avanza a saltos de un tamaño mínimo, el <strong>tic</strong> (41,67 ns en el equipo de referencia), así que las muestras individuales están <strong>cuantizadas en múltiplos del tic</strong>. No es ruido: es el tamaño del tic.</li>
+<li>El cliente mide su <strong>piso de medición</strong> (un par de lecturas sin nada en medio): p50 de 0 a 41 ns y p99 de 42 ns en el equipo de referencia, frente a un p50 de 83 ns. El instrumento no es despreciable y se declara.</li>
+<li>Como contraste, el cliente cronometra <strong>lotes de 1000 intercambios</strong> con un solo par de lecturas: mediana de <strong>75 / 66 / 75 ns</strong> por intercambio en las tres rondas de referencia. No sustituye a los percentiles, porque una media por lote no tiene cola; sirve para que, si ambas difieren mucho, se sepa que una de las dos mediciones está mal (ADR-003).</li>
+</ul>
+
+<h3>5.3 Resultados en el equipo de referencia</h3>
+<p>Apple M4, macOS 26.6, arm64. 3 rondas × 1 000 000 de iteraciones, payload de 32 B, integridad 3 000 000 / 3 000 000. Nanosegundos. Corrida oficial del 17/09/2026.</p>
+<div class="tw"><table>
+<thead><tr><th>Ronda</th><th class="n">mín</th><th class="n">p50</th><th class="n">p90</th><th class="n">p99</th><th class="n">p99.9</th><th class="n">p99.99</th><th class="n">máx</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="n">0</td><td class="n">83</td><td class="n">84</td><td class="n">125</td><td class="n">167</td><td class="n">250</td><td class="n">37 125</td></tr>
+<tr><td>2</td><td class="n">0</td><td class="n">83</td><td class="n">84</td><td class="n">84</td><td class="n">166</td><td class="n">292</td><td class="n">33 208</td></tr>
+<tr><td>3</td><td class="n">0</td><td class="n">83</td><td class="n">84</td><td class="n">125</td><td class="n">125</td><td class="n">209</td><td class="n">16 167</td></tr>
+</tbody></table></div>
+<p><strong>Cómo leer la distribución.</strong> No es una campana sino escalones de un tic. En la ronda 1: 72,66 % de las muestras en 83–84 ns, 20,48 % en 41–42 ns y 6,62 % en 125 ns; el 99,8 % cae en tres cubos. La latencia real está entre 1 y 2 tics y el contraste por lotes la sitúa en ~66–75 ns. El p50 de 83 ns es el tic superior: <strong>sobreestima por cuantización</strong>, no porque el sistema sea más lento.</p>
+
+<h3>5.4 Comparación con el objetivo de 1 ms</h3>
+<div class="tw"><table>
+<thead><tr><th></th><th class="n">D · C + shm</th><th class="n">B · Python + TCP</th></tr></thead>
+<tbody>
+<tr><td>p50 (ns)</td><td class="n">83</td><td class="n">13 458</td></tr>
+<tr><td>p99.9 (ns)</td><td class="n">167</td><td class="n">116 209</td></tr>
+<tr><td>máximo (ns), 3 M de muestras</td><td class="n">37 125</td><td class="n">13 649 750</td></tr>
+<tr><td><strong>Muestras &gt; 1 ms</strong> (de 3 000 000)</td><td class="n"><strong>0</strong></td><td class="n"><strong>136</strong></td></tr>
+<tr><td>Margen sobre 1 ms por p50</td><td class="n">≈ 12 048×</td><td class="n">≈ 74×</td></tr>
+<tr><td>Margen sobre 1 ms por el peor máximo observado</td><td class="n">≈ 27×</td><td class="n">incumple</td></tr>
+</tbody></table></div>
+<figure class="grafica">
+<img alt="Latencia por percentil en escala logarítmica: B y D frente a la línea de 1 ms" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NDAiIGhlaWdodD0iNTIwIiB2aWV3Qm94PSIwIDAgOTQwIDUyMCIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sU2Vnb2UgVUksSGVsdmV0aWNhLEFyaWFsLHNhbnMtc2VyaWYiPg0KPHJlY3Qgd2lkdGg9Ijk0MCIgaGVpZ2h0PSI1MjAiIGZpbGw9IiNmZmZmZmYiLz4NCjx0ZXh0IHg9IjkwIiB5PSIzMCIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzExMTgyNyI+TGF0ZW5jaWEgcG9yIHBlcmNlbnRpbCDigJQgZMOzbmRlIHNlIGRlY2lkZSBlbCBjdW1wbGltaWVudG88L3RleHQ+DQo8dGV4dCB4PSI5MCIgeT0iNTAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2YjcyODAiPjMgcm9uZGFzIMOXIDEgMDAwIDAwMCBwb3IgdmFyaWFudGUgwrcgUlRUIGRlIGFwbGljYWNpw7NuIChmcm9udGVyYSBGMSwgQURSLTAwMSkgwrcgZXNjYWxhIGxvZ2Fyw610bWljYTwvdGV4dD4NCjxsaW5lIHgxPSI5MCIgeTE9IjQyNS4xIiB4Mj0iODY1IiB5Mj0iNDI1LjEiIHN0cm9rZT0iI2U1ZTdlYiIgc3Ryb2tlLXdpZHRoPSIxIi8+DQo8dGV4dCB4PSI4MiIgeT0iNDI5LjEiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJlbmQiPjEwMCBuczwvdGV4dD4NCjxsaW5lIHgxPSI5MCIgeTE9IjM1OS43IiB4Mj0iODY1IiB5Mj0iMzU5LjciIHN0cm9rZT0iI2U1ZTdlYiIgc3Ryb2tlLXdpZHRoPSIxIi8+DQo8dGV4dCB4PSI4MiIgeT0iMzYzLjciIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJlbmQiPjEgwrVzPC90ZXh0Pg0KPGxpbmUgeDE9IjkwIiB5MT0iMjk0LjQiIHgyPSI4NjUiIHkyPSIyOTQuNCIgc3Ryb2tlPSIjZTVlN2ViIiBzdHJva2Utd2lkdGg9IjEiLz4NCjx0ZXh0IHg9IjgyIiB5PSIyOTguNCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9ImVuZCI+MTAgwrVzPC90ZXh0Pg0KPGxpbmUgeDE9IjkwIiB5MT0iMjI5LjEiIHgyPSI4NjUiIHkyPSIyMjkuMSIgc3Ryb2tlPSIjZTVlN2ViIiBzdHJva2Utd2lkdGg9IjEiLz4NCjx0ZXh0IHg9IjgyIiB5PSIyMzMuMSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9ImVuZCI+MTAwIMK1czwvdGV4dD4NCjxsaW5lIHgxPSI5MCIgeTE9IjE2My44IiB4Mj0iODY1IiB5Mj0iMTYzLjgiIHN0cm9rZT0iI2U1ZTdlYiIgc3Ryb2tlLXdpZHRoPSIxIi8+DQo8dGV4dCB4PSI4MiIgeT0iMTY3LjgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJlbmQiPjEgbXM8L3RleHQ+DQo8bGluZSB4MT0iOTAiIHkxPSI5OC41IiB4Mj0iODY1IiB5Mj0iOTguNSIgc3Ryb2tlPSIjZTVlN2ViIiBzdHJva2Utd2lkdGg9IjEiLz4NCjx0ZXh0IHg9IjgyIiB5PSIxMDIuNSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9ImVuZCI+MTAgbXM8L3RleHQ+DQo8dGV4dCB4PSIxNiIgeT0iMjYwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMzc0MTUxIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSgtOTAgMTYgMjYwKSI+bGF0ZW5jaWEgKGVzY2FsYSBsb2cpPC90ZXh0Pg0KPGxpbmUgeDE9IjkwLjAiIHkxPSI3MCIgeDI9IjkwLjAiIHkyPSI0NTAiIHN0cm9rZT0iI2YzZjRmNiIgc3Ryb2tlLXdpZHRoPSIxIi8+DQo8dGV4dCB4PSI5MC4wIiB5PSI0NzAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm3DrW48L3RleHQ+DQo8bGluZSB4MT0iMjAwLjciIHkxPSI3MCIgeDI9IjIwMC43IiB5Mj0iNDUwIiBzdHJva2U9IiNmM2Y0ZjYiIHN0cm9rZS13aWR0aD0iMSIvPg0KPHRleHQgeD0iMjAwLjciIHk9IjQ3MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+cDUwPC90ZXh0Pg0KPGxpbmUgeDE9IjMxMS40IiB5MT0iNzAiIHgyPSIzMTEuNCIgeTI9IjQ1MCIgc3Ryb2tlPSIjZjNmNGY2IiBzdHJva2Utd2lkdGg9IjEiLz4NCjx0ZXh0IHg9IjMxMS40IiB5PSI0NzAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnA5MDwvdGV4dD4NCjxsaW5lIHgxPSI0MjIuMSIgeTE9IjcwIiB4Mj0iNDIyLjEiIHkyPSI0NTAiIHN0cm9rZT0iI2YzZjRmNiIgc3Ryb2tlLXdpZHRoPSIxIi8+DQo8dGV4dCB4PSI0MjIuMSIgeT0iNDcwIiBmb250LXNpemU9IjExIiBmaWxsPSIjNmI3MjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5wOTk8L3RleHQ+DQo8bGluZSB4MT0iNTMyLjkiIHkxPSI3MCIgeDI9IjUzMi45IiB5Mj0iNDUwIiBzdHJva2U9IiNmM2Y0ZjYiIHN0cm9rZS13aWR0aD0iMSIvPg0KPHRleHQgeD0iNTMyLjkiIHk9IjQ3MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+cDk5Ljk8L3RleHQ+DQo8bGluZSB4MT0iNjQzLjYiIHkxPSI3MCIgeDI9IjY0My42IiB5Mj0iNDUwIiBzdHJva2U9IiNmM2Y0ZjYiIHN0cm9rZS13aWR0aD0iMSIvPg0KPHRleHQgeD0iNjQzLjYiIHk9IjQ3MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+cDk5Ljk5PC90ZXh0Pg0KPGxpbmUgeDE9Ijc1NC4zIiB5MT0iNzAiIHgyPSI3NTQuMyIgeTI9IjQ1MCIgc3Ryb2tlPSIjZjNmNGY2IiBzdHJva2Utd2lkdGg9IjEiLz4NCjx0ZXh0IHg9Ijc1NC4zIiB5PSI0NzAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM2YjcyODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnA5OS45OTk8L3RleHQ+DQo8bGluZSB4MT0iODY1LjAiIHkxPSI3MCIgeDI9Ijg2NS4wIiB5Mj0iNDUwIiBzdHJva2U9IiNmM2Y0ZjYiIHN0cm9rZS13aWR0aD0iMSIvPg0KPHRleHQgeD0iODY1LjAiIHk9IjQ3MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bcOheDwvdGV4dD4NCjxsaW5lIHgxPSI5MCIgeTE9IjE2My44IiB4Mj0iODY1IiB5Mj0iMTYzLjgiIHN0cm9rZT0iI2RjMjYyNiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtZGFzaGFycmF5PSI3LDQiLz4NCjx0ZXh0IHg9Ijk4IiB5PSIxNTYuOCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iI2RjMjYyNiI+b2JqZXRpdm8gZGVsIGVudW5jaWFkbzogMSBtczwvdGV4dD4NCjxwb2x5bGluZSBwb2ludHM9IjkwLjAsMzAyLjEgMjAwLjcsMjg2LjAgMzExLjQsMjc4LjYgNDIyLjEsMjUxLjggNTMyLjksMjI0LjkgNjQzLjYsMTc4LjMgNzU0LjMsMTQwLjggODY1LjAsODkuNyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPGNpcmNsZSBjeD0iOTAuMCIgY3k9IjMwMi4xIiByPSIzLjUiIGZpbGw9IiMyNTYzZWIiLz4NCjxjaXJjbGUgY3g9IjIwMC43IiBjeT0iMjg2LjAiIHI9IjMuNSIgZmlsbD0iIzI1NjNlYiIvPg0KPGNpcmNsZSBjeD0iMzExLjQiIGN5PSIyNzguNiIgcj0iMy41IiBmaWxsPSIjMjU2M2ViIi8+DQo8Y2lyY2xlIGN4PSI0MjIuMSIgY3k9IjI1MS44IiByPSIzLjUiIGZpbGw9IiMyNTYzZWIiLz4NCjxjaXJjbGUgY3g9IjUzMi45IiBjeT0iMjI0LjkiIHI9IjMuNSIgZmlsbD0iIzI1NjNlYiIvPg0KPGNpcmNsZSBjeD0iNjQzLjYiIGN5PSIxNzguMyIgcj0iMy41IiBmaWxsPSIjMjU2M2ViIi8+DQo8Y2lyY2xlIGN4PSI3NTQuMyIgY3k9IjE0MC44IiByPSIzLjUiIGZpbGw9IiMyNTYzZWIiLz4NCjxjaXJjbGUgY3g9Ijg2NS4wIiBjeT0iODkuNyIgcj0iMy41IiBmaWxsPSIjMjU2M2ViIi8+DQo8cG9seWxpbmUgcG9pbnRzPSI5MC4wLDQ1MC4wIDIwMC43LDQzMC4zIDMxMS40LDQzMC4wIDQyMi4xLDQxOC43IDUzMi45LDQxMC41IDY0My42LDM5OS4xIDc1NC4zLDM0NS4zIDg2NS4wLDI1Ny4yIiBmaWxsPSJub25lIiBzdHJva2U9IiM3YzNhZWQiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8Y2lyY2xlIGN4PSI5MC4wIiBjeT0iNDUwLjAiIHI9IjMuNSIgZmlsbD0iIzdjM2FlZCIvPg0KPGNpcmNsZSBjeD0iMjAwLjciIGN5PSI0MzAuMyIgcj0iMy41IiBmaWxsPSIjN2MzYWVkIi8+DQo8Y2lyY2xlIGN4PSIzMTEuNCIgY3k9IjQzMC4wIiByPSIzLjUiIGZpbGw9IiM3YzNhZWQiLz4NCjxjaXJjbGUgY3g9IjQyMi4xIiBjeT0iNDE4LjciIHI9IjMuNSIgZmlsbD0iIzdjM2FlZCIvPg0KPGNpcmNsZSBjeD0iNTMyLjkiIGN5PSI0MTAuNSIgcj0iMy41IiBmaWxsPSIjN2MzYWVkIi8+DQo8Y2lyY2xlIGN4PSI2NDMuNiIgY3k9IjM5OS4xIiByPSIzLjUiIGZpbGw9IiM3YzNhZWQiLz4NCjxjaXJjbGUgY3g9Ijc1NC4zIiBjeT0iMzQ1LjMiIHI9IjMuNSIgZmlsbD0iIzdjM2FlZCIvPg0KPGNpcmNsZSBjeD0iODY1LjAiIGN5PSIyNTcuMiIgcj0iMy41IiBmaWxsPSIjN2MzYWVkIi8+DQo8cmVjdCB4PSIxMDIiIHk9IjczIiB3aWR0aD0iMTMiIGhlaWdodD0iMTMiIHJ4PSIyIiBmaWxsPSIjMjU2M2ViIi8+DQo8dGV4dCB4PSIxMjIiIHk9Ijg0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMzc0MTUxIj5CIMK3IFB5dGhvbiArIFRDUCDigJQgMTM2IG11ZXN0cmFzICZndDsgMSBtczwvdGV4dD4NCjxyZWN0IHg9IjEwMiIgeT0iOTIiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjIiIGZpbGw9IiM3YzNhZWQiLz4NCjx0ZXh0IHg9IjEyMiIgeT0iMTAzIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMzc0MTUxIj5EIMK3IEMgKyBtZW1vcmlhIGNvbXBhcnRpZGEg4oCUIG5pbmd1bmEgJmd0OyAxIG1zPC90ZXh0Pg0KPHRleHQgeD0iOTAiIHk9IjUwMiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzZiNzI4MCI+TGFzIGN1cnZhcyBzb24gcGxhbmFzIGhhc3RhIGVsIHA5OSB5IHNlIGRpc3BhcmFuIGRlc3B1w6lzOiBwb3IgbGEgbWVkaWFuYSB0b2RhcyBjdW1wbGVuOyBsYSBkaWZlcmVuY2lhIGVzdMOhIGVuIGxhIGNvbGEuPC90ZXh0Pg0KPC9zdmc+">
+<figcaption>Latencia por percentil, escala logarítmica. Corrida del 17/09/2026, 3 000 000 de muestras por variante. La curva de B cruza la línea de 1 ms en la cola (entre el p99.99 y el p99.999); la de D no la alcanza.</figcaption>
+</figure>
+<p>Por la mediana, las dos variantes cumplen con holgura. Solo la cola distingue: B tiene 136 muestras sobre el umbral y D ninguna. La métrica elegida, no el sistema, decide el veredicto. Además, el veredicto de B no es reproducible: con el mismo código y el mismo equipo dio 0 muestras sobre 1 ms el 14/09 y 136 el 17/09, mientras que D dio 0 en ambas. El peor caso de D está acotado por construcción; el de B depende del estado de la máquina.</p>
+<blockquote><p><strong>Limitación de la comparación.</strong> B y D difieren en transporte y lenguaje a la vez. El factor de 162× por p50 no se atribuye a una sola causa; la evidencia de descomposición es la del control Bc (3.4).</p></blockquote>
+
+<h3>5.5 La cola sigue ahí, sin bloquear en el intercambio</h3>
+<p>D tiene máximos de 16,2 a 37,1 µs en el equipo de referencia: <strong>447× su p50</strong>. No lo causa el transporte. Según el ADR-002, lo causan el planificador, las interrupciones y, muy probablemente, la migración del hilo a un núcleo de eficiencia, que en macOS/arm64 no se puede impedir porque <code>thread_policy_set(THREAD_AFFINITY_POLICY)</code> devuelve <code>KERN_NOT_SUPPORTED</code> en ese equipo. La clase de QoS solo <em>sugiere</em> núcleos de rendimiento.</p>
+<blockquote class="ok"><p><strong>Conclusión arquitectónica:</strong> eliminar el software de la ruta caliente no elimina la cola. La pone el sistema operativo y el hardware, y en esta plataforma no se puede quitar. El sistema operativo y el hardware son restricciones de tecnología de primer orden, no un detalle de despliegue; aquí se demuestran con números y no solo con una definición.</p></blockquote>
+
+<h3>5.6 Resultados en una segunda plataforma</h3>
+<p>El proyecto se ejecutó también en Linux x86-64 con el harness oficial (<code>run.sh</code>). Es una corrida independiente, con su equipo declarado, y no se mezcla con la tabla del equipo de referencia (ADR-005).</p>
+<div class="tw"><table>
+<thead><tr><th>Equipo</th><th>Detalle</th></tr></thead>
+<tbody>
+<tr><td>CPU</td><td>Intel Core i5-8300H, 4 núcleos / 8 hilos, x86-64</td></tr>
+<tr><td>Sistema</td><td>Linux 6.18 (WSL2, máquina virtual de Hyper-V), Ubuntu</td></tr>
+<tr><td>Compilador / Python</td><td>gcc 15.2 (<code>-O2</code>) · Python 3.14.4</td></tr>
+<tr><td>Reloj</td><td><code>CLOCK_MONOTONIC</code> · granularidad observada: escalones de <strong>100 ns</strong> (piso del instrumento: p50 = 0 ns, p99 = 100 ns)</td></tr>
+</tbody></table></div>
+<p><strong>Resultados</strong> en nanosegundos (en D, integridad 3 000 000 / 3 000 000 respuestas correctas):</p>
+<div class="tw"><table>
+<thead><tr><th></th><th class="n">Muestras</th><th class="n">p50</th><th class="n">p99.9</th><th class="n">máx</th><th class="n">&gt; 1 ms</th></tr></thead>
+<tbody>
+<tr><td><strong>D</strong> · memoria compartida, 3 rondas</td><td class="n">3 000 000</td><td class="n">100</td><td class="n">200</td><td class="n">228 700</td><td class="n"><strong>0</strong></td></tr>
+<tr><td><strong>B</strong> · TCP en Python, 1 ronda (contraste)</td><td class="n">200 000</td><td class="n">61 400</td><td class="n">275 700</td><td class="n">10 550 600</td><td class="n"><strong>27</strong></td></tr>
+</tbody></table></div>
+<details>
+<summary>Ver las tres rondas de D</summary>
+<div class="tw"><table>
+<thead><tr><th>Ronda</th><th class="n">p50</th><th class="n">p90</th><th class="n">p99.9</th><th class="n">p99.99</th><th class="n">máx</th><th class="n">&gt; 1 ms</th><th class="n">Mediana por lotes</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="n">100</td><td class="n">200</td><td class="n">200</td><td class="n">13 800</td><td class="n">44 000</td><td class="n">0</td><td class="n">122</td></tr>
+<tr><td>2</td><td class="n">100</td><td class="n">200</td><td class="n">300</td><td class="n">13 000</td><td class="n">224 500</td><td class="n">0</td><td class="n">127</td></tr>
+<tr><td>3</td><td class="n">100</td><td class="n">200</td><td class="n">200</td><td class="n">16 200</td><td class="n">228 700</td><td class="n">0</td><td class="n">120</td></tr>
+</tbody></table></div>
+</details>
+<p><strong>Lectura y alcance:</strong></p>
+<ul>
+<li><strong>Qué se reproduce.</strong> La forma del resultado: en D, una distribución en escalones de un tic, ninguna muestra sobre 1 ms en 3 M y una cola de decenas a cientos de µs aun sin bloquear en el intercambio; en B, de nuevo muestras sobre 1 ms, lo que respalda que su cumplimiento depende del estado de la máquina. Y que D no pasa por el planificador: el cliente hizo 1 cambio de contexto voluntario en 1 100 017 intercambios, frente a 219 874 en 220 017 en B (uno por intercambio). Es una evidencia indirecta: muestra que el cliente no bloquea ni cede la CPU, pero no cuenta las llamadas al sistema una a una.</li>
+<li><strong>Qué no se reproduce.</strong> Las cifras absolutas (otra CPU, otra arquitectura y una máquina virtual; ADR-005) ni las barreras de memoria de arm64: x86-64 tiene un modelo de memoria fuertemente ordenado, así que <code>acquire</code>/<code>release</code> se compilan a accesos ordinarios y esta plataforma no puede detectar un error de ordenación que solo existiría en arm64. La corrección de las barreras en arm64 se apoya en el razonamiento de 2.4 y en la validación del eco (3 000 000 de respuestas correctas) del equipo de referencia.</li>
+<li><strong>Condiciones de la medición.</strong> Con escalones de 100 ns y un p50 de 100 ns, el tic es tan grande como lo medido: el contraste por lotes (120–127 ns por intercambio) es lo que fija el orden de magnitud. La máquina virtual tenía otros procesos activos. Una medición aparte lanzada desde la interfaz web, con el plano de control consultando el estado durante la corrida, dio p99.9 = 1 200 ns y una muestra sobre 1 ms (máximo 1 576 300 ns): no es comparable con las corridas de <code>run.sh</code>, pero ilustra cuánto depende la cola del entorno.</li>
+</ul>
+</section>
+
+</main>
+</div>
+<footer>Variante D — Memoria compartida · Camilo Céspedes · Group 2 · Módulo 1 · 19/09/2026</footer>
+</body>
+</html>
