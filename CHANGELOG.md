@@ -15,6 +15,12 @@ el detalle línea por línea está en `git log`.
 ## 2026-09-21
 
 ### Añadido
+- **Aporte sobre la variante D** (Camilo), en `Modulo 1/Aportes/camilo/`, con su ficha en `FUENTES.md`:
+  - `m1-arquitectura-variante-d-camilo.html`: documentación técnica (arquitectura, justificación,
+    cuándo usar memoria compartida, medición y resultados).
+  - `m1-codigo-variante-d-camilo.html`: guía del código, archivo por archivo y bloque por bloque.
+  - `m1-manual-instalacion-camilo.html`: manual de instalación y diagnóstico del proyecto completo (web, B y D), versión inicial; probado en WSL2 y Windows nativo, no en macOS.
+- **Índice del proyecto** regenerado (`generar-indice.py`) para incluir los tres documentos. (Camilo)
 - **README general:** pasos para ejecutar todo el sistema en Windows con WSL2
   (`wsl -l -v`, `sudo apt update && sudo apt install -y build-essential make`, `./iniciar.sh`). (Camilo)
 - **README de la variante D:** secciones «Otras plataformas» y «Límites conocidos». La primera documenta una
@@ -37,6 +43,7 @@ el detalle línea por línea está en `git log`.
 - `analyze.py` (`plataforma_de`) identifica una plataforma Linux por la línea «Architecture» de `lscpu`, no por el
   modelo de CPU: dos equipos Linux distintos tendrían la misma identidad y el ADR-005 no los distinguiría. (Camilo)
 - `iniciar.sh` compila `sistema/control-dominio/`, pero falla en Linux (falta `_GNU_SOURCE`) y lo silencia. (Camilo)
+- `generar-indice.py` en Windows nativo clasifica mal los aportes; hay que regenerar el índice desde WSL2, macOS o Linux. (Camilo)
 
 ---
 
