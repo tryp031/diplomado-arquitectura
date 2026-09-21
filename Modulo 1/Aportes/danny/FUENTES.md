@@ -88,3 +88,34 @@ página con las notas incluidas.
 **Advertencia de trazabilidad:** la lámina 7 usa datos de un experimento cuyo código ya no
 está en el árbol (ADR-007). Está marcado como «archivada» en la propia lámina y explicado en
 las notas del orador. **No presentarlo como reproducible en vivo.**
+
+---
+
+## `m1-autoevaluacion-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-09-21 |
+| **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
+| **Tema** | Las 10 preguntas de la autoevaluación M1, resueltas y analizadas |
+| **Tipo** | `apunte` — notas de estudio propias, elaboradas con IA |
+| **Fuentes** | **Autoevaluación oficial del M1** (Brightspace, 10 preguntas — enunciados y opciones transcritos) · Richards & Ford (bibliografía del módulo) · conocimiento complementario marcado como tal en el propio documento |
+| **Estado** | vigente · ⬜ sin consolidar |
+| **Origen** | `M1-arquitectura-software-autoevaluacion.md`, redactado por Danny con Claude tras presentar la autoevaluación el 21/09/2026. El `.md` no se versiona: este HTML lo reemplaza |
+
+**Qué contiene:** marco conceptual en 4 pilares (qué es una decisión significativa · la arquitectura
+como abstracción · las dos leyes · tabla de atributos de calidad) · las 10 preguntas en formato
+interactivo (se responden antes de ver el análisis) · para cada una: por qué la correcta es correcta,
+**por qué falla cada distractora** y el concepto clave · clave de respuestas plegada · 5 patrones para
+resolver preguntas de este tipo · 6 prompts para seguir estudiando · resumen de 6 puntos.
+
+**Cómo se usa:** se abre en cualquier navegador, sin servidor. Clic en una opción la califica y abre
+el análisis. `T` alterna claro/oscuro, `R` reinicia el cuestionario, «Abrir análisis» despliega todo
+(útil antes de imprimir a PDF). El marcador del margen lleva la cuenta de aciertos.
+
+**Trazabilidad del contenido:** los enunciados y las cuatro opciones de cada pregunta son del material
+oficial. Todo lo demás es elaboración propia. Lo que no sale del diplomado va marcado
+`Complementario` dentro del documento (patrón Saga, fecha y maniobra inversa de la Ley de Conway,
+WCAG) y las observaciones propias van marcadas `Criterio` — incluye un reparo al enunciado de las
+preguntas 9 y 1.
