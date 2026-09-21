@@ -15,15 +15,59 @@ Software y Cloud Computing, Pontificia Universidad Javeriana Cali.
 ./iniciar.sh
 ```
 
-**Windows** — doble clic en `iniciar.cmd`, o desde PowerShell:
+**Windows** — hay dos maneras, según lo que se quiera correr:
 
-```powershell
-.\iniciar.ps1
-```
+| Quiero… | Cómo |
+|---|---|
+| Solo la interfaz y las variantes en Python (B) | doble clic en `iniciar.cmd`, o desde PowerShell: `.\iniciar.ps1` |
+| **Todo el sistema, incluida la variante D** | dentro de **WSL2**, con los pasos de abajo |
 
-Compila lo que esta máquina pueda compilar, levanta el plano de control y abre el
-navegador en `http://127.0.0.1:8080`. Solo necesita **Python 3.9 o superior**.
-Sin `npm`, sin `pip install`, sin `node_modules`.
+> **`iniciar.cmd` no arranca la variante D.** En Windows nativo no hay compilador de C ni
+> memoria compartida POSIX (ver «Tres caminos»): el script sigue adelante sin ellos y deja
+> funcionando la interfaz y las variantes en Python. Para correr **todo**, el proyecto se
+> ejecuta dentro de WSL2.
+
+**Todo el sistema en Windows, con WSL2**
+
+1. **Verificar que WSL está instalado.** En PowerShell:
+
+   ```powershell
+   wsl -l -v
+   ```
+
+   Tiene que aparecer al menos una distribución (por ejemplo `Ubuntu`) con `VERSION 2`.
+   Si no aparece ninguna: `wsl --install`, reiniciar el equipo y volver a comprobar.
+
+2. **Entrar a WSL** y ubicarse en la carpeta del proyecto. La unidad `C:` de Windows es
+   `/mnt/c` dentro de WSL (`D:` es `/mnt/d`, y así con las demás). Si la ruta tiene
+   espacios, va entre comillas:
+
+   ```bash
+   wsl
+   cd "/mnt/c/ruta/al/proyecto/reto-latencia-group2"
+   ```
+
+3. **Instalar `make` y el compilador de C**, si no se tienen. Se comprueba con
+   `make --version` y `cc --version`; si alguno dice `command not found`:
+
+   ```bash
+   sudo apt update && sudo apt install -y build-essential make
+   ```
+
+4. **Arrancar el servicio:**
+
+   ```bash
+   ./iniciar.sh
+   ```
+
+   Compila las variantes en C, levanta el plano de control y queda escuchando en
+   `http://127.0.0.1:8080`. Si el navegador no se abre solo, abrir esa dirección desde
+   Windows. No ejecutarlo a la vez que `iniciar.cmd`: los dos usan el puerto 8080.
+
+`iniciar.sh` e `iniciar.cmd` compilan lo que la máquina pueda compilar, levantan el plano
+de control y abren el navegador en `http://127.0.0.1:8080`. Para la interfaz solo hace
+falta **Python 3.9 o superior**; compilar las variantes en C necesita además `make` y un
+compilador de C. Sin `npm`, sin `pip install`, sin `node_modules`.
 
 **¿Algo no arranca?** No preguntes por chat, preguntale a la máquina:
 
@@ -45,7 +89,7 @@ nativo no existe. Así que hay tres caminos, y conviene saber en cuál estás:
 | Camino | Qué corre | Sirve para |
 |---|---|---|
 | **macOS / Linux nativo** | todo | las mediciones del informe |
-| **WSL2 sobre Windows**<br>`wsl --install` | todo | desarrollar variantes en C, medir tu plataforma |
+| **WSL2 sobre Windows**<br>`wsl --install` · pasos en «Arrancar» | todo | desarrollar variantes en C, medir tu plataforma |
 | **Windows nativo**<br>sin instalar nada | interfaz + variantes en Python | ver el sistema, desarrollar A y C, demostrar |
 
 Windows nativo no quedó de segunda por descuido. Portar el plano de datos a Win32
