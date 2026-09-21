@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autoevaluación M1 — Fundamentos de Arquitectura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+  :root{
+    color-scheme:light dark;
+    --ground:#F1F4F4; --surface:#FFFFFF; --surface-2:#E7EDED;
+    --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+    --rule:#CDDADC; --rule-2:#E1E9EA;
+    --accent:#0A6C7C; --accent-soft:#DBEDEF;
+    --signal:#A85B0C; --signal-soft:#F7E8D4;
+    --ok:#1B6B45; --ok-soft:#DCEFE4;
+    --bad:#9B2C2C; --bad-soft:#F7E0E0;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+      --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+      --rule:#233A3F; --rule-2:#1A2E32;
+      --accent:#5CB9C8; --accent-soft:#123338;
+      --signal:#E0A257; --signal-soft:#33240F;
+      --ok:#6FCB9B; --ok-soft:#10301F;
+      --bad:#E88C8C; --bad-soft:#331616;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#6FCB9B; --ok-soft:#10301F;
+    --bad:#E88C8C; --bad-soft:#331616;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1140px; margin:0 auto; padding:0 16px 96px;
+    display:grid; grid-template-columns:1fr; gap:0 56px;
+  }
+  @media (min-width:1020px){ .wrap{grid-template-columns:220px minmax(0,1fr); padding:0 24px 96px} }
+
+  /* ── masthead ─────────────────────────────────────────── */
+  .masthead{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 28px;margin-bottom:40px}
+  .kicker{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.95rem,4.6vw,3rem);line-height:1.05;letter-spacing:-.024em;text-wrap:balance;margin:0 0 18px}
+  .standfirst{font-size:1.16rem;line-height:1.6;color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+  .standfirst em{color:var(--ink);font-style:italic}
+  .facts{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--surface);margin:0}
+  .fact{flex:1 1 140px;padding:12px 18px;border-right:1px solid var(--rule-2)}
+  .fact:last-child{border-right:none}
+  .fact dt{font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin:0 0 5px}
+  .fact dd{margin:0;font-family:var(--sans);font-size:.92rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* ── rail ─────────────────────────────────────────────── */
+  .rail{display:none}
+  @media (min-width:1020px){
+    .rail{display:block;align-self:start;position:sticky;top:24px;font-family:var(--sans);font-size:.83rem;padding-bottom:40px;max-height:calc(100vh - 48px);overflow-y:auto}
+  }
+  .rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .rail ol{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:2px}
+  .rail a{display:flex;gap:9px;color:var(--ink-2);text-decoration:none;border:0;padding:3px 0;line-height:1.35}
+  .rail a:hover{color:var(--accent)}
+  .rail a .n{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);flex:0 0 16px;padding-top:1px}
+  .rail a.hit .n{color:var(--ok)}
+  .rail a.miss .n{color:var(--bad)}
+  .scorebox{border-top:1px solid var(--rule);padding-top:16px;margin-bottom:18px}
+  .scorebox .big{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+  .scorebox .cap{font-size:.76rem;color:var(--ink-3);line-height:1.4}
+  .railbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+
+  /* ── controles ────────────────────────────────────────── */
+  .btn{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);
+    border-radius:2px;padding:6px 10px;cursor:pointer;line-height:1.2;
+  }
+  .btn:hover{color:var(--accent);border-color:var(--accent)}
+  .topbar{
+    position:fixed;top:12px;right:12px;z-index:10;display:flex;gap:6px;
+  }
+  @media (max-width:1019px){.topbar{position:static;margin:16px 0 0;justify-content:flex-start;flex-wrap:wrap}}
+  @media (min-width:1020px){.topbar{display:none}}
+
+  /* ── tipografía general ───────────────────────────────── */
+  main{min-width:0}
+  section{padding-top:8px;margin-bottom:58px;scroll-margin-top:20px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.65rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h2.sec{font-family:var(--sans);font-weight:600;font-size:1.58rem;line-height:1.2;letter-spacing:-.017em;text-wrap:balance;margin:0 0 16px;max-width:34ch}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;letter-spacing:-.008em;margin:32px 0 10px;max-width:46ch}
+  p{margin:0 0 18px;max-width:66ch}
+  main ul,main ol{max-width:64ch;margin:0 0 18px;padding-left:22px}
+  main li{margin-bottom:7px}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:.1em .34em;border-radius:2px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{border-bottom-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;padding:.18em .48em;border-radius:2px;vertical-align:.14em;white-space:nowrap}
+  .p-curso{background:var(--accent-soft);color:var(--accent)}
+  .p-compl{background:var(--surface-2);color:var(--ink-2)}
+  .p-recom{background:var(--signal-soft);color:var(--signal)}
+
+  .note{border-left:2px solid var(--accent);background:var(--surface);padding:16px 20px;margin:24px 0;max-width:66ch;border-radius:0 3px 3px 0}
+  .note.risk{border-left-color:var(--signal)}
+  .note p:last-child{margin-bottom:0}
+  .note .lab{display:block;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+
+  blockquote{margin:22px 0;padding:0 0 0 18px;border-left:2px solid var(--rule);color:var(--ink-2);font-style:italic;max-width:62ch}
+
+  .tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.ok{color:var(--ok);font-weight:600}
+  .cat{font-family:var(--sans);font-weight:600}
+
+  /* ── bloque de pregunta ───────────────────────────────── */
+  .q{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px 22px 18px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .q.done{border-color:var(--rule-2)}
+  .qhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .qn{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .qhead h3{margin:0;font-size:1.08rem}
+  .stem{font-family:var(--sans);font-size:1rem;line-height:1.55;color:var(--ink);margin:0 0 16px;max-width:64ch}
+  .opts{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:7px;max-width:none}
+  .opts li{margin:0}
+  .opt{
+    width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;
+    font-family:var(--sans);font-size:.94rem;line-height:1.5;color:var(--ink);
+    background:var(--ground);border:1px solid var(--rule-2);border-radius:3px;
+    padding:11px 14px;cursor:pointer;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-2)}
+  .opt:disabled{cursor:default}
+  .opt .k{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--ink-3);flex:0 0 14px;padding-top:2px;text-transform:lowercase}
+  .opt.is-ok{background:var(--ok-soft);border-color:var(--ok)}
+  .opt.is-ok .k{color:var(--ok)}
+  .opt.is-bad{background:var(--bad-soft);border-color:var(--bad)}
+  .opt.is-bad .k{color:var(--bad)}
+  .opt.dim{opacity:.55}
+  .verdict{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin:12px 0 0;padding:7px 11px;border-radius:2px}
+  .verdict.ok{background:var(--ok-soft);color:var(--ok)}
+  .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+  details.why{margin-top:14px;border-top:1px solid var(--rule-2);padding-top:6px}
+  details.why summary{cursor:pointer;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 0;list-style:none;display:flex;gap:8px;align-items:center}
+  details.why summary::-webkit-details-marker{display:none}
+  details.why summary::before{content:"+";font-size:.85rem;color:var(--accent)}
+  details.why[open] summary::before{content:"\2212"}
+  details.why summary:hover{color:var(--accent)}
+  .why .body{font-size:1rem;line-height:1.66;color:var(--ink-2);padding-bottom:6px}
+  .why .body p{max-width:64ch}
+  .why .body strong{color:var(--ink)}
+  .key{
+    display:flex;gap:10px;align-items:flex-start;margin:18px 0 2px;padding:12px 15px;
+    background:var(--accent-soft);border-radius:3px;font-family:var(--sans);font-size:.93rem;
+    line-height:1.5;color:var(--ink);max-width:64ch;
+  }
+  .key .lab{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);flex:0 0 auto;padding-top:3px}
+
+  /* ── prompts ──────────────────────────────────────────── */
+  .prompt{position:relative;border:1px solid var(--rule);border-radius:3px;background:var(--surface);margin:14px 0}
+  .prompt pre{margin:0;padding:15px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;color:var(--ink-2);white-space:pre-wrap}
+  .prompt .copy{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .12s}
+  .prompt:hover .copy,.prompt .copy:focus-visible{opacity:1}
+  @media (hover:none){.prompt .copy{opacity:1}}
+
+  .hand{list-style:none;counter-reset:h;margin:22px 0;padding:0;display:grid;gap:1px;background:var(--rule-2);border:1px solid var(--rule);border-radius:3px;overflow:hidden;max-width:none}
+  .hand li{counter-increment:h;background:var(--surface);padding:13px 16px 13px 46px;position:relative;font-family:var(--sans);font-size:.94rem;margin:0;line-height:1.5}
+  .hand li::before{content:counter(h);position:absolute;left:17px;top:13px;font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+
+  footer.end{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:20px;padding-top:22px;font-family:var(--sans);font-size:.82rem;color:var(--ink-3);line-height:1.6}
+
+  @media print{
+    .topbar,.rail{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="btn" id="btn-theme" type="button">Tema</button>
+  <button class="btn" id="btn-open" type="button">Abrir análisis</button>
+  <button class="btn" id="btn-reset" type="button">Reiniciar</button>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Módulo 1 · Autoevaluación · Diplomado en Arquitectura de Software y Cloud Computing</p>
+    <h1>Fundamentos de arquitectura: las 10 preguntas, resueltas y desarmadas</h1>
+    <p class="standfirst">Cuaderno de repaso construido a partir de la autoevaluación del Módulo 1. Cada pregunta se puede <em>volver a responder</em> antes de ver el análisis: primero eliges, después lees por qué la correcta es correcta y —lo que más rinde en examen— <em>por qué cada distractora está mal</em>.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Autor</dt><dd>Daniel Mazo (Danny)</dd></div>
+      <div class="fact"><dt>Fecha</dt><dd>2026-09-21</dd></div>
+      <div class="fact"><dt>Preguntas</dt><dd>10</dd></div>
+      <div class="fact"><dt>Tipo</dt><dd>apunte de estudio</dd></div>
+      <div class="fact"><dt>Estado</dt><dd>vigente</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Índice">
+    <div class="scorebox">
+      <div class="big" id="score">0 / 10</div>
+      <div class="cap" id="scorecap">aciertos sobre respondidas</div>
+      <div class="railbtns">
+        <button class="btn" id="btn-theme-2" type="button">Tema</button>
+        <button class="btn" id="btn-reset-2" type="button">Reiniciar</button>
+        <button class="btn" id="btn-open-2" type="button">Abrir análisis</button>
+      </div>
+    </div>
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#marco"><span class="n">§</span><span>Marco conceptual</span></a></li>
+      <li><a href="#preguntas"><span class="n">§</span><span>Las 10 preguntas</span></a></li>
+    </ol>
+    <h2>Preguntas</h2>
+    <ol id="railq">
+      <li><a href="#p1" data-q="1"><span class="n">1</span><span>Impacto estratégico</span></a></li>
+      <li><a href="#p2" data-q="2"><span class="n">2</span><span>La arquitectura como abstracción</span></a></li>
+      <li><a href="#p3" data-q="3"><span class="n">3</span><span>Primera ley: trade-offs</span></a></li>
+      <li><a href="#p4" data-q="4"><span class="n">4</span><span>Rol del arquitecto</span></a></li>
+      <li><a href="#p5" data-q="5"><span class="n">5</span><span>Desafíos futuros</span></a></li>
+      <li><a href="#p6" data-q="6"><span class="n">6</span><span>Ley de Conway</span></a></li>
+      <li><a href="#p7" data-q="7"><span class="n">7</span><span>Tipos de restricciones</span></a></li>
+      <li><a href="#p8" data-q="8"><span class="n">8</span><span>Por qué importan</span></a></li>
+      <li><a href="#p9" data-q="9"><span class="n">9</span><span>Atributos y evolución</span></a></li>
+      <li><a href="#p10" data-q="10"><span class="n">10</span><span>Accesibilidad vs. usabilidad</span></a></li>
+    </ol>
+    <h2>Cierre</h2>
+    <ol>
+      <li><a href="#clave"><span class="n">§</span><span>Clave de respuestas</span></a></li>
+      <li><a href="#patrones"><span class="n">§</span><span>Patrones de examen</span></a></li>
+      <li><a href="#prompts"><span class="n">§</span><span>Prompts para profundizar</span></a></li>
+      <li><a href="#cuaderno"><span class="n">§</span><span>Para el cuaderno</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ══ MARCO ═══════════════════════════════════════════ -->
+    <section id="marco">
+      <p class="eyebrow">Antes de empezar</p>
+      <h2 class="sec">Los cuatro pilares que atraviesan todo el cuestionario</h2>
+
+      <div class="note">
+        <span class="lab">Cómo leer este documento</span>
+        <p>Las etiquetas marcan el origen de cada afirmación: <span class="pill p-curso">Curso</span> es contenido del Módulo 1 o de su bibliografía, <span class="pill p-compl">Complementario</span> es conocimiento externo que agrego para dar contexto, y <span class="pill p-recom">Criterio</span> es lectura propia. Las preguntas y sus opciones se transcriben de la autoevaluación; los análisis son míos.</p>
+      </div>
+
+      <h3>1. Qué es (y qué no es) arquitectura <span class="pill p-curso">Curso</span></h3>
+      <p>La arquitectura de software es el <strong>conjunto de decisiones significativas</strong> sobre un sistema. Una decisión es «significativa» cuando cumple al menos uno de estos criterios:</p>
+      <ul>
+        <li>Es <strong>costosa de revertir</strong> una vez implementada.</li>
+        <li><strong>Condiciona atributos de calidad</strong> del sistema completo (rendimiento, seguridad, escalabilidad…).</li>
+        <li>Define <strong>límites estructurales</strong> entre partes del sistema.</li>
+      </ul>
+      <p>Si una decisión se puede cambiar el martes sin que nadie se entere, no es arquitectónica.</p>
+
+      <h3>2. La arquitectura como abstracción <span class="pill p-curso">Curso</span></h3>
+      <p>Una abstracción es útil <strong>por lo que omite</strong>, no por lo que incluye. La arquitectura esconde deliberadamente los detalles de implementación para permitir razonar sobre el sistema a alto nivel.</p>
+      <div class="tw"><table>
+        <thead><tr><th>La arquitectura SÍ captura</th><th>La arquitectura OMITE</th></tr></thead>
+        <tbody>
+          <tr><td>Componentes principales y sus relaciones</td><td>Variables locales, bucles</td></tr>
+          <tr><td>Protocolos de comunicación</td><td>Algoritmos internos de un módulo</td></tr>
+          <tr><td>Principios que guían la evolución</td><td>Nombres de funciones privadas</td></tr>
+          <tr><td>Trade-offs entre atributos de calidad</td><td>Detalles de sintaxis o framework</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>3. Las leyes de la arquitectura (Richards &amp; Ford) <span class="pill p-curso">Curso</span></h3>
+      <p><strong>Primera ley:</strong> <em>todo en arquitectura de software es un trade-off.</em> Si crees que encontraste una decisión sin contrapartida, todavía no identificaste cuál es.</p>
+      <p><strong>Segunda ley:</strong> <em>el «por qué» importa más que el «cómo».</em> Documentar la razón de una decisión vale más que documentar su implementación — es exactamente lo que hace un ADR.</p>
+
+      <h3>4. Atributos de calidad <span class="pill p-curso">Curso</span></h3>
+      <p>No son «extras»: son el objetivo del diseño arquitectónico. Los del módulo, cada uno con la pregunta que responde:</p>
+      <div class="tw"><table>
+        <thead><tr><th>Atributo</th><th>Pregunta que responde</th></tr></thead>
+        <tbody>
+          <tr><td class="cat">Disponibilidad</td><td>¿El sistema está arriba cuando lo necesito?</td></tr>
+          <tr><td class="cat">Rendimiento</td><td>¿Responde rápido bajo carga?</td></tr>
+          <tr><td class="cat">Escalabilidad</td><td>¿Aguanta si crece la demanda?</td></tr>
+          <tr><td class="cat">Modificabilidad / Extensibilidad</td><td>¿Puedo agregar funcionalidad sin romper todo?</td></tr>
+          <tr><td class="cat">Portabilidad</td><td>¿Corre en distintas plataformas?</td></tr>
+          <tr><td class="cat">Seguridad</td><td>¿Protege datos y accesos?</td></tr>
+          <tr><td class="cat">Usabilidad</td><td>¿Es fácil de usar?</td></tr>
+          <tr><td class="cat">Accesibilidad</td><td>¿Puede usarlo alguien con limitaciones físicas o sensoriales?</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ══ PREGUNTAS ═══════════════════════════════════════ -->
+    <section id="preguntas">
+      <p class="eyebrow">Autoevaluación · <span style="color:var(--accent)">responde antes de abrir el análisis</span></p>
+      <h2 class="sec">Las 10 preguntas</h2>
+
+      <!-- P1 -->
+      <article class="q" id="p1" data-q="1" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 1</span><h3>Impacto estratégico de las decisiones</h3></div>
+        <p class="stem">Si la arquitectura de software es el conjunto de decisiones significativas sobre un sistema, ¿cuál de estos escenarios refleja mejor su impacto estratégico?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Un equipo elige React para el frontend porque es la biblioteca que mejor dominan.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Se define un patrón de microservicios con límites claros para garantizar escalabilidad independiente de módulos críticos.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Se documenta exhaustivamente cada función del código para facilitar el onboarding.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Se prioriza cumplir con el deadline usando componentes monolíticos, dejando la optimización para futuras iteraciones.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Definir microservicios con límites explícitos es la decisión arquetípica de arquitectura. Cumple los tres criterios de significancia: es costosísima de revertir (implica rediseñar comunicación, datos y despliegue), condiciona atributos de calidad centrales (escalabilidad, aislamiento de fallos, despliegue independiente) y establece los límites estructurales del sistema.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Decisión <strong>táctica de conveniencia</strong>: el criterio es la comodidad del equipo, no una propiedad del sistema. Cambiar de biblioteca de frontend es caro, pero acotado: no reestructura el sistema.</li>
+            <li><strong>c)</strong> Documentar funciones opera <strong>a nivel de código</strong>, no de arquitectura. Ojo con el matiz: documentar <em>decisiones arquitectónicas</em> (los ADR) sí sería arquitectura. La diferencia está en el nivel de abstracción.</li>
+            <li><strong>d)</strong> Es una <strong>decisión de gestión de cronograma</strong> que genera deuda técnica. Tiene consecuencias arquitectónicas, pero lo que describe el escenario es una priorización de entrega, no un diseño.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Decisión significativa = costosa de revertir + condiciona atributos de calidad.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P2 -->
+      <article class="q" id="p2" data-q="2" data-correct="a">
+        <div class="qhead"><span class="qn">Pregunta 2</span><h3>La arquitectura como abstracción</h3></div>
+        <p class="stem">Al diseñar una arquitectura, ¿qué tipo de información debería omitirse intencionalmente para mantener su utilidad como abstracción?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Las variables temporales usadas en bucles internos de un módulo no crítico.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>La relación entre componentes principales y sus protocolos de comunicación.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Los principios que guían la evolución futura del sistema.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Los trade-offs entre seguridad y rendimiento en APIs públicas.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Es el ejemplo más puro de detalle de implementación. Una variable de bucle no dice nada sobre cómo se comporta el sistema, y si la incluyeras, la «arquitectura» dejaría de ser navegable. La palabra clave del enunciado es <strong>intencionalmente</strong>: omitir no es descuido, es el mecanismo que hace útil a la abstracción.</p>
+          <p><strong>Por qué fallan las demás.</strong> Las tres son exactamente lo que la arquitectura debe capturar:</p>
+          <ul>
+            <li><strong>b)</strong> Componentes y protocolos <strong>son</strong> la estructura. Omitirlos deja un documento vacío.</li>
+            <li><strong>c)</strong> Los principios rectores son decisiones arquitectónicas de primer orden: guían todo lo que viene.</li>
+            <li><strong>d)</strong> Los trade-offs entre seguridad y rendimiento son <em>el</em> trabajo del arquitecto (Primera Ley).</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Una abstracción vale por lo que deja afuera. Si incluye todo, no abstrae nada.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P3 -->
+      <article class="q" id="p3" data-q="3" data-correct="d">
+        <div class="qhead"><span class="qn">Pregunta 3</span><h3>Primera ley: todo es un trade-off</h3></div>
+        <p class="stem">Según las leyes presentadas, ¿cuál de estas situaciones ejemplifica mejor el principio de que «todo en arquitectura es un trade-off»?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Implementar un diseño de interfaz minimalista para mejorar la experiencia de usuario.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Priorizar la coherencia visual en todos los componentes del sistema.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Aumentar el número de servidores para mejorar el rendimiento sin modificar la arquitectura.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Optar por una base de datos relacional para garantizar integridad de datos, aceptando mayor costo operacional.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Es la única con la <strong>estructura gramatical y lógica de un trade-off</strong>: un beneficio explícito (integridad de datos) comprado con un costo explícito (mayor costo operacional). Fíjate en la palabra «aceptando»: señala la contrapartida asumida conscientemente. Eso es hacer un trade-off — no evitar el costo, sino elegirlo con los ojos abiertos.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> y <strong>b)</strong> se presentan como <strong>mejoras puras</strong>, sin contrapartida mencionada. Son decisiones de diseño de interfaz, no arquitectónicas.</li>
+            <li><strong>c)</strong> Es la distractora más interesante. Dice «sin modificar la arquitectura», lo que la plantea como ganancia gratuita. Además esconde un error conceptual: escalar horizontalmente <strong>sí</strong> tiene costos (infraestructura, coordinación, consistencia distribuida). Los oculta, que es justo lo que la Primera Ley advierte que no hagas.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Si no ves el trade-off, no es que no exista: es que no lo has encontrado.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P4 -->
+      <article class="q" id="p4" data-q="4" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 4</span><h3>Responsabilidades del arquitecto</h3></div>
+        <p class="stem">En un proyecto de banca móvil, ¿cuál de estas acciones refleja con mayor precisión las responsabilidades de un arquitecto de software?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Escribir el código del módulo de transferencias bancarias.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Seleccionar la paleta de colores para la aplicación móvil.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Diseñar un sistema de compensación para garantizar consistencia transaccional durante fallos.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Capacitar al equipo comercial en las funcionalidades de la app.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El arquitecto decide <strong>cómo el sistema sostiene sus atributos de calidad bajo condiciones adversas</strong>. Un mecanismo de compensación responde a una pregunta puramente arquitectónica: <em>si una transacción falla a la mitad en un sistema distribuido, ¿cómo vuelve el sistema a un estado consistente?</em> En banca eso no es un detalle: es el núcleo del diseño.</p>
+          <p><span class="pill p-compl">Complementario</span> El caso típico de este mecanismo en sistemas distribuidos es el patrón <strong>Saga</strong>: una secuencia de transacciones locales donde cada paso tiene su transacción compensatoria. El enunciado del módulo no lo nombra; lo agrego porque es el vocabulario que vas a encontrar en la literatura y muy probablemente en módulos posteriores.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>a)</strong> escribir código es del desarrollador (muchos arquitectos programan, pero eso no define el rol); <strong>b)</strong> la paleta es del diseñador UI; <strong>d)</strong> capacitar al equipo comercial es formación/producto, no diseño técnico.</p>
+          <p class="key"><span class="lab">Concepto</span><span>El arquitecto no decide cómo se escribe el código, sino qué propiedades debe garantizar el sistema y con qué estructura.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P5 -->
+      <article class="q" id="p5" data-q="5" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 5</span><h3>Arquitectura frente a desafíos futuros</h3></div>
+        <p class="stem">¿Cuál de los siguientes enunciados describe con mayor profundidad cómo la arquitectura de software permite enfrentar los desafíos futuros de un sistema?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Garantiza que todo el sistema esté completamente desarrollado desde el inicio.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Define estructuras esenciales que permiten razonar sobre el sistema y sus atributos de calidad.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Elimina la necesidad de tomar decisiones técnicas durante el desarrollo.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Asegura que los desarrolladores puedan trabajar sin restricciones ni limitaciones.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> La clave está en el verbo <strong>razonar</strong>. La arquitectura no predice el futuro ni lo resuelve por anticipado: da un marco para <strong>evaluar el impacto de un cambio antes de hacerlo</strong>. Poder responder «si agrego esta funcionalidad, ¿qué se rompe?» es lo que permite enfrentar lo que venga.</p>
+          <p><strong>Por qué fallan las demás.</strong> Las tres contienen absolutos falsos, y ese es el patrón para detectarlas:</p>
+          <ul>
+            <li><strong>a)</strong> «Completamente desarrollado desde el inicio» contradice todo el desarrollo iterativo moderno.</li>
+            <li><strong>c)</strong> La arquitectura <strong>no elimina</strong> decisiones técnicas: las enmarca y las restringe a un espacio coherente.</li>
+            <li><strong>d)</strong> Es el inverso de la realidad. La arquitectura <strong>impone restricciones deliberadamente</strong>, y esas restricciones son lo que mantiene la integridad conceptual del sistema.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>La arquitectura habilita el razonamiento sobre el cambio, no lo evita.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P6 -->
+      <article class="q" id="p6" data-q="6" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 6</span><h3>Ley de Conway</h3></div>
+        <p class="stem">¿De qué manera una arquitectura de software puede tener impacto directo en la dinámica y los resultados de una organización?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Estableciendo un diseño que nunca se modifica, sin importar los cambios en la organización.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Asegurando que cada equipo trabaje de manera aislada para lograr mayor eficiencia.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Reflejando y alineando la estructura de comunicación organizacional con el diseño del sistema.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Permitiendo que el desarrollo de productos se realice sin planificación previa.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Esto es la <strong>Ley de Conway</strong>:</p>
+          <blockquote>Las organizaciones que diseñan sistemas están condenadas a producir diseños que son copias de sus estructuras de comunicación.</blockquote>
+          <p><span class="pill p-compl">Complementario</span> Melvin Conway la formuló en 1967 (publicada en <em>Datamation</em> en 1968). La consecuencia práctica es la <strong>maniobra inversa de Conway</strong>: si quieres una arquitectura de microservicios, primero organiza equipos pequeños, autónomos y con responsabilidad de punta a punta. Si tienes tres equipos, tenderás a producir tres módulos, lo quieras o no.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Una arquitectura inmutable es una arquitectura muerta: debe evolucionar con la organización.</li>
+            <li><strong>b)</strong> El aislamiento total produce silos, integración tardía y duplicación. Lo deseable es <strong>autonomía con interfaces claras</strong>, que no es lo mismo que aislamiento.</li>
+            <li><strong>d)</strong> Desarrollar sin planificación previa es la ausencia de arquitectura.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Ley de Conway: la estructura del sistema espeja la estructura de comunicación de quien lo construye.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P7 -->
+      <article class="q" id="p7" data-q="7" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 7</span><h3>Tipos de restricciones</h3></div>
+        <p class="stem">Cuando se diseñan sistemas de software, ¿cuál de las siguientes situaciones representa con mayor claridad una restricción de tipo <strong>tecnológico</strong> que puede influir en las decisiones arquitectónicas?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>El deseo de los directivos de incorporar inteligencia artificial.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>La obligación de cumplir con una normativa internacional sobre privacidad de datos.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>La necesidad de que el nuevo sistema sea compatible con aplicaciones existentes.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>La falta de personal con experiencia en lenguajes de programación funcional.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> La compatibilidad con sistemas existentes (<strong>interoperabilidad con legado</strong>) es una limitación que surge del entorno técnico: protocolos, formatos de datos, APIs y contratos ya establecidos que el nuevo sistema no puede ignorar. Condiciona directamente decisiones de integración, estilo arquitectónico y modelo de datos.</p>
+          <p><strong>Por qué fallan las demás — y por qué esta es la pregunta más tramposa del cuestionario:</strong> las cuatro opciones <em>son</em> restricciones reales. Lo que se evalúa es clasificarlas por tipo.</p>
+          <div class="tw"><table>
+            <thead><tr><th>Opción</th><th>Tipo de restricción</th></tr></thead>
+            <tbody>
+              <tr><td>a) Deseo de directivos de usar IA</td><td class="cat">De negocio / estratégica</td></tr>
+              <tr><td>b) Normativa de privacidad</td><td class="cat">Legal / regulatoria</td></tr>
+              <tr><td>c) Compatibilidad con legado</td><td class="cat ok">Tecnológica ✓</td></tr>
+              <tr><td>d) Falta de personal capacitado</td><td class="cat">Organizacional / de talento</td></tr>
+            </tbody>
+          </table></div>
+          <p class="key"><span class="lab">Concepto</span><span>Las restricciones se clasifican en técnicas, de negocio, legales y organizacionales. Confundirlas lleva a atacar el problema equivocado.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P8 -->
+      <article class="q" id="p8" data-q="8" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 8</span><h3>Por qué importan las decisiones arquitectónicas</h3></div>
+        <p class="stem">¿Cuál de las siguientes afirmaciones describe mejor por qué las decisiones arquitectónicas son fundamentales en el desarrollo de software?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Porque permiten delegar el diseño técnico a los desarrolladores sin supervisión.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Porque determinan únicamente la interfaz gráfica del sistema.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Porque definen una estructura que condiciona el rendimiento, la seguridad y la escalabilidad del sistema.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Porque se pueden modificar fácilmente durante cualquier fase del proyecto sin consecuencias mayores.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Conecta directamente con la definición: las decisiones arquitectónicas importan porque <strong>la estructura determina las propiedades emergentes del sistema</strong>. No puedes «agregarle» seguridad o escalabilidad después a un sistema cuya estructura no las permite. Además nombra tres atributos de calidad concretos, que es el vocabulario correcto.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Delegar <em>sin supervisión</em> contradice el rol del arquitecto como garante de la integridad conceptual.</li>
+            <li><strong>b)</strong> La palabra <strong>«únicamente»</strong> la descarta. La interfaz gráfica es una parte mínima del alcance arquitectónico.</li>
+            <li><strong>d)</strong> Afirma <strong>exactamente lo contrario de la realidad</strong>. Las decisiones arquitectónicas son difíciles y costosas de cambiar, y esa es precisamente la razón de que sean fundamentales. Si fueran fáciles de cambiar, no serían arquitectónicas (ver Pregunta 1).</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>La estructura condiciona las propiedades. Los atributos de calidad no se agregan después.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P9 -->
+      <article class="q" id="p9" data-q="9" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 9</span><h3>Atributos de calidad y evolución</h3></div>
+        <p class="stem">¿Cuál de las siguientes situaciones representa un atributo de calidad estructural que impacta directamente la facilidad con la que el sistema puede <strong>evolucionar a lo largo del tiempo</strong>?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>El sistema debe garantizar disponibilidad 24/7 con mínima interrupción.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>El sistema necesita ejecutarse en múltiples plataformas como Linux y Windows.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>El sistema debe poder incorporar nuevas funcionalidades de forma modular.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>El sistema requiere responder rápidamente ante una alta carga de usuarios.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El enunciado pregunta por <strong>evolución en el tiempo</strong>, que es la definición de <strong>modificabilidad / extensibilidad</strong>. La palabra «modular» es la pista: la modularidad es el mecanismo estructural que permite agregar capacidades sin propagar cambios por todo el sistema (alta cohesión, bajo acoplamiento).</p>
+          <p><strong>Por qué fallan las demás.</strong> Las cuatro son atributos de calidad legítimos; aquí se evalúa emparejar el escenario con el atributo correcto.</p>
+          <div class="tw"><table>
+            <thead><tr><th>Opción</th><th>Atributo</th><th>¿Es sobre evolución?</th></tr></thead>
+            <tbody>
+              <tr><td>a) 24/7 sin interrupción</td><td class="cat">Disponibilidad</td><td>No — es sobre operación continua</td></tr>
+              <tr><td>b) Linux y Windows</td><td class="cat">Portabilidad</td><td>No — es sobre entornos de ejecución</td></tr>
+              <tr><td>c) Nuevas funcionalidades modulares</td><td class="cat ok">Modificabilidad</td><td class="ok">Sí ✓</td></tr>
+              <tr><td>d) Responder bajo alta carga</td><td class="cat">Rendimiento / Escalabilidad</td><td>No — es sobre carga</td></tr>
+            </tbody>
+          </table></div>
+          <p class="key"><span class="lab">Concepto</span><span>Evolución en el tiempo → modificabilidad y extensibilidad, sostenidas por modularidad.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P10 -->
+      <article class="q" id="p10" data-q="10" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 10</span><h3>Accesibilidad frente a usabilidad</h3></div>
+        <p class="stem">¿Qué característica transversal de arquitectura se vuelve especialmente relevante cuando se diseñan sistemas que deben ser utilizados por personas con <strong>limitaciones físicas o sensoriales</strong>?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Portabilidad</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Accesibilidad</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Usabilidad</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Mantenibilidad</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> <strong>Accesibilidad</strong> es el término técnico preciso para la capacidad de un sistema de ser utilizado por personas con discapacidades o limitaciones físicas, sensoriales o cognitivas. Se materializa en soporte para lectores de pantalla, navegación por teclado, contraste suficiente, texto alternativo en imágenes y subtítulos. <span class="pill p-compl">Complementario</span> El estándar de referencia es <strong>WCAG</strong> (Web Content Accessibility Guidelines), del W3C.</p>
+          <p><strong>Por qué c) es la trampa.</strong> Usabilidad y accesibilidad se solapan, pero no son lo mismo:</p>
+          <div class="tw"><table>
+            <thead><tr><th></th><th>Usabilidad</th><th>Accesibilidad</th></tr></thead>
+            <tbody>
+              <tr><td class="cat">Pregunta</td><td>¿Es fácil de usar?</td><td>¿Puede usarlo <em>cualquier</em> persona?</td></tr>
+              <tr><td class="cat">Población</td><td>Usuario general</td><td>Personas con limitaciones específicas</td></tr>
+              <tr><td class="cat">Ejemplo</td><td>Menú intuitivo, pocos pasos</td><td>Compatible con lector de pantalla</td></tr>
+            </tbody>
+          </table></div>
+          <p>Buena accesibilidad suele mejorar la usabilidad para todos — el «efecto acera rebajada» — pero cuando el enunciado dice <strong>explícitamente</strong> «limitaciones físicas o sensoriales», está pidiendo el término específico.</p>
+          <p><strong>a) Portabilidad</strong> es sobre ejecutarse en distintas plataformas; <strong>d) mantenibilidad</strong>, sobre la facilidad de corregir y modificar el sistema.</p>
+          <p class="key"><span class="lab">Concepto</span><span>Accesibilidad ≠ usabilidad. Si el enunciado menciona limitaciones físicas o sensoriales, la respuesta es accesibilidad.</span></p>
+        </div></details>
+      </article>
+    </section>
+
+    <!-- ══ CLAVE ═══════════════════════════════════════════ -->
+    <section id="clave">
+      <p class="eyebrow">Referencia</p>
+      <h2 class="sec">Clave de respuestas</h2>
+      <p>Está plegada a propósito: si la abres antes de responder, el documento pierde su función.</p>
+      <details class="why"><summary>Mostrar la clave</summary><div class="body">
+        <div class="tw"><table>
+          <thead><tr><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th></tr></thead>
+          <tbody><tr><td>b</td><td>a</td><td>d</td><td>c</td><td>b</td><td>c</td><td>c</td><td>c</td><td>c</td><td>b</td></tr></tbody>
+        </table></div>
+      </div></details>
+    </section>
+
+    <!-- ══ PATRONES ════════════════════════════════════════ -->
+    <section id="patrones">
+      <p class="eyebrow">Lo que sirve para los módulos siguientes</p>
+      <h2 class="sec">Patrones para resolver este tipo de pregunta</h2>
+      <ol class="hand">
+        <li><strong>La correcta habla de estructura y atributos de calidad.</strong> Las distractoras hablan de código, interfaz gráfica, gestión de cronograma o formación de personal. Ese es el corte entre «arquitectura» y todo lo demás.</li>
+        <li><strong>Desconfía de los absolutos.</strong> <em>Únicamente</em>, <em>nunca</em>, <em>garantiza que todo</em>, <em>sin consecuencias</em>, <em>sin restricciones</em>: casi siempre marcan una opción falsa. La arquitectura es un campo de matices y contrapartidas.</li>
+        <li><strong>Si la opción presenta una ganancia sin costo, sospecha.</strong> Por la Primera Ley, toda decisión tiene contrapartida. La opción que <strong>nombra explícitamente lo que se sacrifica</strong> suele ser la correcta en preguntas sobre trade-offs.</li>
+        <li><strong>Cuando todas las opciones son verdaderas, la pregunta es de clasificación.</strong> Las preguntas 7 y 9 son el ejemplo. Lee el enunciado buscando la palabra que define la categoría pedida (<em>tecnológico</em>, <em>evolucionar a lo largo del tiempo</em>).</li>
+        <li><strong>Precisión terminológica.</strong> Usabilidad vs. accesibilidad, escalabilidad vs. rendimiento, disponibilidad vs. confiabilidad. Los pares cercanos son la fuente favorita de distractoras.</li>
+      </ol>
+
+      <div class="note risk">
+        <span class="lab">Reparo propio <span class="pill p-recom">Criterio</span></span>
+        <p>Dos advertencias sobre el cuestionario, no sobre las respuestas. La pregunta 9 usa «atributo de calidad estructural» como sinónimo de modificabilidad, cuando en rigor <em>disponibilidad</em> y <em>rendimiento</em> también dependen de la estructura; lo que desempata es la frase «evolucionar a lo largo del tiempo», no el adjetivo. Y en la pregunta 1, la opción <strong>d)</strong> también describe un trade-off real (velocidad de entrega comprada con deuda técnica): no es falsa por no ser un trade-off, sino porque el escenario narra una priorización de cronograma en vez de un diseño. En examen, elige la opción que mejor responde, no la única defendible.</p>
+      </div>
+    </section>
+
+    <!-- ══ PROMPTS ═════════════════════════════════════════ -->
+    <section id="prompts">
+      <p class="eyebrow">Seguir estudiando</p>
+      <h2 class="sec">Prompts para profundizar</h2>
+      <p>Para pegar en una conversación nueva. Pasa el cursor sobre cada bloque para copiarlo.</p>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame el patrón Saga para consistencia transaccional en sistemas
+distribuidos, con un ejemplo concreto de banca móvil. Compáralo con
+las transacciones ACID tradicionales y dime qué trade-offs implica.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame la Ley de Conway y la "maniobra inversa de Conway" con
+ejemplos reales de empresas. ¿Cómo debería estructurar los equipos
+una organización que quiere migrar de monolito a microservicios?</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Hazme un cuadro comparativo de los atributos de calidad de la norma
+ISO/IEC 25010, con una definición, un escenario de ejemplo y una
+táctica arquitectónica típica para cada uno.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Dame 10 escenarios y yo clasifico cada restricción como técnica,
+de negocio, legal u organizacional. Corrígeme y explícame los errores.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame cuándo NO conviene usar microservicios. Quiero los
+contraargumentos honestos, no la versión de folleto.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Tómame una evaluación de 10 preguntas de opción múltiple sobre
+fundamentos de arquitectura de software, al mismo nivel de dificultad
+que este módulo. No me des las respuestas hasta que yo responda todas.</pre></div>
+    </section>
+
+    <!-- ══ CUADERNO ════════════════════════════════════════ -->
+    <section id="cuaderno">
+      <p class="eyebrow">Cierre</p>
+      <h2 class="sec">Los seis puntos que resumen el módulo</h2>
+      <ol class="hand">
+        <li><strong>Decisión arquitectónica</strong> = costosa de revertir + condiciona atributos de calidad.</li>
+        <li><strong>La abstracción vale por lo que omite.</strong> Detalles de implementación afuera; estructura, protocolos y principios adentro.</li>
+        <li><strong>Primera ley:</strong> todo es un trade-off. Si no lo ves, no lo has encontrado.</li>
+        <li><strong>Segunda ley:</strong> el <em>por qué</em> importa más que el <em>cómo</em>.</li>
+        <li><strong>Ley de Conway:</strong> el sistema espeja la estructura de comunicación de la organización.</li>
+        <li><strong>Los atributos de calidad son el objetivo del diseño</strong>, no un adorno posterior. La estructura los habilita o los impide.</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer class="end">
+    <p>Aporte de Daniel Mazo (Danny) · Módulo 1 — Fundamentos de la Arquitectura de Software · 21/09/2026.<br>
+    Fuente primaria: autoevaluación del Módulo 1 (10 preguntas, plataforma Brightspace). Los enunciados y opciones se transcriben; los análisis, tablas y notas son elaboración propia con apoyo de IA. El contenido marcado <span class="pill p-compl">Complementario</span> no proviene del material oficial del diplomado.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_THEME = "m1-autoeval-theme";
+
+  /* ── tema ─────────────────────────────────────────── */
+  try{
+    var saved = localStorage.getItem(LS_THEME);
+    if(saved === "dark" || saved === "light"){ document.documentElement.setAttribute("data-theme", saved); }
+  }catch(e){}
+
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    if(!cur){
+      cur = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem(LS_THEME, next); }catch(e){}
+  }
+
+  /* ── quiz ─────────────────────────────────────────── */
+  var qs = Array.prototype.slice.call(document.querySelectorAll(".q"));
+  var state = {};
+
+  function railLink(n){ return document.querySelector('#railq a[data-q="' + n + '"]'); }
+
+  function paint(){
+    var answered = 0, hits = 0;
+    Object.keys(state).forEach(function(k){
+      answered++;
+      if(state[k]) hits++;
+    });
+    var el = document.getElementById("score");
+    var cap = document.getElementById("scorecap");
+    if(el){ el.textContent = hits + " / " + (answered || 0); }
+    if(cap){
+      cap.textContent = answered === 0
+        ? "aún no has respondido"
+        : "aciertos sobre " + answered + " respondida" + (answered === 1 ? "" : "s") + " de 10";
+    }
+  }
+
+  function answer(q, key){
+    var n = q.getAttribute("data-q");
+    if(state.hasOwnProperty(n)) return;           // una sola oportunidad por pregunta
+    var correct = q.getAttribute("data-correct");
+    var good = key === correct;
+    state[n] = good;
+
+    q.classList.add("done");
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      var k = b.getAttribute("data-k");
+      b.disabled = true;
+      if(k === correct){ b.classList.add("is-ok"); }
+      else if(k === key){ b.classList.add("is-bad"); }
+      else { b.classList.add("dim"); }
+    });
+
+    var v = q.querySelector(".verdict");
+    v.hidden = false;
+    v.className = "verdict " + (good ? "ok" : "bad");
+    v.textContent = good
+      ? "Correcto — la respuesta es " + correct + ")"
+      : "Revisa: elegiste " + key + "), la correcta es " + correct + ")";
+
+    var d = q.querySelector("details.why");
+    if(d){ d.open = true; }
+
+    var link = railLink(n);
+    if(link){ link.classList.add(good ? "hit" : "miss"); }
+
+    paint();
+  }
+
+  qs.forEach(function(q){
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      b.addEventListener("click", function(){ answer(q, b.getAttribute("data-k")); });
+    });
+  });
+
+  function reset(){
+    state = {};
+    qs.forEach(function(q){
+      q.classList.remove("done");
+      Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+        b.disabled = false;
+        b.classList.remove("is-ok","is-bad","dim");
+      });
+      var v = q.querySelector(".verdict");
+      v.hidden = true; v.textContent = ""; v.className = "verdict";
+      var d = q.querySelector("details.why");
+      if(d){ d.open = false; }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#railq a"), function(a){
+      a.classList.remove("hit","miss");
+    });
+    paint();
+  }
+
+  function openAll(){
+    Array.prototype.forEach.call(document.querySelectorAll("details"), function(d){ d.open = true; });
+  }
+
+  /* ── copiar prompts ───────────────────────────────── */
+  Array.prototype.forEach.call(document.querySelectorAll(".prompt .copy"), function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.parentNode.querySelector("pre");
+      var txt = pre ? pre.textContent : "";
+      var done = function(){
+        var old = btn.textContent;
+        btn.textContent = "Copiado";
+        setTimeout(function(){ btn.textContent = old; }, 1400);
+      };
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done, function(){});
+          return;
+        }
+      }catch(e){}
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); done();
+      }catch(e2){}
+    });
+  });
+
+  /* ── botones y teclado ────────────────────────────── */
+  ["btn-theme","btn-theme-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", toggleTheme);
+  });
+  ["btn-reset","btn-reset-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", reset);
+  });
+  ["btn-open","btn-open-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", openAll);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    var k = e.key.toLowerCase();
+    if(k === "t"){ toggleTheme(); }
+    else if(k === "r"){ reset(); }
+  });
+
+  paint();
+})();
+</script>
+</body>
+</html>
