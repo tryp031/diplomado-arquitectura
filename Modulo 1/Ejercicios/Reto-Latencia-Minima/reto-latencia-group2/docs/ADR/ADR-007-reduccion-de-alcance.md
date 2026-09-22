@@ -1,7 +1,9 @@
 # ADR-007 — Reducción del alcance a las variantes B y D
 
-- **Estado:** Propuesta · pendiente de aceptación del equipo en la reunión del 21/09
-- **Fecha:** 2026-09-16
+- **Estado:** **Aceptada** el 2026-09-21 en la reunión del equipo. Se ratifican las dos
+  preguntas que quedaban abiertas: **no** se usan las cifras archivadas del control `Bc`
+  y **no** se usa la línea base de internet (`E`). El alcance del reto queda en B y D.
+- **Fecha:** 2026-09-16 · ratificada 2026-09-21
 - **Decide:** Daniel Mazo (tarea asignada en la reunión del 15/09) · ratifica Group 2
 - **Origen:** división de trabajo acordada el 15/09 tras la asesoría con el docente —
   Freddy documenta la variante B (TCP/Python), Camilo documenta la variante D (memoria
