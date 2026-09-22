@@ -10,7 +10,7 @@ en el PDF sin pixelarse.
 
 Uso:
     ./graficas.py                      # agrega rondas 1-3 de cada variante en resultados/
-    ./graficas.py --out graficas/
+    ./graficas.py --out ../docs/graficas/
 """
 import argparse
 import csv
@@ -255,7 +255,9 @@ def main():
     aqui = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()
     ap.add_argument("--resultados", default=os.path.join(aqui, "resultados"))
-    ap.add_argument("--out", default=os.path.join(aqui, "graficas"))
+    # Las figuras son PRODUCTO del analisis, no parte del sistema: viven en docs/ y
+    # por eso no viajan en el ZIP del codigo fuente (nota 7 del 21/09, ADR-010).
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(aqui), "docs", "graficas"))
     a = ap.parse_args()
 
     series = cargar(a.resultados)

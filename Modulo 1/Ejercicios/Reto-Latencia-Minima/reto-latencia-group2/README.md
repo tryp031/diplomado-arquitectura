@@ -172,7 +172,7 @@ reto-latencia-group2/
     ├── ENUNCIADO.md        el reto, literal
     ├── DISENO-ARQUITECTURA.md
     ├── archivo/            hallazgos de lo que se retiró del árbol (ADR-007)
-    └── ADR/                las nueve decisiones registradas
+    └── ADR/                las diez decisiones registradas
 ```
 
 > **Alcance de la entrega: TCP Python y Memoria compartida C.** El 16/09 se retiraron
@@ -188,6 +188,12 @@ reto-latencia-group2/
 > renombraron en pareja CSV+log, sin cambiar un byte de contenido. Los comandos viejos
 > (`./run.sh B 1`) ya no funcionan. Ver
 > [ADR-008](docs/ADR/ADR-008-nomenclatura-de-los-sistemas.md).
+
+> **El ZIP del entregable se arma con `./hacer-zip.sh`**, no a mano. Empaqueta por lista
+> blanca y deja fuera `docs/`, `sistema/resultados/` y los binarios; falla si alguno se
+> cuela. Qué es cada corrida de `resultados/`, en
+> [`sistema/resultados/LEEME.md`](sistema/resultados/LEEME.md). Ver
+> [ADR-010](docs/ADR/ADR-010-que-se-empaqueta-en-el-entregable.md).
 
 > **Dos cosas distintas se llaman «harness» en este proyecto.** `sistema/run.sh` +
 > `analyze.py` son el **harness de medición**: orquestan una corrida. `verificar.py`
