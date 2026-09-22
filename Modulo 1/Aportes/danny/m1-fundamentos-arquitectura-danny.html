@@ -299,6 +299,10 @@
     white-space:nowrap;
   }
   tbody tr:last-child td{border-bottom:none}
+  /* Columna de magnitudes: encabezado y dato se alinean a la derecha, para que el
+     separador decimal y la unidad queden a plomo entre filas. Si solo se alinea la
+     celda, la cifra se lee corrida respecto de su propio titulo. */
+  th.n,td.n{text-align:right}
   td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
   td.hi{color:var(--signal);font-weight:500}
   .cat{font-family:var(--sans);font-weight:600}
@@ -791,7 +795,7 @@
 
       <div class="tw">
         <table>
-          <thead><tr><th>#</th><th>Característica</th><th>Subcaracterísticas</th></tr></thead>
+          <thead><tr><th class="n">#</th><th>Característica</th><th>Subcaracterísticas</th></tr></thead>
           <tbody>
             <tr><td class="n">1</td><td class="cat">Adecuación funcional</td><td>Completitud · corrección · pertinencia</td></tr>
             <tr><td class="n">2</td><td class="cat">Eficiencia de desempeño</td><td>Comportamiento temporal · uso de recursos · capacidad</td></tr>
@@ -845,7 +849,7 @@
 
       <div class="tw">
         <table>
-          <thead><tr><th>Métrica</th><th>Valor</th><th>Lectura</th></tr></thead>
+          <thead><tr><th>Métrica</th><th class="n">Valor</th><th>Lectura</th></tr></thead>
           <tbody>
             <tr><td class="cat">mín</td><td class="n">7,58 µs</td><td>El mejor caso, útil solo como cota inferior</td></tr>
             <tr><td class="cat">p50</td><td class="n">13,38 µs</td><td>La mitad de las peticiones va por debajo</td></tr>
