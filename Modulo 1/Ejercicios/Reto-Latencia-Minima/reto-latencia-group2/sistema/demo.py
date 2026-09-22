@@ -89,7 +89,7 @@ def main() -> None:
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     sock.settimeout(3.0)
 
-    print(f"\n  Clasificador de hosts — {a.variante} · {a.host}:{port}")
+    print(f"\n  Clasificador de hosts — variante {a.variante} · {a.host}:{port}")
     print(f"  {len(nombres)} hosts en tabla. Escriba un nombre o una IP. "
           f"'lista' para verlos, Ctrl-D para salir.\n")
 

@@ -390,7 +390,7 @@
     }
 
     return sec({className: 'section', id: 'servidores'},
-      h(Cabecera, {titulo: 'Sistemas del plano de datos',
+      h(Cabecera, {titulo: 'Variantes del plano de datos',
                    sub: 'Cada transporte corre en un proceso y un puerto independientes.'},
         b({className: 'btn alt', type: 'button', disabled: busy === '*' || activos === reales.length,
            onClick: function () { todas('arrancar'); }}, 'Arrancar todas'),
@@ -469,10 +469,10 @@
       h2(null, 'Probar clasificación'),
       p({className: 'sub'}, 'Pregunta al sistema si reconoce este host.'),
       activos.length === 0
-        ? div({className: 'aviso a-info'}, 'Arrancá un sistema para poder mandar estímulos.')
+        ? div({className: 'aviso a-info'}, 'Arrancá una variante para poder mandar estímulos.')
         : form({onSubmit: enviar},
             div({className: 'control'},
-              lbl({htmlFor: 'ev'}, 'Sistema'),
+              lbl({htmlFor: 'ev'}, 'Variante'),
               sel({id: 'ev', value: variante, onChange: function (e) { setVariante(e.target.value); }},
                 activos.map(function (v) { return opt({key: v.id, value: v.id}, v.nombre); }))),
             div({className: 'control'},
@@ -511,8 +511,8 @@
             ? [' · la web añadió ', bold({key: 'x'}, Math.round(res.latencia_web_ns / res.latencia_sistema_ns) + '×')]
             : null))
         : null,
-      h(Porque, {titulo: '¿qué cambia el sistema?'},
-        p(null, 'El sistema no cambia el veredicto: cambia cuánto tarda en darlo. Ese es el ' +
+      h(Porque, {titulo: '¿qué cambia la variante?'},
+        p(null, 'La variante no cambia el veredicto: cambia cuánto tarda en darlo. Ese es el ' +
           'experimento del reto — mismo dominio, mismo payload, distinto transporte.'),
         p(null, 'Lo que no esté en la tabla responde DESCONOCIDO. Es la política por defecto: ' +
           'lo no clasificado explícitamente, se rechaza.')),
@@ -604,7 +604,7 @@
       celda('Reto de Latencia Minima') + SEP + celda('Group 2'),
       celda('Generado') + SEP + celda(new Date().toLocaleString('es-CO', {hour12: false}).replace(',', '')),
       celda('Estimulos') + SEP + celda(es.length) +
-        SEP + celda('sistema ' + (Object.keys(vars).join(' y ') || '-')) +
+        SEP + celda('variante ' + (Object.keys(vars).join(' y ') || '-')) +
         SEP + celda(ms ? 'mediana sistema ' + dec(ms / 1000, 2) + ' us' : ''),
       '',
       celda('UNIDADES') + SEP + celda('el sufijo del nombre de la columna dice en que esta medida'),
@@ -661,7 +661,7 @@
         b({className: 'btn ghost', type: 'button', disabled: !es.length, onClick: props.limpiar}, 'Limpiar')),
       div({className: 'filtros'},
         div({className: 'control'},
-          lbl({htmlFor: 'fv'}, 'Sistema'),
+          lbl({htmlFor: 'fv'}, 'Variante'),
           sel({id: 'fv', value: fv, onChange: function (e) { setFv(e.target.value); }},
             opt({value: ''}, 'todas'),
             Object.keys(vars).map(function (k) { return opt({key: k, value: k}, vars[k]); })))),
@@ -675,10 +675,10 @@
             es.length ? 'Ningún estímulo coincide con el filtro.' : 'Todavía no mandaste ningún estímulo.')
         : div({className: 'tablabox'}, tbl({className: 'history'},
             thead(null, tr(null,
-              th(null, '#'), th(null, 'INICIO'), th(null, 'FIN'), th(null, 'SISTEMA'),
+              th(null, '#'), th(null, 'INICIO'), th(null, 'FIN'), th(null, 'VAR'),
               th(null, 'HOST'),
-              th({style: {textAlign: 'right'}}, 'TIEMPO SISTEMA'),
-              th({style: {textAlign: 'right'}}, 'TIEMPO WEB'))),
+              th({style: {textAlign: 'right'}}, 'SISTEMA'),
+              th({style: {textAlign: 'right'}}, 'WEB'))),
             tbody(null, vistos.map(function (e) {
               return tr({key: e.seq},
                 td({className: 'seq'}, e.seq),
@@ -778,14 +778,14 @@
                      ? res.nombre + ' · ' + miles(res.n) + ' muestras · ' +
                        (hilos > 1 ? hilos + ' clientes concurrentes · ' : '1 cliente · ') +
                        miles(res.warmup) + ' warmup · ' + res.segundos + ' s'
-                     : 'Lanza el cliente real del sistema: el mismo que produce el informe.'},
+                     : 'Lanza el cliente real de la variante: el mismo que produce el informe.'},
         b({className: 'btn', type: 'button', onClick: medir, disabled: corr || !activos.length},
           corr ? 'Midiendo…' : 'Ejecutar medición')),
       activos.length === 0
-        ? div({className: 'aviso a-info'}, 'Arrancá al menos un sistema para poder medir.')
+        ? div({className: 'aviso a-info'}, 'Arrancá al menos una variante para poder medir.')
         : div({className: 'filtros'},
             div({className: 'control', style: {flex: '0 1 260px'}},
-              lbl({htmlFor: 'mv'}, 'Sistema'),
+              lbl({htmlFor: 'mv'}, 'Variante'),
               sel({id: 'mv', value: variante, onChange: function (e) { setVariante(e.target.value); }},
                 activos.map(function (v) { return opt({key: v.id, value: v.id}, v.nombre); }))),
             div({className: 'control', style: {flex: '0 1 220px'}},
@@ -804,7 +804,7 @@
                      opt({key: 2, value: 2}, '2'),
                      opt({key: 4, value: 4}, '4'),
                      opt({key: 8, value: 8}, '8 · carga alta')]
-                  : opt({value: 1}, '1 · este sistema no admite más')))),
+                  : opt({value: 1}, '1 · esta variante no admite más')))),
       // No se oculta el control: que aparezca deshabilitado CON su razon enseña algo
       // del sistema. Ocultarlo dejaria al usuario creyendo que se nos olvidó.
       !admiteHilos && vsel && vsel.porque_no
@@ -905,7 +905,7 @@
           a({href: '#rendimiento'}, 'Rendimiento'),
           a({href: '#historial'}, 'Historial')),
         div({className: 'status' + (activos ? '' : ' cero')},
-          '● ' + activos + ' de ' + reales + ' sistemas activos')),
+          '● ' + activos + ' de ' + reales + ' variantes activas')),
 
       aviso ? div({className: 'aviso a-err'}, aviso.txt) : null,
 
@@ -914,7 +914,7 @@
           div({className: 'kicker'}, 'Módulo 1 · Reto de latencia mínima'),
           h1(null, 'Una vista clara para decisiones rápidas.'),
           p(null, 'Controlá el plano de datos, clasificá cada host y comprobá el rendimiento real ' +
-            'de los sistemas. Esta página es el plano de control, no el sistema.'),
+            'de las variantes. Esta página es el plano de control, no el sistema.'),
           h(Porque, {titulo: 'la separación en dos planos'},
             p(null, 'El plano de datos —cliente y servidor, en C y en Python— es lo que el reto mide, ' +
               'y su cronómetro vive ahí dentro (frontera F1, ADR-001).'),

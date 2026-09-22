@@ -6,7 +6,7 @@
 - **Decide:** Group 2 — Freddy Aparicio · Camilo Céspedes · Daniel Mazo. Ejecuta Daniel Mazo.
 - **Origen:** `Modulo 1/Notas/2026-09-21-reunion-group2-ajustes-reto.md`, notas 7, 8 y 11
 - **Depende de:** [ADR-005](ADR-005-comparabilidad-entre-maquinas.md) (trazabilidad de la
-  evidencia) · [ADR-008](ADR-008-nomenclatura-de-los-sistemas.md) (nombres)
+  evidencia) · [ADR-008](ADR-008-nomenclatura-de-las-variantes.md) (nombres)
 
 ---
 

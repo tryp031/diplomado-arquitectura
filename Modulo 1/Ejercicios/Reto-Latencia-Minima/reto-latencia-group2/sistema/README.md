@@ -13,9 +13,9 @@ buena voluntad.
 
 ```bash
 cd sistema
-./run.sh tcp-python 1                   # TCP Python, ronda 1, valores por defecto
+./run.sh tcp-python 1                   # variante TCP Python, ronda 1, por defecto
 ./run.sh tcp-python 1 --warmup 20000 --iters 100000   # corrida corta de prueba
-./run.sh memoria-compartida-c 1         # Memoria compartida C
+./run.sh memoria-compartida-c 1         # variante Memoria compartida C
 ./analyze.py --md resultados/*.csv      # tabla comparativa final
 
 # Demostración en vivo — servidor aparte, NUNCA el cliente medidor
@@ -291,8 +291,8 @@ Ver [`ADR-003`](../docs/ADR/ADR-003-resolucion-del-reloj.md).
 - [x] ~~Línea base de red real~~ → medida 13/09, archivada en `docs/archivo/`
 - [x] ~~Demostración en vivo~~ → `demo.py`
 - [x] ~~Reducir el alcance a B y D~~ → ADR-007, 16/09
-- [ ] **Documentación técnica de TCP Python — Freddy.**
-- [ ] **Documentación técnica de Memoria compartida C — Camilo.**
+- [ ] **Documentación técnica de la variante TCP Python — Freddy.**
+- [ ] **Documentación técnica de la variante Memoria compartida C — Camilo.**
 - [ ] **Repetir bajo carga controlada**, para separar «el sistema tiene cola» de «la
       máquina estaba ocupada». Es el experimento que sigue faltando.
 - [ ] Congelar `../ESPEC-MEDICION.md` con las enmiendas de ADR-001, ADR-003 y ADR-004

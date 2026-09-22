@@ -13,14 +13,14 @@ RONDA="${2:?uso: ./run.sh <VARIANTE> <RONDA> [args extra del cliente]}"
 shift 2
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# El alcance de la entrega son TCP Python y Memoria compartida C (ADR-007). Las
-# variantes A y C nunca se
+# El alcance de la entrega son las variantes TCP Python y Memoria compartida C
+# (ADR-007). Las variantes A y C nunca se
 # implementaron; los controles Bc y E se midieron y se retiraron del arbol el 16/09.
 # Sus hallazgos siguen en docs/archivo/ y su codigo en el historial de git.
 case "$VARIANTE" in
   tcp-python)           DIR="$AQUI/tcp-python" ;;
   memoria-compartida-c) DIR="$AQUI/memoria-compartida-c" ;;
-  *) echo "sistema desconocido: $VARIANTE (use tcp-python|memoria-compartida-c)" >&2; exit 2 ;;
+  *) echo "variante desconocida: $VARIANTE (use tcp-python|memoria-compartida-c)" >&2; exit 2 ;;
 esac
 [[ -d "$DIR" ]] || { echo "falta el directorio $DIR" >&2; exit 2; }
 
@@ -41,7 +41,7 @@ for viejo in "$OUT" "$LOG"; do
   fi
 done
 
-echo "== $VARIANTE, ronda $RONDA =="
+echo "== variante $VARIANTE, ronda $RONDA =="
 {
   echo "fecha:     $(date -Iseconds)"
   echo "host:      $(uname -a)"

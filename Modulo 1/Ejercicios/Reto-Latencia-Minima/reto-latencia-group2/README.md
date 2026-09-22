@@ -175,7 +175,7 @@ reto-latencia-group2/
     └── ADR/                las diez decisiones registradas
 ```
 
-> **Alcance de la entrega: TCP Python y Memoria compartida C.** El 16/09 se retiraron
+> **Alcance de la entrega: las variantes TCP Python y Memoria compartida C.** El 16/09 se retiraron
 > del árbol las variantes A y C
 > (nunca implementadas) y los experimentos `Bc` (TCP en C) y `E` (ICMP). Sus mediciones
 > eran reales y siguen en [`docs/archivo/`](docs/archivo/); su código, en el historial de
@@ -187,7 +187,7 @@ reto-latencia-group2/
 > compartida C** (`sistema/memoria-compartida-c/`). Los archivos de evidencia se
 > renombraron en pareja CSV+log, sin cambiar un byte de contenido. Los comandos viejos
 > (`./run.sh B 1`) ya no funcionan. Ver
-> [ADR-008](docs/ADR/ADR-008-nomenclatura-de-los-sistemas.md).
+> [ADR-008](docs/ADR/ADR-008-nomenclatura-de-las-variantes.md).
 
 > **El ZIP del entregable se arma con `./hacer-zip.sh`**, no a mano. Empaqueta por lista
 > blanca y deja fuera `docs/`, `sistema/resultados/` y los binarios; falla si alguno se
@@ -252,8 +252,8 @@ cada arquitectura.
 ## Para el equipo
 
 - El contrato para implementar una variante está en [`sistema/README.md`](sistema/README.md).
-- **División acordada el 15/09:** Freddy documenta TCP Python;
-  Camilo documenta Memoria compartida C; Daniel se ocupa del CSV
+- **División acordada el 15/09:** Freddy documenta la variante TCP Python;
+  Camilo documenta la variante Memoria compartida C; Daniel se ocupa del CSV
   del plano de control, la limpieza del código y la presentación.
 - Los tres documentos a producir son **manual de instalación**, **manual de uso** y
   **manual técnico**. Quién firma cada uno se concreta en la reunión del **21/09**.

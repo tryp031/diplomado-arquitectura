@@ -109,7 +109,7 @@ def main() -> int:
         linea(OK, f"compilador de C ({compilador}) y make")
     elif WINDOWS:
         linea(AVISO, "no hay compilador de C — es lo esperado en Windows nativo",
-              "Memoria compartida C usa POSIX y no existe en\n"
+              "La variante Memoria compartida C usa POSIX y no existe en\n"
               "Windows. Para tenerla, instalá WSL2:\n"
               "  wsl --install\n"
               "Sin eso el resto del sistema funciona igual (ver README, «Tres caminos»).")

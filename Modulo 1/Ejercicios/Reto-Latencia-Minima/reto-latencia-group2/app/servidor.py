@@ -14,7 +14,7 @@ Por eso hay DOS PLANOS, y la separación es la decisión arquitectónica del mó
   PLANO DE CONTROL  (este archivo + index.html)   milisegundos   NO se mide
       Formularios, listas, botones, gráficas. Pide cosas y muestra resultados.
               │
-              ▼  "medí 50 000 intercambios contra TCP Python"
+              ▼  "medí 50 000 intercambios contra la variante TCP Python"
   PLANO DE DATOS  (sistema/variante-*)            µs y ns        SÍ se mide
       cliente ⇄ servidor. EL CRONÓMETRO VIVE AQUÍ DENTRO, nunca en el navegador.
 
@@ -144,7 +144,7 @@ def anotar(entrada: dict) -> dict:
 # ──────────────────────────────────────────────────────────────────────────────
 # La tabla de hosts — el dominio (ADR-004)
 # ──────────────────────────────────────────────────────────────────────────────
-CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODOS los sistemas.
+CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODAS las variantes.
 #
 # Se carga UNA VEZ al arrancar cada servidor. Nunca se lee dentro del bucle de medicion.
 #
@@ -308,10 +308,10 @@ def compilar(vid: str):
         # Camino Windows nativo: no hay cadena de compilacion. Es un escenario
         # PREVISTO (ver README, "tres caminos"), no un fallo: el plano de control y
         # las variantes en Python funcionan igual. Se dice que falta y como tenerlo.
-        return ("Este sistema esta escrito en C y aqui no hay compilador (`make`).\n\n"
-                "En Windows, los sistemas en C y la medicion oficial necesitan WSL2:\n"
+        return ("Esta variante esta escrita en C y aqui no hay compilador (`make`).\n\n"
+                "En Windows, las variantes en C y la medicion oficial necesitan WSL2:\n"
                 "  wsl --install\n\n"
-                "Sin WSL2 podes usar igual el plano de control y los sistemas en Python.\n"
+                "Sin WSL2 podes usar igual el plano de control y las variantes en Python.\n"
                 "Ver README.md, seccion «Tres caminos».")
     r = subprocess.run(["make"], cwd=d, capture_output=True, text=True)
     return None if r.returncode == 0 else (r.stderr or r.stdout)[-800:]
@@ -344,7 +344,7 @@ def arrancar(vid: str) -> dict:
         if declarado[0] == "./server" and not Path(cmd[0]).exists():
             return {"ok": False, "error": f"Falta el binario {v['dir']}/server."}
         if declarado[0] == "python3" and not (d / declarado[1]).exists():
-            return {"ok": False, "error": f"Falta {v['dir']}/{cmd[1]} — este sistema todavía no está implementado."}
+            return {"ok": False, "error": f"Falta {v['dir']}/{cmd[1]} — esta variante todavía no está implementada."}
 
         cmd += ["--port", str(v["puerto"]), "--tabla", str(TABLA)]
         try:
@@ -399,7 +399,7 @@ def conexion(vid: str) -> socket.socket:
 
 def estimulo_por_cliente(v: dict, ip: str) -> tuple:
     """
-    Un estimulo contra un sistema que no habla por sockets: se lanza SU cliente
+    Un estimulo contra una variante que no habla por sockets: se lanza SU cliente
     con `--clasificar`, que hace un solo intercambio y reporta el veredicto.
 
     Por que asi y no manteniendo un cliente residente: la region compartida tiene
@@ -414,7 +414,7 @@ def estimulo_por_cliente(v: dict, ip: str) -> tuple:
     """
     if progreso.get("activa"):
         raise RuntimeError(
-            "Hay una medicion en curso. Este sistema tiene una sola ranura de memoria "
+            "Hay una medicion en curso. Esta variante tiene una sola ranura de memoria "
             "compartida: mandar un estimulo ahora corromperia la medicion. Espera a que "
             "termine.")
 
@@ -475,7 +475,7 @@ def estimulo(vid: str, host: str) -> dict:
 
     v = VARIANTES[vid]
     if not corriendo(vid):
-        return fallo(f"El servidor de {vid} no está corriendo.")
+        return fallo(f"El servidor de la variante {vid} no está corriendo.")
 
     filas = leer_tabla()
     ip = next((f["ip"] for f in filas if f["nombre"] == host), host)
@@ -491,7 +491,7 @@ def estimulo(vid: str, host: str) -> dict:
                                 "resuelto en el plano de control, sin viaje al plano de datos"))
 
     if not v["socket"]:
-        # Este sistema no tiene conexiones que aceptar (ADR-002): se le habla
+        # Esta variante no tiene conexiones que aceptar (ADR-002): se le habla
         # lanzando su propio cliente en C, una vez por estimulo. Ver ADR-009.
         try:
             ver_byte, latencia = estimulo_por_cliente(v, ip)
@@ -573,7 +573,7 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
     muestras. La única diferencia con `run.sh` es quién aprieta el botón.
     """
     if not corriendo(vid):
-        return {"ok": False, "error": f"Arrancá primero el servidor de {vid}."}
+        return {"ok": False, "error": f"Arrancá primero el servidor de la variante {vid}."}
 
     v = VARIANTES[vid]
     d = SISTEMA / v["dir"]

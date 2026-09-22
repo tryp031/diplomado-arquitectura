@@ -68,8 +68,11 @@ Alcance ejecutado el 22/09:
 - `run.sh` ahora se invoca `./run.sh tcp-python 1` / `./run.sh memoria-compartida-c 1`.
 - Claves de `VARIANTES` en `app/servidor.py`, `doctor.py`, `graficas.py` y
   `visor/generar-datos.py` alineadas con los nombres nuevos.
-- La palabra «variante» sale de la superficie visible (UI, mensajes, READMEs) y se
-  sustituye por «sistema».
+- **La palabra «variante» se conserva.** La nota pedía cambiar «variante B» por «TCP
+  Python», es decir sustituir el **identificador**, no el sustantivo. En un primer intento
+  se reemplazó además «variante» por «sistema» en toda la interfaz; eso no lo pedía nadie
+  y se revirtió el mismo día. «Variante» es cada implementación; «sistema» es lo que el
+  reto mide. No son sinónimos y mezclarlos confunde los dos planos.
 
 **Lo que NO cambia, deliberadamente:** el campo `variante` del JSON interno y de la columna
 del CSV exportado. La nota 4.1 del backlog pide que esa columna **escriba el nombre**, lo

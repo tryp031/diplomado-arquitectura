@@ -20,7 +20,7 @@ python3 client.py --port 9101 --tabla ../tabla-hosts.csv --iters 50000 --out /tm
 ```
 
 Corre en cualquier sistema con Python 3: macOS, Linux, WSL2 y **Windows nativo**. Es el
-único sistema del reto que no necesita compilador — por eso es también el que sirve para
+única variante del reto que no necesita compilador — por eso es también el que sirve para
 desarrollar en cualquier máquina. Medir, en cambio, solo vale en el equipo de referencia
 (ADR-005).
 
@@ -36,7 +36,7 @@ cliente                          servidor
    │  ◀────── 32 B  veredicto + eco  │
 ```
 
-La respuesta **depende del estímulo**: eso es lo que distingue este sistema de un eco puro,
+La respuesta **depende del estímulo**: eso es lo que distingue esta variante de un eco puro,
 y es lo que se agregó el 14/09 para tener algo que demostrar (ADR-004).
 
 ## Las cuatro decisiones que explican la latencia
@@ -74,7 +74,7 @@ Cada hilo tiene **sus propios buffers**. Compartirlos no daría error: daría re
 cruzadas de vez en cuando —un cliente recibiendo el veredicto de otro—, que es peor que
 fallar. Ver ADR-006.
 
-**Este es el único sistema del reto que admite concurrencia.** Memoria compartida no puede:
+**Esta es la única variante del reto que admite concurrencia.** Memoria compartida no puede:
 tiene una sola ranura por sentido.
 
 ## Resultados — corrida oficial del 17/09/2026
@@ -94,7 +94,7 @@ tiene una sola ranura por sentido.
 116 µs de p99,9 están holgadamente por debajo del milisegundo; 136 muestras lo superan, y
 la peor llega a 13,6 ms — mil veces la mediana.
 
-Esas 136 muestras son el resultado más interesante del sistema, por esto:
+Esas 136 muestras son el resultado más interesante de la variante, por esto:
 
 | Corrida | muestras > 1 ms (de 3 M) |
 |---|---|
@@ -102,7 +102,7 @@ Esas 136 muestras son el resultado más interesante del sistema, por esto:
 | 17/09 | **136** |
 
 **Mismo código, misma máquina.** Lo único que cambió fue el estado del sistema operativo.
-La conclusión que sostiene el informe es que el cumplimiento de este sistema **depende del
+La conclusión que sostiene el informe es que el cumplimiento de esta variante **depende del
 estado del SO, no de su arquitectura**: no hay nada en el diseño que acote el peor caso,
 porque cada intercambio atraviesa el planificador y la pila de red.
 
@@ -115,7 +115,7 @@ porque cada intercambio atraviesa el planificador y la pila de red.
 | Concurrencia | sí | no |
 | Portabilidad | cualquier SO con Python | POSIX, sin afinidad garantizada |
 
-El factor es **162×**. **Matiz obligatorio al citarlo:** entre los dos sistemas cambian *el
+El factor es **162×**. **Matiz obligatorio al citarlo:** entre las dos variantes cambian *el
 transporte y el lenguaje a la vez*, así que ese 162× **no es atribuible a ninguno de los dos
 por separado**. El control que sí los separaba (`Bc`, TCP en C) se midió y se retiró del
 alcance con ADR-007; su hallazgo queda en `docs/archivo/control-Bc-tcp-c.md` y **no sustenta
@@ -134,5 +134,5 @@ su peor caso sea de milisegundos.
 
 El clasificador **no se reimplementa aquí**: viene de `../clasificador.py`, que es el mismo
 dominio que usa `../clasificador.h` en C. Que los dos coincidan lo comprueba `verificar.py`
-con 20 casos; si dejaran de coincidir, los dos sistemas harían trabajos distintos y la
+con 20 casos; si dejaran de coincidir, las dos variantes harían trabajos distintos y la
 comparación no significaría nada.

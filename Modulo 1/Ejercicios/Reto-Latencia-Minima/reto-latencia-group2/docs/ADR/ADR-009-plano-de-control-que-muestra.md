@@ -1,4 +1,4 @@
-# ADR-009 — El plano de control: qué muestra y cómo le habla a cada sistema
+# ADR-009 — El plano de control: qué muestra y cómo le habla a cada variante
 
 - **Estado:** **Aceptada** el 2026-09-22. Acordada por Group 2 en la reunión del 21/09/2026
   (notas 2, 3, 4 y 5 del backlog) y ejecutada el 22/09.
@@ -9,7 +9,7 @@
   que aceptar» — sigue siendo cierto, y ahora hay una forma acordada de hablarle igual
 - **Depende de:** [ADR-001](ADR-001-frontera-de-medicion.md) (frontera F1) ·
   [ADR-004](ADR-004-dominio-listas-de-hosts.md) (dominio) ·
-  [ADR-008](ADR-008-nomenclatura-de-los-sistemas.md) (nombres)
+  [ADR-008](ADR-008-nomenclatura-de-las-variantes.md) (nombres)
 
 ---
 
@@ -22,8 +22,8 @@ eliminaciones y una es una funcionalidad que faltaba:
 |---|---|
 | 2 | Quitar la sección de listas blancas y negras; dejar un dropdown de hosts sin clasificar |
 | 3 | Que «Probar clasificación» funcione también con memoria compartida |
-| 4 | En el CSV exportado: escribir el nombre del sistema, intercambiar `web_ms`/`sistema_us`, quitar `veredicto`, `resultado` y `detalle` |
-| 5 | En la grilla: quitar la columna VEREDICTO y mostrar el nombre del sistema en vez de `VAR` |
+| 4 | En el CSV exportado: escribir el nombre de la variante, intercambiar `web_ms`/`sistema_us`, quitar `veredicto`, `resultado` y `detalle` |
+| 5 | En la grilla: quitar la columna VEREDICTO y mostrar el nombre de la variante en la columna `VAR` |
 
 ## Problema
 
@@ -62,7 +62,7 @@ sigue clasificando y ADR-004 queda intacto. La medición del 17/09 sigue siendo 
 un clasificador, y el sistema sigue siendo un clasificador. Lo que se retiró es un *editor*.
 El plano de control era editor de las filas, nunca autor del dominio.
 
-### Nota 3 — cómo se le habla al sistema sin sockets
+### Nota 3 — cómo se le habla a la variante sin sockets
 
 ADR-002 dice que memoria compartida no tiene conexiones que aceptar: una sola ranura por
 sentido, y dos clientes se pisan el payload. **Eso sigue siendo cierto y no se cambia.**
