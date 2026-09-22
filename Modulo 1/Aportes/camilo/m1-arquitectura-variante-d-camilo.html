@@ -339,7 +339,7 @@ binario.</p>
 
 <p><strong>Por qué memoria compartida.</strong></p>
 <ul>
-<li>Todas las demás opciones atraviesan el kernel en cada mensaje y pagan por ello. El control Bc muestra que ese costo es del transporte, no del lenguaje (3.4).</li>
+<li>Todas las demás opciones atraviesan el kernel en cada mensaje y pagan por ello. El control Bc, en su momento, apuntaba a que ese costo era sobre todo del transporte y no del lenguaje — un indicio histórico, no una medición vigente (3.4).</li>
 <li>La memoria compartida es la única que saca al kernel y al planificador de la ruta del mensaje. Con ello la latencia pasa de microsegundos a decenas de nanosegundos, y el peor caso deja de depender de lo ocupado que esté el sistema operativo (5.4).</li>
 <li>Con 1 ms como objetivo, opciones como B ya cumplen por la mediana: elegir D no era una necesidad del reto sino una decisión sobre el peor caso y sobre mostrar el límite de lo posible y su precio. Ese precio (3.3) es justamente lo que permite responder cuándo conviene una arquitectura así y cuándo no (4).</li>
 </ul>

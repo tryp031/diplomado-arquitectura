@@ -37,6 +37,14 @@ el detalle línea por línea está en `git log`.
   falla (`clock_gettime`, `ftruncate` y `usleep` quedan sin declarar bajo `-std=c11`). El README de D ya lo
   documenta, así que entran juntos. (Camilo)
 
+### Corregido
+- **`m1-arquitectura-variante-d-camilo.html` §3.2 y §3.4** (revisión de @dmazo-koronet, PR #8): la descomposición
+  lenguaje/transporte del control Bc se presentaba sin fecha, como si fuera de la corrida vigente del 17/09. Ahora
+  dice que es de la campaña del 10/09/2026 y que Bc no es reproducible desde el árbol (ADR-007); §3.2 y §5.4 dejan
+  de llamarla «evidencia» y pasan a «indicio histórico». La cifra se conserva, declarada. (Camilo)
+- **`FUENTES.md` / `m1-codigo-variante-d-camilo.html`:** el conteo de líneas del `Makefile` (22) quedó
+  desactualizado tras el `-D_GNU_SOURCE` de más arriba; corregido a 25 en ambos documentos. (Camilo)
+
 ### Detectado, sin corregir
 - `reloj_verificar()` (`reloj.h`) no se invoca y el cliente de D imprime siempre «granularidad ~41.67 ns»; el ADR-003
   pide verificar y reportar la granularidad real. (Camilo)
