@@ -381,6 +381,11 @@
     function todas(acc) {
       var pend = reales.filter(function (v) { return acc === 'arrancar' ? !v.corriendo : v.corriendo; });
       setBusy('*');
+      /* El aviso se limpia al EMPEZAR, igual que hace accion(). Sin esto, el error de
+         una tentativa anterior —el tipico: un servidor huerfano ocupando el puerto—
+         seguia en pantalla despues de que el reintento funcionara, describiendo un
+         problema ya resuelto. Solo debe sobrevivir el error de ESTA pasada. */
+      props.avisar(null);
       pend.reduce(function (cad, v) {
         return cad.then(function () {
           return api('/api/servidor', {method: 'POST', body: JSON.stringify({variante: v.id, accion: acc})})
@@ -515,12 +520,7 @@
         p(null, 'La variante no cambia el veredicto: cambia cuánto tarda en darlo. Ese es el ' +
           'experimento del reto — mismo dominio, mismo payload, distinto transporte.'),
         p(null, 'Lo que no esté en la tabla responde DESCONOCIDO. Es la política por defecto: ' +
-          'lo no clasificado explícitamente, se rechaza.')),
-      h(Porque, {titulo: 'por qué solo 16 hosts'},
-        p(null, '16 × 4 B = 64 B = una línea de caché. Ese tope es lo que permite afirmar que ' +
-          'clasificar cuesta ~1,9 ns y no contamina la medición (ADR-004). Subirlo invalidaría el ADR.'),
-        p(null, 'La tabla vive en sistema/tabla-hosts.csv y se lee UNA vez al arrancar, nunca ' +
-          'dentro del bucle: es el precio de no tocar el archivo en la ruta caliente.')));
+          'lo no clasificado explícitamente, se rechaza.')));
   }
 
   /* ═══════════ Historial ═══════════ */

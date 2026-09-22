@@ -47,7 +47,6 @@ import datetime
 import itertools
 import json
 import math
-import re
 import shutil
 import signal
 import socket
@@ -145,17 +144,6 @@ def anotar(entrada: dict) -> dict:
 # ──────────────────────────────────────────────────────────────────────────────
 # La tabla de hosts — el dominio (ADR-004)
 # ──────────────────────────────────────────────────────────────────────────────
-CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODAS las variantes.
-#
-# Se carga UNA VEZ al arrancar cada servidor. Nunca se lee dentro del bucle de medicion.
-#
-# Limite duro: 16 filas. 16 x 4 bytes = 64 bytes = UNA linea de cache.
-#   Ese limite es una DECISION de diseno, no una casualidad: es lo que permite
-#   afirmar que la clasificacion no contamina la medicion. Ver ADR-004.
-#
-# veredicto: local | externo      (cualquier host ausente -> desconocido)
-#
-"""
 
 
 def ip_valida(ip: str) -> bool:
@@ -180,62 +168,6 @@ def leer_tabla() -> list[dict]:
             if len(partes) >= 3 and partes[0] != "nombre":
                 filas.append({"nombre": partes[0], "ip": partes[1], "veredicto": partes[2]})
     return filas
-
-
-def cabecera_conservada() -> str:
-    """
-    Devuelve los comentarios que YA tiene el CSV, no los que este archivo cree que
-    deberia tener.
-
-    Por que existe esta funcion: hasta el 15/09 se escribia `CABECERA` tal cual, y
-    guardar la tabla desde la interfaz BORRABA en silencio todo comentario que no
-    estuviera en esa constante. Asi se perdio la justificacion del escenario y de los
-    rangos RFC 5737, y entraron IPs reales enrutables (8.8.8.8) como datos de ejemplo.
-
-    El fondo es arquitectonico: el plano de control es EDITOR de las filas del dominio,
-    no AUTOR del dominio. El razonamiento que acompana a la tabla pertenece al plano de
-    datos y sobrevive a cualquier edicion hecha desde la web. `CABECERA` queda solo como
-    semilla para cuando el archivo todavia no existe.
-    """
-    try:
-        lineas = TABLA.read_text().splitlines(keepends=True)
-    except OSError:
-        return CABECERA
-    previos = list(itertools.takewhile(lambda l: l.lstrip().startswith("#") or not l.strip(), lineas))
-    return "".join(previos) or CABECERA
-
-
-def escribir_tabla(filas: list[dict]) -> None:
-    """Valida y reescribe el CSV. Hay que reiniciar los servidores para que lo relean."""
-    if len(filas) > TABLA_MAX:
-        raise ValueError(
-            f"La tabla no puede pasar de {TABLA_MAX} hosts. No es un tope arbitrario: "
-            f"{TABLA_MAX} × 4 B = 64 B = una línea de caché, y de ahí sale la garantía de "
-            f"que clasificar cuesta ~1,9 ns. Subirlo invalidaría el ADR-004."
-        )
-    if not filas:
-        raise ValueError("La tabla no puede quedar vacía: el sistema necesita al menos un host.")
-
-    vistos = set()
-    for f in filas:
-        nombre = (f.get("nombre") or "").strip()
-        ip = (f.get("ip") or "").strip()
-        ver = (f.get("veredicto") or "").strip()
-        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", nombre):
-            raise ValueError(f"Nombre inválido: «{nombre}». Use letras, números, punto, guion o guion bajo.")
-        if not ip_valida(ip):
-            raise ValueError(f"«{ip}» no es una IPv4 válida. Cada número va de 0 a 255.")
-        if ver not in ("local", "externo"):
-            raise ValueError(f"Veredicto inválido: «{ver}». Solo «local» o «externo».")
-        if nombre in vistos:
-            raise ValueError(f"El host «{nombre}» está repetido.")
-        vistos.add(nombre)
-
-    with TABLA.open("w", newline="") as fh:
-        fh.write(cabecera_conservada())
-        fh.write("nombre,ip,veredicto\n")
-        for f in filas:
-            fh.write(f"{f['nombre'].strip()},{f['ip'].strip()},{f['veredicto'].strip()}\n")
 
 
 def id_de_ip(ip: str) -> int:
@@ -713,21 +645,6 @@ class Handler(BaseHTTPRequestHandler):
             with candado_hist:
                 return self._json({"ok": True, "historial": list(historial),
                                    "limite": HISTORIAL_MAX})
-        self.send_error(404)
-
-    def do_PUT(self):
-        if self.path == "/api/tabla":
-            try:
-                escribir_tabla(self._cuerpo().get("tabla", []))
-            except (ValueError, KeyError, TypeError, AttributeError) as e:
-                return self._json({"ok": False, "error": str(e)}, 400)
-            # La tabla se carga al arrancar: para que el cambio tenga efecto hay que
-            # reiniciar. Es el precio de NO releer el archivo en la ruta caliente.
-            reiniciados = [k for k in list(procesos) if corriendo(k)]
-            for k in reiniciados:
-                parar(k)
-                arrancar(k)
-            return self._json({"ok": True, "tabla": leer_tabla(), "reiniciados": reiniciados})
         self.send_error(404)
 
     def do_POST(self):
