@@ -31,12 +31,22 @@ el detalle línea por línea está en `git log`.
   falla (`clock_gettime`, `ftruncate` y `usleep` quedan sin declarar bajo `-std=c11`). El README de D ya lo
   documenta, así que entran juntos. (Camilo)
 
+### Corregido
+- **`sistema/control-dominio/Makefile`** (revisión de @dmazo-koronet, PR #7): mismo fallo que el de D — sin
+  `-D_GNU_SOURCE` no compila en Linux/WSL2 (`clock_gettime`, que usa `reloj.h`, queda sin declarar bajo
+  `-std=c11`). `iniciar.sh` lo silenciaba (`make ... || true`) en vez de fallar visiblemente. Verificado:
+  compila limpio en WSL2/Ubuntu tras el cambio. (Camilo)
+- **`sistema/variante-D-shm/Makefile`:** `server` y `client` no declaraban `../reloj.h` como dependencia, aunque
+  `common.h` lo incluye — editar el reloj compartido (el instrumento común de ADR-003) no disparaba
+  recompilación, y un binario desactualizado habría dado números que ya no significan lo que dicen, sin ningún
+  error visible. Verificado en WSL2: antes de este cambio, tocar `reloj.h` y volver a hacer `make` no
+  recompilaba nada; después, recompila los dos binarios. (Camilo)
+
 ### Detectado, sin corregir
 - `reloj_verificar()` (`reloj.h`) no se invoca y el cliente de D imprime siempre «granularidad ~41.67 ns»; el ADR-003
   pide verificar y reportar la granularidad real. (Camilo)
 - `analyze.py` (`plataforma_de`) identifica una plataforma Linux por la línea «Architecture» de `lscpu`, no por el
   modelo de CPU: dos equipos Linux distintos tendrían la misma identidad y el ADR-005 no los distinguiría. (Camilo)
-- `iniciar.sh` compila `sistema/control-dominio/`, pero falla en Linux (falta `_GNU_SOURCE`) y lo silencia. (Camilo)
 
 ---
 

@@ -13,10 +13,10 @@ LDFLAGS ?=
 
 all: server client
 
-server: server.c common.h ../clasificador.h
+server: server.c common.h ../clasificador.h ../reloj.h
 	$(CC) $(CFLAGS) -o $@ server.c $(LDFLAGS)
 
-client: client.c common.h ../clasificador.h
+client: client.c common.h ../clasificador.h ../reloj.h
 	$(CC) $(CFLAGS) -o $@ client.c $(LDFLAGS)
 
 clean:
