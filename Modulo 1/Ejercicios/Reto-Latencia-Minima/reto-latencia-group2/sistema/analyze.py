@@ -8,7 +8,7 @@ resultados son comparables por construcción.
 
 Uso:
     ./analyze.py resultados/*.csv
-    ./analyze.py --histograma resultados/resultados-B-1.csv
+    ./analyze.py --histograma resultados/resultados-tcp-python-1.csv
     ./analyze.py --md resultados/*.csv > ../resultados-tabla.md
 
 Método de percentiles: rango más cercano (nearest-rank), sin interpolación. Es el

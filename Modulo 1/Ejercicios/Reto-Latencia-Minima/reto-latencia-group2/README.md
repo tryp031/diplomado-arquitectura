@@ -160,8 +160,8 @@ reto-latencia-group2/
 │   ├── tabla-hosts.csv     el dominio: fuente única de verdad
 │   ├── clasificador.h/.py  la clasificación, en C y en Python
 │   ├── reloj.h             el instrumento de medición, compartido
-│   ├── variante-B-tcp/     TCP crudo en Python        → documenta Freddy
-│   ├── variante-D-shm/     memoria compartida en C    → documenta Camilo
+│   ├── tcp-python/            TCP crudo en Python     → documenta Freddy
+│   ├── memoria-compartida-c/  memoria compartida en C → documenta Camilo
 │   ├── control-dominio/    mide cuánto cuesta clasificar
 │   ├── run.sh · analyze.py el harness de MEDICIÓN
 │   ├── demo.py             demostración por línea de comandos
@@ -172,14 +172,22 @@ reto-latencia-group2/
     ├── ENUNCIADO.md        el reto, literal
     ├── DISENO-ARQUITECTURA.md
     ├── archivo/            hallazgos de lo que se retiró del árbol (ADR-007)
-    └── ADR/                las siete decisiones registradas
+    └── ADR/                las ocho decisiones registradas
 ```
 
-> **Alcance de la entrega: B y D.** El 16/09 se retiraron del árbol las variantes A y C
+> **Alcance de la entrega: TCP Python y Memoria compartida C.** El 16/09 se retiraron
+> del árbol las variantes A y C
 > (nunca implementadas) y los experimentos `Bc` (TCP en C) y `E` (ICMP). Sus mediciones
 > eran reales y siguen en [`docs/archivo/`](docs/archivo/); su código, en el historial de
 > git. El porqué y lo que eso cuesta, en
 > [ADR-007](docs/ADR/ADR-007-reduccion-de-alcance.md).
+
+> **Los nombres cambiaron el 22/09.** Lo que antes era «variante B» ahora es
+> **TCP Python** (`sistema/tcp-python/`) y lo que era «variante D» es **Memoria
+> compartida C** (`sistema/memoria-compartida-c/`). Los archivos de evidencia se
+> renombraron en pareja CSV+log, sin cambiar un byte de contenido. Los comandos viejos
+> (`./run.sh B 1`) ya no funcionan. Ver
+> [ADR-008](docs/ADR/ADR-008-nomenclatura-de-los-sistemas.md).
 
 > **Dos cosas distintas se llaman «harness» en este proyecto.** `sistema/run.sh` +
 > `analyze.py` son el **harness de medición**: orquestan una corrida. `verificar.py`
@@ -194,9 +202,9 @@ Requiere macOS, Linux o WSL2.
 
 ```bash
 cd sistema
-./run.sh B 1 --iters 1000000        # una medición completa
+./run.sh tcp-python 1 --iters 1000000   # una medición completa
 ./analyze.py --md resultados/*.csv  # tabla comparativa
-python3 demo.py --variante B        # demo interactiva
+python3 demo.py --variante tcp-python   # demo interactiva
 ```
 
 Los resultados del informe salen de aquí, nunca de la aplicación web.
@@ -221,7 +229,8 @@ Corrida oficial del **17/09/2026**, 3 rondas × 1 000 000 por arquitectura.
 > no sobre la arquitectura. Análisis completo en `INFORME.md` §7.1; la evidencia de la
 > corrida anterior se conserva en `sistema/resultados/archivo/`.
 
-> **Matiz obligatorio al comparar B con D:** entre las dos cambian **el transporte y el
+> **Matiz obligatorio al comparar TCP Python con Memoria compartida C:** entre los dos
+> cambian **el transporte y el
 > lenguaje a la vez**, así que el factor 162× **no es atribuible a ninguno de los dos por
 > sí solo**, y el informe no lo atribuye. Un control que sí separaba las causas (`Bc`,
 > TCP en C) se midió y se retiró del árbol con el ADR-007; su trabajo queda como historia
@@ -237,8 +246,8 @@ cada arquitectura.
 ## Para el equipo
 
 - El contrato para implementar una variante está en [`sistema/README.md`](sistema/README.md).
-- **División acordada el 15/09:** Freddy documenta la variante B (TCP en Python);
-  Camilo documenta la variante D (memoria compartida en C); Daniel se ocupa del CSV
+- **División acordada el 15/09:** Freddy documenta TCP Python;
+  Camilo documenta Memoria compartida C; Daniel se ocupa del CSV
   del plano de control, la limpieza del código y la presentación.
 - Los tres documentos a producir son **manual de instalación**, **manual de uso** y
   **manual técnico**. Quién firma cada uno se concreta en la reunión del **21/09**.

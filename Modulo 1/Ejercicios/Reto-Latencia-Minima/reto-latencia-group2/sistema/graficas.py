@@ -23,12 +23,12 @@ from collections import defaultdict
 UMBRAL_NS = 1_000_000  # el objetivo del enunciado: 1 ms
 
 ESTILO = {
-    "B":  ("#2563eb", "B · Python + TCP"),
+    "tcp-python":           ("#2563eb", "TCP Python"),
     "C":  ("#16a34a", "C · Unix socket / UDP"),
     "A":  ("#a16207", "A · HTTP/REST"),
-    "D":  ("#7c3aed", "D · C + memoria compartida"),
+    "memoria-compartida-c": ("#7c3aed", "Memoria compartida C"),
 }
-ORDEN = ["B", "D"]
+ORDEN = ["tcp-python", "memoria-compartida-c"]
 PERCENTILES = [0, 50, 90, 99, 99.9, 99.99, 99.999]
 
 
@@ -44,7 +44,7 @@ def cargar(dir_res, rondas=RONDAS_DEL_INFORME):
     """Agrega las rondas del informe de cada variante. resultados-<VAR>-<RONDA>.csv"""
     series = defaultdict(list)
     for ruta in sorted(glob.glob(os.path.join(dir_res, "resultados-*.csv"))):
-        m = re.match(r"resultados-([A-Za-z]+)-(\d+)\.csv$", os.path.basename(ruta))
+        m = re.match(r"resultados-([A-Za-z][A-Za-z0-9-]*)-(\d)\.csv$", os.path.basename(ruta))
         if not m:
             continue
         var, ronda = m.group(1), int(m.group(2))

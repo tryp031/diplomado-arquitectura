@@ -13,14 +13,14 @@ buena voluntad.
 
 ```bash
 cd sistema
-./run.sh B 1                            # variante B, ronda 1, valores por defecto
-./run.sh B 1 --warmup 20000 --iters 100000   # corrida corta de prueba
-./run.sh D 1                            # variante D, memoria compartida
+./run.sh tcp-python 1                   # TCP Python, ronda 1, valores por defecto
+./run.sh tcp-python 1 --warmup 20000 --iters 100000   # corrida corta de prueba
+./run.sh memoria-compartida-c 1         # Memoria compartida C
 ./analyze.py --md resultados/*.csv      # tabla comparativa final
 
 # Demostración en vivo — servidor aparte, NUNCA el cliente medidor
-python3 variante-B-tcp/server.py --port 9101 &
-python3 demo.py --variante B
+python3 tcp-python/server.py --port 9101 &
+python3 demo.py --variante tcp-python
 ```
 
 `run.sh` levanta el servidor, corre el cliente, baja el servidor, analiza y registra en el log
@@ -37,10 +37,10 @@ sistema/
 ├── README.md            ← este archivo: el contrato
 ├── analyze.py           ← ÚNICO script de métricas. No tocar por variante.
 ├── run.sh               ← orquestador de una corrida
-├── variante-B-tcp/      ← TCP en Python · referencia — documenta Freddy
+├── tcp-python/             ← TCP en Python · referencia — documenta Freddy
 │   ├── server.py
 │   └── client.py        ← plantilla del bucle de medición
-├── variante-D-shm/      ← memoria compartida en C11 — documenta Camilo
+├── memoria-compartida-c/   ← memoria compartida en C11 — documenta Camilo
 ├── control-dominio/     ← CONTROL: cuánto cuesta clasificar (~1,9 ns)
 ├── tabla-hosts.csv      ← EL DOMINIO. Fuente única de verdad. No duplicar.
 ├── clasificador.h       ← el dominio en C      (D)
@@ -99,7 +99,7 @@ escribir(respuesta, veredicto, host_id)      # 1 B veredicto + eco del host_id
 ### Autoprueba obligatoria antes de medir
 
 Tu cliente debe verificar los 16 hosts **más uno fuera de tabla** antes de la primera
-muestra. Copia el bloque de `variante-B-tcp/client.py`. Sin esto el harness puede estar
+muestra. Copia el bloque de `tcp-python/client.py`. Sin esto el harness puede estar
 midiendo un transporte que transporta basura, y nadie se entera.
 
 ### El ciclo de estímulos
@@ -155,7 +155,7 @@ iteracion,latencia_ns
 
 Nombre: `resultados/resultados-<VARIANTE>-<RONDA>.csv`
 
-### 3. El bucle de medición — copiar de `variante-B-tcp/client.py`
+### 3. El bucle de medición — copiar de `tcp-python/client.py`
 
 No reinventarlo. Lo que **no** se negocia:
 
@@ -291,8 +291,8 @@ Ver [`ADR-003`](../docs/ADR/ADR-003-resolucion-del-reloj.md).
 - [x] ~~Línea base de red real~~ → medida 13/09, archivada en `docs/archivo/`
 - [x] ~~Demostración en vivo~~ → `demo.py`
 - [x] ~~Reducir el alcance a B y D~~ → ADR-007, 16/09
-- [ ] **Documentación técnica de la variante B — Freddy.**
-- [ ] **Documentación técnica de la variante D — Camilo.**
+- [ ] **Documentación técnica de TCP Python — Freddy.**
+- [ ] **Documentación técnica de Memoria compartida C — Camilo.**
 - [ ] **Repetir bajo carga controlada**, para separar «el sistema tiene cola» de «la
       máquina estaba ocupada». Es el experimento que sigue faltando.
 - [ ] Congelar `../ESPEC-MEDICION.md` con las enmiendas de ADR-001, ADR-003 y ADR-004

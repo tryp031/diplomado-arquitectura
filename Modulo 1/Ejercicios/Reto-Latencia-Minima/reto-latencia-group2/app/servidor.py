@@ -14,7 +14,7 @@ Por eso hay DOS PLANOS, y la separación es la decisión arquitectónica del mó
   PLANO DE CONTROL  (este archivo + index.html)   milisegundos   NO se mide
       Formularios, listas, botones, gráficas. Pide cosas y muestra resultados.
               │
-              ▼  "medí 50 000 intercambios contra la variante B"
+              ▼  "medí 50 000 intercambios contra TCP Python"
   PLANO DE DATOS  (sistema/variante-*)            µs y ns        SÍ se mide
       cliente ⇄ servidor. EL CRONÓMETRO VIVE AQUÍ DENTRO, nunca en el navegador.
 
@@ -77,14 +77,14 @@ VEREDICTOS = {0: "EXTERNO", 1: "LOCAL", 2: "DESCONOCIDO"}
 # C, así que participa en las mediciones pero no en el formulario de estímulos.
 # ──────────────────────────────────────────────────────────────────────────────
 VARIANTES = {
-    "B": {
-        "nombre": "TCP crudo (Python)", "puerto": 9101, "socket": True,
-        "dir": "variante-B-tcp", "servidor": ["python3", "server.py"], "cliente": ["python3", "client.py"],
+    "tcp-python": {
+        "nombre": "TCP Python", "puerto": 9101, "socket": True,
+        "dir": "tcp-python", "servidor": ["python3", "server.py"], "cliente": ["python3", "client.py"],
         "nota": "TCP_NODELAY · conexión persistente",
     },
-    "D": {
-        "nombre": "Memoria compartida (C)", "puerto": 9103, "socket": False,
-        "dir": "variante-D-shm", "servidor": ["./server"], "cliente": ["./client"],
+    "memoria-compartida-c": {
+        "nombre": "Memoria compartida C", "puerto": 9103, "socket": False,
+        "dir": "memoria-compartida-c", "servidor": ["./server"], "cliente": ["./client"],
         "nota": "espera activa · cero llamadas al sistema",
         "concurrencia": False,
         "porque_no": (
@@ -144,7 +144,7 @@ def anotar(entrada: dict) -> dict:
 # ──────────────────────────────────────────────────────────────────────────────
 # La tabla de hosts — el dominio (ADR-004)
 # ──────────────────────────────────────────────────────────────────────────────
-CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODAS las variantes.
+CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODOS los sistemas.
 #
 # Se carga UNA VEZ al arrancar cada servidor. Nunca se lee dentro del bucle de medicion.
 #
@@ -308,10 +308,10 @@ def compilar(vid: str):
         # Camino Windows nativo: no hay cadena de compilacion. Es un escenario
         # PREVISTO (ver README, "tres caminos"), no un fallo: el plano de control y
         # las variantes en Python funcionan igual. Se dice que falta y como tenerlo.
-        return ("Esta variante esta escrita en C y aqui no hay compilador (`make`).\n\n"
-                "En Windows, las variantes en C y la medicion oficial necesitan WSL2:\n"
+        return ("Este sistema esta escrito en C y aqui no hay compilador (`make`).\n\n"
+                "En Windows, los sistemas en C y la medicion oficial necesitan WSL2:\n"
                 "  wsl --install\n\n"
-                "Sin WSL2 podes usar igual el plano de control y las variantes en Python.\n"
+                "Sin WSL2 podes usar igual el plano de control y los sistemas en Python.\n"
                 "Ver README.md, seccion «Tres caminos».")
     r = subprocess.run(["make"], cwd=d, capture_output=True, text=True)
     return None if r.returncode == 0 else (r.stderr or r.stdout)[-800:]
@@ -344,7 +344,7 @@ def arrancar(vid: str) -> dict:
         if declarado[0] == "./server" and not Path(cmd[0]).exists():
             return {"ok": False, "error": f"Falta el binario {v['dir']}/server."}
         if declarado[0] == "python3" and not (d / declarado[1]).exists():
-            return {"ok": False, "error": f"Falta {v['dir']}/{cmd[1]} — esta variante todavía no está implementada."}
+            return {"ok": False, "error": f"Falta {v['dir']}/{cmd[1]} — este sistema todavía no está implementado."}
 
         cmd += ["--port", str(v["puerto"]), "--tabla", str(TABLA)]
         try:
@@ -432,10 +432,10 @@ def estimulo(vid: str, host: str) -> dict:
 
     v = VARIANTES[vid]
     if not v["socket"]:
-        return fallo(f"La variante {vid} usa memoria compartida: solo habla con su cliente en C. "
+        return fallo(f"{vid} usa memoria compartida: solo habla con su cliente en C. "
                      f"Participa en las mediciones, no en este formulario.")
     if not corriendo(vid):
-        return fallo(f"El servidor de la variante {vid} no está corriendo.")
+        return fallo(f"El servidor de {vid} no está corriendo.")
 
     filas = leer_tabla()
     ip = next((f["ip"] for f in filas if f["nombre"] == host), host)
@@ -515,7 +515,7 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
     muestras. La única diferencia con `run.sh` es quién aprieta el botón.
     """
     if not corriendo(vid):
-        return {"ok": False, "error": f"Arrancá primero el servidor de la variante {vid}."}
+        return {"ok": False, "error": f"Arrancá primero el servidor de {vid}."}
 
     v = VARIANTES[vid]
     d = SISTEMA / v["dir"]

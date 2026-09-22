@@ -13,8 +13,8 @@ es el límite físico, y sirve para cuantificar qué hay que sacrificar para lle
 
 ```bash
 make                                  # compila server y client
-../run.sh D 1                         # ronda 1 completa (1 M iteraciones)
-../run.sh D 1 --iters 100000          # corrida corta de prueba
+../run.sh memoria-compartida-c 1              # ronda 1 completa (1 M iteraciones)
+../run.sh memoria-compartida-c 1 --iters 100000   # corrida corta de prueba
 ```
 
 `run.sh` compila antes de medir, así que nunca se mide un binario obsoleto.

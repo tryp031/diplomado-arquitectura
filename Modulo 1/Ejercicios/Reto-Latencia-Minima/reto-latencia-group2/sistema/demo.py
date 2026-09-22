@@ -4,7 +4,7 @@ demo.py — DEMOSTRACIÓN EN VIVO del sistema (entregable 5 del enunciado).
 
 Escribes un host, el sistema responde el veredicto y el tiempo que tardó.
 
-    $ python3 demo.py --variante B
+    $ python3 demo.py --variante tcp-python
     host> pepito
       pepito           127.0.0.1        LOCAL           14.2 µs
     host> google
@@ -43,7 +43,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import clasificador  # noqa: E402
 
-PUERTOS = {"A": 9100, "B": 9101, "C": 9102, "D": 9103}
+PUERTOS = {"tcp-python": 9101, "memoria-compartida-c": 9103}
 
 VERDE, ROJO, AMAR, GRIS, FIN = "\033[32m", "\033[31m", "\033[33m", "\033[90m", "\033[0m"
 COLOR = {
@@ -68,7 +68,7 @@ def cargar_nombres(ruta: Path) -> dict[str, str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Demostración en vivo del clasificador de hosts")
-    ap.add_argument("--variante", default="B", choices=sorted(PUERTOS))
+    ap.add_argument("--variante", default="tcp-python", choices=sorted(PUERTOS))
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=None)
     ap.add_argument("--payload", type=int, default=32)
@@ -84,12 +84,12 @@ def main() -> None:
     except OSError as e:
         raise SystemExit(
             f"No hay servidor en {a.host}:{port} — {e}\n"
-            f"Levántelo primero:  python3 variante-B-tcp/server.py --port {port}"
+            f"Levántelo primero:  python3 tcp-python/server.py --port {port}"
         )
     sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     sock.settimeout(3.0)
 
-    print(f"\n  Clasificador de hosts — variante {a.variante} · {a.host}:{port}")
+    print(f"\n  Clasificador de hosts — {a.variante} · {a.host}:{port}")
     print(f"  {len(nombres)} hosts en tabla. Escriba un nombre o una IP. "
           f"'lista' para verlos, Ctrl-D para salir.\n")
 
