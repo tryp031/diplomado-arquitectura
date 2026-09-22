@@ -147,13 +147,17 @@ def main():
 
     # --- Empieza aquí ---
     destacados = []
-    for patron, desc in [
-        ("Consolidado/m1-consolidado.html", "Las notas de estudio del Módulo 1: las 5 fuentes fusionadas, con las contradicciones registradas."),
-        ("Aportes/danny/m1-clasificador-hosts-danny.html", "Qué construimos en el reto, cómo funciona y dónde encaja cada pieza. El documento de la reunión."),
+    # (ruta, descripción, título propio). El título propio es para cuando el <title> del
+    # documento no dice qué es desde el índice: "Reto de Latencia Minima - Group 2" no
+    # distingue la presentacion del informe. None = se usa el <title> del documento.
+    for patron, desc, titulo_propio in [
+        ("Consolidado/m1-consolidado.html", "Las notas de estudio del Módulo 1: las 5 fuentes fusionadas, con las contradicciones registradas.", None),
+        ("Aportes/danny/m1-clasificador-hosts-danny.html", "Qué construimos en el reto, cómo funciona y dónde encaja cada pieza. El documento de la reunión.", None),
+        ("Aportes/danny/m1-presentacion-reto-latencia-danny.html", "Las láminas de la sustentación, con las cifras de la corrida del 17/09. Borrador: sin revisar por Freddy ni Camilo.", "Presentación del reto — Módulo 1"),
     ]:
         for d in docs:
             if str(d["rel"]).endswith(patron):
-                destacados.append(tarjeta(d["rel"], d["titulo"], desc, d["tipo"], destacado=True))
+                destacados.append(tarjeta(d["rel"], titulo_propio or d["titulo"], desc, d["tipo"], destacado=True))
     destacados.append(tarjeta(pathlib.Path("README.md"), "README — puerta de entrada",
                               "Qué es este repositorio, cómo está organizado y cuál es el flujo de trabajo.", "md", destacado=True))
     destacados.append(tarjeta(pathlib.Path("CONTRIBUIR.md"), "CONTRIBUIR — cómo aportar",

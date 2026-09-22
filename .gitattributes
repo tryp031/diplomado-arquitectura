@@ -10,6 +10,19 @@
 *.c     text eol=lf
 *.h     text eol=lf
 
+# Documentos y notas: SIEMPRE LF, aunque nadie los ejecute.
+# Motivo medido (21/09): generar-indice.py reporta el tamano con st_size // 1024.
+# Con CRLF cada archivo pesa ~1 KB mas, asi que el INDICE.html generado en Windows
+# o WSL2 difiere del generado en macOS en LOS 39 tamanos, sin que cambie ningun
+# documento. Conflicto permanente y falso en cada PR.
+*.html  text eol=lf
+*.md    text eol=lf
+
+# EXCEPCION: el material recibido no se toca, ni siquiera los finales de linea.
+# Las paginas descargadas de Brightspace vienen con BOM y CRLF; normalizarlas
+# cambiaria los bytes del archivo que nos entregaron. Es fuente primaria.
+**/Material-Clase/** -text
+
 # Scripts nativos de Windows: SIEMPRE CRLF.
 *.cmd   text eol=crlf
 *.ps1   text eol=crlf

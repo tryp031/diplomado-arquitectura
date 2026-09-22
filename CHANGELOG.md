@@ -12,6 +12,83 @@ el detalle línea por línea está en `git log`.
 
 ---
 
+## 2026-09-21
+
+### Decidido
+- **ADR-007 pasa a «Aceptada»** (Group 2). Se ratifican las dos preguntas que quedaban
+  abiertas desde el 16/09: **no** se usan las cifras archivadas del control `Bc` y **no** se
+  usa la línea base de internet (`E`). El alcance del reto queda definitivamente en B y D.
+  - **Consecuencia inmediata:** la §3.4 del documento de arquitectura de Camilo (PR #8)
+    sostiene la descomposición 9,2 % / 90,8 % sobre `Bc`. Con el ADR ratificado deja de ser
+    una contradicción «a resolver en el consolidado» y pasa a ser **corrección obligatoria**
+    antes de integrar ese PR.
+
+### Cambiado
+- **Presentación del reto reestructurada** (Daniel): de 13 láminas sin apéndice a **11 de
+  línea principal, cronometradas en 4:50**, más **5 de apéndice técnico** que no se presentan
+  y la lámina interna de estado. La narrativa pasa a ser problema → qué construimos →
+  arquitectura → medición → resultados → optimización → trade-offs → cumplimiento →
+  aprendizaje. Al apéndice bajan las colas, el suelo del instrumento, la justificación
+  tecnológica, el C4 y los límites del experimento.
+  - Lámina nueva **«Un portero con una lista»**: qué hace el sistema sin tecnicismos, para
+    público no técnico.
+  - **Rigor:** se retira de la tabla de trade-offs la afirmación «peor caso acotado por
+    diseño: SÍ» para D. El experimento no la sostiene —su máximo fue 37 µs, 447× su mediana,
+    impuesto por el planificador y el hardware—. Se sustituye por la variabilidad observada
+    (máx/p50) y por «no se observaron muestras sobre 1 ms», que es lo que la evidencia dice.
+  - Las once cifras del deck se contrastaron una por una contra `INFORME.md`.
+  - Las referencias a láminas **por número** se sustituyen por referencias **por nombre**:
+    reordenar el deck las dejaba apuntando a láminas equivocadas, que es justo lo que pasó.
+
+### Añadido
+- **Cuadernillo de repaso del Módulo 1** (Daniel · PR #9): la autoevaluación de 10 preguntas
+  convertida en material de estudio, con la respuesta razonada de cada una.
+- **Este CHANGELOG** (Camilo · PR #6) y su convención.
+- **Presentación del reto** (Daniel): las dos gráficas SVG del informe, incrustadas sin
+  modificar —percentiles en la lámina 7, histograma en la lámina 11—, y una **lámina 14 de
+  reserva con la vista C4** (contexto y contenedores), que solo se presenta si la piden.
+  La lámina corrige dos errores de `DISENO-ARQUITECTURA.md` §4.2: dibuja cuatro variantes
+  cuando A y C nunca se implementaron (ADR-007), y dibuja D con «núcleo fijado» cuando el
+  código no fija afinidad y en macOS/arm64 no podría.
+- **`INDICE.html`:** acceso directo a la presentación desde «Empieza aquí». Va en
+  `generar-indice.py`, no en el HTML generado, que se sobrescribe en cada regeneración.
+  El generador admite ahora un título propio por destacado: el `<title>` de la presentación
+  es «Reto de Latencia Mínima — Group 2», igual que el del informe, y desde el índice no se
+  distinguían.
+
+### Corregido
+- **`INDICE.html` llevaba desde el 16/09 sin regenerar** (Daniel): el PR #9 añadió un
+  documento y no ejecutó `generar-indice.py`. El índice decía 14 documentos y le faltaba la
+  autoevaluación. Es el mismo punto de la checklist de `CONTRIBUIR.md` que se le exige a
+  cualquier aporte.
+- **Referencia colgante en la presentación** (Daniel): la lámina 4 remitía a «la lámina 7»
+  para explicar cómo se separaron las causas del factor 162×. Esa lámina se eliminó el 17/09
+  junto con `Bc`. Ahora dice lo que la 7 hace de verdad: **declarar la limitación**, no
+  resolverla. El sello de estado pasa de «DRAFT · 16 SEP» a «DRAFT · 21 SEP».
+- **`.gitattributes` no cubría `html` ni `md`** (Daniel). Medido el 21/09: `generar-indice.py`
+  calcula el peso con `st_size // 1024`, así que con CRLF cada archivo pesa ~1 KB más y el
+  índice generado en WSL2 difiere del generado en macOS **en los 39 tamaños**, sin que cambie
+  ningún documento. Conflicto permanente y falso en cada PR. Se añade `text eol=lf` para
+  `html` y `md`, con **excepción explícita del material recibido**: `**/Material-Clase/**` y
+  los HTML del Módulo 0, que vienen de Brightspace con BOM y CRLF y se conservan byte a byte.
+
+### Revisado
+- **PR #6 aprobado.** El historial del 15 al 17/09 se contrastó contra `git log`: los PR #1 a
+  #5 mapean uno a uno con sus commits y la entrada del 17/09 describe exactamente los 26
+  archivos que toca `8c0b035`.
+- **PR #7, cambios pedidos.** Verificado en el equipo de referencia que `-D_GNU_SOURCE` **no
+  altera el binario en macOS**: mismo ensamblador y objetos idénticos byte a byte con y sin el
+  flag, así que no hay que volver a medir. Se pide extender el arreglo a
+  `sistema/control-dominio/`, que incluye `reloj.h` y falla igual en Linux, y declarar
+  `../reloj.h` como dependencia del `Makefile` de D —hoy editar el reloj compartido no
+  dispara recompilación—.
+- **PR #8, cambios pedidos.** La ficha de fuentes y las siete contradicciones declaradas se
+  comprobaron y son reales. Se pide fechar §3.4 y decir que el control `Bc` lo retiró el
+  ADR-007: el documento presenta la descomposición 9,2 % / 90,8 % como dato medido vigente,
+  y el README y el `INFORME.md` declaran lo contrario.
+
+---
+
 ## 2026-09-17
 
 ### Cambiado

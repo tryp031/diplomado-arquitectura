@@ -1,0 +1,4 @@
+# Los HTML de este modulo son paginas descargadas de Brightspace (BOM + CRLF).
+# Son material recibido: se conservan byte a byte, como el de Material-Clase.
+# Sin esta regla, el *.html text eol=lf de la raiz los reescribiria.
+*.html -text
