@@ -45,6 +45,7 @@ int main(int argc, char **argv)
     uint64_t lote = 1000, lote_rondas = 200;   /* contraste por lotes, ver mas abajo */
     const char *ruta_tabla = "tabla-hosts.csv";
     int sin_clasificar = 0;                     /* corrida de control, ADR-004 §5 */
+    const char *clasificar = NULL;              /* modo estimulo suelto — ADR-009 */
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--host") && i + 1 < argc)            host = argv[++i];
@@ -58,12 +59,19 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[i], "--lote-rondas") && i + 1 < argc) lote_rondas = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--tabla") && i + 1 < argc)        ruta_tabla = argv[++i];
         else if (!strcmp(argv[i], "--sin-clasificar"))               sin_clasificar = 1;
+        else if (!strcmp(argv[i], "--clasificar") && i + 1 < argc)    clasificar = argv[++i];
         else { fprintf(stderr, "argumento desconocido: %s\n", argv[i]); return 2; }
     }
     (void)host;
 
-    if (!salida)  { fprintf(stderr, "error: falta --out\n"); return 2; }
-    if (iters == 0) { fprintf(stderr, "error: --iters debe ser > 0\n"); return 2; }
+    /* El modo --clasificar responde UNA pregunta y sale: no produce CSV ni corrida,
+       asi que no exige --out ni --iters. Ver ADR-009. */
+    if (clasificar) {
+        iters = 1;
+    } else {
+        if (!salida)  { fprintf(stderr, "error: falta --out\n"); return 2; }
+        if (iters == 0) { fprintf(stderr, "error: --iters debe ser > 0\n"); return 2; }
+    }
     if (payload == 0 || payload > PAYLOAD_MAX) {
         fprintf(stderr, "error: --payload debe estar entre 1 y %zu\n", (size_t)PAYLOAD_MAX);
         return 2;
@@ -124,7 +132,7 @@ int main(int argc, char **argv)
     memset(latencias, 0, iters * sizeof(uint64_t));
 
     /* --- Piso de medición: cuánto cuesta el instrumento ----------------------- */
-    {
+    if (!clasificar) {
         enum { N_PISO = 100000 };
         uint64_t *piso = malloc(N_PISO * sizeof(uint64_t));
         if (piso) {
@@ -166,6 +174,45 @@ int main(int argc, char **argv)
         }                                                                                 \
         memcpy(recibido, r->respuesta.dato, payload);                                     \
     } while (0)
+
+    /* --- MODO ESTIMULO SUELTO (--clasificar) --------------------------------
+       Una sola pregunta, se imprime el veredicto y se sale. Existe para que el
+       plano de control pueda hablarle a este sistema, que no tiene sockets que
+       aceptar (ADR-002). NO toca el bucle medido ni la autoprueba: es una rama
+       que retorna antes de llegar a ellos, asi que ninguna cifra del informe
+       depende de este codigo.
+
+       El cronometro sigue siendo la frontera F1 (ADR-001): las mismas dos marcas
+       alrededor del mismo intercambio. Lo que el plano de control agregue por
+       lanzar el proceso queda fuera y se reporta aparte, como web_ms. */
+    if (clasificar) {
+        unsigned char est[PAYLOAD_MAX];
+        uint32_t hid = id_de_ip(clasificar);
+        armar_estimulo(est, payload, hid, 0);
+
+        uint64_t t0 = ahora_ns();
+        INTERCAMBIO(est);
+        uint64_t t1 = ahora_ns();
+
+        uint32_t eco;
+        memcpy(&eco, recibido + OFF_ECO_ID, sizeof eco);
+        if (eco != hid) {
+            fprintf(stderr, "[cliente D] eco incorrecto: el sistema respondio a otra pregunta\n");
+            free(latencias);
+            return 1;
+        }
+        if (giros_perdidos) {
+            fprintf(stderr, "[cliente D] el servidor no respondio dentro del limite de espera\n");
+            free(latencias);
+            return 1;
+        }
+        /* Linea parseable por el plano de control. Cualquier otra salida es ruido. */
+        printf("ESTIMULO veredicto=%u latencia_ns=%llu\n",
+               (unsigned)recibido[OFF_VEREDICTO], (unsigned long long)(t1 - t0));
+        fflush(stdout);
+        free(latencias);
+        return 0;
+    }
 
     /* --- WARMUP: descartado (ESPEC §2) -------------------------------------- */
     /* ---- AUTOPRUEBA: verificar que el sistema CLASIFICA antes de medir nada ---- */

@@ -397,6 +397,49 @@ def conexion(vid: str) -> socket.socket:
     return s
 
 
+def estimulo_por_cliente(v: dict, ip: str) -> tuple:
+    """
+    Un estimulo contra un sistema que no habla por sockets: se lanza SU cliente
+    con `--clasificar`, que hace un solo intercambio y reporta el veredicto.
+
+    Por que asi y no manteniendo un cliente residente: la region compartida tiene
+    UNA ranura por sentido. Un cliente permanente del plano de control la ocupa, y
+    si alguien lanza una medicion a la vez, los dos se pisan el payload y la corrida
+    sale contaminada SIN dar error. Por eso este camino es de usar y tirar, y por eso
+    se niega a correr mientras haya una medicion en curso.
+
+    El precio es el arranque del proceso (milisegundos). No entra en la cifra del
+    reto: la latencia que se devuelve la mide el cliente entre sus dos marcas de la
+    frontera F1, igual que en una corrida.
+    """
+    if progreso.get("activa"):
+        raise RuntimeError(
+            "Hay una medicion en curso. Este sistema tiene una sola ranura de memoria "
+            "compartida: mandar un estimulo ahora corromperia la medicion. Espera a que "
+            "termine.")
+
+    d = SISTEMA / v["dir"]
+    cmd = resolver_cmd(v["cliente"], d) + [
+        "--clasificar", ip, "--port", str(v["puerto"]), "--tabla", str(TABLA),
+    ]
+    try:
+        r = subprocess.run(cmd, cwd=d, capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("El cliente no respondio en 30 s.")
+
+    linea = next((l for l in r.stdout.splitlines() if l.startswith("ESTIMULO ")), None)
+    if linea is None:
+        detalle = (r.stderr or r.stdout or "").strip().splitlines()
+        raise RuntimeError("El cliente no devolvio un veredicto. "
+                           + (detalle[-1] if detalle else f"codigo {r.returncode}"))
+
+    campos = dict(par.split("=", 1) for par in linea.split() if "=" in par)
+    try:
+        return int(campos["veredicto"]), int(campos["latencia_ns"])
+    except (KeyError, ValueError):
+        raise RuntimeError(f"No se entiende la respuesta del cliente: {linea}")
+
+
 def estimulo(vid: str, host: str) -> dict:
     """
     Manda UN estímulo y devuelve el veredicto con el log completo de tiempos.
@@ -431,9 +474,6 @@ def estimulo(vid: str, host: str) -> dict:
                            control_overhead_ns=None, t0_f1_ns=None, t1_f1_ns=None))
 
     v = VARIANTES[vid]
-    if not v["socket"]:
-        return fallo(f"{vid} usa memoria compartida: solo habla con su cliente en C. "
-                     f"Participa en las mediciones, no en este formulario.")
     if not corriendo(vid):
         return fallo(f"El servidor de {vid} no está corriendo.")
 
@@ -449,6 +489,24 @@ def estimulo(vid: str, host: str) -> dict:
                            ts_control_responde=ahora(),
                            nota="no está en la tabla y tampoco es una IPv4 · "
                                 "resuelto en el plano de control, sin viaje al plano de datos"))
+
+    if not v["socket"]:
+        # Este sistema no tiene conexiones que aceptar (ADR-002): se le habla
+        # lanzando su propio cliente en C, una vez por estimulo. Ver ADR-009.
+        try:
+            ver_byte, latencia = estimulo_por_cliente(v, ip)
+        except Exception as e:                                  # noqa: BLE001
+            return fallo(str(e))
+        total_control = time.perf_counter_ns() - t_entra
+        return anotar(dict(
+            base, ok=True, ip=ip, veredicto=VEREDICTOS.get(ver_byte, "?"),
+            t0_f1_ns=None, t1_f1_ns=None,
+            latencia_sistema_ns=latencia,
+            control_overhead_ns=total_control - latencia,
+            ts_control_responde=ahora(),
+            nota="estimulo suelto: el cliente arranca en frio, sin warmup, y mide UN "
+                 "intercambio. Sirve para ver que clasifica, no para comparar con el "
+                 "p50 del informe, que sale de un millon de intercambios en caliente."))
 
     host_id = id_de_ip(ip)
     msg = struct.pack("<II", host_id, 0) + b"\x00" * (PAYLOAD - 8)

@@ -172,7 +172,7 @@ reto-latencia-group2/
     ├── ENUNCIADO.md        el reto, literal
     ├── DISENO-ARQUITECTURA.md
     ├── archivo/            hallazgos de lo que se retiró del árbol (ADR-007)
-    └── ADR/                las ocho decisiones registradas
+    └── ADR/                las nueve decisiones registradas
 ```
 
 > **Alcance de la entrega: TCP Python y Memoria compartida C.** El 16/09 se retiraron

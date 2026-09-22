@@ -400,9 +400,8 @@
         return art({className: 'server ' + (!v.existe ? 'pending' : v.corriendo ? 'active' : ''), key: v.id},
           span({className: 'pill' + (v.corriendo ? '' : ' off')},
             !v.existe ? 'PENDIENTE' : v.corriendo ? 'ACTIVO' : 'PARADO'),
-          h3(null, v.id + ' · ' + v.nombre),
+          h3(null, v.nombre),
           div({className: 'code'}, ':' + v.puerto + ' · ' + v.nota),
-          v.socket ? null : div({className: 'code'}, 'sin estímulos sueltos · solo medición'),
           v.existe
             ? b({className: 'btn sm full ' + (v.corriendo ? 'ghost' : 'alt'), type: 'button',
                  disabled: busy === v.id || busy === '*',
@@ -414,7 +413,9 @@
 
   /* ═══════════ Estímulo ═══════════ */
   function Estimulo(props) {
-    var activos = props.estado.variantes.filter(function (v) { return v.corriendo && v.socket; });
+    // Antes se exigia v.socket y memoria compartida no aparecia nunca en el
+    // formulario. Ahora se le habla lanzando su cliente en C — ver ADR-009.
+    var activos = props.estado.variantes.filter(function (v) { return v.corriendo; });
     var tabla = props.estado.tabla;
     var sv = us(''), variante = sv[0], setVariante = sv[1];
     var sh = us(''), host = sh[0], setHost = sh[1];
@@ -434,15 +435,13 @@
       if (!hay) setHost(tabla.length ? tabla[0].nombre : OTRO);
     }, [tabla]);
 
-    var blancas = tabla.filter(function (f) { return f.veredicto === 'local'; });
-    var negras = tabla.filter(function (f) { return f.veredicto === 'externo'; });
     var fila = tabla.filter(function (f) { return f.nombre === host; })[0];
     var destino = host === OTRO ? libre.trim() : host;
 
     function explica() {
       if (host === OTRO) return 'no está en la tabla → responderá DESCONOCIDO.';
       if (!fila) return 'elegí un host.';
-      return fila.ip + ' · lista ' + (fila.veredicto === 'local' ? 'BLANCA → LOCAL' : 'NEGRA → EXTERNO');
+      return fila.ip + ' · preguntale al sistema qué responde.';
     }
 
     function enviar(ev) {
@@ -470,19 +469,17 @@
       h2(null, 'Probar clasificación'),
       p({className: 'sub'}, 'Pregunta al sistema si reconoce este host.'),
       activos.length === 0
-        ? div({className: 'aviso a-info'}, 'Arrancá TCP Python para poder mandar estímulos.')
+        ? div({className: 'aviso a-info'}, 'Arrancá un sistema para poder mandar estímulos.')
         : form({onSubmit: enviar},
             div({className: 'control'},
               lbl({htmlFor: 'ev'}, 'Sistema'),
               sel({id: 'ev', value: variante, onChange: function (e) { setVariante(e.target.value); }},
-                activos.map(function (v) { return opt({key: v.id, value: v.id}, v.id + ' · ' + v.nombre); }))),
+                activos.map(function (v) { return opt({key: v.id, value: v.id}, v.nombre); }))),
             div({className: 'control'},
               lbl({htmlFor: 'eh'}, 'Host a clasificar'),
               sel({id: 'eh', value: host, onChange: function (e) { setHost(e.target.value); }},
-                blancas.length ? og({label: 'Lista blanca — LOCAL', key: 'b'}, blancas.map(function (f) {
-                  return opt({key: f.nombre, value: f.nombre}, f.nombre + '  ·  ' + f.ip); })) : null,
-                negras.length ? og({label: 'Lista negra — EXTERNO', key: 'n'}, negras.map(function (f) {
-                  return opt({key: f.nombre, value: f.nombre}, f.nombre + '  ·  ' + f.ip); })) : null,
+                og({label: 'Hosts de ejemplo', key: 'h'}, tabla.map(function (f) {
+                  return opt({key: f.nombre, value: f.nombre}, f.nombre + '  ·  ' + f.ip); })),
                 og({label: 'Fuera de la tabla', key: 'o'},
                   opt({value: OTRO}, 'Otro host o IP — escribir a mano'))),
               p({className: 'sub', style: {marginTop: 7, fontFamily: 'var(--mono)', fontSize: 12}}, explica())),
@@ -518,7 +515,12 @@
         p(null, 'El sistema no cambia el veredicto: cambia cuánto tarda en darlo. Ese es el ' +
           'experimento del reto — mismo dominio, mismo payload, distinto transporte.'),
         p(null, 'Lo que no esté en la tabla responde DESCONOCIDO. Es la política por defecto: ' +
-          'lo no clasificado explícitamente, se rechaza.')));
+          'lo no clasificado explícitamente, se rechaza.')),
+      h(Porque, {titulo: 'por qué solo 16 hosts'},
+        p(null, '16 × 4 B = 64 B = una línea de caché. Ese tope es lo que permite afirmar que ' +
+          'clasificar cuesta ~1,9 ns y no contamina la medición (ADR-004). Subirlo invalidaría el ADR.'),
+        p(null, 'La tabla vive en sistema/tabla-hosts.csv y se lee UNA vez al arrancar, nunca ' +
+          'dentro del bucle: es el precio de no tocar el archivo en la ruta caliente.')));
   }
 
   /* ═══════════ Historial ═══════════ */
@@ -567,19 +569,16 @@
     ['fecha',       function (e) { return fecha(e.ts_nav_envio || e.ts_control_recibe); }],
     ['hora_inicio', function (e) { return horaTexto(e.ts_nav_envio || e.ts_control_recibe); }],
     ['hora_fin',    function (e) { return horaTexto(e.ts_nav_recibe || e.ts_control_responde); }],
-    ['variante',    function (e) { return e.variante; }],
+    ['variante',    function (e) { return e.nombre_variante || e.variante; }],
     ['host',        function (e) { return e.host; }],
     ['ip',          function (e) { return e.ip; }],
-    ['veredicto',   function (e) { return e.veredicto; }],
+    ['web_ms',      function (e) { return e.latencia_web_ns == null ? '' : dec(e.latencia_web_ns / 1000000, 1); }],
     /* Dos decimales, no uno. `fmt()` en pantalla usa 1 decimal a partir de 10 us,
        pero aqui la columna cubre TODO el rango del reto de una vez: con un solo
        decimal Memoria compartida C (0,083 us) se redondea a 0,1 y desaparece la cifra que
        sostiene el informe. Con dos queda 0,08, que es como la reportan analyze.py
        y la tabla de resultados. */
-    ['sistema_us',  function (e) { return e.latencia_sistema_ns == null ? '' : dec(e.latencia_sistema_ns / 1000, 2); }],
-    ['web_ms',      function (e) { return e.latencia_web_ns == null ? '' : dec(e.latencia_web_ns / 1000000, 1); }],
-    ['resultado',   function (e) { return e.ok ? 'OK' : 'ERROR'; }],
-    ['detalle',     function (e) { return e.error || e.nota || ''; }]
+    ['sistema_us',  function (e) { return e.latencia_sistema_ns == null ? '' : dec(e.latencia_sistema_ns / 1000, 2); }]
   ];
 
   function celda(v) {
@@ -591,7 +590,8 @@
   }
 
   function aCSV(es) {
-    var vars = {}; es.forEach(function (e) { if (e.variante) vars[e.variante] = 1; });
+    var vars = {};
+    es.forEach(function (e) { if (e.variante) vars[e.variante] = e.nombre_variante || e.variante; });
     var ms = mediana(es.map(function (e) { return e.latencia_sistema_ns; }).filter(Boolean));
 
     /* Encabezado ejecutivo: cuatro lineas de clave;valor, sin `#`. Excel no trata
@@ -616,8 +616,7 @@
       celda('  sistema_us') + SEP + celda('lo que tarda el SISTEMA, frontera F1 - es la UNICA medicion del reto'),
       celda('  web_ms') + SEP + celda('lo que anade el navegador (HTTP + JSON + React) - solo contraste'),
       celda('  hora_inicio / hora_fin') + SEP + celda('reloj de PARED: dicen cuando paso, no cuanto tardo'),
-      celda('  veredicto') + SEP + celda('LOCAL = lista blanca / EXTERNO = lista negra / DESCONOCIDO = no esta en la tabla'),
-      celda('  detalle') + SEP + celda('solo se llena cuando la fila necesita explicacion: un DESCONOCIDO o un ERROR'),
+      celda('  fila sin tiempos') + SEP + celda('si sistema_us y web_ms van vacios, ese estimulo fallo: no hubo respuesta que medir'),
       '',
       celda('Decimales con PUNTO') + SEP + celda('si Excel muestra 7596 donde deberia decir 75.96, su regional usa coma decimal'),
       ''
@@ -644,12 +643,12 @@
   function Historial(props) {
     var es = props.entradas;
     var sv = us(''), fv = sv[0], setFv = sv[1];
-    var sr = us(''), fr = sr[0], setFr = sr[1];
 
     var vistos = es.filter(function (e) {
-      return (!fv || e.variante === fv) && (!fr || e.veredicto === fr);
+      return !fv || e.variante === fv;
     });
-    var vars = {}; es.forEach(function (e) { if (e.variante) vars[e.variante] = 1; });
+    var vars = {};
+    es.forEach(function (e) { if (e.variante) vars[e.variante] = e.nombre_variante || e.variante; });
     var ms = mediana(vistos.map(function (e) { return e.latencia_sistema_ns; }).filter(Boolean));
     var mw = mediana(vistos.map(function (e) { return e.latencia_web_ns; }).filter(Boolean));
 
@@ -665,14 +664,7 @@
           lbl({htmlFor: 'fv'}, 'Sistema'),
           sel({id: 'fv', value: fv, onChange: function (e) { setFv(e.target.value); }},
             opt({value: ''}, 'todas'),
-            Object.keys(vars).map(function (k) { return opt({key: k, value: k}, k); }))),
-        div({className: 'control'},
-          lbl({htmlFor: 'fr'}, 'Veredicto'),
-          sel({id: 'fr', value: fr, onChange: function (e) { setFr(e.target.value); }},
-            opt({value: ''}, 'todos'),
-            opt({value: 'LOCAL'}, 'LOCAL'),
-            opt({value: 'EXTERNO'}, 'EXTERNO'),
-            opt({value: 'DESCONOCIDO'}, 'DESCONOCIDO')))),
+            Object.keys(vars).map(function (k) { return opt({key: k, value: k}, vars[k]); })))),
       div({className: 'resumen'},
         span(null, bold(null, vistos.length), ' estímulos'),
         span(null, 'mediana sistema ', bold(null, fmt(ms))),
@@ -683,19 +675,21 @@
             es.length ? 'Ningún estímulo coincide con el filtro.' : 'Todavía no mandaste ningún estímulo.')
         : div({className: 'tablabox'}, tbl({className: 'history'},
             thead(null, tr(null,
-              th(null, '#'), th(null, 'INICIO'), th(null, 'FIN'), th(null, 'VAR'),
-              th(null, 'HOST'), th(null, 'VEREDICTO'),
-              th({style: {textAlign: 'right'}}, 'SISTEMA'),
-              th({style: {textAlign: 'right'}}, 'WEB'))),
+              th(null, '#'), th(null, 'INICIO'), th(null, 'FIN'), th(null, 'SISTEMA'),
+              th(null, 'HOST'),
+              th({style: {textAlign: 'right'}}, 'TIEMPO SISTEMA'),
+              th({style: {textAlign: 'right'}}, 'TIEMPO WEB'))),
             tbody(null, vistos.map(function (e) {
               return tr({key: e.seq},
                 td({className: 'seq'}, e.seq),
                 td({className: 't'}, hora(e.ts_nav_envio || e.ts_control_recibe)),
                 td({className: 't'}, hora(e.ts_nav_recibe || e.ts_control_responde)),
-                td({className: 't'}, e.variante || '—'),
-                td({className: 'host'}, e.host + (e.ip ? ' → ' + e.ip : '')),
-                td(null, span({className: 'pill ' + (e.ok ? clasePill(e.veredicto) : 'ext')},
-                  e.ok ? e.veredicto : 'ERROR')),
+                td({className: 't'}, e.nombre_variante || e.variante || '—'),
+                /* Quitada la columna VEREDICTO (nota 5), una fila fallida se veia igual
+                   que una correcta: mismos guiones en los tiempos. La marca va aqui para
+                   no reintroducir la columna — ADR-009. */
+                td({className: 'host', title: e.ok ? '' : (e.error || 'falló')},
+                  (e.ok ? '' : '⚠ ') + e.host + (e.ip ? ' → ' + e.ip : '')),
                 td({className: 'num s'}, fmt(e.latencia_sistema_ns)),
                 td({className: 'num w'}, fmt(e.latencia_web_ns)));
             })))),
@@ -708,158 +702,6 @@
           'del plano de control, sale de ', code(null, 'sistema/run.sh'), '.'),
         p(null, 'El log vive en el navegador y en un buffer circular de 500 entradas en el plano de ' +
           'control, así sobrevive a un F5. No toca disco ni la ruta caliente del plano de datos.')));
-  }
-
-  /* ═══════════ Listas ═══════════ */
-  var RE_NOMBRE = /^[A-Za-z0-9_.-]{1,32}$/;
-  function ipOk(ip) {
-    var q = String(ip).split('.');
-    return q.length === 4 && q.every(function (x) {
-      return /^\d{1,3}$/.test(x) && +x >= 0 && +x <= 255;
-    });
-  }
-
-  function Listas(props) {
-    var sf = us(props.estado.tabla), filas = sf[0], setFilas = sf[1];
-    // `base` es la última tabla confirmada del servidor, serializada. Lo que
-    // difiera de ella es borrador: lo que el usuario editó y el servidor no sabe.
-    var sb = us(JSON.stringify(props.estado.tabla)), base = sb[0], setBase = sb[1];
-    var sm = us(null), msg = sm[0], setMsg = sm[1];
-    var sg = us(false), guardando = sg[0], setGuardando = sg[1];
-    var sx = us(false), conflicto = sx[0], setConflicto = sx[1];
-    var limite = props.estado.limite;
-
-    var sucio = JSON.stringify(filas) !== base;
-    var filasRef = ur(filas);
-    filasRef.current = filas;
-
-    /*
-     * El estado llega por polling cada 4 s. Este efecto dependía antes de
-     * `props.estado.tabla`, que React compara POR REFERENCIA: cada respuesta HTTP
-     * trae un array nuevo aunque el contenido sea idéntico, así que corría siempre
-     * y pisaba el borrador. De ahí venía el «se reinicia solo».
-     *
-     * Ahora se compara por VALOR y el borrador manda: el servidor solo entra si
-     * (a) su tabla cambió de verdad y (b) no hay nada sin guardar que perder.
-     */
-    ue(function () {
-      var firma = JSON.stringify(props.estado.tabla);
-      if (firma === base) return;
-      if (JSON.stringify(filasRef.current) !== base) { setConflicto(true); return; }
-      setBase(firma); setFilas(props.estado.tabla); setConflicto(false);
-    }, [props.estado.tabla, base]);
-
-    // Mismas reglas que escribir_tabla() en servidor.py, pero en vivo: el error se
-    // ve en el campo antes de guardar, no después de un 400.
-    var cuenta = {};
-    filas.forEach(function (f) { cuenta[f.nombre] = (cuenta[f.nombre] || 0) + 1; });
-    function malNombre(f) {
-      if (!RE_NOMBRE.test(f.nombre || '')) return 'Letras, números, punto, guion o guion bajo (1 a 32).';
-      if (cuenta[f.nombre] > 1) return 'Nombre repetido.';
-      return null;
-    }
-    function malIP(f) { return ipOk(f.ip) ? null : 'IPv4 inválida: cada número va de 0 a 255.'; }
-    var invalidas = filas.filter(function (f) { return malNombre(f) || malIP(f); }).length;
-
-    var lleno = filas.length >= limite;
-    var blancas = filas.filter(function (f) { return f.veredicto === 'local'; }).length;
-
-    function cambiar(i, campo, valor) {
-      var n = filas.slice(); n[i] = Object.assign({}, n[i]); n[i][campo] = valor;
-      setFilas(n); setMsg(null);
-    }
-    function quitar(i) { var n = filas.slice(); n.splice(i, 1); setFilas(n); setMsg(null); }
-    function mover(i) { cambiar(i, 'veredicto', filas[i].veredicto === 'local' ? 'externo' : 'local'); }
-    function agregar(ver) {
-      if (lleno) {
-        // El tope no se levanta desde la interfaz: es la premisa del ADR-004.
-        setMsg({ok: false, txt: 'Tabla llena: ' + limite + ' hosts. ' + limite + ' × 4 B = 64 B = una ' +
-          'línea de caché, y de ahí sale que clasificar cueste ~1,9 ns (ADR-004). Quitá uno con la ×.'});
-        return;
-      }
-      var usados = {}; filas.forEach(function (f) { usados[f.nombre] = 1; });
-      var k = filas.length + 1;
-      while (usados['host-' + k]) k++;
-      setFilas(filas.concat([{nombre: 'host-' + k, ip: '10.0.0.' + Math.min(254, k), veredicto: ver}]));
-      setMsg(null);
-    }
-    function descartar() {
-      setFilas(props.estado.tabla); setBase(JSON.stringify(props.estado.tabla));
-      setConflicto(false); setMsg(null);
-    }
-    function guardar() {
-      setGuardando(true);
-      api('/api/tabla', {method: 'PUT', body: JSON.stringify({tabla: filas})})
-        .then(function (r) {
-          setGuardando(false);
-          if (!r.ok) return setMsg({ok: false, txt: r.error});
-          var t = r.tabla || filas;
-          setFilas(t); setBase(JSON.stringify(t)); setConflicto(false);
-          setMsg({ok: true, txt: (r.reiniciados && r.reiniciados.length)
-            ? 'Guardado · reiniciados ' + r.reiniciados.join(', ') + ' para releer la tabla.'
-            : 'Guardado.'});
-          props.recargar();
-        });
-    }
-
-    function columna(ver) {
-      var esBlanca = ver === 'local';
-      var idx = [];
-      filas.forEach(function (f, i) { if (f.veredicto === ver) idx.push(i); });
-      return div({className: 'rule ' + (esBlanca ? 'white' : 'black')},
-        div({className: 'ruletitle'},
-          span(null, esBlanca ? 'Permitidos → LOCAL' : 'Bloqueados → EXTERNO'),
-          span(null, idx.length)),
-        idx.length === 0 ? div({className: 'rvacia'}, 'vacía') : null,
-        idx.map(function (i) {
-          var f = filas[i], en = malNombre(f), ei = malIP(f);
-          return div({className: 'rrow', key: i},
-            inp({className: 'n' + (en ? ' mal' : ''), value: f.nombre, title: en || '',
-                 'aria-label': 'nombre del host ' + (i + 1), 'aria-invalid': en ? 'true' : 'false',
-                 onChange: function (e) { cambiar(i, 'nombre', e.target.value); }}),
-            inp({className: 'i' + (ei ? ' mal' : ''), value: f.ip, title: ei || '',
-                 'aria-label': 'IPv4 del host ' + (i + 1), 'aria-invalid': ei ? 'true' : 'false',
-                 onChange: function (e) { cambiar(i, 'ip', e.target.value); }}),
-            b({className: 'btn ghost sm', type: 'button', onClick: function () { mover(i); },
-               title: esBlanca ? 'mover a la lista negra' : 'mover a la lista blanca',
-               'aria-label': 'mover ' + f.nombre +
-                             (esBlanca ? ' a la lista negra' : ' a la lista blanca')}, '⇄'),
-            b({className: 'btn ghost sm', type: 'button', onClick: function () { quitar(i); },
-               'aria-label': 'quitar ' + f.nombre}, '×'));
-        }),
-        div({className: 'radd'},
-          b({className: 'btn alt sm full', type: 'button',
-             onClick: function () { agregar(ver); }}, '+ Agregar host')));
-    }
-
-    return sec({className: 'section', id: 'reglas'},
-      h(Cabecera, {titulo: 'Listas de decisión',
-                   sub: filas.length + ' de ' + limite + ' hosts · cualquier valor desconocido se rechaza.'},
-        sucio ? b({className: 'btn ghost', type: 'button', onClick: descartar}, 'Descartar') : null,
-        b({className: 'btn', type: 'button', onClick: guardar,
-           disabled: !sucio || guardando || invalidas > 0},
-          guardando ? 'Guardando…' : 'Guardar cambios')),
-      div({className: 'rules'}, columna('local'), columna('externo')),
-      div({className: 'cap' + (lleno ? ' full' : '')},
-        ital({style: {width: (filas.length / limite * 100) + '%'}})),
-      div({className: 'desc-zona'},
-        span({className: 'pill desc'}, 'DESCONOCIDO'),
-        span(null, 'No es una lista que se edite: lo que no esté arriba se rechaza por defecto.'),
-        span({style: {marginLeft: 'auto', fontFamily: 'var(--mono)', fontSize: 12}},
-          filas.length + '/' + limite + ' · ' + blancas + ' blanca · ' + (filas.length - blancas) + ' negra')),
-      invalidas > 0 ? div({className: 'aviso a-err'},
-        invalidas + (invalidas === 1 ? ' campo inválido' : ' campos inválidos') +
-        ' — pasá el cursor por el campo rojo para ver por qué.') : null,
-      msg ? div({className: 'aviso ' + (msg.ok ? 'a-ok' : 'a-err')}, msg.txt) : null,
-      conflicto ? div({className: 'aviso a-err'},
-        'La tabla cambió en el servidor mientras editabas. Tu borrador está intacto: guardá para ' +
-        'imponerlo, o descartá para traer la del servidor.') : null,
-      sucio ? div({className: 'aviso a-info'}, 'Cambios sin guardar.') : null,
-      h(Porque, {titulo: 'por qué 16, y por qué reinicia al guardar'},
-        p(null, '16 × 4 B = 64 B = una línea de caché. Ese tope es lo que permite afirmar que ' +
-          'clasificar cuesta ~1,9 ns y no contamina la medición (ADR-004). Subirlo invalidaría el ADR.'),
-        p(null, 'La tabla se lee UNA vez al arrancar, nunca dentro del bucle. Por eso guardar reinicia ' +
-          'los servidores activos: es el precio de no tocar el archivo en la ruta caliente.')));
   }
 
   /* ═══════════ Histograma ═══════════ */
@@ -945,7 +787,7 @@
             div({className: 'control', style: {flex: '0 1 260px'}},
               lbl({htmlFor: 'mv'}, 'Sistema'),
               sel({id: 'mv', value: variante, onChange: function (e) { setVariante(e.target.value); }},
-                activos.map(function (v) { return opt({key: v.id, value: v.id}, v.id + ' · ' + v.nombre); }))),
+                activos.map(function (v) { return opt({key: v.id, value: v.id}, v.nombre); }))),
             div({className: 'control', style: {flex: '0 1 220px'}},
               lbl({htmlFor: 'mi'}, 'Iteraciones'),
               sel({id: 'mi', value: iters, onChange: function (e) { setIters(parseInt(e.target.value, 10)); }},
@@ -1060,7 +902,6 @@
           small(null, 'Group 2 · plano de control')),
         nav({className: 'tabs'},
           a({href: '#servidores'}, 'Servidores'),
-          a({href: '#reglas'}, 'Listas'),
           a({href: '#rendimiento'}, 'Rendimiento'),
           a({href: '#historial'}, 'Historial')),
         div({className: 'status' + (activos ? '' : ' cero')},
@@ -1082,7 +923,6 @@
         h(Estimulo, {estado: estado, onLog: anotar})),
 
       h(Servidores, {estado: estado, recargar: recargar, avisar: setAviso}),
-      h(Listas, {estado: estado, recargar: recargar}),
       h(Medicion, {estado: estado, recargar: recargar}),
       h(Historial, {entradas: log, limpiar: limpiar}),
 
