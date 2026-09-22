@@ -182,11 +182,11 @@ reto-latencia-group2/
 > git. El porqué y lo que eso cuesta, en
 > [ADR-007](docs/ADR/ADR-007-reduccion-de-alcance.md).
 
-> **Los nombres cambiaron el 22/09.** Lo que antes era «variante B» ahora es
-> **TCP Python** (`sistema/tcp-python/`) y lo que era «variante D» es **Memoria
+> **Los nombres cambiaron el 22/09.** Lo que antes era «variante TCP Python» ahora es
+> **TCP Python** (`sistema/tcp-python/`) y lo que era «variante Memoria compartida C» es **Memoria
 > compartida C** (`sistema/memoria-compartida-c/`). Los archivos de evidencia se
 > renombraron en pareja CSV+log, sin cambiar un byte de contenido. Los comandos viejos
-> (`./run.sh B 1`) ya no funcionan. Ver
+> (`./run.sh tcp-python 1`) ya no funcionan. Ver
 > [ADR-008](docs/ADR/ADR-008-nomenclatura-de-las-variantes.md).
 
 > **El ZIP del entregable se arma con `./hacer-zip.sh`**, no a mano. Empaqueta por lista

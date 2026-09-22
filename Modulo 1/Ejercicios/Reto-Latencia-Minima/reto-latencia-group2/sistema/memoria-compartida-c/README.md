@@ -1,4 +1,4 @@
-# Variante D — memoria compartida + espera activa
+# Variante Memoria compartida C — memoria compartida + espera activa
 
 **Responsable:** Daniel Mazo Serna · **Estado:** implementada y medida (3 rondas) · 2026-09-10
 **Decisiones de diseño:** [`ADR-002`](../../docs/ADR/ADR-002-variante-D-memoria-compartida.md)
@@ -147,7 +147,7 @@ devuelve `KERN_NOT_SUPPORTED`, verificado).
 
 > Eliminar el software de la ruta caliente **no elimina la cola**. La cola la pone el sistema
 > operativo y el hardware, y con esta plataforma no se puede quitar.
-> Esa es la conclusión arquitectónica de la variante D, y vale más que los 83 ns.
+> Esa es la conclusión arquitectónica de la variante Memoria compartida C, y vale más que los 83 ns.
 
 ---
 
@@ -160,4 +160,4 @@ devuelve `KERN_NOT_SUPPORTED`, verificado).
 | `client.c` | Cliente medidor: piso de medición, warmup, medición, contraste por lotes, CSV |
 | `Makefile` | `-std=c11 -O2 -Wall -Wextra -pedantic` (no `-O3`: ver comentario en el archivo) |
 
-Resultados en `../resultados/resultados-D-{1,2,3}.csv` y `../resultados/ejecucion-D-{1,2,3}.log`.
+Resultados en `../resultados/resultados-memoria-compartida-c-{1,2,3}.csv` y `../resultados/ejecucion-memoria-compartida-c-{1,2,3}.log`.

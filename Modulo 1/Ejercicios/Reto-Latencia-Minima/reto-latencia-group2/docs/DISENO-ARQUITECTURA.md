@@ -111,7 +111,7 @@ no es verificable; lo que sigue sí.
 **[REC]** Este atributo **no lo pide el enunciado; lo añado yo**, y es el que convierte el
 ejercicio en arquitectura. En sistemas de baja latencia reales —trading, telecomunicaciones,
 control industrial— el requisito nunca es «que sea rápido», es «que la cola sea acotada». El
-hallazgo de la variante B —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
+hallazgo de la variante TCP Python —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
 encima de 1 ms en 3 M)— es precisamente ese caso. Y hay un matiz que lo hace mejor: el 14/09,
 con el mismo código, B dio **0**. Su cumplimiento depende del estado de la máquina, no de su
 arquitectura. Ahí está el contenido del informe.
@@ -143,7 +143,7 @@ es lo que separa una decisión de una omisión.
 
 | Atributo | Se sacrifica | A cambio de |
 |---|---|---|
-| **Portabilidad** | La variante D depende del sistema operativo y de la arquitectura de CPU | Latencia de ~2 órdenes de magnitud menos |
+| **Portabilidad** | La variante Memoria compartida C depende del sistema operativo y de la arquitectura de CPU | Latencia de ~2 órdenes de magnitud menos |
 | **Escalabilidad** | Un solo cliente; busy-spin ocupa un núcleo al 100 % | Eliminar el despertar del planificador |
 | **Eficiencia de recursos** | Un núcleo quemado al 100 % sin hacer trabajo útil | Determinismo en la cola |
 | **Interoperabilidad** | Memoria compartida solo funciona entre procesos del mismo host | Evitar la pila de red completa |
@@ -225,13 +225,13 @@ graph TB
         subgraph A["Variante A · HTTP/1.1 sobre TCP"]
             A1["Cliente HTTP"] <--> A2["Servidor HTTP"]
         end
-        subgraph B["Variante B · TCP crudo + NODELAY"]
+        subgraph B["Variante TCP Python · TCP crudo + NODELAY"]
             B1["Cliente"] <--> B2["Servidor"]
         end
         subgraph Cv["Variante C · Unix socket / UDP"]
             C1["Cliente"] <--> C2["Servidor"]
         end
-        subgraph D["Variante D · Memoria compartida + busy-spin"]
+        subgraph D["Variante Memoria compartida C · Memoria compartida + busy-spin"]
             D1["Cliente<br/>núcleo fijado"] <--> D2["Servidor<br/>núcleo fijado"]
         end
     end
@@ -333,7 +333,7 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 | CSV crudo como contrato entre variantes | D5 | AC-3, AC-4 | `harness/README.md` |
 | Ronda final en una sola máquina | D6 | AC-3 | ESPEC §4 |
 | Estudio comparativo de 4 transportes | D5 | AC-3 | `PLAN-EQUIPO.md` |
-| Variante D: lenguaje y mecanismo | D1, D5 | AC-1, AC-2 | ADR-002 |
+| Variante Memoria compartida C: lenguaje y mecanismo | D1, D5 | AC-1, AC-2 | ADR-002 |
 
 ---
 
@@ -396,11 +396,11 @@ trabajo útil es despreciable**, no que el lenguaje nunca importe.
 | Drivers, atributos y trade-offs (este documento) | ✅ 10/09 |
 | `ESPEC-MEDICION.md` | ⚠️ **borrador** — congelar con el equipo |
 | ADR-001 · frontera de medición | ✅ propuesta, pendiente de aceptación del equipo |
-| ADR-002 · variante D (mecanismo, lenguaje, planificación) | ✅ 10/09 |
+| ADR-002 · variante Memoria compartida C (mecanismo, lenguaje, planificación) | ✅ 10/09 |
 | ADR-003 · resolución del reloj — **enmienda a ESPEC §2** | ✅ 10/09, pendiente de aprobación |
-| Harness común + variante B medida | ✅ 08/09 |
+| Harness común + variante TCP Python medida | ✅ 08/09 |
 | Harness adaptado a variantes compiladas | ✅ 10/09 |
-| **Variante D implementada y medida (3 × 1 M)** | ✅ 10/09 — Daniel |
+| **Variante Memoria compartida C implementada y medida (3 × 1 M)** | ✅ 10/09 — Daniel |
 | **Control Bc (TCP en C) + B re-medida a 1 M** | ✅ 10/09 — cierra el sesgo lenguaje/transporte |
 | Variantes A, C | ⬜ bloqueadas por el reparto del equipo |
 | Informe PDF + video | ⬜ 22–26/09 |

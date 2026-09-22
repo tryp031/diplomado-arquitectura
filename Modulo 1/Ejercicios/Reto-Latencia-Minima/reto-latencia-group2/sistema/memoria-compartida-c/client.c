@@ -1,11 +1,11 @@
 /*
- * Variante D — cliente medidor sobre memoria compartida.
+ * Variante Memoria compartida C — cliente medidor sobre memoria compartida.
  *
  * Contrato del harness (ver ../README.md):
  *   --host <ignorado> --port 9103 --payload 32
  *   --warmup 100000 --iters 1000000 --out <ruta CSV>
  *
- * Frontera de medición F1 (ADR-001), idéntica a la de la variante B:
+ * Frontera de medición F1 (ADR-001), idéntica a la de la variante TCP Python:
  *   t0 = inmediatamente ANTES de escribir el estímulo
  *   t1 = inmediatamente DESPUÉS de tener la respuesta completa en buffer local
  *
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 #endif
 
     /* --- "Conexión": abrir la región que creó el servidor, con reintentos --------
-       Equivale al connect() de la variante B y, como allí, se paga fuera de la
+       Equivale al connect() de la variante TCP Python y, como allí, se paga fuera de la
        medición (ADR-001: la frontera F1 excluye el establecimiento). */
     char nombre[64];
     snprintf(nombre, sizeof nombre, NOMBRE_SHM_FMT, port);

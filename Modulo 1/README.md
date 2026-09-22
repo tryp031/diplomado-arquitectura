@@ -64,12 +64,12 @@ en el navegador.
 | ADR | Tema | Estado |
 |---|---|---|
 | `ADR-001` | Frontera de medición (dónde empiezan y terminan las sondas) | propuesta |
-| `ADR-002` | Variante D — memoria compartida: mecanismo, lenguaje, planificación | propuesta |
+| `ADR-002` | Variante Memoria compartida C — memoria compartida: mecanismo, lenguaje, planificación | propuesta |
 | `ADR-003` | Resolución del reloj — granularidad ≠ unidades | propuesta |
 | `ADR-004` | Dominio del reto: listas de hosts en vez de eco puro | propuesta |
 | `ADR-005` | Comparabilidad entre máquinas — no mezclar corridas de equipos distintos | propuesta |
 | `ADR-006` | Concurrencia: un hilo por conexión, y por qué D no puede tenerla | propuesta |
-| `ADR-007` | Reducción de alcance a las variantes B y D | propuesta |
+| `ADR-007` | Reducción de alcance a las variantes TCP Python y Memoria compartida C | propuesta |
 
 Todas en [`Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/`](Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/),
 que es donde viven: **un ADR viaja con el ejercicio que lo produjo.**

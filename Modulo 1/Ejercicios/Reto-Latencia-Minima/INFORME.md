@@ -143,7 +143,7 @@ ADR-007.
 > **no puede atribuirse a una sola causa** con los datos de esta entrega. Lo que el experimento
 > sostiene es el efecto conjunto, no su descomposición.
 
-### 3.3 La variante D en detalle
+### 3.3 La variante Memoria compartida C en detalle
 
 Dos procesos comparten 256 bytes de memoria física (`shm_open` + `mmap`). No hay sockets, no hay
 kernel en la ruta crítica, no hay planificador.
@@ -259,7 +259,7 @@ Decisión completa y consecuencias: **ADR-001**.
 
 ### 5.3 El instrumento: un problema que apareció al medir
 
-La primera corrida de la variante D devolvió **ceros**. No era un fallo del código.
+La primera corrida de la variante Memoria compartida C devolvió **ceros**. No era un fallo del código.
 
 Granularidad real de cada reloj, medida en el equipo (200 000 pares de lecturas consecutivas):
 
@@ -272,7 +272,7 @@ Granularidad real de cada reloj, medida en el equipo (200 000 pares de lecturas 
 
 «Resolución de nanosegundos» describe **las unidades del valor**, no **la granularidad con que
 avanza**. `CLOCK_MONOTONIC` devuelve nanosegundos y salta de microsegundo en microsegundo.
-Nuestra propia especificación de medición contenía ese error, y la variante D lo destapó.
+Nuestra propia especificación de medición contenía ese error, y la variante Memoria compartida C lo destapó.
 
 **Regla adoptada (ADR-003):** la granularidad debe ser al menos **10× menor** que el p50
 esperado. Si no lo es, la configuración añade un **contraste por lotes** como medida
@@ -326,7 +326,7 @@ Agregado de 3 rondas × 1 000 000 por columna. Todo en **nanosegundos**. Corrida
 **Figuras:** `reto-latencia-group2/sistema/graficas/percentiles.svg` y `…/histograma.svg`.
 Se regeneran con `python3 reto-latencia-group2/sistema/graficas.py` (sin dependencias externas).
 
-### 6.1 Contraste por lotes para la variante D
+### 6.1 Contraste por lotes para la variante Memoria compartida C
 
 Cronometrando 1000 intercambios de una vez y dividiendo (200 rondas), la mediana por intercambio
 fue de **75, 66 y 75 ns** en las tres rondas, frente a los 83 ns del p50 por muestra.
@@ -342,7 +342,7 @@ La diferencia es explicable y no es contradicción:
 > Se reportan las dos medidas, etiquetadas. Con una sola, o se pierde la cola (lotes) o se
 > exagera la mediana (muestras). Ninguna es «la verdadera».
 
-### 6.2 Distribución de la variante D — no es una campana
+### 6.2 Distribución de la variante Memoria compartida C — no es una campana
 
 Ronda 1, n = 1 000 000. El tic del contador es de 41,67 ns:
 
@@ -380,8 +380,8 @@ resta. El acumulador es `volatile` para que el optimizador no borre el bucle.
 
 | Frente a | Peso |
 |---|---|
-| Variante D (p50 83 ns) | 2,3 % |
-| Variante B (p50 13 458 ns) | **0,014 %** |
+| Variante Memoria compartida C (p50 83 ns) | 2,3 % |
+| Variante TCP Python (p50 13 458 ns) | **0,014 %** |
 | Un tic del reloj (41,67 ns) | por debajo de un solo tic |
 
 **El matiz honesto: en D es el 2,3 %, no cero.** A 83 ns ya nada es gratis. Decir «despreciable»
@@ -527,7 +527,7 @@ Tres consecuencias:
 
 ### 7.4 La cola persiste aunque se elimine el software
 
-La variante D no hace **una sola llamada al sistema** en la ruta crítica, no copia por el
+La variante Memoria compartida C no hace **una sola llamada al sistema** en la ruta crítica, no copia por el
 kernel y no cede el núcleo. Aun así:
 
 ```text
@@ -583,7 +583,7 @@ máquina** y no de su diseño: una corrida da cero incumplimientos y la siguient
 **Ese es el único escenario en que el precio de D se justifica**, y la razón no es que D sea
 rápida sino que su peor caso está acotado por construcción.
 
-### 8.2 Atributos sacrificados por la variante D
+### 8.2 Atributos sacrificados por la variante Memoria compartida C
 
 | Atributo | Se sacrifica | A cambio de |
 |---|---|---|
@@ -624,7 +624,7 @@ Esta tabla responde a «¿por qué no se usa esto en producción para todo?».
 
 - **Reintroducir un control que aísle una sola variable** (mismo transporte, otro lenguaje) para
   poder descomponer el factor de 162× — es la limitación nº 3.
-- Repetir la variante D en Linux con afinidad real de núcleo y comparar colas.
+- Repetir la variante Memoria compartida C en Linux con afinidad real de núcleo y comparar colas.
 - Medir entre dos máquinas físicas para cuantificar cuánto aporta la red.
 - Medir bajo carga concurrente, que es el escenario realista.
 
@@ -637,12 +637,12 @@ Esta tabla responde a «¿por qué no se usa esto en producción para todo?».
 | ADR | Decisión |
 |---|---|
 | **ADR-001** | Frontera de medición F1 — RTT de aplicación en el cliente |
-| **ADR-002** | Variante D: memoria compartida + espera activa, C11, QoS en lugar de afinidad |
+| **ADR-002** | Variante Memoria compartida C: memoria compartida + espera activa, C11, QoS en lugar de afinidad |
 | **ADR-003** | Resolución del reloj: enmienda a la especificación de medición |
 | **ADR-004** | Dominio del reto: tabla de 16 hosts, payload de 32 B, tabla como archivo |
 | **ADR-005** | Comparabilidad entre máquinas: una sola plataforma declarada |
 | **ADR-006** | Concurrencia: un hilo por conexión, fuera de la ruta caliente; N=1 en el informe |
-| **ADR-007** | Reducción del alcance a las variantes B y D |
+| **ADR-007** | Reducción del alcance a las variantes TCP Python y Memoria compartida C |
 
 Los siete viven en `reto-latencia-group2/docs/ADR/`.
 
@@ -650,8 +650,8 @@ Los siete viven en `reto-latencia-group2/docs/ADR/`.
 
 ```bash
 cd reto-latencia-group2/sistema
-./run.sh B 1 --warmup 100000 --iters 1000000    # TCP en Python   (repetir con 2 y 3)
-./run.sh D 1 --warmup 100000 --iters 1000000    # memoria compartida en C
+./run.sh tcp-python 1 --warmup 100000 --iters 1000000    # TCP en Python   (repetir con 2 y 3)
+./run.sh memoria-compartida-c 1 --warmup 100000 --iters 1000000    # memoria compartida en C
 ./analyze.py --md resultados/resultados-{B,D}-{1,2,3}.csv   # tabla comparativa
 ./graficas.py                                   # figuras SVG del informe
 ```

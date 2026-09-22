@@ -73,7 +73,7 @@ VEREDICTOS = {0: "EXTERNO", 1: "LOCAL", 2: "DESCONOCIDO"}
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Catálogo de variantes. `socket` indica si se le puede mandar un estímulo suelto
-# desde aquí: la variante D usa memoria compartida y solo habla con su cliente en
+# desde aquí: la variante Memoria compartida C usa memoria compartida y solo habla con su cliente en
 # C, así que participa en las mediciones pero no en el formulario de estímulos.
 # ──────────────────────────────────────────────────────────────────────────────
 VARIANTES = {

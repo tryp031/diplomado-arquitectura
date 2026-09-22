@@ -48,7 +48,7 @@ conexión (se hace una vez, en el warmup) ni arranque del proceso.
 > La redacción original decía «resolución de ns» y nombraba `CLOCK_MONOTONIC` en primer lugar.
 > **Eso confundía las unidades del valor con la granularidad con que el reloj avanza.**
 > Medido en el M4: `CLOCK_MONOTONIC` avanza a saltos de **1000 ns**, mientras el contador de
-> hardware da **41,67 ns**. La variante D mide ~70 ns: con el reloj original, el 97,6 % de sus
+> hardware da **41,67 ns**. La variante Memoria compartida C mide ~70 ns: con el reloj original, el 97,6 % de sus
 > muestras salían **cero**.
 >
 > Regla propuesta: **la granularidad del reloj debe ser al menos 10× menor que el p50 esperado**;
@@ -110,7 +110,7 @@ iteracion,latencia_ns
 ...
 ```
 
-Nombre de archivo: `resultados-<variante>-<ronda>.csv` (p. ej. `resultados-B-1.csv`).
+Nombre de archivo: `resultados-<variante>-<ronda>.csv` (p. ej. `resultados-tcp-python-1.csv`).
 El análisis (percentiles + histograma) lo hace **un solo script compartido** sobre estos CSV.
 Así ninguna variante puede "calcular sus percentiles a su manera".
 
@@ -121,7 +121,7 @@ Así ninguna variante puede "calcular sus percentiles a su manera".
 - [ ] ¿Quién implementa el script de análisis compartido?
 - [ ] ¿En qué máquina se corre la ronda final?
 - [ ] ¿Repositorio Git compartido? ¿Dónde?
-- [ ] ¿Se fijan hilos a núcleos? (afecta mucho a la variante D)
+- [ ] ¿Se fijan hilos a núcleos? (afecta mucho a la variante Memoria compartida C)
       → **Resuelto por la plataforma: NO SE PUEDE.** En macOS/arm64 `thread_policy_set`
       devuelve `KERN_NOT_SUPPORTED` (verificado 10/09). Solo queda la clase de QoS, que es
       una sugerencia al planificador. Si se consigue una máquina Linux para la ronda final,

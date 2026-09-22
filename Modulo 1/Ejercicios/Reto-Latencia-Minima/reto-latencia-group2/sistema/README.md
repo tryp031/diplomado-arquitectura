@@ -116,7 +116,7 @@ cero saltos condicionales.
 | `clasificar()` en C | **≈ 1,9** |
 | `dict.get` en Python | ≈ 40 |
 
-3 % de la variante D · 0,016 % de Bc. Método y por qué el primer método falló:
+3 % de la variante Memoria compartida C · 0,016 % de Bc. Método y por qué el primer método falló:
 [`control-dominio/README.md`](control-dominio/README.md).
 
 ---
@@ -173,7 +173,7 @@ No reinventarlo. Lo que **no** se negocia:
 
 La referencia está en Python porque es la que todos tienen instalada, pero **el lenguaje es parte
 de tu decisión técnica y hay que justificarla** (el enunciado lo pide explícitamente). Para la
-variante D, Python no va a llegar a nanosegundos: C, Rust, Go, Zig o Java son mejores candidatos.
+variante Memoria compartida C, Python no va a llegar a nanosegundos: C, Rust, Go, Zig o Java son mejores candidatos.
 
 Lo único que importa es que produzcas el mismo CSV.
 
@@ -231,7 +231,7 @@ Archivadas — medidas de verdad, código retirado del árbol el 16/09 (ADR-007)
 ### ⚠️ La cola de B no es reproducible — ya es una conclusión del informe
 
 Tres corridas del **mismo código**, con el mismo tamaño de muestra (3 M), sobre la misma
-máquina. Muestras por encima de 1 ms en la variante B:
+máquina. Muestras por encima de 1 ms en la variante TCP Python:
 
 | Corrida | B | D | Evidencia |
 |---|---|---|---|
@@ -271,7 +271,7 @@ máquina estaba ocupada». Es el experimento que falta.
 La remedición **sobrescribió los CSV y logs crudos del 10/09** antes de que `run.sh`
 archivara. Se perdió el dato crudo de aquellas 9 M de muestras; sobreviven las cifras
 resumidas en `DISENO-ARQUITECTURA.md §7 bis`, en este archivo y en `INFORME.md`, más
-`resultados-B-0.csv` (08/09).
+`resultados-tcp-python-0.csv` (08/09).
 
 `run.sh` ya no sobrescribe: mueve lo anterior a `resultados/archivo/` con su fecha. **Los
 resultados crudos son la evidencia del informe (AC-4); perderlos rompe la cadena.**
@@ -286,7 +286,7 @@ Ver [`ADR-003`](../docs/ADR/ADR-003-resolucion-del-reloj.md).
 
 ## Siguientes pasos
 
-- [x] ~~Rehacer la variante B en C~~ → medido 10/09, archivado en `docs/archivo/`
+- [x] ~~Rehacer la variante TCP Python en C~~ → medido 10/09, archivado en `docs/archivo/`
 - [x] ~~Decidir el dominio~~ → ADR-004, clasificador de hosts, implementado y remedido
 - [x] ~~Línea base de red real~~ → medida 13/09, archivada en `docs/archivo/`
 - [x] ~~Demostración en vivo~~ → `demo.py`

@@ -19,7 +19,7 @@ No son el mismo algoritmo, y por tanto B y Bc no hacen exactamente el mismo trab
 Se acepta deliberadamente, por dos razones:
 
   1. Replicar el barrido de 16 en Python costaría ~2 µs, es decir el 15 % del p50 de
-     la variante B (13,2 µs). ESO SÍ contaminaría la medición. El `dict` cuesta 40 ns:
+     la variante TCP Python (13,2 µs). ESO SÍ contaminaría la medición. El `dict` cuesta 40 ns:
      el 0,3 %.
   2. Un `dict` es lo que escribiría cualquier desarrollador de Python. Forzar un
      barrido manual para «igualar» al C sería una distorsión artificial del lenguaje

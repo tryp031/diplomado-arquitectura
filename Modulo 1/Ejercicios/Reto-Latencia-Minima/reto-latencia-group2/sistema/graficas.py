@@ -184,7 +184,7 @@ def grafica_percentiles(series, salida):
 
 
 def grafica_histograma(series, salida):
-    """Distribución por décadas logarítmicas. Hace visible la cuantización de la variante D."""
+    """Distribución por décadas logarítmicas. Hace visible la cuantización de la variante Memoria compartida C."""
     an, al, m = 940, 470, {"l": 90, "r": 75, "t": 70, "b": 70}
     todos = [v for d in series.values() for v in d if v > 0]
     lo, hi = math.log10(min(todos)), math.log10(max(todos))
@@ -246,7 +246,7 @@ def grafica_histograma(series, salida):
         c.p.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="2"/>')
         leyenda.append((color, nombre))
     c.leyenda(leyenda, m["l"] + 185, m["t"] + 12)  # zona vacía entre los dos picos
-    c.nota("La variante D no forma una campana sino dos picos: son los tics del reloj "
+    c.nota("La variante Memoria compartida C no forma una campana sino dos picos: son los tics del reloj "
            "(41,67 ns). El instrumento es visible en el resultado.", al - 18)
     c.guardar(salida)
 

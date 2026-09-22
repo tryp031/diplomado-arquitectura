@@ -8,7 +8,7 @@ entregable 2: *«explicación de cómo se mide la latencia»*. Así que se mide.
 
 ## Primer intento — y por qué falló
 
-Medirlo a través del RTT: correr la variante D con y sin clasificador y restar.
+Medirlo a través del RTT: correr la variante Memoria compartida C con y sin clasificador y restar.
 
 | | mediana por lotes |
 |---|---|
@@ -50,8 +50,8 @@ make && ./micro ../tabla-hosts.csv
 
 | Frente a | Peso del clasificador |
 |---|---|
-| Variante D (p50 83 ns) | **2,3 %** |
-| Variante B (p50 13 458 ns) | **0,014 %** |
+| Variante Memoria compartida C (p50 83 ns) | **2,3 %** |
+| Variante TCP Python (p50 13 458 ns) | **0,014 %** |
 | Granularidad del reloj (41,67 ns) | **por debajo de un solo tic** |
 
 **Conclusión:** el dominio no cambia ninguna conclusión del estudio. El salto de B a D

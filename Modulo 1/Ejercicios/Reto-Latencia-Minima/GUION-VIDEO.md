@@ -139,7 +139,7 @@ enunciarla.»
 
 ### 4:20 – 4:40 · Cierre
 
-> **En pantalla:** la tabla de atributos sacrificados por la variante D.
+> **En pantalla:** la tabla de atributos sacrificados por la variante Memoria compartida C.
 
 «Para cerrar: la versión más rápida es también la peor arquitectura posible para casi cualquier
 sistema real. No funciona entre máquinas, quema dos núcleos al cien por ciento sin hacer nada,

@@ -16,7 +16,7 @@ Escribes un host, el sistema responde el veredicto y el tiempo que tardó.
 POR QUÉ ESTO ES UN PROGRAMA APARTE Y NO UN MODO DEL CLIENTE MEDIDOR
 
 Un `print` a terminal cuesta entre 10 y 50 µs. Eso es 600 veces el p50 de la
-variante D (64 ns). Si la demostración compartiera la ruta caliente con la
+variante Memoria compartida C (64 ns). Si la demostración compartiera la ruta caliente con la
 medición, la medición dejaría de medir el sistema y pasaría a medir la terminal.
 
 Por eso: MISMO servidor, sin tocar una línea; cliente distinto.
