@@ -28,6 +28,14 @@ Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/docs/ADR/
 | `ADR-005` | comparabilidad entre máquinas — no mezclar corridas de equipos distintos |
 | `ADR-006` | concurrencia — un hilo por conexión, y por qué D no puede tenerla |
 | `ADR-007` | reducción de alcance a las variantes B y D |
+| `ADR-008` | nomenclatura — B y D pasan a llamarse TCP Python y Memoria compartida C |
+| `ADR-009` | el plano de control muestra, no edita: se retira el editor de listas |
+| `ADR-010` | qué se empaqueta en el entregable |
+| `ADR-011` | se retira el residuo del editor: `PUT /api/tabla` y el aviso de los 16 hosts |
+
+> Los títulos de `ADR-002`, `006` y `007` dicen «variante B» y «variante D» porque así se
+> llamaban **en su fecha**. Desde `ADR-008` son **TCP Python** y **Memoria compartida C**;
+> los ADR anteriores no se reescriben, se leen con esa equivalencia.
 
 ## Por qué se borró la copia que había aquí
 

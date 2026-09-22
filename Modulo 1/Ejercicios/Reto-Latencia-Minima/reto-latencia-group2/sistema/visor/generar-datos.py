@@ -40,8 +40,8 @@ def pct(ordenados, p):
     return ordenados[i]
 
 VARIANTES = {
-    "D":  {"nombre": "Memoria compartida",  "detalle": "C11 · espera activa · cero llamadas al sistema", "lenguaje": "C"},
-    "B":  {"nombre": "TCP crudo en Python", "detalle": "TCP_NODELAY · conexión persistente",             "lenguaje": "Python"},
+    "memoria-compartida-c":  {"nombre": "Memoria compartida C",  "detalle": "C11 · espera activa · cero llamadas al sistema", "lenguaje": "C"},
+    "tcp-python":  {"nombre": "TCP Python", "detalle": "TCP_NODELAY · conexión persistente",             "lenguaje": "Python"},
 }
 
 def cargar(patron):

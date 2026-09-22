@@ -2,8 +2,8 @@
 # Orquestador de una corrida: levanta el servidor, mide, lo baja y analiza.
 #
 # Uso:
-#   ./run.sh B 1                        # variante B, ronda 1, valores por defecto
-#   ./run.sh B 1 --iters 200000         # parámetros extra van al cliente
+#   ./run.sh tcp-python 1               # TCP Python, ronda 1, valores por defecto
+#   ./run.sh tcp-python 1 --iters 200000   # parámetros extra van al cliente
 #
 # El cliente reintenta la conexión, así que no hace falta esperar al servidor.
 set -euo pipefail
@@ -13,13 +13,14 @@ RONDA="${2:?uso: ./run.sh <VARIANTE> <RONDA> [args extra del cliente]}"
 shift 2
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# El alcance de la entrega son B y D (ADR-007). Las variantes A y C nunca se
+# El alcance de la entrega son las variantes TCP Python y Memoria compartida C
+# (ADR-007). Las variantes A y C nunca se
 # implementaron; los controles Bc y E se midieron y se retiraron del arbol el 16/09.
 # Sus hallazgos siguen en docs/archivo/ y su codigo en el historial de git.
 case "$VARIANTE" in
-  B) DIR="$AQUI/variante-B-tcp" ;;
-  D) DIR="$AQUI/variante-D-shm" ;;
-  *) echo "variante desconocida: $VARIANTE (use B|D)" >&2; exit 2 ;;
+  tcp-python)           DIR="$AQUI/tcp-python" ;;
+  memoria-compartida-c) DIR="$AQUI/memoria-compartida-c" ;;
+  *) echo "variante desconocida: $VARIANTE (use tcp-python|memoria-compartida-c)" >&2; exit 2 ;;
 esac
 [[ -d "$DIR" ]] || { echo "falta el directorio $DIR" >&2; exit 2; }
 

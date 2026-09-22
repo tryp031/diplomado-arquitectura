@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Variante B — cliente medidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
+Variante TCP Python — cliente medidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
 
 Este archivo es la PLANTILLA de medición. Las variantes A, C y D replican exactamente
 este bucle; solo cambia el transporte. Todo lo demás está congelado en

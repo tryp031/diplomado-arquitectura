@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Variante B — servidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
+Variante TCP Python — servidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
 
 Qué hace (dominio del reto, ADR-004):
   Recibe 32 B con un identificador de host (IPv4) y responde 32 B con un veredicto:

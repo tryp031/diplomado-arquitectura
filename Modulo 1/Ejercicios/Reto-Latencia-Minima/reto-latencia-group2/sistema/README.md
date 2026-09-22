@@ -13,14 +13,14 @@ buena voluntad.
 
 ```bash
 cd sistema
-./run.sh B 1                            # variante B, ronda 1, valores por defecto
-./run.sh B 1 --warmup 20000 --iters 100000   # corrida corta de prueba
-./run.sh D 1                            # variante D, memoria compartida
+./run.sh tcp-python 1                   # variante TCP Python, ronda 1, por defecto
+./run.sh tcp-python 1 --warmup 20000 --iters 100000   # corrida corta de prueba
+./run.sh memoria-compartida-c 1         # variante Memoria compartida C
 ./analyze.py --md resultados/*.csv      # tabla comparativa final
 
 # Demostración en vivo — servidor aparte, NUNCA el cliente medidor
-python3 variante-B-tcp/server.py --port 9101 &
-python3 demo.py --variante B
+python3 tcp-python/server.py --port 9101 &
+python3 demo.py --variante tcp-python
 ```
 
 `run.sh` levanta el servidor, corre el cliente, baja el servidor, analiza y registra en el log
@@ -37,10 +37,10 @@ sistema/
 ├── README.md            ← este archivo: el contrato
 ├── analyze.py           ← ÚNICO script de métricas. No tocar por variante.
 ├── run.sh               ← orquestador de una corrida
-├── variante-B-tcp/      ← TCP en Python · referencia — documenta Freddy
+├── tcp-python/             ← TCP en Python · referencia — documenta Freddy
 │   ├── server.py
 │   └── client.py        ← plantilla del bucle de medición
-├── variante-D-shm/      ← memoria compartida en C11 — documenta Camilo
+├── memoria-compartida-c/   ← memoria compartida en C11 — documenta Camilo
 ├── control-dominio/     ← CONTROL: cuánto cuesta clasificar (~1,9 ns)
 ├── tabla-hosts.csv      ← EL DOMINIO. Fuente única de verdad. No duplicar.
 ├── clasificador.h       ← el dominio en C      (D)
@@ -99,7 +99,7 @@ escribir(respuesta, veredicto, host_id)      # 1 B veredicto + eco del host_id
 ### Autoprueba obligatoria antes de medir
 
 Tu cliente debe verificar los 16 hosts **más uno fuera de tabla** antes de la primera
-muestra. Copia el bloque de `variante-B-tcp/client.py`. Sin esto el harness puede estar
+muestra. Copia el bloque de `tcp-python/client.py`. Sin esto el harness puede estar
 midiendo un transporte que transporta basura, y nadie se entera.
 
 ### El ciclo de estímulos
@@ -116,7 +116,7 @@ cero saltos condicionales.
 | `clasificar()` en C | **≈ 1,9** |
 | `dict.get` en Python | ≈ 40 |
 
-3 % de la variante D · 0,016 % de Bc. Método y por qué el primer método falló:
+3 % de la variante Memoria compartida C · 0,016 % de Bc. Método y por qué el primer método falló:
 [`control-dominio/README.md`](control-dominio/README.md).
 
 ---
@@ -155,7 +155,7 @@ iteracion,latencia_ns
 
 Nombre: `resultados/resultados-<VARIANTE>-<RONDA>.csv`
 
-### 3. El bucle de medición — copiar de `variante-B-tcp/client.py`
+### 3. El bucle de medición — copiar de `tcp-python/client.py`
 
 No reinventarlo. Lo que **no** se negocia:
 
@@ -173,7 +173,7 @@ No reinventarlo. Lo que **no** se negocia:
 
 La referencia está en Python porque es la que todos tienen instalada, pero **el lenguaje es parte
 de tu decisión técnica y hay que justificarla** (el enunciado lo pide explícitamente). Para la
-variante D, Python no va a llegar a nanosegundos: C, Rust, Go, Zig o Java son mejores candidatos.
+variante Memoria compartida C, Python no va a llegar a nanosegundos: C, Rust, Go, Zig o Java son mejores candidatos.
 
 Lo único que importa es que produzcas el mismo CSV.
 
@@ -231,7 +231,7 @@ Archivadas — medidas de verdad, código retirado del árbol el 16/09 (ADR-007)
 ### ⚠️ La cola de B no es reproducible — ya es una conclusión del informe
 
 Tres corridas del **mismo código**, con el mismo tamaño de muestra (3 M), sobre la misma
-máquina. Muestras por encima de 1 ms en la variante B:
+máquina. Muestras por encima de 1 ms en la variante TCP Python:
 
 | Corrida | B | D | Evidencia |
 |---|---|---|---|
@@ -248,8 +248,13 @@ El sistema no cambió en nada que explique eso: el dominio añade 1,9 ns. Lo que
 >
 > Esto **refuerza** la tesis del trabajo —el entorno es una restricción arquitectónica de
 > primer orden— y **ya está incorporado** al informe (§5.2, §6, §7.1 y limitación 7). La
-> diferencia real entre B y D no es que una sea lenta, sino que **el peor caso de D está
-> acotado por construcción** y el de B queda a merced del planificador.
+> diferencia real entre las dos variantes no es que una sea lenta, sino que Memoria compartida C
+> **saca de la ruta crítica las fuentes de variabilidad** —sin llamadas al sistema no hay
+> planificador que intervenga— y TCP Python queda a merced de él.
+>
+> ⚠ **Eso no la acota.** El máximo de Memoria compartida C fue 37 µs, **447× su propia
+> mediana**, sin una sola llamada al sistema. No se observaron muestras sobre 1 ms; no es lo
+> mismo que no puedan ocurrir.
 
 ### Convención de rondas — cuáles entran en el informe
 
@@ -271,7 +276,7 @@ máquina estaba ocupada». Es el experimento que falta.
 La remedición **sobrescribió los CSV y logs crudos del 10/09** antes de que `run.sh`
 archivara. Se perdió el dato crudo de aquellas 9 M de muestras; sobreviven las cifras
 resumidas en `DISENO-ARQUITECTURA.md §7 bis`, en este archivo y en `INFORME.md`, más
-`resultados-B-0.csv` (08/09).
+`resultados-tcp-python-0.csv` (08/09).
 
 `run.sh` ya no sobrescribe: mueve lo anterior a `resultados/archivo/` con su fecha. **Los
 resultados crudos son la evidencia del informe (AC-4); perderlos rompe la cadena.**
@@ -286,13 +291,13 @@ Ver [`ADR-003`](../docs/ADR/ADR-003-resolucion-del-reloj.md).
 
 ## Siguientes pasos
 
-- [x] ~~Rehacer la variante B en C~~ → medido 10/09, archivado en `docs/archivo/`
+- [x] ~~Rehacer la variante TCP Python en C~~ → medido 10/09, archivado en `docs/archivo/`
 - [x] ~~Decidir el dominio~~ → ADR-004, clasificador de hosts, implementado y remedido
 - [x] ~~Línea base de red real~~ → medida 13/09, archivada en `docs/archivo/`
 - [x] ~~Demostración en vivo~~ → `demo.py`
 - [x] ~~Reducir el alcance a B y D~~ → ADR-007, 16/09
-- [ ] **Documentación técnica de la variante B — Freddy.**
-- [ ] **Documentación técnica de la variante D — Camilo.**
+- [ ] **Documentación técnica de la variante TCP Python — Freddy.**
+- [ ] **Documentación técnica de la variante Memoria compartida C — Camilo.**
 - [ ] **Repetir bajo carga controlada**, para separar «el sistema tiene cola» de «la
       máquina estaba ocupada». Es el experimento que sigue faltando.
 - [ ] Congelar `../ESPEC-MEDICION.md` con las enmiendas de ADR-001, ADR-003 y ADR-004

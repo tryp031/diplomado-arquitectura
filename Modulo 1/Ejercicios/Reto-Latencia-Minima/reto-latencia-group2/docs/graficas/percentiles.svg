@@ -52,8 +52,8 @@
 <circle cx="754.3" cy="345.3" r="3.5" fill="#7c3aed"/>
 <circle cx="865.0" cy="257.2" r="3.5" fill="#7c3aed"/>
 <rect x="102" y="73" width="13" height="13" rx="2" fill="#2563eb"/>
-<text x="122" y="84" font-size="12" fill="#374151">B · Python + TCP — 136 muestras &gt; 1 ms</text>
+<text x="122" y="84" font-size="12" fill="#374151">TCP Python — 136 muestras &gt; 1 ms</text>
 <rect x="102" y="92" width="13" height="13" rx="2" fill="#7c3aed"/>
-<text x="122" y="103" font-size="12" fill="#374151">D · C + memoria compartida — ninguna &gt; 1 ms</text>
+<text x="122" y="103" font-size="12" fill="#374151">Memoria compartida C — ninguna &gt; 1 ms</text>
 <text x="90" y="502" font-size="11" fill="#6b7280">Las curvas son planas hasta el p99 y se disparan después: por la mediana todas cumplen; la diferencia está en la cola.</text>
 </svg>

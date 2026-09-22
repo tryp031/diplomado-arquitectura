@@ -244,8 +244,8 @@ arquitectura perfecta sino **adecuada a un contexto**:
 | Las leyes son las de Richards y Ford | **Hipótesis** | F2 y F4 coinciden, pero F1 no las enuncia. Richards & Ford es bibliografía oficial → plausible, no confirmado |
 | TCP loopback entrega 25–60 µs de ida y vuelta | **Opinión/estimación** | F5. **Contradicho por medición** → ver C3 |
 | Memoria compartida entrega 150–600 ns | **Opinión/estimación** | F5. **Contradicho por medición** → ver C4 |
-| Variante B: p50 13,38 µs · p99.9 62,38 µs · máx 2 202 µs | **Hecho medido** | F6, 100 000 iteraciones tras 20 000 de calentamiento |
-| Variante D: p50 83 ns · p99.9 167 ns · máx 34,8 µs | **Hecho medido** | F6, 3 rondas × 1 000 000. Ninguna muestra supera 1 ms |
+| Variante TCP Python: p50 13,38 µs · p99.9 62,38 µs · máx 2 202 µs | **Hecho medido** | F6, 100 000 iteraciones tras 20 000 de calentamiento |
+| Variante Memoria compartida C: p50 83 ns · p99.9 167 ns · máx 34,8 µs | **Hecho medido** | F6, 3 rondas × 1 000 000. Ninguna muestra supera 1 ms |
 | El transporte explica el 91 % de la diferencia y el lenguaje el 9 % | **Hecho medido** | F6, control Bc (TCP en C) contra B (TCP en Python) |
 | `CLOCK_MONOTONIC` avanza a saltos de 1 µs en macOS | **Hecho medido** | ADR-003 |
 | macOS/arm64 no permite fijar hilos a núcleos (`KERN_NOT_SUPPORTED`) | **Hecho verificado** | ADR-002 |
@@ -349,7 +349,7 @@ y los ADR). Mapa de equivalencia para leer el documento de Camilo:
 
 ### C8 — Warm-up — **discrepancia menor, hay que cerrarla**
 
-F5 recomienda descartar 50 000–100 000 muestras. La variante B se midió descartando **20 000**.
+F5 recomienda descartar 50 000–100 000 muestras. La variante TCP Python se midió descartando **20 000**.
 **Acción:** unificar el criterio en `ESPEC-MEDICION.md` y aplicarlo a todas las variantes, o
 justificar por escrito por qué 20 000 basta. Si cada variante usa un warm-up distinto, la
 comparación pierde validez — que es justamente lo que el harness común existe para evitar.
@@ -364,12 +364,12 @@ incorporarse:
 | # | Aporte de F5 | Por qué vale | Costo |
 |---|---|---|---|
 | 1 | **Medir el costo del reloj en vacío y reportarlo** | Una llamada monotónica cuesta ~20–25 ns. Con un RTT de 83 ns, **el instrumento es ~25 % de lo medido**. No declararlo es un agujero metodológico | Bajo — un microbenchmark |
-| 2 | **Medir con y sin `TCP_NODELAY`** | El ejemplo más limpio de «una decisión de una línea con impacto de orden de magnitud» | Bajo — ya existe la variante B |
+| 2 | **Medir con y sin `TCP_NODELAY`** | El ejemplo más limpio de «una decisión de una línea con impacto de orden de magnitud» | Bajo — ya existe la variante TCP Python |
 | 3 | **Matriz de 10 atributos × 5 niveles** | Más completa que la tabla de trade-offs actual. Muestra de un vistazo que *la columna que gana en la primera fila pierde en casi todas las demás* | Nulo — adaptarla |
 | 4 | **Nombrar io_uring, DPDK, Onload, RDMA y páginas enormes como fuera de alcance, y por qué** | Demuestra conocer el techo y saber dónde está la frontera del ejercicio | Nulo — un párrafo |
 | 5 | **Tabla «cada parte del reto ↔ sección del Módulo I ↔ atributos involucrados»** | Demuestra que el ejercicio se resolvió con el marco del módulo y no solo con intuición técnica | Nulo — adaptarla |
 
-> El punto 1 es el más importante: con la variante D midiendo 83 ns, **el costo del instrumento ya
+> El punto 1 es el más importante: con la variante Memoria compartida C midiendo 83 ns, **el costo del instrumento ya
 > no es despreciable**. Es una debilidad real del informe actual y Camilo la detectó.
 
 ---

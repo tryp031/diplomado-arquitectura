@@ -82,7 +82,7 @@ esa máquina y con qué comando se consigue. Leé su salida antes de proponer na
 ### «Voy a medir»
 1. Solo en macOS, Linux o WSL2.
 2. `cd sistema && ./run.sh <VARIANTE> <RONDA> --iters N`
-   Concurrencia (solo variante B): añadí `--hilos 4`. **N=1 es el histórico del informe**;
+   Concurrencia (solo TCP Python): añadí `--hilos 4`. **N=1 es el histórico del informe**;
    una corrida con hilos no se compara contra una sin hilos. Ver ADR-006.
 3. Nunca borres ni sobrescribas un CSV de `resultados/`: es la evidencia del informe.
    `run.sh` ya archiva lo anterior con su fecha. El `.log` hermano no es basura —es

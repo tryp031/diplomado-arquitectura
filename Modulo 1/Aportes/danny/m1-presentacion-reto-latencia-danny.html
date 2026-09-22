@@ -821,7 +821,7 @@ body.con-notas .notas{display:block}
 <text x="295" y="84" font-size="12" fill="#374151">B · Python + TCP</text>
 <rect x="275" y="92" width="13" height="13" rx="2" fill="#7c3aed"/>
 <text x="295" y="103" font-size="12" fill="#374151">D · C + memoria compartida</text>
-<text x="90" y="452" font-size="11" fill="#6b7280">La variante D no forma una campana sino dos picos: son los tics del reloj (41,67 ns). El instrumento es visible en el resultado.</text>
+<text x="90" y="452" font-size="11" fill="#6b7280">La variante Memoria compartida C no forma una campana sino dos picos: son los tics del reloj (41,67 ns). El instrumento es visible en el resultado.</text>
 </svg>
       <figcaption><b>Distribución de la misma corrida.</b> Las dos arquitecturas viven en
         regímenes separados por tres órdenes de magnitud. Generada por <code>graficas.py</code>
@@ -1034,8 +1034,8 @@ body.con-notas .notas{display:block}
 
     <h3>Reparto pendiente</h3>
     <div class="rej d3">
-      <div class="card"><span class="et">Freddy</span><span class="g" style="font-size:17px">Doc. técnica<br>variante B</span>
-        <small><code>sistema/variante-B-tcp/</code></small></div>
+      <div class="card"><span class="et">Freddy</span><span class="g" style="font-size:17px">Doc. técnica<br>variante TCP Python</span>
+        <small><code>sistema/tcp-python/</code></small></div>
       <div class="card"><span class="et">Camilo · entregado</span><span class="g" style="font-size:17px">Doc. técnica D<br>+ manual instalación</span>
         <small>PR #8, con ficha de fuentes y 7 contradicciones declaradas. Pendiente de
           corregir §3.4 antes de integrarlo.</small></div>
@@ -1066,8 +1066,8 @@ body.con-notas .notas{display:block}
       <p>Esta lámina se borra antes de presentar. Está aquí para que Freddy y Camilo vean
         el estado real al abrir el archivo, sin tener que leer el ADR-007.</p>
       <p><b>Todas las cifras del deck salen de la corrida del 17/09</b> y se
-        reproducen con <code>./run.sh B 1</code> · <code>./run.sh D 1</code> (rondas 1-3) y
-        <code>./analyze.py --md resultados/resultados-{B,D}-{1,2,3}.csv</code>. Si alguien
+        reproducen con <code>./run.sh tcp-python 1</code> · <code>./run.sh memoria-compartida-c 1</code> (rondas 1-3) y
+        <code>./analyze.py --md resultados/resultados-{tcp-python,memoria-compartida-c}-{1,2,3}.csv</code>. Si alguien
         vuelve a medir y los números cambian, <b>esta presentación cambia con ellos</b>.</p>
       <p><b>Ojo con las dos figuras SVG:</b> son evidencia congelada. Los CSV de la corrida
         del 17/09 <b>no están versionados</b> (pesan ~108 MB y los excluye <code>.gitignore</code>),

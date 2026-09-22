@@ -1,5 +1,5 @@
 /*
- * Variante D — memoria compartida + busy-spin.  Definiciones comunes.
+ * Variante Memoria compartida C — memoria compartida + busy-spin.  Definiciones comunes.
  *
  * Decisiones que se materializan en este archivo (ver ADR-002):
  *

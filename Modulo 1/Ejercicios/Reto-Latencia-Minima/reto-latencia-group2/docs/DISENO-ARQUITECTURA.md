@@ -111,9 +111,9 @@ no es verificable; lo que sigue sí.
 **[REC]** Este atributo **no lo pide el enunciado; lo añado yo**, y es el que convierte el
 ejercicio en arquitectura. En sistemas de baja latencia reales —trading, telecomunicaciones,
 control industrial— el requisito nunca es «que sea rápido», es «que la cola sea acotada». El
-hallazgo de la variante B —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
+hallazgo de la variante TCP Python —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
 encima de 1 ms en 3 M)— es precisamente ese caso. Y hay un matiz que lo hace mejor: el 14/09,
-con el mismo código, B dio **0**. Su cumplimiento depende del estado de la máquina, no de su
+con el mismo código, TCP Python dio **0**. Su cumplimiento depende del estado de la máquina, no de su
 arquitectura. Ahí está el contenido del informe.
 
 ### AC-3 · Comparabilidad entre variantes (estructural, del *proceso* de medición)
@@ -143,7 +143,7 @@ es lo que separa una decisión de una omisión.
 
 | Atributo | Se sacrifica | A cambio de |
 |---|---|---|
-| **Portabilidad** | La variante D depende del sistema operativo y de la arquitectura de CPU | Latencia de ~2 órdenes de magnitud menos |
+| **Portabilidad** | La variante Memoria compartida C depende del sistema operativo y de la arquitectura de CPU | Latencia de ~2 órdenes de magnitud menos |
 | **Escalabilidad** | Un solo cliente; busy-spin ocupa un núcleo al 100 % | Eliminar el despertar del planificador |
 | **Eficiencia de recursos** | Un núcleo quemado al 100 % sin hacer trabajo útil | Determinismo en la cola |
 | **Interoperabilidad** | Memoria compartida solo funciona entre procesos del mismo host | Evitar la pila de red completa |
@@ -225,13 +225,13 @@ graph TB
         subgraph A["Variante A · HTTP/1.1 sobre TCP"]
             A1["Cliente HTTP"] <--> A2["Servidor HTTP"]
         end
-        subgraph B["Variante B · TCP crudo + NODELAY"]
+        subgraph B["Variante TCP Python · TCP crudo + NODELAY"]
             B1["Cliente"] <--> B2["Servidor"]
         end
         subgraph Cv["Variante C · Unix socket / UDP"]
             C1["Cliente"] <--> C2["Servidor"]
         end
-        subgraph D["Variante D · Memoria compartida + busy-spin"]
+        subgraph D["Variante Memoria compartida C · Memoria compartida + busy-spin"]
             D1["Cliente<br/>núcleo fijado"] <--> D2["Servidor<br/>núcleo fijado"]
         end
     end
@@ -241,9 +241,9 @@ graph TB
 
 ```text
  A ─ aplicación → parseo HTTP → TCP → IP → loopback → IP → TCP → parseo HTTP → aplicación
- B ─ aplicación ──────────────→ TCP → IP → loopback → IP → TCP ──────────────→ aplicación
+ TCP Python ─ aplicación ──────→ TCP → IP → loopback → IP → TCP ──────────────→ aplicación
  C ─ aplicación ─────────────────────→ buffer del kernel ─────────────────────→ aplicación
- D ─ aplicación ─────────────→ memoria física compartida ─────────────────────→ aplicación
+ Memoria compart. ─ aplicación → memoria física compartida ─────────────────────→ aplicación
                                (sin llamadas al sistema en la ruta caliente)
 ```
 
@@ -264,6 +264,10 @@ equipo/recursos. Aplicadas aquí:
 | Equipo | 4 personas con lenguajes distintos; nadie es especialista en baja latencia |
 
 ### Comparación de transportes
+
+> **Las letras de esta tabla son el catálogo de alternativas de diseño, no los nombres de lo
+> entregado.** `A` y `C` nunca se implementaron (ADR-007). `B` corresponde a la variante
+> **TCP Python** y `D` a la variante **Memoria compartida C**.
 
 | | **A · HTTP** | **B · TCP crudo** | **C · Unix socket / UDP** | **D · Memoria compartida** |
 |---|---|---|---|---|
@@ -333,7 +337,7 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 | CSV crudo como contrato entre variantes | D5 | AC-3, AC-4 | `harness/README.md` |
 | Ronda final en una sola máquina | D6 | AC-3 | ESPEC §4 |
 | Estudio comparativo de 4 transportes | D5 | AC-3 | `PLAN-EQUIPO.md` |
-| Variante D: lenguaje y mecanismo | D1, D5 | AC-1, AC-2 | ADR-002 |
+| Variante Memoria compartida C: lenguaje y mecanismo | D1, D5 | AC-1, AC-2 | ADR-002 |
 
 ---
 
@@ -341,14 +345,14 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 
 Agregado de 3 rondas × 1 000 000 por columna (3 M de muestras). Nanosegundos.
 
-| | **B** Python+TCP | **D** C+shm |
+| | **TCP Python** | **Memoria compartida C** |
 |---|---|---|
 | p50 | 13 458 | **83** |
 | p99.9 | 116 209 | **167** |
 | máx | 13 649 750 | **37 125** |
 | **muestras > 1 ms** (de 3 M) | **136** ❌ | **0** ✅ |
 
-> **La comparación mezcla dos variables.** Entre B y D cambian el transporte *y* el
+> **La comparación mezcla dos variables.** Entre las dos variantes cambian el transporte *y* el
 > lenguaje a la vez, así que el factor de 162× **no se puede atribuir a ninguna causa
 > concreta**. Un control que sí las separaba (`Bc`, TCP en C) se midió y se retiró del
 > árbol con el ADR-007. El informe **declara la limitación** en vez de ocultarla; ver
@@ -357,27 +361,31 @@ Agregado de 3 rondas × 1 000 000 por columna (3 M de muestras). Nanosegundos.
 **Cuatro conclusiones sostenidas con datos propios:**
 
 1. **El objetivo de 1 ms se cumple por la mediana con las dos.** El reto nunca estuvo en
-   alcanzar el número: B está 74× por debajo del umbral y D, 12 048×.
+   alcanzar el número: TCP Python está 74× por debajo del umbral y Memoria compartida C, 12 048×.
 2. **Solo la cola distingue cumplir de no cumplir.** Por p50 las dos aprueban con holgura.
-   Por máximo, B tiene 136 muestras sobre el umbral; D, ninguna. Un informe basado en
+   Por máximo, TCP Python tiene 136 muestras sobre el umbral; Memoria compartida C, ninguna. Un informe basado en
    promedios (14,7 µs frente a 79 ns) habría dado las dos por buenas.
    **[REC]** Este es el titular del informe: **la métrica elegida, no el sistema, decide el
    veredicto.**
-3. **El veredicto de B no es reproducible, y eso es un resultado, no un problema.** Misma
+3. **El veredicto de TCP Python no es reproducible, y eso es un resultado, no un problema.** Misma
    máquina, mismo código, mismo `n`: el 14/09 dio **0** muestras sobre 1 ms y el 17/09 dio
    **136**. Afirmar «esta arquitectura incumple» desde una sola corrida es afirmar algo
-   **sobre la máquina, no sobre la arquitectura**. La diferencia real con D no es velocidad:
-   es que el peor caso de D **está acotado por construcción** —sin llamadas al sistema no hay
-   planificador que le robe 13 ms— y el de B no.
+   **sobre la máquina, no sobre la arquitectura**. La diferencia real con Memoria compartida C no es velocidad:
+   es que Memoria compartida C **saca de la ruta crítica las fuentes de variabilidad**
+   —sin llamadas al sistema no hay planificador que le robe 13 ms— y TCP Python no. Lo que **no** se
+   sigue de ahí es que su peor caso esté acotado: el máximo medido fue 37 125 ns, **447× su
+   propia mediana**, impuesto por el planificador y el hardware pese a cero llamadas al
+   sistema. Los datos sostienen que no se observaron muestras sobre 1 ms, no que no puedan
+   ocurrir.
 4. **El máximo no es una propiedad del sistema, sino de la ventana de observación.** Leyendo
-   **la misma corrida** de B con ventanas crecientes: 167 µs con 10 k muestras, 3,1 ms con
+   **la misma corrida** de TCP Python con ventanas crecientes: 167 µs con 10 k muestras, 3,1 ms con
    100 k, 6,4 ms con 1 M y 13,6 ms con 3 M. **81× peor sin cambiar nada del sistema.** Por eso
    un máximo sin su `n` al lado no significa nada, y por eso los sistemas serios se
    especifican en percentiles.
 
 ### Lo que queda sin cerrar
 
-**Eliminar el software de la ruta caliente no elimina la cola.** D no hace una sola
+**Eliminar el software de la ruta caliente no elimina la cola.** Memoria compartida C no hace una sola
 llamada al sistema y aun así tiene máximos de 16–37 µs, 447× su p50. La cola la ponen el
 planificador y el hardware, y en macOS/arm64 no hay afinidad de núcleo para evitarlo
 (`KERN_NOT_SUPPORTED`, verificado). **El sistema operativo y el hardware son restricciones
@@ -396,12 +404,12 @@ trabajo útil es despreciable**, no que el lenguaje nunca importe.
 | Drivers, atributos y trade-offs (este documento) | ✅ 10/09 |
 | `ESPEC-MEDICION.md` | ⚠️ **borrador** — congelar con el equipo |
 | ADR-001 · frontera de medición | ✅ propuesta, pendiente de aceptación del equipo |
-| ADR-002 · variante D (mecanismo, lenguaje, planificación) | ✅ 10/09 |
+| ADR-002 · variante Memoria compartida C (mecanismo, lenguaje, planificación) | ✅ 10/09 |
 | ADR-003 · resolución del reloj — **enmienda a ESPEC §2** | ✅ 10/09, pendiente de aprobación |
-| Harness común + variante B medida | ✅ 08/09 |
+| Harness común + variante TCP Python medida | ✅ 08/09 |
 | Harness adaptado a variantes compiladas | ✅ 10/09 |
-| **Variante D implementada y medida (3 × 1 M)** | ✅ 10/09 — Daniel |
-| **Control Bc (TCP en C) + B re-medida a 1 M** | ✅ 10/09 — cierra el sesgo lenguaje/transporte |
+| **Variante Memoria compartida C implementada y medida (3 × 1 M)** | ✅ 10/09 — Daniel |
+| **Control Bc (TCP en C) + TCP Python re-medida a 1 M** | ✅ 10/09 — cierra el sesgo lenguaje/transporte |
 | Variantes A, C | ⬜ bloqueadas por el reparto del equipo |
 | Informe PDF + video | ⬜ 22–26/09 |
 

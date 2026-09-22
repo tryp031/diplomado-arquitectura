@@ -14,7 +14,7 @@ Por eso hay DOS PLANOS, y la separación es la decisión arquitectónica del mó
   PLANO DE CONTROL  (este archivo + index.html)   milisegundos   NO se mide
       Formularios, listas, botones, gráficas. Pide cosas y muestra resultados.
               │
-              ▼  "medí 50 000 intercambios contra la variante B"
+              ▼  "medí 50 000 intercambios contra la variante TCP Python"
   PLANO DE DATOS  (sistema/variante-*)            µs y ns        SÍ se mide
       cliente ⇄ servidor. EL CRONÓMETRO VIVE AQUÍ DENTRO, nunca en el navegador.
 
@@ -47,7 +47,6 @@ import datetime
 import itertools
 import json
 import math
-import re
 import shutil
 import signal
 import socket
@@ -73,29 +72,30 @@ VEREDICTOS = {0: "EXTERNO", 1: "LOCAL", 2: "DESCONOCIDO"}
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Catálogo de variantes. `socket` indica si se le puede mandar un estímulo suelto
-# desde aquí: la variante D usa memoria compartida y solo habla con su cliente en
+# desde aquí: la variante Memoria compartida C usa memoria compartida y solo habla con su cliente en
 # C, así que participa en las mediciones pero no en el formulario de estímulos.
 # ──────────────────────────────────────────────────────────────────────────────
 VARIANTES = {
-    "B": {
-        "nombre": "TCP crudo (Python)", "puerto": 9101, "socket": True,
-        "dir": "variante-B-tcp", "servidor": ["python3", "server.py"], "cliente": ["python3", "client.py"],
+    "tcp-python": {
+        "nombre": "TCP Python", "puerto": 9101, "socket": True,
+        "dir": "tcp-python", "servidor": ["python3", "server.py"], "cliente": ["python3", "client.py"],
         "nota": "TCP_NODELAY · conexión persistente",
     },
-    "D": {
-        "nombre": "Memoria compartida (C)", "puerto": 9103, "socket": False,
-        "dir": "variante-D-shm", "servidor": ["./server"], "cliente": ["./client"],
+    "memoria-compartida-c": {
+        "nombre": "Memoria compartida C", "puerto": 9103, "socket": False,
+        "dir": "memoria-compartida-c", "servidor": ["./server"], "cliente": ["./client"],
         "nota": "espera activa · cero llamadas al sistema",
         "concurrencia": False,
         "porque_no": (
-            "D no tiene conexiones que aceptar: cliente y servidor comparten UNA region "
+            "Memoria compartida C no tiene conexiones que aceptar: cliente y servidor "
+            "comparten UNA region "
             "de memoria con una sola ranura por sentido. Dos clientes se pisarian el "
             "payload y podrian leer la respuesta del otro. Ademas cada proceso gira "
             "ocupando un nucleo entero, asi que 8 clientes + 8 servidores pelearian por "
             "10 nucleos.\n\n"
             "No es una limitacion de implementacion: los 83 ns se pagan con exclusividad. "
             "Compartir exige o un barrido que crece con N, o contencion atomica — y eso "
-            "es justo lo que D elimino para ser rapida. Ver ADR-006."),
+            "es justo lo que esta variante elimino para ser rapida. Ver ADR-006."),
     },
 }
 
@@ -144,17 +144,6 @@ def anotar(entrada: dict) -> dict:
 # ──────────────────────────────────────────────────────────────────────────────
 # La tabla de hosts — el dominio (ADR-004)
 # ──────────────────────────────────────────────────────────────────────────────
-CABECERA = """# tabla-hosts.csv — DOMINIO del reto. Fuente unica de verdad para TODAS las variantes.
-#
-# Se carga UNA VEZ al arrancar cada servidor. Nunca se lee dentro del bucle de medicion.
-#
-# Limite duro: 16 filas. 16 x 4 bytes = 64 bytes = UNA linea de cache.
-#   Ese limite es una DECISION de diseno, no una casualidad: es lo que permite
-#   afirmar que la clasificacion no contamina la medicion. Ver ADR-004.
-#
-# veredicto: local | externo      (cualquier host ausente -> desconocido)
-#
-"""
 
 
 def ip_valida(ip: str) -> bool:
@@ -179,62 +168,6 @@ def leer_tabla() -> list[dict]:
             if len(partes) >= 3 and partes[0] != "nombre":
                 filas.append({"nombre": partes[0], "ip": partes[1], "veredicto": partes[2]})
     return filas
-
-
-def cabecera_conservada() -> str:
-    """
-    Devuelve los comentarios que YA tiene el CSV, no los que este archivo cree que
-    deberia tener.
-
-    Por que existe esta funcion: hasta el 15/09 se escribia `CABECERA` tal cual, y
-    guardar la tabla desde la interfaz BORRABA en silencio todo comentario que no
-    estuviera en esa constante. Asi se perdio la justificacion del escenario y de los
-    rangos RFC 5737, y entraron IPs reales enrutables (8.8.8.8) como datos de ejemplo.
-
-    El fondo es arquitectonico: el plano de control es EDITOR de las filas del dominio,
-    no AUTOR del dominio. El razonamiento que acompana a la tabla pertenece al plano de
-    datos y sobrevive a cualquier edicion hecha desde la web. `CABECERA` queda solo como
-    semilla para cuando el archivo todavia no existe.
-    """
-    try:
-        lineas = TABLA.read_text().splitlines(keepends=True)
-    except OSError:
-        return CABECERA
-    previos = list(itertools.takewhile(lambda l: l.lstrip().startswith("#") or not l.strip(), lineas))
-    return "".join(previos) or CABECERA
-
-
-def escribir_tabla(filas: list[dict]) -> None:
-    """Valida y reescribe el CSV. Hay que reiniciar los servidores para que lo relean."""
-    if len(filas) > TABLA_MAX:
-        raise ValueError(
-            f"La tabla no puede pasar de {TABLA_MAX} hosts. No es un tope arbitrario: "
-            f"{TABLA_MAX} × 4 B = 64 B = una línea de caché, y de ahí sale la garantía de "
-            f"que clasificar cuesta ~1,9 ns. Subirlo invalidaría el ADR-004."
-        )
-    if not filas:
-        raise ValueError("La tabla no puede quedar vacía: el sistema necesita al menos un host.")
-
-    vistos = set()
-    for f in filas:
-        nombre = (f.get("nombre") or "").strip()
-        ip = (f.get("ip") or "").strip()
-        ver = (f.get("veredicto") or "").strip()
-        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", nombre):
-            raise ValueError(f"Nombre inválido: «{nombre}». Use letras, números, punto, guion o guion bajo.")
-        if not ip_valida(ip):
-            raise ValueError(f"«{ip}» no es una IPv4 válida. Cada número va de 0 a 255.")
-        if ver not in ("local", "externo"):
-            raise ValueError(f"Veredicto inválido: «{ver}». Solo «local» o «externo».")
-        if nombre in vistos:
-            raise ValueError(f"El host «{nombre}» está repetido.")
-        vistos.add(nombre)
-
-    with TABLA.open("w", newline="") as fh:
-        fh.write(cabecera_conservada())
-        fh.write("nombre,ip,veredicto\n")
-        for f in filas:
-            fh.write(f"{f['nombre'].strip()},{f['ip'].strip()},{f['veredicto'].strip()}\n")
 
 
 def id_de_ip(ip: str) -> int:
@@ -397,6 +330,49 @@ def conexion(vid: str) -> socket.socket:
     return s
 
 
+def estimulo_por_cliente(v: dict, ip: str) -> tuple:
+    """
+    Un estimulo contra una variante que no habla por sockets: se lanza SU cliente
+    con `--clasificar`, que hace un solo intercambio y reporta el veredicto.
+
+    Por que asi y no manteniendo un cliente residente: la region compartida tiene
+    UNA ranura por sentido. Un cliente permanente del plano de control la ocupa, y
+    si alguien lanza una medicion a la vez, los dos se pisan el payload y la corrida
+    sale contaminada SIN dar error. Por eso este camino es de usar y tirar, y por eso
+    se niega a correr mientras haya una medicion en curso.
+
+    El precio es el arranque del proceso (milisegundos). No entra en la cifra del
+    reto: la latencia que se devuelve la mide el cliente entre sus dos marcas de la
+    frontera F1, igual que en una corrida.
+    """
+    if progreso.get("activa"):
+        raise RuntimeError(
+            "Hay una medicion en curso. Esta variante tiene una sola ranura de memoria "
+            "compartida: mandar un estimulo ahora corromperia la medicion. Espera a que "
+            "termine.")
+
+    d = SISTEMA / v["dir"]
+    cmd = resolver_cmd(v["cliente"], d) + [
+        "--clasificar", ip, "--port", str(v["puerto"]), "--tabla", str(TABLA),
+    ]
+    try:
+        r = subprocess.run(cmd, cwd=d, capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("El cliente no respondio en 30 s.")
+
+    linea = next((l for l in r.stdout.splitlines() if l.startswith("ESTIMULO ")), None)
+    if linea is None:
+        detalle = (r.stderr or r.stdout or "").strip().splitlines()
+        raise RuntimeError("El cliente no devolvio un veredicto. "
+                           + (detalle[-1] if detalle else f"codigo {r.returncode}"))
+
+    campos = dict(par.split("=", 1) for par in linea.split() if "=" in par)
+    try:
+        return int(campos["veredicto"]), int(campos["latencia_ns"])
+    except (KeyError, ValueError):
+        raise RuntimeError(f"No se entiende la respuesta del cliente: {linea}")
+
+
 def estimulo(vid: str, host: str) -> dict:
     """
     Manda UN estímulo y devuelve el veredicto con el log completo de tiempos.
@@ -431,9 +407,6 @@ def estimulo(vid: str, host: str) -> dict:
                            control_overhead_ns=None, t0_f1_ns=None, t1_f1_ns=None))
 
     v = VARIANTES[vid]
-    if not v["socket"]:
-        return fallo(f"La variante {vid} usa memoria compartida: solo habla con su cliente en C. "
-                     f"Participa en las mediciones, no en este formulario.")
     if not corriendo(vid):
         return fallo(f"El servidor de la variante {vid} no está corriendo.")
 
@@ -449,6 +422,24 @@ def estimulo(vid: str, host: str) -> dict:
                            ts_control_responde=ahora(),
                            nota="no está en la tabla y tampoco es una IPv4 · "
                                 "resuelto en el plano de control, sin viaje al plano de datos"))
+
+    if not v["socket"]:
+        # Esta variante no tiene conexiones que aceptar (ADR-002): se le habla
+        # lanzando su propio cliente en C, una vez por estimulo. Ver ADR-009.
+        try:
+            ver_byte, latencia = estimulo_por_cliente(v, ip)
+        except Exception as e:                                  # noqa: BLE001
+            return fallo(str(e))
+        total_control = time.perf_counter_ns() - t_entra
+        return anotar(dict(
+            base, ok=True, ip=ip, veredicto=VEREDICTOS.get(ver_byte, "?"),
+            t0_f1_ns=None, t1_f1_ns=None,
+            latencia_sistema_ns=latencia,
+            control_overhead_ns=total_control - latencia,
+            ts_control_responde=ahora(),
+            nota="estimulo suelto: el cliente arranca en frio, sin warmup, y mide UN "
+                 "intercambio. Sirve para ver que clasifica, no para comparar con el "
+                 "p50 del informe, que sale de un millon de intercambios en caliente."))
 
     host_id = id_de_ip(ip)
     msg = struct.pack("<II", host_id, 0) + b"\x00" * (PAYLOAD - 8)
@@ -654,21 +645,6 @@ class Handler(BaseHTTPRequestHandler):
             with candado_hist:
                 return self._json({"ok": True, "historial": list(historial),
                                    "limite": HISTORIAL_MAX})
-        self.send_error(404)
-
-    def do_PUT(self):
-        if self.path == "/api/tabla":
-            try:
-                escribir_tabla(self._cuerpo().get("tabla", []))
-            except (ValueError, KeyError, TypeError, AttributeError) as e:
-                return self._json({"ok": False, "error": str(e)}, 400)
-            # La tabla se carga al arrancar: para que el cambio tenga efecto hay que
-            # reiniciar. Es el precio de NO releer el archivo en la ruta caliente.
-            reiniciados = [k for k in list(procesos) if corriendo(k)]
-            for k in reiniciados:
-                parar(k)
-                arrancar(k)
-            return self._json({"ok": True, "tabla": leer_tabla(), "reiniciados": reiniciados})
         self.send_error(404)
 
     def do_POST(self):

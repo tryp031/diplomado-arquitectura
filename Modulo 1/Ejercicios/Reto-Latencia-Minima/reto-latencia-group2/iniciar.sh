@@ -9,7 +9,7 @@ PUERTO="${1:-8080}"
 
 command -v python3 >/dev/null || { echo "Falta python3. Instalalo y volve a intentar." >&2; exit 1; }
 if ! command -v cc >/dev/null; then
-  echo "Aviso: no hay compilador de C. La variante D no va a arrancar."
+  echo "Aviso: no hay compilador de C. La variante Memoria compartida C no va a arrancar."
   echo "       Diagnostico completo:  python3 doctor.py"
 fi
 

@@ -1,5 +1,5 @@
 /*
- * Variante D — servidor de eco sobre memoria compartida con espera activa.
+ * Variante Memoria compartida C — servidor de eco sobre memoria compartida con espera activa.
  *
  * Contrato del harness (ver ../README.md):
  *   --host <ignorado>  --port <9103>  --payload <32>
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
         ultima = s;
 
         /* Leer el estímulo: el dato tiene que cruzar de verdad, igual que en la
-           variante B el servidor hace recv del payload completo. */
+           variante TCP Python el servidor hace recv del payload completo. */
         memcpy(recibido, r->peticion.dato, payload);
 
         /* ---- EL DOMINIO. Tiempo constante: 16 csel, cero saltos condicionales.

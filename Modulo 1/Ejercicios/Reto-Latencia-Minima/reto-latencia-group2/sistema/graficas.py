@@ -10,7 +10,7 @@ en el PDF sin pixelarse.
 
 Uso:
     ./graficas.py                      # agrega rondas 1-3 de cada variante en resultados/
-    ./graficas.py --out graficas/
+    ./graficas.py --out ../docs/graficas/
 """
 import argparse
 import csv
@@ -23,12 +23,12 @@ from collections import defaultdict
 UMBRAL_NS = 1_000_000  # el objetivo del enunciado: 1 ms
 
 ESTILO = {
-    "B":  ("#2563eb", "B · Python + TCP"),
+    "tcp-python":           ("#2563eb", "TCP Python"),
     "C":  ("#16a34a", "C · Unix socket / UDP"),
     "A":  ("#a16207", "A · HTTP/REST"),
-    "D":  ("#7c3aed", "D · C + memoria compartida"),
+    "memoria-compartida-c": ("#7c3aed", "Memoria compartida C"),
 }
-ORDEN = ["B", "D"]
+ORDEN = ["tcp-python", "memoria-compartida-c"]
 PERCENTILES = [0, 50, 90, 99, 99.9, 99.99, 99.999]
 
 
@@ -44,7 +44,7 @@ def cargar(dir_res, rondas=RONDAS_DEL_INFORME):
     """Agrega las rondas del informe de cada variante. resultados-<VAR>-<RONDA>.csv"""
     series = defaultdict(list)
     for ruta in sorted(glob.glob(os.path.join(dir_res, "resultados-*.csv"))):
-        m = re.match(r"resultados-([A-Za-z]+)-(\d+)\.csv$", os.path.basename(ruta))
+        m = re.match(r"resultados-([A-Za-z][A-Za-z0-9-]*)-(\d)\.csv$", os.path.basename(ruta))
         if not m:
             continue
         var, ronda = m.group(1), int(m.group(2))
@@ -184,7 +184,7 @@ def grafica_percentiles(series, salida):
 
 
 def grafica_histograma(series, salida):
-    """Distribución por décadas logarítmicas. Hace visible la cuantización de la variante D."""
+    """Distribución por décadas logarítmicas. Hace visible la cuantización de la variante Memoria compartida C."""
     an, al, m = 940, 470, {"l": 90, "r": 75, "t": 70, "b": 70}
     todos = [v for d in series.values() for v in d if v > 0]
     lo, hi = math.log10(min(todos)), math.log10(max(todos))
@@ -246,7 +246,7 @@ def grafica_histograma(series, salida):
         c.p.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="2"/>')
         leyenda.append((color, nombre))
     c.leyenda(leyenda, m["l"] + 185, m["t"] + 12)  # zona vacía entre los dos picos
-    c.nota("La variante D no forma una campana sino dos picos: son los tics del reloj "
+    c.nota("La variante Memoria compartida C no forma una campana sino dos picos: son los tics del reloj "
            "(41,67 ns). El instrumento es visible en el resultado.", al - 18)
     c.guardar(salida)
 
@@ -255,7 +255,9 @@ def main():
     aqui = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()
     ap.add_argument("--resultados", default=os.path.join(aqui, "resultados"))
-    ap.add_argument("--out", default=os.path.join(aqui, "graficas"))
+    # Las figuras son PRODUCTO del analisis, no parte del sistema: viven en docs/ y
+    # por eso no viajan en el ZIP del codigo fuente (nota 7 del 21/09, ADR-010).
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(aqui), "docs", "graficas"))
     a = ap.parse_args()
 
     series = cargar(a.resultados)
