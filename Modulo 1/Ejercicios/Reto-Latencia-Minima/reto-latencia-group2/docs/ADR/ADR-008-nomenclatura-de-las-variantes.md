@@ -113,8 +113,13 @@ empezado a colarse en las figuras del informe.
 
 ### Acciones derivadas
 
-- [ ] Barrer «variante B/D» en la presentación y en `docs/DISENO-ARQUITECTURA.md`
-      (nota 6 del backlog, barrido final).
+- [x] Barrer «variante B/D» en la presentación y en `docs/DISENO-ARQUITECTURA.md`
+      (nota 6 del backlog, barrido final). **Hecho el 22/09**: `INFORME.md` (tablas §7
+      y los dos comandos de §10.2), `GUION-VIDEO.md`, `informe-a-pdf.py`, la
+      presentación, `_Base-Conocimiento/INDICE.md` y la skill `reto-latencia`.
+      `docs/DISENO-ARQUITECTURA.md` ya estaba limpio. **No se tocaron** los ADR-001
+      a 007, `docs/archivo/`, `comunicaciones/` ni las notas de la reunión del 21/09:
+      son registro fechado y se leen con la equivalencia de este ADR.
 - [ ] Freddy y Camilo: usar los nombres nuevos en los manuales técnicos.
 - [x] `python3 verificar.py` en verde tras el cambio (9/9).
 

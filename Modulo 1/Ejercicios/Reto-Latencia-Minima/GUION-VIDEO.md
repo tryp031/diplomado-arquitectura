@@ -192,7 +192,7 @@ Si asistes, la demo sustituye al video. Cambia el formato, no la tesis.
 
 ### Preparación — antes de conectarte
 
-- [ ] Binarios compilados: `cd reto-latencia-group2/sistema && make -C variante-D-shm`
+- [ ] Binarios compilados: `cd reto-latencia-group2/sistema && make -C memoria-compartida-c`
 - [ ] `python3 verificar.py` en verde: confirma que el experimento sigue siendo válido
 - [ ] Una corrida de prueba completa, para que nada falle en vivo
 - [ ] Dos terminales abiertas, fuente grande (≥ 18 pt)

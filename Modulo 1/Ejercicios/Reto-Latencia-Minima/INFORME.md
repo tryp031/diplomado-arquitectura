@@ -323,7 +323,7 @@ Agregado de 3 rondas × 1 000 000 por columna. Todo en **nanosegundos**. Corrida
 > y es uno de los resultados del trabajo. Su evidencia se conserva en
 > `sistema/resultados/archivo/`.
 
-**Figuras:** `reto-latencia-group2/sistema/graficas/percentiles.svg` y `…/histograma.svg`.
+**Figuras:** `reto-latencia-group2/docs/graficas/percentiles.svg` y `…/histograma.svg`.
 Se regeneran con `python3 reto-latencia-group2/sistema/graficas.py` (sin dependencias externas).
 
 ### 6.1 Contraste por lotes para la variante Memoria compartida C
@@ -428,16 +428,16 @@ cd reto-latencia-group2/sistema/control-dominio && make && ./micro ../tabla-host
 
 | | p50 | veces por debajo de 1 ms |
 |---|---|---|
-| B | 13 458 ns | 74× |
-| D | 83 ns | **12 048×** |
+| TCP Python | 13 458 ns | 74× |
+| Memoria compartida C | 83 ns | **12 048×** |
 
-**Por la cola, el resultado de B no es reproducible — y ese es el hallazgo:**
+**Por la cola, el resultado de TCP Python no es reproducible — y ese es el hallazgo:**
 
 | | máx | muestras > 1 ms (de 3 M) | AC-1 (p99.9 < 1 ms) | AC-2 (ninguna > 1 ms) |
 |---|---|---|---|---|
-| B · corrida del **17/09** | 13 649 750 ns | **136** | ✅ cumple (116 µs) | ❌ **incumple** |
-| B · corrida del **14/09** | 344 880 ns | **0** | ✅ cumple (39 µs) | ✅ **cumple** |
-| D · ambas corridas | 37 125 ns | **0** | ✅ cumple (167 ns) | ✅ **cumple** |
+| TCP Python · corrida del **17/09** | 13 649 750 ns | **136** | ✅ cumple (116 µs) | ❌ **incumple** |
+| TCP Python · corrida del **14/09** | 344 880 ns | **0** | ✅ cumple (39 µs) | ✅ **cumple** |
+| Memoria compartida C · ambas corridas | 37 125 ns | **0** | ✅ cumple (167 ns) | ✅ **cumple** |
 
 **Mismo código, misma máquina, mismo tamaño de muestra, tres días de diferencia: un veredicto
 distinto.** Lo único que cambió fue el estado del sistema operativo durante la medición. Una
@@ -660,7 +660,7 @@ Los siete viven en `reto-latencia-group2/docs/ADR/`.
 cd reto-latencia-group2/sistema
 ./run.sh tcp-python 1 --warmup 100000 --iters 1000000    # TCP en Python   (repetir con 2 y 3)
 ./run.sh memoria-compartida-c 1 --warmup 100000 --iters 1000000    # memoria compartida en C
-./analyze.py --md resultados/resultados-{B,D}-{1,2,3}.csv   # tabla comparativa
+./analyze.py --md resultados/resultados-{tcp-python,memoria-compartida-c}-{1,2,3}.csv   # tabla comparativa
 ./graficas.py                                   # figuras SVG del informe
 ```
 
@@ -684,6 +684,6 @@ cd reto-latencia-group2 && python3 verificar.py
 | 4 · Informe de resultados vs 1 ms | este documento, §§ 6–8 |
 | 5 · Video ≤ 5 min o demo en vivo | guion en `GUION-VIDEO.md` |
 
-Muestras crudas: `reto-latencia-group2/sistema/resultados/resultados-{B,D}-{1,2,3}.csv`
+Muestras crudas: `reto-latencia-group2/sistema/resultados/resultados-{tcp-python,memoria-compartida-c}-{1,2,3}.csv`
 (3 000 000 de filas por variante). Las corridas anteriores no se borran: `run.sh` las mueve a
 `resultados/archivo/` con su fecha.

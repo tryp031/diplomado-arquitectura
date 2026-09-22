@@ -203,7 +203,7 @@ def incrustar_figuras(cuerpo, dir_graficas):
              "Figura 1 — Latencia por percentil. Por la mediana las tres cumplen; "
              "la diferencia está en la cola."),
             ("histograma.svg",
-             "Figura 2 — Distribución. La variante D no forma una campana sino dos picos: "
+             "Figura 2 — Distribución. La variante Memoria compartida C no forma una campana sino dos picos: "
              "son los tics del reloj.")]
     bloque = []
     for nombre, pie in figs:
@@ -229,7 +229,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--md", default=os.path.join(aqui, "INFORME.md"))
     ap.add_argument("--pdf", default=os.path.join(aqui, "INFORME.pdf"))
-    ap.add_argument("--graficas", default=os.path.join(aqui, "reto-latencia-group2", "sistema", "graficas"))
+    ap.add_argument("--graficas", default=os.path.join(aqui, "reto-latencia-group2", "docs", "graficas"))
     ap.add_argument("--html", default=None, help="conservar el HTML intermedio")
     a = ap.parse_args()
 

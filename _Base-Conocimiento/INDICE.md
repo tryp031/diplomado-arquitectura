@@ -125,14 +125,14 @@ Si algo no está ahí, no está planificado.
    definir máquina final y repo Git.
 4. Conseguir los 4 Genially y el video del aula (faltan las leyes exactas y la taxonomía completa).
 5. Autoevaluación M1 — **un solo intento**, hacerla después del punto 4.
-6. Opcional, si hay tiempo: variante B en C, para separar el efecto del lenguaje del transporte.
+6. Opcional, si hay tiempo: TCP en C, para separar el efecto del lenguaje del transporte.
 
 ### Hallazgos técnicos que van al informe
 
-- **La variante B incumple el objetivo en el máximo** (2,2 ms > 1 ms) aunque su mediana sea
-  13 µs. La D no lo supera nunca. La diferencia entre cumplir y no cumplir está en la cola.
+- **TCP Python incumple el objetivo en el máximo** (2,2 ms > 1 ms) aunque su mediana sea
+  13 µs. Memoria compartida C no lo supera nunca. La diferencia entre cumplir y no cumplir está en la cola.
 - **`CLOCK_MONOTONIC` avanza a saltos de 1 µs en macOS** (medido). El reloj que la ESPEC
-  exigía no podía medir la variante D. Piso físico de la máquina: 41,67 ns (contador 24 MHz).
+  exigía no podía medir Memoria compartida C. Piso físico de la máquina: 41,67 ns (contador 24 MHz).
 - **macOS/arm64 no permite fijar hilos a núcleos**: `thread_policy_set` devuelve
   `KERN_NOT_SUPPORTED` (verificado). El sistema operativo es una restricción arquitectónica.
 
