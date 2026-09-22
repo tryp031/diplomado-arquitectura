@@ -149,8 +149,12 @@ El umbral de un milisegundo lo cumple la opción más simple y más interoperabl
 la extrema compra dos órdenes de magnitud que casi nadie necesita, al precio de todos los demás
 atributos. Solo hay un caso en que se justifica: cuando el requisito es absoluto, cuando el
 contrato dice *ninguna respuesta por encima de un milisegundo*. Y entonces la razón para
-elegirla no es que sea rápida, sino que **su peor caso está acotado por construcción**: sin
-llamadas al sistema operativo, no hay planificador que pueda robarle trece milisegundos.
+elegirla no es que sea rápida, sino que **saca de la ruta crítica las fuentes de
+variabilidad**: sin llamadas al sistema operativo, no hay planificador que pueda robarle trece
+milisegundos. Aunque cuidado: eliminar no es acotar. Su peor caso medido fue treinta y siete
+microsegundos, cuatrocientas cuarenta y siete veces su propia mediana, sin ejecutar una sola
+llamada al sistema. Lo que podemos afirmar es que no observamos ninguna respuesta por encima
+del milisegundo. No que no puedan ocurrir.
 
 Concluir "usen memoria compartida" habría sido aprender a optimizar. La conclusión que nos
 llevamos es otra: **todo es un trade-off, y la pregunta nunca es cuál es más rápida sino qué

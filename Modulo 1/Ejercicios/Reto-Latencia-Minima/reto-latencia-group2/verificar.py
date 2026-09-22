@@ -206,8 +206,9 @@ def inv_coherencia_clasificadores() -> None:
     if desacuerdos:
         mal("los clasificadores de C y Python NO coinciden",
             "\n".join(desacuerdos) + "\n"
-            "B clasifica con clasificador.py y D con clasificador.h. Si los dos dejan\n"
-            "de coincidir, B y D hacen trabajos distintos y la unica comparacion que\n"
+            "TCP Python clasifica con clasificador.py y Memoria compartida C con\n"
+            "clasificador.h. Si los dos dejan de coincidir, las dos variantes hacen\n"
+            "trabajos distintos y la unica comparacion que\n"
             "queda en pie deja de decir lo que el informe afirma que dice.",
             "ADR-004")
     else:

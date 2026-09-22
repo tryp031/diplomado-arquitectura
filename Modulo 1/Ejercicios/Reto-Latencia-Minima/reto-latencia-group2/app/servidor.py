@@ -88,14 +88,15 @@ VARIANTES = {
         "nota": "espera activa · cero llamadas al sistema",
         "concurrencia": False,
         "porque_no": (
-            "D no tiene conexiones que aceptar: cliente y servidor comparten UNA region "
+            "Memoria compartida C no tiene conexiones que aceptar: cliente y servidor "
+            "comparten UNA region "
             "de memoria con una sola ranura por sentido. Dos clientes se pisarian el "
             "payload y podrian leer la respuesta del otro. Ademas cada proceso gira "
             "ocupando un nucleo entero, asi que 8 clientes + 8 servidores pelearian por "
             "10 nucleos.\n\n"
             "No es una limitacion de implementacion: los 83 ns se pagan con exclusividad. "
             "Compartir exige o un barrido que crece con N, o contencion atomica — y eso "
-            "es justo lo que D elimino para ser rapida. Ver ADR-006."),
+            "es justo lo que esta variante elimino para ser rapida. Ver ADR-006."),
     },
 }
 

@@ -131,7 +131,8 @@ def main() -> int:
     # ── Qué variantes existen hoy ────────────────────────────────────────────
     print()
     print("  VARIANTES DISPONIBLES AQUÍ")
-    # Alcance de la entrega: B y D (ADR-007). A y C nunca se implementaron; Bc y E
+    # Alcance: TCP Python y Memoria compartida C (ADR-007). A y C nunca se
+    # implementaron; Bc y E
     # se midieron y se retiraron del arbol el 16/09 — ver docs/archivo/.
     catalogo = [
         ("tcp-python",           "tcp-python",           "TCP Python",           "python"),

@@ -248,8 +248,13 @@ El sistema no cambió en nada que explique eso: el dominio añade 1,9 ns. Lo que
 >
 > Esto **refuerza** la tesis del trabajo —el entorno es una restricción arquitectónica de
 > primer orden— y **ya está incorporado** al informe (§5.2, §6, §7.1 y limitación 7). La
-> diferencia real entre B y D no es que una sea lenta, sino que **el peor caso de D está
-> acotado por construcción** y el de B queda a merced del planificador.
+> diferencia real entre las dos variantes no es que una sea lenta, sino que Memoria compartida C
+> **saca de la ruta crítica las fuentes de variabilidad** —sin llamadas al sistema no hay
+> planificador que intervenga— y TCP Python queda a merced de él.
+>
+> ⚠ **Eso no la acota.** El máximo de Memoria compartida C fue 37 µs, **447× su propia
+> mediana**, sin una sola llamada al sistema. No se observaron muestras sobre 1 ms; no es lo
+> mismo que no puedan ocurrir.
 
 ### Convención de rondas — cuáles entran en el informe
 

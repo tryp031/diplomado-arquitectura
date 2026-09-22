@@ -67,7 +67,7 @@ es de esfuerzo: es de validez. Está razonado en
 │  PLANO DE CONTROL — app/        milisegundos        NO se mide    │
 │  React + HTTP. Formularios, listas, botones, gráficas.            │
 └─────────────────────────────┬────────────────────────────────────┘
-                              │  "medí 50 000 intercambios contra B"
+                              │  "medí 50 000 intercambios contra TCP Python"
                               ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │  PLANO DE DATOS — sistema/      microsegundos       SÍ se mide    │
@@ -90,8 +90,8 @@ Las mismas mediciones, lanzadas desde el navegador y desde la línea de comandos
 
 | Variante | Desde `./run.sh` | Desde la aplicación web |
 |---|---|---|
-| B · TCP en Python | 13,4 µs | 13,46 µs |
-| D · memoria compartida | 83 ns | 83 ns |
+| TCP Python | 13,4 µs | 13,46 µs |
+| Memoria compartida C | 83 ns | 83 ns |
 
 Idénticos. Quien aprieta el botón no cambia lo que se mide.
 
@@ -223,13 +223,13 @@ Corrida oficial del **17/09/2026**, 3 rondas × 1 000 000 por arquitectura.
 
 | Arquitectura | Mediana | Cola p99,9 | Peor caso | > 1 ms (de 3 M) | Objetivo 1 ms |
 |---|---|---|---|---|---|
-| D · memoria compartida | **0,08 µs** | 0,17 µs | 37 µs | **0** | ✅ 12 048× por debajo |
-| B · TCP en Python | 13,5 µs | 116,2 µs | 13 650 µs | **136** | ✅ por mediana · ❌ por cola |
+| Memoria compartida C | **0,08 µs** | 0,17 µs | 37 µs | **0** | ✅ 12 048× por debajo |
+| TCP Python | 13,5 µs | 116,2 µs | 13 650 µs | **136** | ✅ por mediana · ❌ por cola |
 
 **Equipo de referencia: Apple M4, macOS 26.6, arm64.** Se reproducen con `./run.sh`.
 
-> **El resultado de B no es reproducible entre corridas, y ese es el hallazgo.** El
-> 14/09, con el mismo código y el mismo `n`, B dio **0** muestras por encima de 1 ms;
+> **El resultado de TCP Python no es reproducible entre corridas, y ese es el hallazgo.** El
+> 14/09, con el mismo código y el mismo `n`, TCP Python dio **0** muestras por encima de 1 ms;
 > el 17/09 dio **136**. Lo único que cambió fue el estado de la máquina. Afirmar «esta
 > arquitectura incumple» a partir de una sola corrida es afirmar algo sobre la máquina,
 > no sobre la arquitectura. Análisis completo en `INFORME.md` §7.1; la evidencia de la

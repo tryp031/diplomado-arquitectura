@@ -580,8 +580,16 @@ casi nadie necesita, al precio de todos los demás atributos.
 La excepción es precisamente el requisito absoluto: si el contrato dice *«ninguna respuesta por
 encima de 1 ms»*, B no sirve — no por lenta, sino porque **su peor caso depende del estado de la
 máquina** y no de su diseño: una corrida da cero incumplimientos y la siguiente, 136.
-**Ese es el único escenario en que el precio de D se justifica**, y la razón no es que D sea
-rápida sino que su peor caso está acotado por construcción.
+**Ese es el único escenario en que el precio de la variante Memoria compartida C se justifica**, y la razón
+no es que sea rápida sino que **elimina de la ruta crítica las fuentes de variabilidad**: sin
+llamadas al sistema no hay planificador que intervenga.
+
+Con un matiz que este mismo experimento obliga a declarar: **eliminar no es acotar**. El máximo
+medido de esta variante fue **37 125 ns, 447× su propia mediana**, impuesto por el planificador
+y por el hardware pese a no ejecutar una sola llamada al sistema. Lo que sostienen los datos es
+que **no se observó ninguna muestra por encima de 1 ms en 3 000 000**; no que no puedan
+ocurrir. Afirmar que su peor caso está acotado por construcción sería ir más lejos de lo que
+esta medición permite.
 
 ### 8.2 Atributos sacrificados por la variante Memoria compartida C
 
