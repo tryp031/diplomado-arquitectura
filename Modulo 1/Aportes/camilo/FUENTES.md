@@ -92,7 +92,7 @@ El documento no lleva etiquetas de fuente ni anexos; el registro de origen vive 
 | 4 | El comentario de `common.h` estima el límite de espera en «~segundos»; medido en x86-64/WSL2 son ≈ 21 s por intercambio perdido | `common.h:60-62` | Dato medido propio; conviene reportarlo al autor del código |
 | 5 | El cliente D imprime la granularidad «41.67 ns» de forma fija y `reloj_verificar()` nunca se llama | ADR-003 exige verificar y reportar la granularidad real | Incumplimiento en otra plataforma; sin efecto en el equipo de referencia |
 | 6 | 3.4 usa Bc p50 = 12 000 ns y B p50 = 13 209 ns (tabla agregada de `control-Bc-tcp-c.md`) | `variante-E-icmp.md` da Bc = 11,5 µs y B = 13,4 µs para las mismas mediciones | Dos agregaciones distintas del mismo día dentro de los documentos archivados; el documento usa la primera por ser la que descompone el factor |
-| 7 | 3.4 apoya la descomposición lenguaje/transporte (9,2 % / 90,8 %) en el control Bc | README del reto y ADR-007: Bc se retiró del árbol y su trabajo queda como historia, «no como sustento de ninguna conclusión vigente» | Declarar en el consolidado cuál se adopta; el documento debería decir que el control ya no es reproducible desde el árbol |
+| 7 | 3.4 apoyaba la descomposición lenguaje/transporte (9,2 % / 90,8 %) en el control Bc, sin fecha, y 5.4 la citaba como «la evidencia de descomposición» | README del reto y ADR-007: Bc se retiró del árbol y su trabajo queda como historia, «no como sustento de ninguna conclusión vigente» | **Corregido en este PR** (revisión de @dmazo-koronet, 21/09): 3.4 ahora fecha la campaña (10/09/2026), dice explícitamente que Bc no es reproducible desde el árbol tras el ADR-007, y 5.4 la llama «indicio histórico», no evidencia vigente. La cifra se conserva, declarada — no se borró |
 
 ---
 
@@ -114,7 +114,8 @@ líneas; los tres fragmentos clave comentados (`clasificar`, ruta caliente del s
 de medición); cómo se ejecuta; glosario.
 
 **Límites:** los rangos de líneas corresponden al código a fecha 2026-09-20 (server.c 155, client.c 277, common.h 64,
-clasificador.h 216, reloj.h 109, Makefile 22). Si esos archivos cambian, hay que actualizar los rangos. Se
+clasificador.h 216, reloj.h 109, Makefile 25 — actualizado el 21/09 tras el PR de `reto/camilo-d-linux-wsl2`, que
+le añadió `-D_GNU_SOURCE` y su comentario). Si esos archivos cambian, hay que actualizar los rangos. Se
 comprobó mecánicamente que las líneas citadas contienen lo que el texto dice. El `Makefile` incluye `-D_GNU_SOURCE`
 (propuesto en el PR de la rama `reto/camilo-d-linux-wsl2`).
 

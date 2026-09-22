@@ -375,7 +375,7 @@ binario.</p>
 <p>Comparar B (Python + TCP) con D (C + memoria compartida) cambia a la vez el transporte y el lenguaje. Para separar las dos causas se midió un <strong>control</strong>, llamado <strong>Bc</strong>: la misma comunicación TCP de B, con la misma frontera de medición, el mismo reloj y el mismo payload, pero programada en C. Con tres puntos en lugar de dos, el efecto se descompone:</p>
 <pre><code>B  (Python + TCP) ── cambia el LENGUAJE ──▶ Bc (C + TCP)
 Bc (C + TCP)      ── cambia el TRANSPORTE ─▶ D  (C + memoria compartida)</code></pre>
-<p>Medido sobre el equipo de referencia con 3 × 1 000 000 de muestras:</p>
+<p>Medido sobre el equipo de referencia el <strong>10/09/2026</strong>, en la campaña que incluía el control Bc, con 3 × 1 000 000 de muestras — <strong>anterior a la corrida vigente del 17/09</strong>. El <strong>ADR-007 retiró Bc del árbol</strong>: estas cifras no se pueden reproducir hoy compilando y corriendo el proyecto, y quedan como indicio histórico, no como conclusión vigente.</p>
 <div class="tw"><table>
 <thead><tr><th>Salto</th><th class="n">p50 antes → después (ns)</th><th class="n">Factor</th><th class="n">Peso</th></tr></thead>
 <tbody>
@@ -493,7 +493,7 @@ Bc (C + TCP)      ── cambia el TRANSPORTE ─▶ D  (C + memoria compartida)
 <figcaption>Latencia por percentil, escala logarítmica. Corrida del 17/09/2026, 3 000 000 de muestras por variante. La curva de B cruza la línea de 1 ms en la cola (entre el p99.99 y el p99.999); la de D no la alcanza.</figcaption>
 </figure>
 <p>Por la mediana, las dos variantes cumplen con holgura. Solo la cola distingue: B tiene 136 muestras sobre el umbral y D ninguna. La métrica elegida, no el sistema, decide el veredicto. Además, el veredicto de B no es reproducible: con el mismo código y el mismo equipo dio 0 muestras sobre 1 ms el 14/09 y 136 el 17/09, mientras que D dio 0 en ambas. El peor caso de D está acotado por construcción; el de B depende del estado de la máquina.</p>
-<blockquote><p><strong>Limitación de la comparación.</strong> B y D difieren en transporte y lenguaje a la vez. El factor de 162× por p50 no se atribuye a una sola causa; la evidencia de descomposición es la del control Bc (3.4).</p></blockquote>
+<blockquote><p><strong>Limitación de la comparación.</strong> B y D difieren en transporte y lenguaje a la vez. El factor de 162× por p50 no se atribuye a una sola causa; 3.4 recoge un <strong>indicio histórico</strong> de descomposición (control Bc, campaña del 10/09/2026, no reproducible desde el árbol tras el ADR-007), no evidencia vigente.</p></blockquote>
 
 <h3>5.5 La cola sigue ahí, sin bloquear en el intercambio</h3>
 <p>D tiene máximos de 16,2 a 37,1 µs en el equipo de referencia: <strong>447× su p50</strong>. No lo causa el transporte. Según el ADR-002, lo causan el planificador, las interrupciones y, muy probablemente, la migración del hilo a un núcleo de eficiencia, que en macOS/arm64 no se puede impedir porque <code>thread_policy_set(THREAD_AFFINITY_POLICY)</code> devuelve <code>KERN_NOT_SUPPORTED</code> en ese equipo. La clase de QoS solo <em>sugiere</em> núcleos de rendimiento.</p>

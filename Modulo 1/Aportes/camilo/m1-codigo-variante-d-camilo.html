@@ -130,7 +130,7 @@ mutuamente cambiando un contador. Todo el código cabe en unas 840 líneas, repa
 <tr><td><code>sistema/clasificador.h</code></td><td>216</td><td>El «dominio»: la tabla de hosts, la función que clasifica y el formato de los mensajes</td><td>server.c, client.c</td></tr>
 <tr><td><code>variante-D-shm/server.c</code></td><td>155</td><td>El programa servidor</td><td>—</td></tr>
 <tr><td><code>variante-D-shm/client.c</code></td><td>277</td><td>El programa cliente medidor</td><td>—</td></tr>
-<tr><td><code>variante-D-shm/Makefile</code></td><td>22</td><td>Compila los dos programas</td><td>run.sh, plano de control</td></tr>
+<tr><td><code>variante-D-shm/Makefile</code></td><td>25</td><td>Compila los dos programas</td><td>run.sh, plano de control</td></tr>
 </tbody></table></div>
 <p><code>reloj.h</code> y <code>clasificador.h</code> viven en <code>sistema/</code> porque también los usan otras variantes;
 los demás archivos están en <code>sistema/variante-D-shm/</code>.</p>
@@ -459,11 +459,11 @@ while (!g_salir) {
 <div class="tw"><table>
 <thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
 <tbody>
-<tr><td class="l">1–6</td><td>Comentario: se usa <code>-O2</code> y no <code>-O3</code> porque <code>-O3</code> activa transformaciones agresivas cuyo efecto sobre un bucle dominado por la latencia de caché es impredecible y haría el resultado más difícil de explicar. La medición tiene que ser defendible, no máxima.</td></tr>
-<tr><td class="l">7–9</td><td>Variables <code>CC</code> (el compilador, <code>cc</code>), <code>CFLAGS</code> y <code>LDFLAGS</code>. El operador <code>?=</code> permite reemplazarlas desde la línea de comandos.</td></tr>
-<tr><td class="l">11</td><td>El objetivo por defecto, <code>all</code>: construye <code>server</code> y <code>client</code>.</td></tr>
-<tr><td class="l">13–17</td><td>Cómo se construye cada programa a partir de su <code>.c</code>. Las dependencias incluyen los encabezados: si cambia <code>common.h</code> o <code>clasificador.h</code>, se recompila.</td></tr>
-<tr><td class="l">19–22</td><td><code>clean</code> borra los binarios; <code>.PHONY</code> indica que <code>all</code> y <code>clean</code> son acciones y no archivos.</td></tr>
+<tr><td class="l">1–9</td><td>Comentario: se usa <code>-O2</code> y no <code>-O3</code> porque <code>-O3</code> activa transformaciones agresivas cuyo efecto sobre un bucle dominado por la latencia de caché es impredecible y haría el resultado más difícil de explicar (la medición tiene que ser defendible, no máxima); y por qué hace falta <code>-D_GNU_SOURCE</code> en Linux/WSL2 (no cambia el nivel de optimización, ver más abajo).</td></tr>
+<tr><td class="l">10–12</td><td>Variables <code>CC</code> (el compilador, <code>cc</code>), <code>CFLAGS</code> y <code>LDFLAGS</code>. El operador <code>?=</code> permite reemplazarlas desde la línea de comandos.</td></tr>
+<tr><td class="l">14</td><td>El objetivo por defecto, <code>all</code>: construye <code>server</code> y <code>client</code>.</td></tr>
+<tr><td class="l">16–20</td><td>Cómo se construye cada programa a partir de su <code>.c</code>. Las dependencias incluyen los encabezados: si cambia <code>common.h</code> o <code>clasificador.h</code>, se recompila.</td></tr>
+<tr><td class="l">22–25</td><td><code>clean</code> borra los binarios; <code>.PHONY</code> indica que <code>all</code> y <code>clean</code> son acciones y no archivos.</td></tr>
 </tbody></table></div>
 <p>Las opciones de compilación son:</p>
 <ul>
