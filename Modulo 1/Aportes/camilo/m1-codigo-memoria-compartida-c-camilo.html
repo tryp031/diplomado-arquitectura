@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memoria compartida C — Guía del código</title>
+<style>
+:root{
+  --paper:#e9edf2; --card:#fff; --ink:#17212b; --muted:#5b6b7c;
+  --navy:#123252; --navy-2:#1f4e79; --navy-soft:#e2ebf3;
+  --gold:#b2802a; --gold-soft:#f8f1df;
+  --green:#256b47; --green-soft:#e3f1e9; --line:#d3dbe4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.62}
+
+header.cover{background:var(--navy);color:#fff;padding:46px 32px 36px;border-bottom:4px solid var(--gold)}
+.cover-in{max-width:1180px;margin:0 auto}
+.cover .kicker{font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px}
+.cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;
+  font-size:2.25rem;line-height:1.2;margin:0 0 8px;max-width:24ch}
+.cover .sub{font-family:Georgia,serif;font-size:1.22rem;color:#f0d6a0;margin:0 0 18px}
+.cover p.lead{margin:0;max-width:72ch;color:#dbe6f0;font-size:1rem}
+.cover p.by{margin:18px 0 0;color:#a9c4dd;font-size:.9rem}
+.cover strong{color:#fff}
+
+.shell{max-width:1180px;margin:0 auto;padding:26px 22px 70px;
+  display:grid;grid-template-columns:232px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px}
+nav.toc h2{font-family:Georgia,serif;font-weight:normal;font-size:1rem;color:var(--navy);
+  margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+nav.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);
+  font-size:.88rem;padding:5px 6px;border-radius:6px;line-height:1.35}
+nav.toc a:hover{background:var(--navy-soft);color:var(--navy)}
+nav.toc .tn{color:var(--gold);font-weight:700;flex:0 0 22px;text-align:right}
+
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:6px 30px 26px;margin:0 0 16px}
+h2{font-family:Georgia,serif;font-weight:normal;color:var(--navy);
+  font-size:1.5rem;margin:26px 0 6px;padding-bottom:9px;border-bottom:2px solid var(--navy-soft);scroll-margin-top:16px}
+h3{font-size:1.1rem;color:var(--navy-2);margin:26px 0 6px;scroll-margin-top:16px}
+p{margin:11px 0;max-width:78ch}
+ul,ol{padding-left:22px;margin:11px 0;max-width:78ch}
+li{margin:5px 0}
+strong{color:var(--navy)}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#eef2f7;
+  padding:1px 5px;border-radius:4px}
+pre{background:#0f2237;color:#e7eef6;padding:14px 16px;border-radius:8px;overflow-x:auto;
+  font-size:.85rem;line-height:1.5;margin:14px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+a{color:var(--navy-2)}
+
+blockquote{margin:16px 0;padding:13px 18px;background:var(--gold-soft);
+  border-left:4px solid var(--gold);border-radius:8px}
+blockquote p{margin:4px 0;max-width:76ch}
+blockquote strong{color:#8a6318}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eef2f7;color:var(--navy);font-weight:600}
+tbody tr:nth-child(even){background:#fafbfd}
+td.l{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+.tw{overflow-x:auto}
+
+figure{margin:18px 0}
+figure svg{width:100%;height:auto;background:#fbfcfe;border:1px solid var(--line);border-radius:8px}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:6px}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;fill:#17212b}
+svg .sm{font-size:11.5px;fill:#5b6b7c}
+svg .b{font-weight:700}
+
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:.85rem}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;padding:18px 14px 50px}
+  nav.toc{position:static}
+  section{padding:4px 16px 20px}
+  .cover h1{font-size:1.7rem}
+}
+@media print{
+  nav.toc{display:none} .shell{display:block} section{break-inside:avoid-page;border:none}
+}
+</style>
+</head>
+<body>
+
+<header class="cover"><div class="cover-in">
+  <p class="kicker">Módulo 1 · Reto de Latencia Mínima · Group 2</p>
+  <h1>Memoria compartida C — Guía del código</h1>
+  <p class="sub">Qué hace cada archivo y cada bloque</p>
+  <p class="lead">Recorrido por el código de la variante de memoria compartida: los seis archivos que la
+  componen, en qué orden se leen, qué hace cada bloque y por qué está escrito así. Cada bloque indica sus
+  líneas para poder abrir el archivo y seguir el texto.</p>
+  <p class="by">Camilo Céspedes · 22/09/2026</p>
+</div></header>
+
+<div class="shell">
+<nav class="toc" aria-label="Contenido">
+  <h2>Contenido</h2>
+  <a href="#general"><span class="tn">1</span>Visión general</a>
+  <a href="#common"><span class="tn">2</span>common.h</a>
+  <a href="#reloj"><span class="tn">3</span>reloj.h</a>
+  <a href="#clasif"><span class="tn">4</span>clasificador.h</a>
+  <a href="#server"><span class="tn">5</span>server.c</a>
+  <a href="#client"><span class="tn">6</span>client.c</a>
+  <a href="#make"><span class="tn">7</span>Makefile</a>
+  <a href="#ejec"><span class="tn">8</span>Cómo se ejecuta</a>
+  <a href="#gloss"><span class="tn">9</span>Glosario</a>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<section id="general">
+<h2>1. Visión general</h2>
+<p>Memoria compartida C son <strong>dos programas en C</strong> que se ejecutan a la vez: un <strong>servidor</strong> que
+clasifica hosts y un <strong>cliente</strong> que le envía estímulos y cronometra cada respuesta. No se envían
+mensajes por una red ni por un socket: ambos programas leen y escriben una misma zona de memoria y se avisan
+mutuamente cambiando un contador. Todo el código cabe en unas 890 líneas, repartidas así:</p>
+
+<div class="tw"><table>
+<thead><tr><th>Archivo</th><th>Líneas</th><th>Para qué sirve</th><th>Quién lo usa</th></tr></thead>
+<tbody>
+<tr><td><code>memoria-compartida-c/common.h</code></td><td>64</td><td>Define la región de memoria compartida y sus constantes</td><td>server.c, client.c</td></tr>
+<tr><td><code>sistema/reloj.h</code></td><td>109</td><td>Lee el reloj en nanosegundos y define la pausa de la espera activa</td><td>common.h (y por él, server.c y client.c)</td></tr>
+<tr><td><code>sistema/clasificador.h</code></td><td>216</td><td>El «dominio»: la tabla de hosts, la función que clasifica y el formato de los mensajes</td><td>server.c, client.c</td></tr>
+<tr><td><code>memoria-compartida-c/server.c</code></td><td>155</td><td>El programa servidor</td><td>—</td></tr>
+<tr><td><code>memoria-compartida-c/client.c</code></td><td>324</td><td>El programa cliente medidor</td><td>—</td></tr>
+<tr><td><code>memoria-compartida-c/Makefile</code></td><td>25</td><td>Compila los dos programas</td><td>run.sh, plano de control</td></tr>
+</tbody></table></div>
+<p><code>reloj.h</code> y <code>clasificador.h</code> viven en <code>sistema/</code> porque también los usan otras variantes;
+los demás archivos están en <code>sistema/memoria-compartida-c/</code>.</p>
+
+<figure>
+<svg viewBox="0 0 760 210" role="img" aria-label="Quién incluye a quién">
+<defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4e79"/></marker></defs>
+<rect x="30" y="30" width="150" height="46" rx="6" fill="#fff" stroke="#123252" stroke-width="1.5"/><text x="105" y="58" text-anchor="middle" class="b">server.c</text>
+<rect x="30" y="130" width="150" height="46" rx="6" fill="#fff" stroke="#123252" stroke-width="1.5"/><text x="105" y="158" text-anchor="middle" class="b">client.c</text>
+<rect x="320" y="30" width="150" height="46" rx="6" fill="#f8f1df" stroke="#b2802a" stroke-width="1.5"/><text x="395" y="58" text-anchor="middle" class="b">common.h</text>
+<rect x="320" y="130" width="150" height="46" rx="6" fill="#f8f1df" stroke="#b2802a" stroke-width="1.5"/><text x="395" y="158" text-anchor="middle" class="b">clasificador.h</text>
+<rect x="590" y="30" width="140" height="46" rx="6" fill="#f8f1df" stroke="#b2802a" stroke-width="1.5"/><text x="660" y="58" text-anchor="middle" class="b">reloj.h</text>
+<line x1="180" y1="48" x2="320" y2="48" stroke="#1f4e79" marker-end="url(#a1)"/>
+<line x1="180" y1="62" x2="320" y2="145" stroke="#1f4e79" marker-end="url(#a1)"/>
+<line x1="180" y1="145" x2="320" y2="62" stroke="#1f4e79" marker-end="url(#a1)"/>
+<line x1="180" y1="158" x2="320" y2="158" stroke="#1f4e79" marker-end="url(#a1)"/>
+<line x1="470" y1="53" x2="590" y2="53" stroke="#1f4e79" marker-end="url(#a1)"/>
+<text x="380" y="200" text-anchor="middle" class="sm">La flecha indica «incluye a». server.c y client.c incluyen ambos encabezados; common.h incluye reloj.h.</text>
+</svg>
+</figure>
+
+<h3>Qué pasa en una corrida completa (<code>--out</code>)</h3>
+<ol>
+<li><strong>El servidor arranca.</strong> Carga la tabla de hosts, crea la región de memoria compartida (con nombre <code>/latm-D-9103</code>), la deja a cero y queda girando, esperando que el contador de petición cambie.</li>
+<li><strong>El cliente arranca.</strong> Carga la misma tabla, abre la región (reintenta hasta 50 veces cada 50 ms, por si el servidor todavía no la creó) y prepara 16 estímulos.</li>
+<li><strong>Autoprueba.</strong> Antes de medir, el cliente envía los 16 hosts de la tabla y uno desconocido y comprueba que los veredictos sean los esperados.</li>
+<li><strong>Warmup.</strong> Ejecuta cien mil intercambios que no se guardan, para que cachés y frecuencia de CPU se estabilicen.</li>
+<li><strong>Medición.</strong> Para cada intercambio anota el instante antes y después, y guarda la diferencia.</li>
+<li><strong>Contraste por lotes.</strong> Repite el intercambio en bloques de 1000 y mide cada bloque completo, como comprobación cruzada.</li>
+<li><strong>CSV.</strong> El cliente escribe todas las latencias en un archivo y termina.</li>
+<li><strong>El servidor se detiene</strong> cuando recibe una señal de terminación: libera la región y sale.</li>
+</ol>
+<p>Esta es la corrida <strong>oficial</strong> (la que usan <code>run.sh</code> y el botón «Medir rendimiento» de
+la web). El cliente tiene además una <strong>segunda forma de arrancar</strong>, mucho más corta —
+un estímulo suelto con <code>--clasificar</code>, sin CSV ni autoprueba — que usa el botón «Probar
+clasificación» de la web. Es una rama completamente aparte del programa: se explica en la sección 6.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="common">
+<h2>2. common.h — la región compartida</h2>
+<p>Es el archivo más corto y el más importante: define <em>qué</em> se comparte. Todo lo demás (servidor y cliente) es código que lee y escribe esta estructura.</p>
+
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–24</td><td>Comentario de cabecera con las decisiones que se materializan aquí: ranuras alineadas a 128 B, bandera en la misma línea que su payload, sincronización con atómicos y sin anillo.</td></tr>
+<tr><td class="l">25–30</td><td>Protección contra inclusión doble (<code>LATM_COMMON_H</code>) e includes de <code>stdatomic.h</code> (tipos y operaciones atómicas), <code>stdint.h</code> y <code>stddef.h</code>.</td></tr>
+<tr><td class="l">32–34</td><td>Incluye <code>../reloj.h</code>. El reloj y la pausa de espera son del instrumento común, no de esta variante, para que todas midan con lo mismo.</td></tr>
+<tr><td class="l">36–37</td><td><code>LINEA_CACHE</code> = 128 (bytes) y <code>PAYLOAD_MAX</code> = 128 − 8 = <strong>120 bytes</strong>: lo que queda de una ranura después de reservar 8 bytes para el contador.</td></tr>
+<tr><td class="l">39–46</td><td><code>ranura_t</code>: la unidad de intercambio. Y una aserción de compilación que exige que mida exactamente 128 bytes.</td></tr>
+<tr><td class="l">48–54</td><td><code>region_t</code>: dos ranuras, <code>peticion</code> y <code>respuesta</code>. Otra aserción exige 256 bytes en total.</td></tr>
+<tr><td class="l">56–58</td><td><code>NOMBRE_SHM_FMT</code> = <code>"/latm-D-%d"</code>: el nombre del objeto de memoria compartida, con el puerto como número. Servidor y cliente lo construyen igual, y así se encuentran.</td></tr>
+<tr><td class="l">60–62</td><td><code>LIMITE_SPIN</code> = 5 000 000 000: cuántos giros espera el cliente una respuesta antes de rendirse en ese intercambio.</td></tr>
+</tbody></table></div>
+
+<pre><code>#define LINEA_CACHE 128
+#define PAYLOAD_MAX (LINEA_CACHE - sizeof(uint64_t))   /* 120 B */
+
+typedef struct {
+    _Alignas(LINEA_CACHE) _Atomic uint64_t seq;        /* contador de secuencia */
+    unsigned char dato[LINEA_CACHE - sizeof(uint64_t)];/* el mensaje */
+} ranura_t;
+
+typedef struct {
+    ranura_t peticion;    /* cliente escribe, servidor lee */
+    ranura_t respuesta;   /* servidor escribe, cliente lee */
+} region_t;</code></pre>
+
+<h3>Cómo leer esta estructura</h3>
+<ul>
+<li><strong><code>_Atomic uint64_t seq</code></strong> es un número de 64 bits que se lee y se escribe de forma indivisible: nadie puede verlo a medias. Es el «timbre»: quien escribe un mensaje sube el número, y quien espera detecta que cambió.</li>
+<li><strong><code>dato[120]</code></strong> es el mensaje. Se usan 32 bytes por defecto; el resto queda libre.</li>
+<li><strong><code>_Alignas(128)</code></strong> hace que cada ranura empiece en una dirección múltiplo de 128. Así <code>peticion</code> y <code>respuesta</code> quedan en <em>líneas de caché distintas</em>. Si compartieran línea, cada escritura de un proceso obligaría al otro núcleo a descartar su copia (<em>false sharing</em>) y la latencia aumentaría mucho.</li>
+<li><strong>Cada ranura tiene un solo escritor.</strong> El cliente solo escribe en <code>peticion</code> y el servidor solo en <code>respuesta</code>, por eso no hace falta ningún cerrojo.</li>
+<li><strong>El contador y el mensaje comparten línea:</strong> cuando el otro núcleo ve el contador nuevo, el mensaje ya viajó con él en la misma transferencia.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="reloj">
+<h2>3. reloj.h — el reloj y la pausa</h2>
+<p>Contiene las dos herramientas de bajo nivel que necesitan ambos programas: leer la hora en nanosegundos y esperar sin ceder la CPU.</p>
+
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–22</td><td>Comentario: por qué se usa este reloj. La tabla de granularidades medidas (1000 ns para <code>CLOCK_MONOTONIC</code> en el equipo de referencia frente a 41 ns de <code>CLOCK_UPTIME_RAW</code>) justifica la elección.</td></tr>
+<tr><td class="l">33–42</td><td><code>ahora_ns()</code>: devuelve la hora actual en nanosegundos, de un reloj que nunca retrocede. En macOS usa <code>clock_gettime_nsec_np(CLOCK_UPTIME_RAW)</code>; en el resto, <code>clock_gettime(CLOCK_MONOTONIC)</code>. Es lo que se usa para cronometrar.</td></tr>
+<tr><td class="l">44–57</td><td><code>pausa_spin()</code>: la pausa que se inserta dentro de los bucles de espera activa. En arm64 emite <code>isb sy</code>; en x86-64, <code>pause</code> (<code>__builtin_ia32_pause</code>); en otras arquitecturas, una barrera vacía. <strong>No cede el núcleo al sistema operativo</strong>: solo indica a la CPU que está girando, lo que ahorra energía y mejora la espera.</td></tr>
+<tr><td class="l">59–63</td><td><code>latm_cmp_u64</code>: función de comparación de enteros de 64 bits, para ordenar con <code>qsort</code>.</td></tr>
+<tr><td class="l">65–98</td><td><code>reloj_verificar()</code>: mide la granularidad real del reloj (el menor salto no nulo entre dos lecturas seguidas) y el costo de un par de lecturas, sobre 100 000 pares.</td></tr>
+<tr><td class="l">100–107</td><td><code>reloj_avisar_si_grueso()</code>: avisa si la granularidad no es al menos diez veces menor que la latencia esperada.</td></tr>
+</tbody></table></div>
+<p>El servidor y el cliente de Memoria compartida C usan <code>ahora_ns()</code> y <code>pausa_spin()</code>. Las funciones <code>reloj_verificar()</code> y <code>reloj_avisar_si_grueso()</code> no se invocan desde este cliente, que mide por su cuenta el costo del reloj (sección 6, «Piso de medición»).</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="clasif">
+<h2>4. clasificador.h — el dominio</h2>
+<p>Define qué significan los mensajes: <strong>dado un host, ¿es local, externo o desconocido?</strong> Contiene la tabla de hosts, la función que clasifica, el cargador del archivo CSV y el formato de los mensajes. Lo comparten las dos variantes.</p>
+
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–61</td><td>Comentario largo con las tres propiedades del dominio (cabe en una línea de caché, es de tiempo constante, no asigna memoria ni hace E/S) y la trampa a evitar: si la tabla fuera constantes del código, el compilador plegaría el bucle y el clasificador desaparecería del binario.</td></tr>
+<tr><td class="l">62–70</td><td>Guarda de inclusión e includes (<code>arpa/inet.h</code> para convertir direcciones IP, más la biblioteca estándar).</td></tr>
+<tr><td class="l">72–81</td><td>Constantes: <code>TABLA_MAX</code> = 16; los veredictos <code>EXTERNO</code> = 0, <code>LOCAL</code> = 1, <code>DESCONOCIDO</code> = 2; y <code>RANURA_LIBRE</code> = 0xFFFFFFFF (la dirección 255.255.255.255, que nunca es un host consultado, así una ranura vacía jamás coincide).</td></tr>
+<tr><td class="l">83–86</td><td>Las variables globales de la tabla: <code>g_tabla_id[16]</code> (las direcciones, 16 × 4 B = 64 B, alineadas a 64), <code>g_tabla_ver[16]</code> (el veredicto de cada una) y <code>g_tabla_n</code> (cuántas hay). Al ser <code>static</code>, cada programa tiene su propia copia.</td></tr>
+<tr><td class="l">88–101</td><td><code>clasificar(id)</code>: <strong>la ruta caliente</strong>. Ver el bloque de código más abajo.</td></tr>
+<tr><td class="l">105–163</td><td><code>clasificador_cargar(ruta)</code>: lee el CSV una sola vez, al arrancar. Ver el detalle más abajo.</td></tr>
+<tr><td class="l">165–170</td><td><code>id_de_ip("a.b.c.d")</code>: convierte un texto de IP al entero de 32 bits que se usa como identificador. Si el texto no es válido devuelve <code>RANURA_LIBRE</code>. Es la función que usa el modo <code>--clasificar</code> del cliente (sección 6) para convertir la IP que manda la web.</td></tr>
+<tr><td class="l">172–179</td><td><code>nombre_veredicto(v)</code>: convierte el número del veredicto a texto (<code>LOCAL</code>, <code>EXTERNO</code>, <code>DESCONOCIDO</code>).</td></tr>
+<tr><td class="l">181–190</td><td><code>clasificador_resumen(etiqueta, ruta)</code>: imprime cuántos hosts se cargaron y cuántos son locales y externos.</td></tr>
+<tr><td class="l">192–207</td><td>Comentario con el formato de los mensajes de 32 bytes, y las constantes de posición: <code>OFF_HOST_ID</code> = 0, <code>OFF_SEQ</code> = 4, <code>OFF_VEREDICTO</code> = 0, <code>OFF_ECO_ID</code> = 4.</td></tr>
+<tr><td class="l">209–214</td><td><code>armar_estimulo(buffer, n, host_id, seq)</code>: llena un buffer con ceros y escribe el host y el número de secuencia en su posición. La usan tanto el ciclo de 16 estímulos como el modo <code>--clasificar</code>.</td></tr>
+</tbody></table></div>
+
+<h3>clasificar(): la función que se ejecuta en cada mensaje</h3>
+<pre><code>static inline uint8_t clasificar(uint32_t id)
+{
+    uint8_t v = (uint8_t)VEREDICTO_DESCONOCIDO;
+    for (int i = 0; i &lt; TABLA_MAX; i++)
+        v = (g_tabla_id[i] == id) ? g_tabla_ver[i] : v;
+    return v;
+}</code></pre>
+<ul>
+<li>Parte de «desconocido» y compara el identificador con <strong>las 16 entradas, siempre</strong>. Si alguna coincide, toma su veredicto.</li>
+<li>No hay salida anticipada ni <code>if</code> dependiente del dato: el <code>? :</code> se traduce a una instrucción de selección condicional (<code>csel</code> en arm64, <code>cmov</code> en x86). Por eso clasificar un host local, uno externo o uno desconocido <strong>cuesta lo mismo</strong>, y la latencia no depende de qué host se consulte.</li>
+<li>Si hubiera direcciones repetidas en la tabla, ganaría la última, porque el recorrido nunca se detiene.</li>
+</ul>
+
+<h3>clasificador_cargar(): cómo se lee la tabla</h3>
+<ol>
+<li>Pone las 16 ranuras en «libre» con veredicto «desconocido» (líneas 107–111).</li>
+<li>Abre el archivo; si no puede, informa el error y devuelve −1 (113–118).</li>
+<li>Lee línea por línea (hasta 256 caracteres). Salta los comentarios (que empiezan con <code>#</code>) y las líneas vacías (122).</li>
+<li>Separa cada línea en tres campos <code>nombre,ip,veredicto</code> con <code>sscanf</code> (125). Una línea que no tenga los tres campos se ignora en silencio. La fila de cabecera (<code>nombre</code>) también se salta (126).</li>
+<li>Si ya hay 16 y aparece otra, aborta con un mensaje: el límite es una decisión de diseño (128–134).</li>
+<li>Convierte la IP con <code>inet_pton</code>; si no es válida, aborta (136–141). El resultado se guarda tal cual, en orden de red, sin convertir el orden de bytes (152).</li>
+<li>Interpreta el veredicto: <code>local</code> → 1, <code>externo</code> → 0; cualquier otra palabra aborta (143–150).</li>
+<li>Si al final no hay ninguna entrada, informa el error; si no, devuelve cuántas cargó (158–162).</li>
+</ol>
+
+<h3>El formato de los mensajes</h3>
+<div class="tw"><table>
+<thead><tr><th>Byte</th><th>Estímulo (cliente → servidor)</th><th>Byte</th><th>Respuesta (servidor → cliente)</th></tr></thead>
+<tbody>
+<tr><td class="l">0–3</td><td><code>host_id</code>: la dirección IPv4 como entero de 32 bits</td><td class="l">0</td><td>veredicto (0, 1 o 2)</td></tr>
+<tr><td class="l">4–7</td><td><code>seq</code>: número de secuencia</td><td class="l">1–3</td><td>relleno (ceros)</td></tr>
+<tr><td class="l">8–31</td><td>relleno (ceros)</td><td class="l">4–7</td><td>eco de <code>host_id</code>, para que el cliente verifique que la respuesta es de su petición</td></tr>
+<tr><td class="l"></td><td></td><td class="l">8–31</td><td>relleno (ceros)</td></tr>
+</tbody></table></div>
+<p>El formato es binario y de tamaño fijo, no texto: serializar y analizar texto costaría más que el propio intercambio.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="server">
+<h2>5. server.c — el servidor</h2>
+<p>Un programa que prepara la región compartida y luego ejecuta un bucle infinito: espera una petición, la clasifica y responde.</p>
+
+<h3>Opciones de línea de comandos</h3>
+<div class="tw"><table>
+<thead><tr><th>Opción</th><th>Por defecto</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td><code>--host</code></td><td>127.0.0.1</td><td>Se acepta por compatibilidad con las demás variantes y se ignora</td></tr>
+<tr><td><code>--port</code></td><td>9103</td><td>No abre ningún puerto: solo forma el nombre de la región (<code>/latm-D-9103</code>)</td></tr>
+<tr><td><code>--payload</code></td><td>32</td><td>Tamaño del mensaje en bytes. Debe estar entre 8 y 120</td></tr>
+<tr><td><code>--tabla</code></td><td>tabla-hosts.csv</td><td>Ruta del CSV con los hosts</td></tr>
+<tr><td><code>--sin-clasificar</code></td><td>apagado</td><td>Modo de control: responde siempre «local» sin consultar la tabla, para medir cuánto cuesta clasificar</td></tr>
+</tbody></table></div>
+
+<h3>Bloque por bloque</h3>
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–15</td><td>Comentario de cabecera: el contrato con el harness, lo que cumple del enunciado (escucha permanentemente, responde algo específico, sin llamadas al sistema en la ruta caliente) y su costo: un núcleo al 100 %.</td></tr>
+<tr><td class="l">16–30</td><td>Includes: funciones POSIX de archivos, memoria compartida, señales y procesos; <code>pthread.h</code> solo en Apple; y los dos encabezados propios.</td></tr>
+<tr><td class="l">32–35</td><td>Dos globales: <code>g_nombre</code> (el nombre de la región) y <code>g_salir</code>, un indicador que el manejador de señal pone en 1. Es <code>volatile sig_atomic_t</code> porque lo escribe un manejador de señal.</td></tr>
+<tr><td class="l">35</td><td><code>al_terminar()</code>: el manejador de señal. Solo pone <code>g_salir = 1</code>; el trabajo de cierre lo hace el bucle principal.</td></tr>
+<tr><td class="l">37–40</td><td><code>limpiar()</code>: borra el nombre de la región con <code>shm_unlink</code> si se llegó a crear.</td></tr>
+<tr><td class="l">44–58</td><td>Valores por defecto y lectura de los argumentos. Un argumento desconocido termina con código 2.</td></tr>
+<tr><td class="l">60–65</td><td>Valida el tamaño del mensaje: entre 1 y 120 (cabe en una ranura) y al menos 8 (necesita el host y la secuencia).</td></tr>
+<tr><td class="l">67–79</td><td>Carga la tabla una vez (<code>clasificador_cargar</code>), imprime el resumen y, si se pidió <code>--sin-clasificar</code>, avisa que es modo de control.</td></tr>
+<tr><td class="l">81–90</td><td>Solo en Apple: fija la clase de calidad de servicio <code>USER_INTERACTIVE</code>. Es una sugerencia al planificador para que prefiera núcleos de rendimiento; no es una garantía.</td></tr>
+<tr><td class="l">92–106</td><td><strong>Crea la región compartida</strong> (detalle abajo).</td></tr>
+<tr><td class="l">108–109</td><td>Registra <code>al_terminar</code> para <code>SIGINT</code> (Ctrl-C) y <code>SIGTERM</code> (la terminación estándar).</td></tr>
+<tr><td class="l">111–117</td><td>Dos buffers locales en la pila (<code>respuesta</code> y <code>recibido</code>, de 120 bytes) y el mensaje de arranque.</td></tr>
+<tr><td class="l">119–148</td><td><strong>La ruta caliente</strong> (detalle abajo).</td></tr>
+<tr><td class="l">150–154</td><td>Cierre: imprime el último número de secuencia atendido, desmapea la región y borra su nombre.</td></tr>
+</tbody></table></div>
+
+<h3>Cómo se crea la región (líneas 92–106)</h3>
+<ol>
+<li>Construye el nombre con el puerto: <code>/latm-D-9103</code>.</li>
+<li><code>shm_unlink(nombre)</code>: borra cualquier región anterior con ese nombre, por si quedó una de una ejecución que terminó mal.</li>
+<li><code>shm_open(..., O_CREAT | O_EXCL | O_RDWR, 0600)</code>: crea el objeto nuevo. <code>O_EXCL</code> falla si ya existe; <code>0600</code> deja el permiso solo al usuario.</li>
+<li><code>ftruncate</code>: le da el tamaño de <code>region_t</code> (256 bytes).</li>
+<li><code>mmap(..., MAP_SHARED, ...)</code>: lo proyecta en la memoria del proceso; el resultado <code>r</code> es un puntero a la región. Como es <code>MAP_SHARED</code>, lo que un proceso escribe lo ve el otro. Después se cierra el descriptor, que ya no hace falta.</li>
+<li><code>memset</code> a cero y los dos contadores <code>seq</code> en 0.</li>
+</ol>
+
+<h3>La ruta caliente (líneas 119–148)</h3>
+<pre><code>uint64_t ultima = 0;
+
+while (!g_salir) {
+    uint64_t s;
+    /* espera activa: gira hasta que el contador de petición cambie */
+    while ((s = atomic_load_explicit(&amp;r-&gt;peticion.seq, memory_order_acquire)) == ultima) {
+        if (g_salir) goto fin;
+        pausa_spin();
+    }
+    ultima = s;
+
+    memcpy(recibido, r-&gt;peticion.dato, payload);            /* leer el estímulo */
+
+    uint32_t host_id;
+    memcpy(&amp;host_id, recibido + OFF_HOST_ID, sizeof host_id);
+    respuesta[OFF_VEREDICTO] = sin_clasificar ? (uint8_t)VEREDICTO_LOCAL
+                                              : clasificar(host_id);
+    memcpy(respuesta + OFF_ECO_ID, &amp;host_id, sizeof host_id);
+
+    memcpy(r-&gt;respuesta.dato, respuesta, payload);          /* escribir la respuesta */
+    atomic_store_explicit(&amp;r-&gt;respuesta.seq, s, memory_order_release);
+}</code></pre>
+<ul>
+<li><strong>Esperar.</strong> El bucle interno lee <code>peticion.seq</code> una y otra vez. <code>ultima</code> guarda el último valor atendido; mientras el contador siga igual, no hay petición nueva. Cada vuelta llama a <code>pausa_spin()</code> y revisa si llegó una señal de terminación. Esta espera consume un núcleo completo.</li>
+<li><strong><code>memory_order_acquire</code></strong> garantiza que, si el servidor ve el contador nuevo, también ve el mensaje que el cliente escribió antes de subirlo.</li>
+<li><strong>Leer y responder.</strong> Copia el estímulo a un buffer local, extrae el host, calcula el veredicto y escribe la respuesta en el buffer local: el veredicto en el byte 0 y el eco del host en los bytes 4–7. Los demás bytes quedan en cero.</li>
+<li><strong>Publicar.</strong> Copia la respuesta a la ranura compartida y, <em>después</em>, escribe el contador con <code>memory_order_release</code>. El orden importa: el contador es la señal de «respuesta lista», y <code>release</code> asegura que el cliente que lo vea también vea la respuesta completa.</li>
+<li>La respuesta lleva como <code>seq</code> el <strong>mismo valor</strong> que la petición, y así el cliente sabe a cuál corresponde.</li>
+</ul>
+<p>Nótese que <strong>el servidor no distingue</strong> una corrida completa de un estímulo suelto: siempre es el mismo bucle, atendiendo una petición a la vez. La diferencia entre los dos modos vive enteramente en el cliente (sección 6).</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="client">
+<h2>6. client.c — el cliente medidor</h2>
+<p>El programa más largo, con <strong>324 líneas</strong>, porque además de enviar estímulos se encarga de todo
+lo relacionado con medir: verificar, calentar, cronometrar, comprobar y guardar. Además, ofrece un modo de
+arranque alterno —<code>--clasificar</code>— para responder un único estímulo suelto, sin producir un CSV:
+es el que usa el botón «Probar clasificación» de la interfaz web.</p>
+
+<h3>Opciones de línea de comandos</h3>
+<div class="tw"><table>
+<thead><tr><th>Opción</th><th>Por defecto</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td><code>--host</code></td><td>127.0.0.1</td><td>Se ignora (compatibilidad)</td></tr>
+<tr><td><code>--port</code></td><td>9103</td><td>Forma el nombre de la región; debe coincidir con el del servidor</td></tr>
+<tr><td><code>--payload</code></td><td>32</td><td>Tamaño del mensaje (8 a 120)</td></tr>
+<tr><td><code>--warmup</code></td><td>100 000</td><td>Intercambios de calentamiento que no se guardan. Se ignora en modo <code>--clasificar</code></td></tr>
+<tr><td><code>--iters</code></td><td>1 000 000</td><td>Intercambios que sí se miden. En modo <code>--clasificar</code> se fuerza a 1</td></tr>
+<tr><td><code>--out</code></td><td>(obligatoria salvo con <code>--clasificar</code>)</td><td>Ruta del CSV de salida</td></tr>
+<tr><td><code>--reintentos</code></td><td>50</td><td>Intentos de abrir la región, uno cada 50 ms</td></tr>
+<tr><td><code>--lote</code>, <code>--lote-rondas</code></td><td>1000, 200</td><td>Tamaño y cantidad de los lotes del contraste. Con 0 se omite. Se ignora en modo <code>--clasificar</code></td></tr>
+<tr><td><code>--tabla</code></td><td>tabla-hosts.csv</td><td>Ruta del CSV con los hosts</td></tr>
+<tr><td><code>--sin-clasificar</code></td><td>apagado</td><td>Modo de control: solo se verifica el eco, no el veredicto</td></tr>
+<tr><td><strong><code>--clasificar &lt;ip&gt;</code></strong></td><td>apagado</td><td>Manda UNA pregunta a esa IP, imprime el veredicto y sale — sin CSV, sin warmup, sin autoprueba. Ver más abajo</td></tr>
+</tbody></table></div>
+
+<h3>Bloque por bloque</h3>
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–15</td><td>Comentario de cabecera: contrato con el harness y la frontera de medición (t0 antes de escribir el estímulo, t1 después de tener la respuesta completa).</td></tr>
+<tr><td class="l">16–35</td><td>Includes y <code>cmp_u64</code>, la función de comparación para <code>qsort</code>.</td></tr>
+<tr><td class="l">39–48</td><td>Valores por defecto, incluida <code>clasificar</code> (línea 48, <code>NULL</code> si no se pidió).</td></tr>
+<tr><td class="l">50–64</td><td>Lectura de argumentos, incluida <code>--clasificar</code> (línea 62). Un argumento desconocido termina con código 2.</td></tr>
+<tr><td class="l">67–78</td><td>Si se pidió <code>--clasificar</code>, fuerza <code>iters = 1</code> y se salta la validación de <code>--out</code>/<code>--iters</code>; si no, exige ambas.</td></tr>
+<tr><td class="l">80–87</td><td>Validación de <code>--payload</code> y carga de la tabla, exigiendo <strong>exactamente 16 hosts</strong>.</td></tr>
+<tr><td class="l">90–93</td><td>Solo en Apple: la misma clase de QoS que el servidor.</td></tr>
+<tr><td class="l">95–113</td><td><strong>Abre la región</strong>: construye el nombre, reintenta <code>shm_open</code>, proyecta con <code>mmap</code>. Ocurre siempre, incluso en modo <code>--clasificar</code>.</td></tr>
+<tr><td class="l">115–122</td><td><strong>El ciclo de estímulos:</strong> prepara de antemano los 16 mensajes, uno por host de la tabla. Se construye siempre, aunque el modo <code>--clasificar</code> no lo use.</td></tr>
+<tr><td class="l">124–132</td><td><strong>Array de latencias:</strong> reserva espacio (1 posición en modo <code>--clasificar</code>) y lo escribe con ceros antes de medir.</td></tr>
+<tr><td class="l">134–155</td><td><strong>Piso de medición</strong>, dentro de <code>if (!clasificar)</code>: en el modo de estímulo suelto no tiene sentido medir el costo del reloj sobre 100 000 pares para una sola pregunta.</td></tr>
+<tr><td class="l">157–163</td><td>Punto de partida de la secuencia y contadores <code>desajustes</code>/<code>giros_perdidos</code>.</td></tr>
+<tr><td class="l">165–176</td><td><strong>La macro <code>INTERCAMBIO</code></strong> (detalle abajo).</td></tr>
+<tr><td class="l">178–215</td><td><strong>Modo estímulo suelto (<code>--clasificar</code>).</strong> Ver la subsección dedicada, abajo.</td></tr>
+<tr><td class="l">217–248</td><td>Autoprueba y warmup. Quedan después del <code>return</code> del modo <code>--clasificar</code>: una corrida con esa opción nunca llega hasta aquí.</td></tr>
+<tr><td class="l">250–267</td><td><strong>La medición</strong> (detalle abajo).</td></tr>
+<tr><td class="l">269–275</td><td>Informa esperas agotadas o respuestas inesperadas; si no hubo ninguna, «integridad OK».</td></tr>
+<tr><td class="l">277–308</td><td><strong>Contraste por lotes</strong> (detalle en «Los demás bloques importantes», abajo).</td></tr>
+<tr><td class="l">310–320</td><td>Desmapea la región, escribe el CSV y termina. No se alcanza en modo <code>--clasificar</code>, que ya hizo <code>return</code> antes.</td></tr>
+</tbody></table></div>
+
+<h3>El modo estímulo suelto: <code>--clasificar</code> (líneas 178–215)</h3>
+<p>Esta variante no tiene sockets que aceptar: cliente y servidor comparten memoria, no una conexión de red.
+Para que el plano de control pueda mandarle una pregunta suelta sin levantar todo un cliente medidor
+residente, <strong>lanza este mismo binario una vez por pregunta</strong>, con <code>--clasificar &lt;ip&gt;</code>.</p>
+<pre><code>if (clasificar) {
+    unsigned char est[PAYLOAD_MAX];
+    uint32_t hid = id_de_ip(clasificar);
+    armar_estimulo(est, payload, hid, 0);
+
+    uint64_t t0 = ahora_ns();
+    INTERCAMBIO(est);
+    uint64_t t1 = ahora_ns();
+
+    uint32_t eco;
+    memcpy(&amp;eco, recibido + OFF_ECO_ID, sizeof eco);
+    if (eco != hid) { /* ... error ... */ }
+    if (giros_perdidos) { /* ... error ... */ }
+
+    printf("ESTIMULO veredicto=%u latencia_ns=%llu\n",
+           (unsigned)recibido[OFF_VEREDICTO], (unsigned long long)(t1 - t0));
+    return 0;
+}</code></pre>
+<ul>
+<li><strong>Es la misma macro <code>INTERCAMBIO</code> de siempre</strong>, con un solo estímulo en vez de un ciclo de 16. No hay un camino de código nuevo para «hablar» con el servidor: es literalmente un intercambio suelto, con la misma frontera F1 (t0 antes, t1 después) que usa la medición oficial.</li>
+<li><strong>No toca el bucle medido ni la autoprueba</strong> — es una rama que hace <code>return 0</code> antes de llegar a ellas. Ninguna cifra del informe depende de este código: es, literalmente, lo que dice el comentario del propio archivo.</li>
+<li><strong>La salida es un contrato, no un mensaje para humanos:</strong> la línea <code>ESTIMULO veredicto=&lt;n&gt; latencia_ns=&lt;n&gt;</code> es la única que el plano de control sabe leer — la busca con <code>l.startswith("ESTIMULO ")</code> en <code>estimulo_por_cliente()</code>, en <code>app/servidor.py</code>. Cualquier otra línea en <code>stdout</code> es ruido para ese consumidor (aunque puede servir a un humano leyendo la consola directamente).</li>
+<li><strong>El servidor se niega a compartirse.</strong> Del lado de <code>app/servidor.py</code>: si hay una medición en curso, el plano de control ni siquiera llega a lanzar este proceso — lo rechaza antes, porque la región tiene una sola ranura por sentido y un cliente de estímulo suelto correlacionaría con el que está midiendo (payload cruzado, corrida contaminada sin error visible).</li>
+<li><strong>El precio es el arranque del proceso</strong> (milisegundos): no entra en la cifra que se reporta, porque <code>t0</code>/<code>t1</code> rodean solo el intercambio, no el arranque del cliente. Por eso la interfaz muestra el estímulo suelto con una nota: sirve para ver que clasifica, no para comparar con el p50 de una corrida de un millón.</li>
+</ul>
+
+<h3>La macro INTERCAMBIO: el protocolo completo del cliente</h3>
+<pre><code>#define INTERCAMBIO(EST)                                                          \
+    do {                                                                          \
+        memcpy(r-&gt;peticion.dato, (EST), payload);                                 \
+        atomic_store_explicit(&amp;r-&gt;peticion.seq, ++n, memory_order_release);       \
+        uint64_t giros = 0;                                                       \
+        while (atomic_load_explicit(&amp;r-&gt;respuesta.seq, memory_order_acquire) != n) { \
+            if (++giros &gt; LIMITE_SPIN) { giros_perdidos++; break; }               \
+            pausa_spin();                                                         \
+        }                                                                         \
+        memcpy(recibido, r-&gt;respuesta.dato, payload);                             \
+    } while (0)</code></pre>
+<ol>
+<li><strong>Escribir el estímulo</strong> en la ranura de petición.</li>
+<li><strong>Subir el contador</strong> (<code>++n</code>) con <code>release</code>. Es el «timbre» que ve el servidor.</li>
+<li><strong>Esperar la respuesta:</strong> gira hasta que <code>respuesta.seq</code> valga exactamente <code>n</code>. Si nunca llega, tras <code>LIMITE_SPIN</code> giros se rinde en ese intercambio y lo anota en <code>giros_perdidos</code>.</li>
+<li><strong>Copiar la respuesta</strong> a un buffer local.</li>
+</ol>
+<p>Es una macro y no una función para que su cuerpo se expanda en cada uso (estímulo suelto, autoprueba, warmup, medición y lotes) sin el costo de una llamada. El envoltorio <code>do { ... } while (0)</code> es la forma habitual de que una macro de varias sentencias se comporte como una sola.</p>
+
+<h3>La medición (líneas 250–267)</h3>
+<pre><code>for (uint64_t i = 0; i &lt; iters; i++) {
+    const unsigned char *est = ciclo[i &amp; 15];
+    uint64_t t0 = ahora_ns();
+    INTERCAMBIO(est);
+    uint64_t t1 = ahora_ns();
+    latencias[i] = t1 - t0;
+
+    uint32_t eco;
+    memcpy(&amp;eco, recibido + OFF_ECO_ID, sizeof eco);
+    if (eco != g_tabla_id[i &amp; 15]) desajustes++;
+}</code></pre>
+<ul>
+<li><strong>Solo lo que está entre <code>t0</code> y <code>t1</code> se cronometra</strong>: el intercambio completo, ida y vuelta. Es la frontera de medición definida para todas las variantes.</li>
+<li><code>ciclo[i &amp; 15]</code> recorre los 16 estímulos en orden. Como 16 es potencia de 2, <code>&amp; 15</code> equivale a «resto de dividir entre 16» sin hacer una división.</li>
+<li><strong>La verificación del eco va después de <code>t1</code></strong>, para que comprobar la respuesta no se sume a la latencia. Si las barreras de memoria estuvieran mal, la respuesta llegaría con un eco distinto y <code>desajustes</code> lo delataría.</li>
+</ul>
+
+<h3>Los demás bloques importantes</h3>
+<ul>
+<li><strong>Array de latencias preasignado y «tocado» (124–132).</strong> <code>malloc</code> reserva memoria virtual, pero el sistema operativo solo la entrega cuando se escribe por primera vez, con un <em>fallo de página</em> (una entrada al kernel). Para que eso no ocurra dentro de la medición, el cliente escribe ceros en todo el array antes de empezar.</li>
+<li><strong>Piso de medición (134–155).</strong> Toma 100 000 pares de lecturas del reloj seguidas, sin nada en medio, y las ordena. Imprime el mínimo, la mediana y el percentil 99 de esa diferencia: es lo que cuesta el instrumento solo. A las escalas de esta variante (decenas de nanosegundos) ese costo es comparable a lo que se mide, y por eso se informa. El mensaje siguiente sobre la granularidad del contador (41,67 ns, de 24 MHz) describe el equipo de referencia; en otra plataforma, la granularidad se lee en el piso medido.</li>
+<li><strong>Autoprueba (217–231).</strong> Envía los 16 hosts de la tabla y comprueba dos cosas en cada uno: que el eco coincida y que el veredicto sea el que dice la tabla. Después envía un host que no está en la tabla (203.0.113.77, del rango reservado para documentación) y exige la respuesta «desconocido». Si algo falla, el cliente termina con error <em>antes</em> de medir. En modo <code>--sin-clasificar</code> solo se verifica el eco. No corre en modo <code>--clasificar</code>.</li>
+<li><strong>Contraste por lotes (277–308).</strong> Repite el intercambio en bloques de 1000 y cronometra cada bloque completo con un solo par de lecturas del reloj; el costo por intercambio es el tiempo del bloque dividido entre 1000. Repite 200 veces, ordena y muestra el mínimo, la mediana y el máximo. Como el reloj tiene un tic grueso (decenas de nanosegundos), esta media por lote da una precisión muy por debajo del tic. <strong>No reemplaza a los percentiles</strong> (un promedio no tiene cola); sirve de comprobación cruzada: si difiere mucho de la mediana por muestra, alguna de las dos mediciones está mal.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="make">
+<h2>7. Makefile</h2>
+<div class="tw"><table>
+<thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead>
+<tbody>
+<tr><td class="l">1–9</td><td>Comentario: se usa <code>-O2</code> y no <code>-O3</code> porque <code>-O3</code> activa transformaciones agresivas cuyo efecto sobre un bucle dominado por la latencia de caché es impredecible y haría el resultado más difícil de explicar (la medición tiene que ser defendible, no máxima); y por qué hace falta <code>-D_GNU_SOURCE</code> en Linux/WSL2 (no cambia el nivel de optimización, ver más abajo).</td></tr>
+<tr><td class="l">10–12</td><td>Variables <code>CC</code> (el compilador, <code>cc</code>), <code>CFLAGS</code> y <code>LDFLAGS</code>. El operador <code>?=</code> permite reemplazarlas desde la línea de comandos.</td></tr>
+<tr><td class="l">14</td><td>El objetivo por defecto, <code>all</code>: construye <code>server</code> y <code>client</code>.</td></tr>
+<tr><td class="l">16–20</td><td>Cómo se construye cada programa a partir de su <code>.c</code>. Las dependencias incluyen los tres encabezados —<code>common.h</code>, <code>../clasificador.h</code> y <code>../reloj.h</code>—: si cambia cualquiera de los tres, se recompila. Declarar <code>../reloj.h</code> explícitamente es necesario porque <code>make</code> no sigue includes transitivos por su cuenta: aunque <code>common.h</code> lo incluye, hay que decírselo aparte.</td></tr>
+<tr><td class="l">22–25</td><td><code>clean</code> borra los binarios; <code>.PHONY</code> indica que <code>all</code> y <code>clean</code> son acciones y no archivos.</td></tr>
+</tbody></table></div>
+<p>Las opciones de compilación son:</p>
+<ul>
+<li><code>-std=c11</code>: el estándar del lenguaje C, que es el que incluye los tipos atómicos (<code>_Atomic</code>).</li>
+<li><code>-O2</code>: optimización moderada.</li>
+<li><code>-Wall -Wextra -pedantic</code>: activan los avisos del compilador.</li>
+<li><code>-D_GNU_SOURCE</code>: expone en Linux las funciones POSIX de la biblioteca C (<code>clock_gettime</code>, <code>ftruncate</code>, <code>usleep</code>) que <code>-std=c11</code> estricto oculta. Sin este flag, esta carpeta no compila en Linux ni WSL2 — comprobado.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="ejec">
+<h2>8. Cómo se ejecuta</h2>
+<p><strong>A mano</strong>, desde <code>sistema/memoria-compartida-c/</code>:</p>
+<pre><code>make                                                    # compila server y client
+./server --tabla ../tabla-hosts.csv &amp;                   # arranca el servidor en segundo plano
+./client --tabla ../tabla-hosts.csv --out /tmp/d.csv    # mide y escribe el CSV
+kill %1                                                 # detiene el servidor</code></pre>
+<p><strong>Un estímulo suelto</strong>, con el servidor ya corriendo:</p>
+<pre><code>./client --tabla ../tabla-hosts.csv --clasificar 10.20.0.11
+# ESTIMULO veredicto=1 latencia_ns=1900</code></pre>
+<p><strong>Con el harness oficial</strong>, desde <code>sistema/</code>:</p>
+<pre><code>./run.sh memoria-compartida-c 1                    # una ronda completa (1 000 000 de iteraciones)
+./run.sh memoria-compartida-c 1 --iters 100000     # una corrida corta de prueba</code></pre>
+<p><code>run.sh</code> hace, en orden: registrar en un <code>.log</code> el equipo donde corre; compilar con <code>make</code>; lanzar el servidor en segundo plano con la tabla; ejecutar el cliente con la tabla y el CSV de salida; detener el servidor; y llamar a <code>analyze.py</code> para calcular los percentiles. Antes de empezar archiva, con su fecha, los resultados de una corrida anterior con el mismo nombre.</p>
+<p>Desde la interfaz web, el plano de control (<code>app/servidor.py</code>) usa este mismo cliente de dos formas: al pedir una medición completa, lo lanza con <code>--out</code> y lee el CSV para calcular los percentiles; al mandar un estímulo suelto desde «Probar clasificación», lo lanza con <code>--clasificar &lt;ip&gt;</code> y lee la línea <code>ESTIMULO ...</code> de su salida.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="gloss">
+<h2>9. Glosario</h2>
+<div class="tw"><table>
+<thead><tr><th>Término</th><th>Qué significa aquí</th></tr></thead>
+<tbody>
+<tr><td>Memoria compartida</td><td>Una zona de memoria que dos procesos proyectan en su propio espacio de direcciones: lo que uno escribe, el otro lo lee directamente. Se crea con <code>shm_open</code> y se proyecta con <code>mmap</code>.</td></tr>
+<tr><td>Región / ranura</td><td>La región es toda la zona compartida (256 B). Cada ranura es la mitad que usa un solo sentido de comunicación (128 B).</td></tr>
+<tr><td>Línea de caché</td><td>El bloque mínimo que la CPU mueve entre su memoria rápida y la memoria principal; en Apple Silicon son 128 bytes. Dos datos en la misma línea se mueven juntos.</td></tr>
+<tr><td>False sharing</td><td>Cuando dos núcleos escriben datos distintos que caen en la misma línea de caché y se obligan mutuamente a descartar su copia. Encarece cada acceso.</td></tr>
+<tr><td>Atómico</td><td>Una operación que se ve completa o no se ve: nadie observa un valor a medias.</td></tr>
+<tr><td><code>acquire</code> / <code>release</code></td><td>Reglas de orden entre accesos a memoria. <code>release</code>: todo lo escrito antes queda visible antes de esta escritura. <code>acquire</code>: lo leído después ve todo lo publicado antes por el <code>release</code> correspondiente. Juntas garantizan que el mensaje esté completo cuando se ve la señal.</td></tr>
+<tr><td>Espera activa (<em>spin</em>)</td><td>Esperar repitiendo una lectura en un bucle, sin dormirse. Reacciona en nanosegundos, pero mantiene un núcleo al 100 %.</td></tr>
+<tr><td>Planificador (<em>scheduler</em>)</td><td>La parte del sistema operativo que decide qué proceso corre en qué núcleo y cuándo. Dormir y despertar procesos pasa por él, y eso cuesta microsegundos.</td></tr>
+<tr><td>Llamada al sistema</td><td>Una petición de un programa al kernel (por ejemplo, enviar por un socket). Cruzar al kernel cuesta tiempo y es lo que la memoria compartida evita en el intercambio.</td></tr>
+<tr><td>Eco</td><td>El identificador del host que el servidor copia de vuelta en la respuesta, para que el cliente compruebe que la respuesta corresponde a su petición.</td></tr>
+<tr><td>Warmup</td><td>Intercambios de calentamiento que se descartan, para que cachés, frecuencia de CPU y rutas de código se estabilicen antes de medir. No aplica al estímulo suelto.</td></tr>
+<tr><td>Estímulo suelto</td><td>Un solo intercambio, lanzado con <code>--clasificar</code>, sin CSV ni corrida: responde una pregunta y sale. Lo usa la web para «Probar clasificación».</td></tr>
+<tr><td>Cuantización / tic</td><td>El reloj solo avanza a saltos de un tamaño mínimo (el tic); por eso las latencias medidas caen en múltiplos de ese valor.</td></tr>
+<tr><td>Percentil (p50, p99.9)</td><td>El valor bajo el cual queda esa fracción de las muestras. p50 es la mediana; p99.9 deja fuera solo al 0,1 % más lento.</td></tr>
+<tr><td>QoS</td><td>Clase de calidad de servicio de macOS: una sugerencia al planificador sobre cuán urgente es un hilo.</td></tr>
+<tr><td>Señal (<code>SIGINT</code>, <code>SIGTERM</code>)</td><td>Un aviso que el sistema operativo envía a un proceso: <code>SIGINT</code> es Ctrl-C y <code>SIGTERM</code> es la petición estándar de terminar.</td></tr>
+<tr><td><code>csel</code> / <code>cmov</code></td><td>Instrucciones de la CPU que eligen entre dos valores sin hacer un salto. Permiten que el clasificador cueste lo mismo para cualquier host.</td></tr>
+</tbody></table></div>
+</section>
+
+</main>
+</div>
+<footer>Memoria compartida C — Guía del código · Camilo Céspedes · Group 2 · Módulo 1 · 22/09/2026</footer>
+</body>
+</html>

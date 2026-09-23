@@ -12,6 +12,54 @@ el detalle línea por línea está en `git log`.
 
 ---
 
+## 2026-09-23
+
+Cierra los PR #7 y #8 (Camilo): quedaron atrapados por el rename de ADR-008 — tocaban
+`sistema/variante-D-shm/` y citaban «variante D», y esos nombres ya no existen desde el #13.
+Lo que sigue es la misma sustancia, reabierta en tres PR contra el árbol actual: #14
+(Makefile), #15 (limpieza del front-end) y esta documentación. Detalle completo en
+`Modulo 1/Ejercicios/Reto-Latencia-Minima/comunicaciones/MENSAJE-EQUIPO-23-09.md`.
+
+### Corregido
+- **`sistema/memoria-compartida-c/Makefile` y `sistema/control-dominio/Makefile`:** añaden
+  `-D_GNU_SOURCE`. Sin él, bajo `-std=c11`, la biblioteca C deja sin declarar `clock_gettime`
+  (que usa `reloj.h`), `ftruncate` y `usleep`, y ninguna de las dos carpetas compila en
+  Linux/WSL2. Es el mismo arreglo que ya había aprobado @dmazo-koronet en el PR #7 (cerrado):
+  el `git mv` del rename de ADR-008 partió de la copia sin el fix, así que el bug volvió con
+  el nombre nuevo. Verificado con un clon limpio de `main`: sin este cambio, `memoria-compartida-c`
+  y `control-dominio` no compilan en WSL2/Ubuntu; con él, compilan y el plano de control arranca
+  y clasifica un estímulo suelto contra `memoria-compartida-c` (`LOCAL`, correcto).
+  - De paso, `memoria-compartida-c/Makefile` declara ahora `../reloj.h` como dependencia de
+    `server` y `client` — sin eso, editar el reloj compartido no disparaba recompilación
+    (el otro punto pedido en el PR #7). Verificado: `touch reloj.h && make` ahora sí recompila
+    los dos binarios; antes no recompilaba nada.
+  - Revalidado con `python3 verificar.py` → «Todo en orden» (9/9). (Camilo, PR #14)
+- **`app/index.html` y `app/servidor.py`:** retiran las citas a `ADR-001` y `ADR-006` del
+  texto que se renderiza en pantalla (el recuadro de «la separación en dos planos» y el aviso
+  de por qué `memoria-compartida-c` no admite clientes concurrentes). Son documentación interna
+  del equipo, no parte de la entrega. Se conservan las citas a ADR en comentarios de código, que
+  no se renderizan. (Camilo, PR #15)
+
+### Añadido
+- **`Modulo 1/Aportes/camilo/m1-arquitectura-memoria-compartida-c-camilo.html`:** arquitectura,
+  justificación de las decisiones y criterios de cuándo usar memoria compartida. Reemplaza al
+  documento de la PR #8 (cerrada): nomenclatura actual, sin sección de medición (se documenta
+  arquitectura, no una corrida concreta) y sin citas a ADR en el cuerpo, mismo criterio que el
+  front-end. (Camilo)
+- **`Modulo 1/Aportes/camilo/m1-codigo-memoria-compartida-c-camilo.html`:** guía del código,
+  archivo por archivo y bloque por bloque, incluido el modo de estímulo suelto `--clasificar`.
+  Reemplaza al documento de la PR #8. (Camilo)
+- **`Modulo 1/Aportes/camilo/m1-manual-instalacion-camilo.html`:** manual de instalación
+  reescrito contra el árbol actual (nomenclatura de ADR-008, el fix de esta misma PR ya
+  documentado como vigente). Reemplaza al documento de la PR #8. (Camilo)
+- **`Modulo 1/Aportes/camilo/m1-manual-uso-camilo.html`:** manual de uso de la interfaz web,
+  documento nuevo — la PR #8 nunca llegó a producir uno. Cubre el estado actual: sin editor de
+  tabla (ADR-009/011), con estímulo suelto para `memoria-compartida-c`, sin columna de veredicto
+  en el historial. (Camilo)
+- **`Modulo 1/Aportes/camilo/FUENTES.md`:** fichas de los cuatro documentos anteriores. (Camilo)
+
+---
+
 ## 2026-09-21
 
 ### Decidido
