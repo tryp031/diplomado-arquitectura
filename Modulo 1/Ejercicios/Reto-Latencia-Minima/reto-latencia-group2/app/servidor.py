@@ -95,7 +95,7 @@ VARIANTES = {
             "10 nucleos.\n\n"
             "No es una limitacion de implementacion: los 83 ns se pagan con exclusividad. "
             "Compartir exige o un barrido que crece con N, o contencion atomica — y eso "
-            "es justo lo que esta variante elimino para ser rapida. Ver ADR-006."),
+            "es justo lo que esta variante elimino para ser rapida."),
     },
 }
 
