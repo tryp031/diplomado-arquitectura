@@ -29,7 +29,7 @@ Cifras que salen de aquí (3 rondas agregadas):
 
 | | p50 | p99.9 | máx | > 1 ms |
 |---|---|---|---|---|
-| TCP Python | 14 875 ns | 105 791 ns | 15 762 417 ns | 164 / 3 M |
+| TCP Python | 14 875 ns | 105 750 ns | 15 762 417 ns | 164 / 3 M |
 | Memoria compartida C | **83 ns** | 209 ns | 41 792 ns | **0** / 3 M |
 
 Se regeneran con `./analyze.py --md resultados/resultados-*-[123].csv`.

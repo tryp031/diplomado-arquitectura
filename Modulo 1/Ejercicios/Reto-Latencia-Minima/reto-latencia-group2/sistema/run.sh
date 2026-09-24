@@ -32,9 +32,18 @@ mkdir -p "$AQUI/resultados" "$AQUI/resultados/archivo"
 # poder reproducirse desde un CSV versionado. Sobrescribirlos en silencio destruye esa
 # cadena — ya ocurrio una vez, el 14/09, y se perdieron las corridas del 10/09.
 # Ahora una corrida repetida ARCHIVA lo anterior con su fecha en vez de pisarlo.
+#
+# La fecha sale de la cabecera `fecha:` del log, no del mtime: el .log esta versionado
+# y un `git clone` o `checkout` le pone la fecha del checkout. El 24/09 eso archivo
+# la corrida del 17/09 con fecha del 23/09. El mtime queda solo como respaldo.
+marca_log=""
+if [[ -f "$LOG" ]]; then
+  marca_log=$(sed -n 's/^fecha: *\([0-9]\{4\}\)-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}\):\([0-9]\{2\}\):\([0-9]\{2\}\).*/\1\2\3-\4\5\6/p' "$LOG" | head -1)
+fi
 for viejo in "$OUT" "$LOG"; do
   if [[ -f "$viejo" ]]; then
-    marca=$(date -r "$viejo" +%Y%m%d-%H%M%S 2>/dev/null || date +%Y%m%d-%H%M%S)
+    marca="$marca_log"
+    [[ -n "$marca" ]] || marca=$(date -r "$viejo" +%Y%m%d-%H%M%S 2>/dev/null || date +%Y%m%d-%H%M%S)
     base=$(basename "$viejo"); ext="${base##*.}"; nom="${base%.*}"
     mv "$viejo" "$AQUI/resultados/archivo/${nom}--${marca}.${ext}"
     echo "archivado: resultados/archivo/${nom}--${marca}.${ext}"
@@ -47,6 +56,7 @@ echo "== variante $VARIANTE, ronda $RONDA =="
   echo "host:      $(uname -a)"
   echo "cpu:       $(sysctl -n machdep.cpu.brand_string 2>/dev/null || lscpu 2>/dev/null | head -20)"
   echo "nucleos:   $(sysctl -n hw.ncpu 2>/dev/null || nproc)"
+  echo "carga:     $(uptime | sed 's/.*load average[s]*: *//')"   # supuesto S4 del informe
   echo "python:    $(python3 --version)"
   echo "compilador: $(cc --version 2>/dev/null | head -1 || echo 'n/a')"
   echo "variante:  $VARIANTE   ronda: $RONDA"

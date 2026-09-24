@@ -7,7 +7,7 @@ Daniel Mazo Serna · Freddy Aparicio Marín · Camilo Céspedes Leguizamón
 > Este documento cubre los **entregables 2 y 4** del enunciado (documentación técnica e informe
 > de resultados), que el enunciado permite fusionar.
 >
-> **Corrida oficial: 17/09/2026.** Dos configuraciones, 3 rondas × 1 000 000 de iteraciones cada
+> **Corrida oficial: 24/09/2026.** Dos configuraciones, 3 rondas × 1 000 000 de iteraciones cada
 > una, 3 000 000 de muestras por configuración. Toda cifra de este informe sale de los CSV y los
 > logs que acompañan a la entrega, y se reproduce con los comandos de §10.2.
 >
@@ -25,7 +25,7 @@ Se construyó un servicio que responde a un estímulo de 32 bytes con una respue
 metodología única. El objetivo del enunciado era **una latencia inferior a 1 ms**.
 
 **El objetivo se alcanza trivialmente.** La configuración más lenta que medimos —un servidor
-TCP escrito en Python— responde con una mediana de **13,5 µs**, unas **74 veces por debajo** del
+TCP escrito en Python— responde con una mediana de **14,9 µs**, unas **67 veces por debajo** del
 umbral. Conseguir el número no era el reto.
 
 El trabajo real fue otro. Medimos **dos configuraciones bajo condiciones idénticas** y obtuvimos
@@ -33,13 +33,13 @@ tres resultados que no se ven mirando el promedio:
 
 | Hallazgo | Evidencia |
 |---|---|
-| **Si una de las dos cumple el objetivo depende del día, no de su arquitectura.** | Por p50 ambas cumplen con holgura (74× y 12 048× por debajo). Por la cola, B superó 1 ms en **136 muestras de 3 000 000** el 17/09 y en **0 de 3 000 000** el 14/09, con el mismo código. D no lo superó **ninguna vez en las dos corridas**. |
-| **El máximo no es una propiedad del sistema sino de cuánto se observe.** | Dentro de **la misma corrida**, el máximo de B pasa de 167 µs con 10 000 muestras a **13,6 ms con 3 000 000**: 81× peor sin que cambie nada del sistema. |
-| **Eliminar el software de la ruta crítica no elimina la latencia impredecible.** | D no hace una sola llamada al sistema operativo y aun así su máximo es de 37 µs, **447× su mediana**. La imponen el planificador y el hardware. |
+| **Si una de las dos cumple el objetivo depende del día, no de su arquitectura.** | Por p50 ambas cumplen con holgura (67× y 12 048× por debajo). Por la cola, B superó 1 ms en **164 muestras de 3 000 000** el 24/09, en **136** el 17/09 y en **0** el 14/09, con el mismo código. D no lo superó **ninguna vez en las tres corridas**. |
+| **El máximo no es una propiedad del sistema sino de cuánto se observe.** | Dentro de **la misma corrida**, el máximo de B pasa de 191 µs con 10 000 muestras a **15,8 ms con 3 000 000**: 82× peor sin que cambie nada del sistema. |
+| **Eliminar el software de la ruta crítica no elimina la latencia impredecible.** | D no hace una sola llamada al sistema operativo y aun así su máximo es de 42 µs, **504× su mediana**. La imponen el planificador y el hardware. |
 
 **Conclusión arquitectónica:** el reto no se gana optimizando, se gana **decidiendo en qué capa
 está el coste** y aceptando explícitamente qué se sacrifica a cambio. Un informe basado en
-promedios (14,7 µs frente a 79 ns) habría dado las dos configuraciones por buenas. **La métrica
+promedios (15,9 µs frente a 81 ns) habría dado las dos configuraciones por buenas. **La métrica
 elegida, no el sistema, es lo que determina el veredicto.**
 
 ---
@@ -71,10 +71,10 @@ TLS: ninguno reduce la latencia y todos la aumentan.
 | S1 | Mensajes de tamaño fijo y pequeño (32 B) | Bajo: por debajo del MTU el orden de magnitud no cambia |
 | S2 | Un solo cliente, una petición en vuelo | Medio: cambia la interpretación; se declara en §5.2 |
 | S3 | Cliente y servidor en el mismo host | **Alto: es lo que más baja el número. Ver §8.2** |
-| S4 | Sistema en reposo durante la medición | Medio: infla la cola; se registra la carga |
+| S4 | Sistema en reposo durante la medición | Medio: infla la cola. **No se cumplió del todo el 24/09**: la carga al empezar era 5,76 (1 min) sobre 10 núcleos, anotada en `sistema/resultados/LEEME.md`. Las corridas anteriores no registraron la carga; desde el 24/09 `run.sh` la escribe en cada log |
 
 > **S3 se declara en voz alta y no se esconde.** Medir en loopback elimina la red, que en un
-> sistema real es el componente dominante. Presentar 13 µs como «latencia del sistema» sin
+> sistema real es el componente dominante. Presentar 15 µs como «latencia del sistema» sin
 > decir que no hay red de por medio sería deshonesto.
 
 ### 2.4 Atributos de calidad — escenarios medibles
@@ -139,7 +139,7 @@ frente a la más rápida posible en un solo host. Se consideraron configuracione
 ADR-007.
 
 > **Limitación que esta elección impone, y que se declara aquí y en §9:** B y D difieren en
-> **dos** dimensiones a la vez, transporte *y* lenguaje. Por tanto el factor de 162× entre ellas
+> **dos** dimensiones a la vez, transporte *y* lenguaje. Por tanto el factor de 179× entre ellas
 > **no puede atribuirse a una sola causa** con los datos de esta entrega. Lo que el experimento
 > sostiene es el efecto conjunto, no su descomposición.
 
@@ -232,7 +232,7 @@ Fronteras consideradas y descartadas:
 
 | Frontera | Qué mide | Valor típico | Por qué se descartó |
 |---|---|---|---|
-| **F1 ✅** | RTT de aplicación completo | ~13 µs | *Es lo que percibe un consumidor real* |
+| **F1 ✅** | RTT de aplicación completo | ~15 µs | *Es lo que percibe un consumidor real* |
 | F2 | Solo la llamada al sistema | ~5 µs | Esconde el coste de recibir; no tiene análogo en D, que no hace llamadas al sistema |
 | F3 | Incluye la conexión | ~100 µs | Con conexión persistente, repartir el handshake por iteración falsea |
 | F4 | Incluye el arranque del proceso | ~50 ms | Mide el arranque del runtime, no el sistema |
@@ -255,7 +255,7 @@ Decisión completa y consecuencias: **ADR-001**.
 | Almacenamiento | Array preasignado y pre-tocado | Asignar o provocar fallos de página en el bucle contaminaría |
 | Volcado | Al final, nunca dentro del bucle | Escribir a disco mediría el disco |
 | Rondas del informe | **1, 2 y 3** | Las rondas 0 y 9 son validación y pruebas rápidas: no entran ni en las tablas ni en las figuras |
-| Corridas independientes | **2** (14/09 y 17/09) | Un solo conjunto de rondas no distingue una propiedad de la arquitectura de un estado pasajero de la máquina. Ver §7.1 |
+| Corridas independientes | **3** (14/09, 17/09 y 24/09) | Un solo conjunto de rondas no distingue una propiedad de la arquitectura de un estado pasajero de la máquina. Ver §7.1 |
 
 ### 5.3 El instrumento: un problema que apareció al medir
 
@@ -300,26 +300,26 @@ tesis; `analyze.py` se niega a mezclar plataformas por esa razón (ADR-005).
 
 ## 6. Resultados
 
-Agregado de 3 rondas × 1 000 000 por columna. Todo en **nanosegundos**. Corrida del 17/09/2026.
+Agregado de 3 rondas × 1 000 000 por columna. Todo en **nanosegundos**. Corrida del 24/09/2026.
 
 | | **B** Python + TCP | **D** C + memoria compartida |
 |---|---|---|
 | n | 3 000 000 | 3 000 000 |
 | mín | 7 625 | 0 |
-| **p50** | 13 458 | **83** |
-| p90 | 17 459 | 84 |
-| p99 | 44 917 | **125** |
-| **p99.9** | 116 209 | **167** |
-| p99.99 | 599 125 | **250** |
-| **máx** | **13 649 750** | **37 125** |
-| media *(no es la métrica principal)* | 14 746 | 79 |
-| **muestras > 1 ms** | **136** | **0** |
-| p99.9 / p50 | 8,6× | **2,0×** |
-| máx / p50 | 1 014× | 447× |
+| **p50** | 14 875 | **83** |
+| p90 | 17 542 | 84 |
+| p99 | 44 625 | **125** |
+| **p99.9** | 105 750 | **209** |
+| p99.99 | 547 084 | **3 958** |
+| **máx** | **15 762 417** | **41 792** |
+| media *(no es la métrica principal)* | 15 940 | 81 |
+| **muestras > 1 ms** | **164** | **0** |
+| p99.9 / p50 | 7,1× | **2,5×** |
+| máx / p50 | 1 060× | 504× |
 
-> **Esta tabla describe una corrida, no la arquitectura.** Una corrida anterior del 14/09, con
-> el mismo código y el mismo `n`, dio para B un máximo de 344 880 ns y **cero** muestras sobre
-> 1 ms. La diferencia no está en el sistema sino en el estado de la máquina; se analiza en §7.1
+> **Esta tabla describe una corrida, no la arquitectura.** Dos corridas anteriores, con el mismo
+> código y el mismo `n`, dieron para B un máximo de 344 880 ns y **cero** muestras sobre 1 ms
+> (14/09) y 136 muestras sobre 1 ms (17/09). La diferencia no está en el sistema sino en el estado de la máquina; se analiza en §7.1
 > y es uno de los resultados del trabajo. Su evidencia se conserva en
 > `sistema/resultados/archivo/`.
 
@@ -329,14 +329,14 @@ Se regeneran con `python3 reto-latencia-group2/sistema/graficas.py` (sin depende
 ### 6.1 Contraste por lotes para la variante Memoria compartida C
 
 Cronometrando 1000 intercambios de una vez y dividiendo (200 rondas), la mediana por intercambio
-fue de **75, 66 y 75 ns** en las tres rondas, frente a los 83 ns del p50 por muestra.
+fue de **66, 76 y 72 ns** en las tres rondas, frente a los 83 ns del p50 por muestra.
 
 La diferencia es explicable y no es contradicción:
 
 - El p50 de 83 ns es el **segundo tic** de la cuantización. La latencia real está entre uno y dos
-  tics; los lotes la sitúan en ~66–75 ns. **El p50 sobreestima por cuantización.**
+  tics; los lotes la sitúan en ~66–76 ns. **El p50 sobreestima por cuantización.**
 - El piso del instrumento —un par de lecturas del reloj sin nada en medio— se midió en cada
-  ronda: p50 de 0 a 41 ns, p99 de 42 ns. **A esta escala el instrumento es del mismo orden que
+  ronda: p50 de 0 ns, p99 de 42 ns. **A esta escala el instrumento es del mismo orden que
   lo medido**, y por eso se reporta aparte.
 
 > Se reportan las dos medidas, etiquetadas. Con una sola, o se pierde la cola (lotes) o se
@@ -348,13 +348,13 @@ Ronda 1, n = 1 000 000. El tic del contador es de 41,67 ns:
 
 | Valor | Tics | Muestras | % |
 |---|---|---|---|
-| 0 ns | 0 | 68 | 0,01 % |
-| 41–42 ns | 1 | 204 750 | **20,48 %** |
-| 83–84 ns | 2 | 726 629 | **72,66 %** |
-| 125 ns | 3 | 66 222 | 6,62 % |
-| ≥ 167 ns | ≥ 4 | 2 331 | 0,23 % |
+| 0 ns | 0 | 22 | < 0,01 % |
+| 41–42 ns | 1 | 80 300 | **8,03 %** |
+| 83–84 ns | 2 | 881 041 | **88,10 %** |
+| 125 ns | 3 | 33 684 | 3,37 % |
+| ≥ 167 ns | ≥ 4 | 4 953 | 0,50 % |
 
-El 93,1 % de las muestras cae en dos cubos y el 99,8 % en tres: son los tics del reloj. **El
+El 96,1 % de las muestras cae en dos cubos y el 99,5 % en tres: son los tics del reloj. **El
 instrumento es visible en el resultado**, y por eso hay que declararlo.
 
 ### 6.3 El dominio no contamina la medición — y no se supone, se mide
@@ -381,7 +381,7 @@ resta. El acumulador es `volatile` para que el optimizador no borre el bucle.
 | Frente a | Peso |
 |---|---|
 | Variante Memoria compartida C (p50 83 ns) | 2,3 % |
-| Variante TCP Python (p50 13 458 ns) | **0,014 %** |
+| Variante TCP Python (p50 14 875 ns) | **0,013 %** |
 | Un tic del reloj (41,67 ns) | por debajo de un solo tic |
 
 **El matiz honesto: en D es el 2,3 %, no cero.** A 83 ns ya nada es gratis. Decir «despreciable»
@@ -428,20 +428,21 @@ cd reto-latencia-group2/sistema/control-dominio && make && ./micro ../tabla-host
 
 | | p50 | veces por debajo de 1 ms |
 |---|---|---|
-| TCP Python | 13 458 ns | 74× |
+| TCP Python | 14 875 ns | 67× |
 | Memoria compartida C | 83 ns | **12 048×** |
 
 **Por la cola, el resultado de TCP Python no es reproducible — y ese es el hallazgo:**
 
 | | máx | muestras > 1 ms (de 3 M) | AC-1 (p99.9 < 1 ms) | AC-2 (ninguna > 1 ms) |
 |---|---|---|---|---|
+| TCP Python · corrida del **24/09** | 15 762 417 ns | **164** | ✅ cumple (106 µs) | ❌ **incumple** |
 | TCP Python · corrida del **17/09** | 13 649 750 ns | **136** | ✅ cumple (116 µs) | ❌ **incumple** |
 | TCP Python · corrida del **14/09** | 344 880 ns | **0** | ✅ cumple (39 µs) | ✅ **cumple** |
-| Memoria compartida C · ambas corridas | 37 125 ns | **0** | ✅ cumple (167 ns) | ✅ **cumple** |
+| Memoria compartida C · las tres corridas | ≤ 41 792 ns | **0** | ✅ cumple (≤ 209 ns) | ✅ **cumple** |
 
-**Mismo código, misma máquina, mismo tamaño de muestra, tres días de diferencia: un veredicto
-distinto.** Lo único que cambió fue el estado del sistema operativo durante la medición. Una
-tercera corrida, del 10/09, reportó 363 incumplimientos; se cita como referencia pero **su log
+**Mismo código, misma máquina, mismo tamaño de muestra, tres corridas en diez días: el
+veredicto cambia.** Lo único que cambió fue el estado del sistema operativo durante la medición.
+Una corrida más antigua, del 10/09, reportó 363 incumplimientos; se cita como referencia pero **su log
 no se conservó**, así que este informe no la usa como evidencia.
 
 > **Consecuencia metodológica, y es la más importante del trabajo:** afirmar «esta arquitectura
@@ -455,23 +456,25 @@ una latencia menor a 1 ms»:**
 - Si significa *«la respuesta típica tarda menos de 1 ms»* → **las dos cumplen siempre**, y el
   reto se resuelve con 40 líneas de Python.
 - Si significa *«el sistema nunca tarda más de 1 ms»* → **B lo cumple unas veces sí y otras no**,
-  y D no falló en **6 000 000 de muestras repartidas en dos corridas**.
+  y D no falló en **9 000 000 de muestras repartidas en tres corridas**.
 
-Un informe basado en promedios (14,7 µs frente a 79 ns) habría dado las dos por buenas. **La
+Un informe basado en promedios (15,9 µs frente a 81 ns) habría dado las dos por buenas. **La
 métrica elegida, no el sistema, es lo que determina el veredicto.** Nótese además que B cumple
-la parte de AC-2 referida a la forma de la distribución —p99.9/p50 = 8,6, por debajo del límite
+la parte de AC-2 referida a la forma de la distribución —p99.9/p50 = 7,1, por debajo del límite
 de 10— y la incumple solo por los eventos raros: **un sistema puede tener una distribución sana
 y aun así violar un requisito absoluto.**
 
 **La lectura arquitectónica, que es lo que se califica:** para un requisito absoluto, una
 arquitectura cuyo cumplimiento depende del estado de la máquina **no cumple**, aunque una
-corrida concreta salga en cero. No se trata de que B sea lenta —es 74× más rápida que el
-umbral— sino de que **su peor caso no está acotado por diseño**, mientras que el de D lo está
-por construcción: sin llamadas al sistema no hay planificador que pueda robarle 13 ms.
+corrida concreta salga en cero. No se trata de que B sea lenta —es 67× más rápida que el
+umbral— sino de que **su peor caso no está acotado por diseño**. D saca de la ruta crítica esas
+fuentes de variabilidad —sin llamadas al sistema no hay planificador que le robe 15 ms— y no
+mostró ninguna muestra por encima de 1 ms en tres corridas; eso es lo observado, no una cota
+(§7.4, §8.1).
 
 ### 7.2 Dónde está el coste, y qué no podemos afirmar
 
-El salto de B a D es de **13 375 ns de mediana, un factor de 162×**. Entre las dos
+El salto de B a D es de **14 792 ns de mediana, un factor de 179×**. Entre las dos
 configuraciones cambian dos cosas a la vez: el transporte (TCP sobre loopback → memoria física
 compartida) y el lenguaje (Python → C11).
 
@@ -484,7 +487,7 @@ Lo que sí se sostiene con lo medido:
 
 1. **El servicio no hace trabajo útil, y eso está medido, no supuesto.** Recibe 32 bytes,
    consulta una tabla de 16 entradas que cabe en una línea de caché y devuelve 32 bytes. Ese
-   trabajo cuesta **1,9 ns** (§6.3): el 0,014 % del RTT de B. Por tanto **lo que separa a B de D
+   trabajo cuesta **1,9 ns** (§6.3): el 0,013 % del RTT de B. Por tanto **lo que separa a B de D
    es el coste de mover 32 bytes de un proceso a otro**, no el de procesarlos.
 2. **Ese coste de transporte es de decenas de microsegundos en B**: dos llamadas al sistema, dos
    copias por el kernel, la pila TCP/IP completa y el despertar del planificador. En D es cero
@@ -505,10 +508,10 @@ la misma corrida de B tomando ventanas de observación cada vez más grandes.
 
 | Muestras observadas (misma corrida) | Máximo acumulado |
 |---|---|
-| 10 000 | 167 541 ns |
-| 100 000 | 3 129 125 ns — ya supera 1 ms |
-| 1 000 000 | 6 386 208 ns |
-| 3 000 000 | **13 649 750 ns** — **81× el de 10 000** |
+| 10 000 | 191 167 ns |
+| 100 000 | 991 000 ns — a 9 µs de 1 ms |
+| 1 000 000 | 15 635 250 ns — ya supera 1 ms |
+| 3 000 000 | **15 762 417 ns** — **82× el de 10 000** |
 
 No cambió el sistema, no cambió la máquina, no cambió el momento: **cambió cuánto se miró**. Al
 observar más se capturan eventos más raros (planificación, interrupciones, presión de memoria,
@@ -518,12 +521,12 @@ Tres consecuencias:
 
 1. **Un máximo sin su `n` al lado no significa nada.** Por eso `n` aparece en todas las tablas.
 2. **Por eso los sistemas serios se especifican en percentiles.** El p99.9 de B se movió entre
-   72 y 254 µs según la ronda, mientras su máximo saltaba entre 6,4 y 13,6 ms. Ninguna de las
+   94 y 113 µs según la ronda, mientras su máximo saltaba entre 5,4 y 15,8 ms. Ninguna de las
    dos medidas es perfectamente estable, pero el percentil describe la experiencia del 99,9 % de
    las peticiones y el máximo describe una sola.
 3. Cualquier afirmación del tipo «nunca supera X» es, en rigor, «no lo superó en las N muestras
    que observamos». **Una demostración de 10 000 mensajes no habría visto un solo
-   incumplimiento** de los 136 que existen.
+   incumplimiento** de los 164 que existen.
 
 ### 7.4 La cola persiste aunque se elimine el software
 
@@ -532,7 +535,7 @@ kernel y no cede el núcleo. Aun así:
 
 ```text
    p50 =     83 ns
-   máx = 37 125 ns   →   447× la mediana
+   máx = 41 792 ns   →   504× la mediana
 ```
 
 No lo causa el transporte. Lo causan el planificador del sistema operativo, las interrupciones
@@ -553,9 +556,9 @@ sugerencia al planificador, no una garantía.
 
 | | **B** TCP + Python | **D** memoria compartida + C |
 |---|---|---|
-| Latencia p50 | 13,5 µs | **83 ns** |
-| Muestras > 1 ms (de 3 M) | 136 una corrida, 0 la otra | **0 en las dos** |
-| Peor caso acotado por diseño | ❌ depende del planificador | ✅ sin llamadas al sistema |
+| Latencia p50 | 14,9 µs | **83 ns** |
+| Muestras > 1 ms (de 3 M) | 0, 136 y 164 según la corrida | **0 en las tres** |
+| Fuentes de variabilidad en la ruta crítica | ❌ llamadas al sistema y planificador | ✅ fuera: sin llamadas al sistema (no acota el peor caso, §7.4) |
 | Llamadas al sistema por RTT | 2 | **0** |
 | Funciona entre máquinas | ✅ | ❌ |
 | Interoperabilidad | media | ❌ nula |
@@ -566,7 +569,7 @@ sugerencia al planificador, no una garantía.
 
 **La pregunta correcta no es cuál es mejor, sino qué atributo prioriza el negocio:**
 
-- Prioriza **interoperabilidad, portabilidad y velocidad de desarrollo** → **B**. Los 13 µs son
+- Prioriza **interoperabilidad, portabilidad y velocidad de desarrollo** → **B**. Los 15 µs son
   irrelevantes para el 99 % de los sistemas de negocio, y el umbral del enunciado ya lo cumple.
 - Prioriza **determinismo extremo en un solo host** y puede pagar dos núcleos dedicados, código
   no portable y nula interoperabilidad → **D**.
@@ -579,15 +582,16 @@ casi nadie necesita, al precio de todos los demás atributos.
 
 La excepción es precisamente el requisito absoluto: si el contrato dice *«ninguna respuesta por
 encima de 1 ms»*, B no sirve — no por lenta, sino porque **su peor caso depende del estado de la
-máquina** y no de su diseño: una corrida da cero incumplimientos y la siguiente, 136.
+máquina** y no de su diseño: una corrida da cero incumplimientos, otra 136 y otra 164.
 **Ese es el único escenario en que el precio de la variante Memoria compartida C se justifica**, y la razón
 no es que sea rápida sino que **elimina de la ruta crítica las fuentes de variabilidad**: sin
 llamadas al sistema no hay planificador que intervenga.
 
 Con un matiz que este mismo experimento obliga a declarar: **eliminar no es acotar**. El máximo
-medido de esta variante fue **37 125 ns, 447× su propia mediana**, impuesto por el planificador
+medido de esta variante fue **41 792 ns, 504× su propia mediana**, impuesto por el planificador
 y por el hardware pese a no ejecutar una sola llamada al sistema. Lo que sostienen los datos es
-que **no se observó ninguna muestra por encima de 1 ms en 3 000 000**; no que no puedan
+que **no se observó ninguna muestra por encima de 1 ms en 9 000 000, repartidas en tres
+corridas**; no que no puedan
 ocurrir. Afirmar que su peor caso está acotado por construcción sería ir más lejos de lo que
 esta medición permite.
 
@@ -622,8 +626,8 @@ Esta tabla responde a «¿por qué no se usa esto en producción para todo?».
    instrumento pesa lo mismo que lo medido (§6.1).
 6. **Una sola máquina, un solo modelo de CPU.** Los factores relativos deberían mantenerse en
    otros equipos; los valores absolutos no.
-7. **Dos corridas no bastan para caracterizar la cola de B.** Sabemos que su conteo de
-   incumplimientos varía entre 0 y 136 según el estado de la máquina (§7.1), pero con dos
+7. **Tres corridas no bastan para caracterizar la cola de B.** Sabemos que su conteo de
+   incumplimientos varía entre 0 y 164 según el estado de la máquina (§7.1), pero con tres
    observaciones no podemos dar ni una frecuencia esperada ni una cota. Lo que sí se sostiene es
    la afirmación negativa: **el cumplimiento de B no es una propiedad estable de su
    arquitectura.** Caracterizarlo exigiría muchas corridas en condiciones controladas.
@@ -631,7 +635,7 @@ Esta tabla responde a «¿por qué no se usa esto en producción para todo?».
 ### Trabajo futuro
 
 - **Reintroducir un control que aísle una sola variable** (mismo transporte, otro lenguaje) para
-  poder descomponer el factor de 162× — es la limitación nº 3.
+  poder descomponer el factor de 179× — es la limitación nº 3.
 - Repetir la variante Memoria compartida C en Linux con afinidad real de núcleo y comparar colas.
 - Medir entre dos máquinas físicas para cuantificar cuánto aporta la red.
 - Medir bajo carga concurrente, que es el escenario realista.
@@ -680,7 +684,7 @@ cd reto-latencia-group2 && python3 verificar.py
 |---|---|
 | 1 · Código fuente | `reto-latencia-group2/` completo |
 | 2 · Documentación técnica | este documento, §§ 2–5 |
-| 3 · Logs de ejecución | `reto-latencia-group2/sistema/resultados/ejecucion-{B,D}-{1,2,3}.log` |
+| 3 · Logs de ejecución | `reto-latencia-group2/sistema/resultados/ejecucion-{tcp-python,memoria-compartida-c}-{1,2,3}.log` |
 | 4 · Informe de resultados vs 1 ms | este documento, §§ 6–8 |
 | 5 · Video ≤ 5 min o demo en vivo | guion en `GUION-VIDEO.md` |
 

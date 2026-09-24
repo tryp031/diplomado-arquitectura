@@ -219,25 +219,26 @@ Los resultados del informe salen de aquí, nunca de la aplicación web.
 
 ## Resultados
 
-Corrida oficial del **17/09/2026**, 3 rondas × 1 000 000 por arquitectura.
+Corrida oficial del **24/09/2026**, 3 rondas × 1 000 000 por arquitectura.
 
 | Arquitectura | Mediana | Cola p99,9 | Peor caso | > 1 ms (de 3 M) | Objetivo 1 ms |
 |---|---|---|---|---|---|
-| Memoria compartida C | **0,08 µs** | 0,17 µs | 37 µs | **0** | ✅ 12 048× por debajo |
-| TCP Python | 13,5 µs | 116,2 µs | 13 650 µs | **136** | ✅ por mediana · ❌ por cola |
+| Memoria compartida C | **0,08 µs** | 0,21 µs | 42 µs | **0** | ✅ 12 048× por debajo |
+| TCP Python | 14,9 µs | 105,8 µs | 15 762 µs | **164** | ✅ por mediana · ❌ por cola |
 
 **Equipo de referencia: Apple M4, macOS 26.6, arm64.** Se reproducen con `./run.sh`.
 
 > **El resultado de TCP Python no es reproducible entre corridas, y ese es el hallazgo.** El
 > 14/09, con el mismo código y el mismo `n`, TCP Python dio **0** muestras por encima de 1 ms;
-> el 17/09 dio **136**. Lo único que cambió fue el estado de la máquina. Afirmar «esta
+> el 17/09 dio **136** y el 24/09, **164**. Memoria compartida C dio 0 en las tres. Lo único
+> que cambió fue el estado de la máquina. Afirmar «esta
 > arquitectura incumple» a partir de una sola corrida es afirmar algo sobre la máquina,
-> no sobre la arquitectura. Análisis completo en `INFORME.md` §7.1; la evidencia de la
-> corrida anterior se conserva en `sistema/resultados/archivo/`.
+> no sobre la arquitectura. Análisis completo en `INFORME.md` §7.1; la evidencia de las
+> corridas anteriores se conserva en `sistema/resultados/archivo/`.
 
 > **Matiz obligatorio al comparar TCP Python con Memoria compartida C:** entre los dos
 > cambian **el transporte y el
-> lenguaje a la vez**, así que el factor 162× **no es atribuible a ninguno de los dos por
+> lenguaje a la vez**, así que el factor 179× **no es atribuible a ninguno de los dos por
 > sí solo**, y el informe no lo atribuye. Un control que sí separaba las causas (`Bc`,
 > TCP en C) se midió y se retiró del árbol con el ADR-007; su trabajo queda como historia
 > del proyecto en [`docs/archivo/control-Bc-tcp-c.md`](docs/archivo/control-Bc-tcp-c.md),
