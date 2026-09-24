@@ -111,9 +111,9 @@ no es verificable; lo que sigue sí.
 **[REC]** Este atributo **no lo pide el enunciado; lo añado yo**, y es el que convierte el
 ejercicio en arquitectura. En sistemas de baja latencia reales —trading, telecomunicaciones,
 control industrial— el requisito nunca es «que sea rápido», es «que la cola sea acotada». El
-hallazgo de la variante TCP Python —AC-1 aprobado (p99.9 = 116 µs) y AC-2 incumplido (136 muestras por
+hallazgo de la variante TCP Python —AC-1 aprobado (p99.9 = 106 µs) y AC-2 incumplido (164 muestras por
 encima de 1 ms en 3 M)— es precisamente ese caso. Y hay un matiz que lo hace mejor: el 14/09,
-con el mismo código, TCP Python dio **0**. Su cumplimiento depende del estado de la máquina, no de su
+con el mismo código, TCP Python dio **0** (y el 17/09, 136). Su cumplimiento depende del estado de la máquina, no de su
 arquitectura. Ahí está el contenido del informe.
 
 ### AC-3 · Comparabilidad entre variantes (estructural, del *proceso* de medición)
@@ -341,19 +341,19 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 
 ---
 
-## 7 bis. Resultados — corrida oficial del 17/09
+## 7 bis. Resultados — corrida oficial del 24/09
 
 Agregado de 3 rondas × 1 000 000 por columna (3 M de muestras). Nanosegundos.
 
 | | **TCP Python** | **Memoria compartida C** |
 |---|---|---|
-| p50 | 13 458 | **83** |
-| p99.9 | 116 209 | **167** |
-| máx | 13 649 750 | **37 125** |
-| **muestras > 1 ms** (de 3 M) | **136** ❌ | **0** ✅ |
+| p50 | 14 875 | **83** |
+| p99.9 | 105 750 | **209** |
+| máx | 15 762 417 | **41 792** |
+| **muestras > 1 ms** (de 3 M) | **164** ❌ | **0** ✅ |
 
 > **La comparación mezcla dos variables.** Entre las dos variantes cambian el transporte *y* el
-> lenguaje a la vez, así que el factor de 162× **no se puede atribuir a ninguna causa
+> lenguaje a la vez, así que el factor de 179× **no se puede atribuir a ninguna causa
 > concreta**. Un control que sí las separaba (`Bc`, TCP en C) se midió y se retiró del
 > árbol con el ADR-007. El informe **declara la limitación** en vez de ocultarla; ver
 > `INFORME.md` §7.2 y limitación 3.
@@ -361,32 +361,33 @@ Agregado de 3 rondas × 1 000 000 por columna (3 M de muestras). Nanosegundos.
 **Cuatro conclusiones sostenidas con datos propios:**
 
 1. **El objetivo de 1 ms se cumple por la mediana con las dos.** El reto nunca estuvo en
-   alcanzar el número: TCP Python está 74× por debajo del umbral y Memoria compartida C, 12 048×.
+   alcanzar el número: TCP Python está 67× por debajo del umbral y Memoria compartida C, 12 048×.
 2. **Solo la cola distingue cumplir de no cumplir.** Por p50 las dos aprueban con holgura.
-   Por máximo, TCP Python tiene 136 muestras sobre el umbral; Memoria compartida C, ninguna. Un informe basado en
-   promedios (14,7 µs frente a 79 ns) habría dado las dos por buenas.
+   Por máximo, TCP Python tiene 164 muestras sobre el umbral; Memoria compartida C, ninguna. Un informe basado en
+   promedios (15,9 µs frente a 81 ns) habría dado las dos por buenas.
    **[REC]** Este es el titular del informe: **la métrica elegida, no el sistema, decide el
    veredicto.**
 3. **El veredicto de TCP Python no es reproducible, y eso es un resultado, no un problema.** Misma
-   máquina, mismo código, mismo `n`: el 14/09 dio **0** muestras sobre 1 ms y el 17/09 dio
-   **136**. Afirmar «esta arquitectura incumple» desde una sola corrida es afirmar algo
+   máquina, mismo código, mismo `n`: el 14/09 dio **0** muestras sobre 1 ms, el 17/09 dio
+   **136** y el 24/09, **164**. Afirmar «esta arquitectura incumple» desde una sola corrida es afirmar algo
    **sobre la máquina, no sobre la arquitectura**. La diferencia real con Memoria compartida C no es velocidad:
    es que Memoria compartida C **saca de la ruta crítica las fuentes de variabilidad**
-   —sin llamadas al sistema no hay planificador que le robe 13 ms— y TCP Python no. Lo que **no** se
-   sigue de ahí es que su peor caso esté acotado: el máximo medido fue 37 125 ns, **447× su
+   —sin llamadas al sistema no hay planificador que le robe 15 ms— y TCP Python no. Lo que **no** se
+   sigue de ahí es que su peor caso esté acotado: el máximo medido fue 41 792 ns, **504× su
    propia mediana**, impuesto por el planificador y el hardware pese a cero llamadas al
-   sistema. Los datos sostienen que no se observaron muestras sobre 1 ms, no que no puedan
+   sistema. Los datos sostienen que no se observaron muestras sobre 1 ms en tres corridas
+   (9 M de muestras), no que no puedan
    ocurrir.
 4. **El máximo no es una propiedad del sistema, sino de la ventana de observación.** Leyendo
-   **la misma corrida** de TCP Python con ventanas crecientes: 167 µs con 10 k muestras, 3,1 ms con
-   100 k, 6,4 ms con 1 M y 13,6 ms con 3 M. **81× peor sin cambiar nada del sistema.** Por eso
+   **la misma corrida** de TCP Python con ventanas crecientes: 191 µs con 10 k muestras, 991 µs con
+   100 k, 15,6 ms con 1 M y 15,8 ms con 3 M. **82× peor sin cambiar nada del sistema.** Por eso
    un máximo sin su `n` al lado no significa nada, y por eso los sistemas serios se
    especifican en percentiles.
 
 ### Lo que queda sin cerrar
 
 **Eliminar el software de la ruta caliente no elimina la cola.** Memoria compartida C no hace una sola
-llamada al sistema y aun así tiene máximos de 16–37 µs, 447× su p50. La cola la ponen el
+llamada al sistema y aun así tiene máximos de 25–42 µs, 504× su p50. La cola la ponen el
 planificador y el hardware, y en macOS/arm64 no hay afinidad de núcleo para evitarlo
 (`KERN_NOT_SUPPORTED`, verificado). **El sistema operativo y el hardware son restricciones
 arquitectónicas de primer orden**, no un detalle de despliegue: es el frente «tecnología»

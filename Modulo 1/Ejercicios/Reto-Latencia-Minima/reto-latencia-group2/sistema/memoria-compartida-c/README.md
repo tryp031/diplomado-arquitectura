@@ -81,16 +81,16 @@ en múltiplos de 41,67 ns**. No es ruido, es el tamaño del tic.
 
 Todas las cifras en **nanosegundos**. Integridad: 3 000 000 / 3 000 000 respuestas correctas.
 
-Corrida oficial del **17/09/2026**.
+Corrida oficial del **24/09/2026**.
 
 | Ronda | mín | p50 | p90 | p99 | p99.9 | p99.99 | **máx** | media |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0 | 83 | 84 | 125 | 167 | 250 | 37 125 | 77,9 |
-| 2 | 0 | 83 | 84 | 84 | 166 | 292 | 33 208 | 77,6 |
-| 3 | 0 | 83 | 84 | 125 | 125 | 209 | 16 167 | 81,1 |
+| 1 | 0 | 83 | 84 | 125 | 250 | 5 750 | 27 750 | 83,2 |
+| 2 | 0 | 83 | 84 | 125 | 209 | 3 583 | 41 792 | 80,6 |
+| 3 | 0 | 83 | 84 | 125 | 209 | 1 000 | 24 791 | 79,3 |
 
 **Contraste por lotes** (1000 intercambios cronometrados de una vez, 200 rondas): mediana de
-**75 / 66 / 75 ns** por intercambio.
+**66 / 76 / 72 ns** por intercambio.
 
 ### Cómo leer estos números
 
@@ -98,48 +98,50 @@ La distribución **no es una campana: son escalones de un tic** (ronda 1):
 
 | Valor | Tics | Muestras | % |
 |---|---|---|---|
-| 0 ns | 0 | 68 | 0,01 % |
-| 41–42 ns | 1 | 204 750 | **20,48 %** |
-| 83–84 ns | 2 | 726 629 | **72,66 %** |
-| 125 ns | 3 | 66 222 | 6,62 % |
-| ≥ 167 ns | ≥ 4 | 2 331 | 0,23 % |
+| 0 ns | 0 | 22 | < 0,01 % |
+| 41–42 ns | 1 | 80 300 | **8,03 %** |
+| 83–84 ns | 2 | 881 041 | **88,10 %** |
+| 125 ns | 3 | 33 684 | 3,37 % |
+| ≥ 167 ns | ≥ 4 | 4 953 | 0,50 % |
 
-El 93,1 % de las muestras cae en dos cubos y el 99,8 % en tres. La latencia real está **entre 1
-y 2 tics**, y el contraste por lotes la sitúa en **~66–75 ns**. El p50 reportado de 83 ns es el
+El 96,1 % de las muestras cae en dos cubos y el 99,5 % en tres. La latencia real está **entre 1
+y 2 tics**, y el contraste por lotes la sitúa en **~66–76 ns**. El p50 reportado de 83 ns es el
 tic superior: **sobreestima por cuantización, no porque el sistema sea más lento.**
 
 > Esto es lo que justifica reportar las dos medidas. Con una sola, o se pierde la cola
 > (lotes) o se exagera la mediana (muestras). Ninguna de las dos es «la verdadera».
 
 **El observador pesa lo mismo que lo medido.** El piso del instrumento —un par de lecturas del
-reloj sin nada en medio— se midió en cada ronda: p50 de 0 a 41 ns, p99 de 42 ns, frente a un p50
+reloj sin nada en medio— se midió en cada ronda: p50 de 0 ns, p99 de 42 ns, frente a un p50
 de 83 ns. A esta escala el instrumento no es despreciable, y hay que declararlo.
 
 ---
 
 ## Contra TCP
 
-Agregado de 3 rondas × 1 M por columna (3 M de muestras). Nanosegundos. Corrida del 17/09.
+Agregado de 3 rondas × 1 M por columna (3 M de muestras). Nanosegundos. Corrida del 24/09.
 
 | | **B** Python+TCP | **D** C+shm |
 |---|---|---|
-| p50 | 13 458 | **83** |
-| p99.9 | 116 209 | **167** |
-| máx | 13 649 750 | **37 125** |
-| **muestras > 1 ms** | **136** ❌ | **0** ✅ |
+| p50 | 14 875 | **83** |
+| p99.9 | 105 750 | **209** |
+| máx | 15 762 417 | **41 792** |
+| **muestras > 1 ms** | **164** ❌ | **0** ✅ |
 
 > **La comparación mezcla dos variables, y hay que decirlo.** Entre B y D cambian el
-> transporte *y* el lenguaje a la vez, así que el factor 162× **no es atribuible a ninguno de
+> transporte *y* el lenguaje a la vez, así que el factor 179× **no es atribuible a ninguno de
 > los dos por separado**. Un control que sí las separaba (`Bc`, TCP en C) se midió y se retiró
 > con el ADR-007; el informe declara la limitación en vez de ocultarla (§7.2, limitación 3).
 
-> **Lo que sí distingue a D no es su velocidad, sino que su peor caso está acotado por
-> construcción.** B dio 136 muestras sobre 1 ms el 17/09 y **0** el 14/09, con el mismo código:
-> su cumplimiento depende del estado de la máquina. D dio 0 en las dos corridas.
+> **Lo que sí distingue a D no es su velocidad, sino que saca de la ruta crítica las fuentes
+> de variabilidad** (sin llamadas al sistema no hay planificador que intervenga). B dio 164
+> muestras sobre 1 ms el 24/09, 136 el 17/09 y **0** el 14/09, con el mismo código: su
+> cumplimiento depende del estado de la máquina. En D **no se observó** ninguna muestra sobre
+> 1 ms en las tres corridas (9 M de muestras); eso no demuestra que no puedan ocurrir.
 
 ### La cola sigue ahí, sin un solo syscall
 
-Máximos de 16,2 a 37,1 µs con cero llamadas al sistema y cero copias del kernel. **447× el
+Máximos de 24,8 a 41,8 µs con cero llamadas al sistema y cero copias del kernel. **504× el
 p50.** No lo causa el transporte: lo causan el planificador del sistema operativo, las
 interrupciones y —muy probablemente— la migración del hilo a un núcleo de eficiencia, que en
 macOS/arm64 no se puede impedir porque **no existe afinidad de núcleo** (`thread_policy_set`

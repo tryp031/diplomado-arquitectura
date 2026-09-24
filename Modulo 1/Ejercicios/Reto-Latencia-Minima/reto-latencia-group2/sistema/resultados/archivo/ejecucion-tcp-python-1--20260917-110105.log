@@ -1,0 +1,113 @@
+fecha:     2026-09-17T11:01:05-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  B   ronda: 1
+args:      --warmup 100000 --iters 1000000
+---
+ejecutable: python3 /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/variante-B-tcp/server.py
+[servidor B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[cliente B] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[cliente B] midiendo 1,000,000 iteraciones x 1 hilo(s) en 100 lote(s) de 10,000…
+[servidor B] escuchando en 127.0.0.1:9101, payload=32B
+[servidor B] HILOS vivos=1 atendidas=1 conexión de ('127.0.0.1', 51594)
+[cliente B] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=4/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=5/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=7/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=8/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=9/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=10/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=12/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=15/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=18/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=20/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=22/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=24/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=27/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=30/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=33/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=35/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=38/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=40/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=42/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=45/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=47/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=49/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=52/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=54/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=57/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=60/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=61/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=62/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=65/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=68/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=71/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=74/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=77/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=79/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=82/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=85/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=88/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=91/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=94/100 iters_por_lote=10000
+[cliente B] PROGRESO hilos=1/1 lotes=97/100 iters_por_lote=10000
+[servidor B] HILOS vivos=0 conexión cerrada
+[cliente B] 1,000,000 muestras (1 hilo[s]) -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/resultados/resultados-B-1.csv
+plataforma: Darwin/arm64 · Apple M4
+
+=== resultados-B-1 ===
+  n              1,000,000
+  mín                    7.62 µs
+  p50                   13.17 µs
+  p90                   27.33 µs
+  p99                   53.67 µs
+  p99.9                253.88 µs
+  p99.99             1,130.58 µs
+  máx                6,386.21 µs
+  desv. est.            27.87 µs
+  media                 16.40 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-B-1
+        6.310 µs |                                                                197 ( 0.02%)
+        7.943 µs | #####################                                      132,156 (13.22%)
+       10.000 µs | #################################################          304,708 (30.47%)
+       12.589 µs | ########################################################   348,767 (34.88%)
+       15.849 µs | ###########                                                 70,306 ( 7.03%)
+       19.953 µs | #####                                                       31,627 ( 3.16%)
+       25.119 µs | ######                                                      34,833 ( 3.48%)
+       31.623 µs | #######                                                     40,730 ( 4.07%)
+       39.811 µs | ####                                                        23,669 ( 2.37%)
+       50.119 µs | #                                                            6,593 ( 0.66%)
+       63.096 µs |                                                              2,341 ( 0.23%)
+       79.433 µs |                                                              1,148 ( 0.11%)
+      100.000 µs |                                                                659 ( 0.07%)
+      125.893 µs |                                                                530 ( 0.05%)
+      158.489 µs |                                                                398 ( 0.04%)
+      199.526 µs |                                                                319 ( 0.03%)
+      251.189 µs |                                                                299 ( 0.03%)
+      316.228 µs |                                                                201 ( 0.02%)
+      398.107 µs |                                                                150 ( 0.01%)
+      501.187 µs |                                                                124 ( 0.01%)
+      630.957 µs |                                                                 66 ( 0.01%)
+      794.328 µs |                                                                 58 ( 0.01%)
+     1000.000 µs |                                                                 30 ( 0.00%)
+     1258.925 µs |                                                                 36 ( 0.00%)
+     1584.893 µs |                                                                 22 ( 0.00%)
+     1995.262 µs |                                                                 15 ( 0.00%)
+     2511.886 µs |                                                                 10 ( 0.00%)
+     3162.278 µs |                                                                  5 ( 0.00%)
+     3981.072 µs |                                                                  2 ( 0.00%)
+     5011.872 µs |                                                                  0 ( 0.00%)
+     6309.573 µs |                                                                  1 ( 0.00%)

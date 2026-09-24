@@ -77,29 +77,30 @@ fallar. Ver ADR-006.
 **Esta es la única variante del reto que admite concurrencia.** Memoria compartida no puede:
 tiene una sola ranura por sentido.
 
-## Resultados — corrida oficial del 17/09/2026
+## Resultados — corrida oficial del 24/09/2026
 
 3 rondas × 1 000 000 de iteraciones = 3 M de muestras. Apple M4 · macOS 26.6 · arm64.
 
 | | valor |
 |---|---|
-| p50 | 13 458 ns |
-| p99.9 | 116 209 ns |
-| máximo | 13 649 750 ns |
-| muestras > 1 ms | **136** de 3 000 000 |
+| p50 | 14 875 ns |
+| p99.9 | 105 750 ns |
+| máximo | 15 762 417 ns |
+| muestras > 1 ms | **164** de 3 000 000 |
 
 ### Cómo leer estos números
 
 **El objetivo del enunciado se cumple en la mediana y en el p99,9, y NO en el máximo.**
-116 µs de p99,9 están holgadamente por debajo del milisegundo; 136 muestras lo superan, y
-la peor llega a 13,6 ms — mil veces la mediana.
+106 µs de p99,9 están holgadamente por debajo del milisegundo; 164 muestras lo superan, y
+la peor llega a 15,8 ms — mil veces la mediana.
 
-Esas 136 muestras son el resultado más interesante de la variante, por esto:
+Esas 164 muestras son el resultado más interesante de la variante, por esto:
 
 | Corrida | muestras > 1 ms (de 3 M) |
 |---|---|
 | 14/09 | **0** |
 | 17/09 | **136** |
+| 24/09 | **164** |
 
 **Mismo código, misma máquina.** Lo único que cambió fue el estado del sistema operativo.
 La conclusión que sostiene el informe es que el cumplimiento de esta variante **depende del
@@ -110,13 +111,13 @@ porque cada intercambio atraviesa el planificador y la pila de red.
 
 | | TCP Python | Memoria compartida C |
 |---|---|---|
-| p50 | 13 458 ns | 83 ns |
-| > 1 ms | 136 / 3 M | 0 / 3 M |
+| p50 | 14 875 ns | 83 ns |
+| > 1 ms | 164 / 3 M | 0 / 3 M |
 | Concurrencia | sí | no |
 | Portabilidad | cualquier SO con Python | POSIX, sin afinidad garantizada |
 
-El factor es **162×**. **Matiz obligatorio al citarlo:** entre las dos variantes cambian *el
-transporte y el lenguaje a la vez*, así que ese 162× **no es atribuible a ninguno de los dos
+El factor es **179×**. **Matiz obligatorio al citarlo:** entre las dos variantes cambian *el
+transporte y el lenguaje a la vez*, así que ese 179× **no es atribuible a ninguno de los dos
 por separado**. El control que sí los separaba (`Bc`, TCP en C) se midió y se retiró del
 alcance con ADR-007; su hallazgo queda en `docs/archivo/control-Bc-tcp-c.md` y **no sustenta
 ninguna conclusión vigente**.

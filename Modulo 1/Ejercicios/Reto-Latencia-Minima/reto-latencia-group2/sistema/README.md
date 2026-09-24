@@ -183,7 +183,16 @@ Lo único que importa es que produzcas el mismo CSV.
 
 Agregado por variante. Microsegundos. El umbral se evalúa contra **p99.9**, no contra la media.
 
-**Corrida oficial del 17/09** (la del informe), reproducible desde el árbol:
+**Corrida oficial del 24/09** (la del informe), reproducible desde el árbol:
+
+| | **D** shm | **B** Python+TCP |
+|---|---|---|
+| p50 | **0,083** | 14,88 |
+| p99.9 | **0,209** | 105,8 |
+| máx | 41,8 | 15 762 |
+| **muestras > 1 ms** | **0** / 3 M | **164** / 3 M ❌ |
+
+Corrida del 17/09 (la oficial hasta el 24/09), conservada en `resultados/archivo/`:
 
 | | **D** shm | **B** Python+TCP |
 |---|---|---|
@@ -230,14 +239,15 @@ Archivadas — medidas de verdad, código retirado del árbol el 16/09 (ADR-007)
 
 ### ⚠️ La cola de B no es reproducible — ya es una conclusión del informe
 
-Tres corridas del **mismo código**, con el mismo tamaño de muestra (3 M), sobre la misma
+Cuatro corridas del **mismo código**, con el mismo tamaño de muestra (3 M), sobre la misma
 máquina. Muestras por encima de 1 ms en la variante TCP Python:
 
 | Corrida | B | D | Evidencia |
 |---|---|---|---|
 | 10/09 | **363** | 0 | ❌ el log no se conservó — no se usa como evidencia |
 | 14/09 | **0** | 0 | ✅ `resultados/archivo/` |
-| 17/09 | **136** | 0 | ✅ `resultados/` — corrida oficial |
+| 17/09 | **136** | 0 | ✅ `resultados/archivo/` |
+| 24/09 | **164** | 0 | ✅ `resultados/` — corrida oficial |
 
 El sistema no cambió en nada que explique eso: el dominio añade 1,9 ns. Lo que cambió fue
 **el estado de la máquina**.
@@ -252,7 +262,7 @@ El sistema no cambió en nada que explique eso: el dominio añade 1,9 ns. Lo que
 > **saca de la ruta crítica las fuentes de variabilidad** —sin llamadas al sistema no hay
 > planificador que intervenga— y TCP Python queda a merced de él.
 >
-> ⚠ **Eso no la acota.** El máximo de Memoria compartida C fue 37 µs, **447× su propia
+> ⚠ **Eso no la acota.** El máximo de Memoria compartida C fue 42 µs, **504× su propia
 > mediana**, sin una sola llamada al sistema. No se observaron muestras sobre 1 ms; no es lo
 > mismo que no puedan ocurrir.
 
