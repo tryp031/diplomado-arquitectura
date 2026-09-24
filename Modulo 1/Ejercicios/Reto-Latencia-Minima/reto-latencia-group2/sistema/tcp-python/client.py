@@ -2,9 +2,9 @@
 """
 Variante TCP Python — cliente medidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
 
-Este archivo es la PLANTILLA de medición. Las variantes A, C y D replican exactamente
-este bucle; solo cambia el transporte. Todo lo demás está congelado en
-../../ESPEC-MEDICION.md y no debe modificarse por variante.
+Este archivo es la PLANTILLA de medición. Toda variante replica exactamente este
+bucle; solo cambia el transporte. Todo lo demás está congelado en
+docs/ESPEC-MEDICION.md y no debe modificarse por variante.
 
 Frontera de medición F1 (ADR-001):
     t0 = inmediatamente ANTES de la llamada de escritura

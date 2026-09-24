@@ -7,9 +7,9 @@
 #
 # La nota 8 de la reunion del 21/09 pedia sacar docs/ del proyecto porque no es
 # parte del entregable de codigo. El objetivo es correcto; hacerlo moviendo la
-# carpeta no lo es: el codigo fuente CITA los ADR por ruta —reloj.h, clasificador.h,
-# server.c y verificar.py suman 20 menciones, y analyze.py imprime "Ver docs/ADR/
-# ADR-005" al negarse a mezclar plataformas—. Si docs/ se muda, el ZIP entregado
+# carpeta no lo es: el codigo fuente CITA los ADR por numero —en comentarios de
+# reloj.h, clasificador.h, server.c y verificar.py, entre otros, y analyze.py
+# imprime "Ver docs/ADR/ADR-005" al negarse a mezclar plataformas—. Si docs/ se muda, el ZIP entregado
 # queda lleno de punteros a documentos que el evaluador no recibio.
 #
 # La separacion correcta no es DONDE VIVE sino QUE SE EMPAQUETA. docs/ se queda en
@@ -69,7 +69,7 @@ COMO MEDIR (solo macOS, Linux o WSL2)
   ./analyze.py --md resultados/resultados-*.csv
 
 SOBRE LAS REFERENCIAS A docs/ADR/...
-  El codigo cita decisiones de diseno por su numero de ADR (ADR-001 a ADR-010).
+  El codigo cita decisiones de diseno por su numero de ADR (ADR-001 a ADR-011).
   Esos documentos NO viajan en este ZIP: son el ENTREGABLE 2, la documentacion
   tecnica en PDF. Cada mencion en el codigo tiene alli su justificacion completa.
 
