@@ -61,7 +61,7 @@ def cargar(patron):
 salida = {"bins": {"decIni": DEC_INI, "porDec": POR_DEC, "n": N_BINS}, "variantes": []}
 
 for clave, meta in VARIANTES.items():
-    patron = "resultados-E-0.csv" if clave == "E0" else f"resultados-{clave}-[123].csv"
+    patron = f"resultados-{clave}-[123].csv"
     m = cargar(patron)
     if not m:
         print(f"  aviso: sin datos para {clave}", file=sys.stderr)

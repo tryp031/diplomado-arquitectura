@@ -65,17 +65,6 @@ fi
 TABLA="$AQUI/tabla-hosts.csv"
 [[ -f "$TABLA" ]] || { echo "falta $TABLA" >&2; exit 2; }
 
-# La variante E no tiene servidor propio: el respondedor es el kernel del SO.
-# Eso no es una carencia de la implementacion, es lo que E demuestra.
-if [[ "$VARIANTE" == "E" ]]; then
-  echo "ejecutable: $DIR/client  (sin servidor: responde el kernel)" | tee -a "$LOG"
-  "$DIR/client" --out "$OUT" "$@" 2>&1 | tee -a "$LOG"
-  echo
-  python3 "$AQUI/analyze.py" --histograma "$OUT" | tee -a "$LOG"
-  echo; echo "muestras -> $OUT"; echo "log      -> $LOG"
-  exit 0
-fi
-
 if [[ -x "$DIR/server" && -x "$DIR/client" ]]; then
   CMD_SRV=("$DIR/server"); CMD_CLI=("$DIR/client")
 elif [[ -f "$DIR/server.py" && -f "$DIR/client.py" ]]; then

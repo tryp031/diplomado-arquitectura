@@ -415,9 +415,7 @@
 
     var nota;
     if (v.id === 'memoria-compartida-c') {
-      nota = 'La distribución se ve en escalones porque el reloj de esta máquina avanza de a 41,67 ns: a 83 ns de mediana, el instrumento ya no es despreciable frente a lo medido. Documentado en ADR-003.';
-    } else if (v.id === 'E0') {
-      nota = 'La única medición que no cumple: las 300 muestras están por encima del umbral. No es un defecto del sistema — es lo que cuesta una red real, y por eso está aquí.';
+      nota = 'La distribución se ve en escalones porque el reloj de esta máquina avanza de a 41,67 ns: a 83 ns de mediana, el instrumento ya no es despreciable frente a lo medido.';
     } else {
       nota = 'El grueso de las muestras se agolpa en un rango estrecho y unas pocas se van hacia la derecha. Esa minoría de la derecha es la cola, y es lo que decide el cumplimiento.';
     }
