@@ -51,7 +51,6 @@ def main() -> None:
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=9101)
     ap.add_argument("--payload", type=int, default=32)
-    ap.add_argument("--warmup", type=int, default=100_000, help="iteraciones descartadas")
     ap.add_argument("--iters", type=int, default=1_000_000, help="iteraciones medidas")
     ap.add_argument("--out", type=Path, required=True, help="CSV de salida")
     ap.add_argument("--reintentos", type=int, default=50)
@@ -124,13 +123,8 @@ def main() -> None:
                     raise SystemExit(f"error de integridad: un host fuera de tabla devolvió {v}")
                 print("[cliente tcp-python] autoprueba OK: 16 hosts de tabla + 1 desconocido", flush=True)
 
-            # --- WARMUP: descartado ------------------------------------------
-            # Estabiliza cachés, TLB, ramp-up de frecuencia de CPU y rutas del kernel.
-            for i in range(a.warmup):
-                intercambio(ciclo[i & 15])
-
-            # Nadie mide hasta que TODOS terminaron el warmup: si no, los primeros
-            # hilos medirían un tramo sin contención y la curva saldría mejor de lo que es.
+            # Nadie mide hasta que TODOS están conectados: si no, los primeros hilos
+            # medirían un tramo sin contención y la curva saldría mejor de lo que es.
             listos.wait(timeout=120)
 
             # --- MEDICIÓN, por lotes -----------------------------------------

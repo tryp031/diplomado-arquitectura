@@ -25,7 +25,7 @@
 **Frontera declarada:** `t0` se toma inmediatamente **antes** de la llamada de escritura;
 `t1` inmediatamente **después** de que la respuesta esté completamente leída en el cliente.
 Incluye serialización, transporte y cambios de contexto. **No** incluye establecimiento de
-conexión (se hace una vez, en el warmup) ni arranque del proceso.
+conexión (se hace una vez, antes de la autoprueba) ni arranque del proceso.
 
 > Esta frontera es una **decisión**, no un hecho. Justificarla en el informe: es la que
 > corresponde a lo que percibe un consumidor real del servicio.
@@ -35,7 +35,7 @@ conexión (se hace una vez, en el warmup) ni arranque del proceso.
 | Parámetro | Valor | Por qué |
 |---|---|---|
 | Modo | **Closed-loop, 1 petición en vuelo** | Mide tiempo de servicio en vacío, sin encolamiento. Evita *coordinated omission*. |
-| Warmup | 100 000 iteraciones, **descartadas** | Estabiliza cachés, JIT, TLB, ramp-up de frecuencia de CPU |
+| Warmup | **Ninguno** desde el 29/09 ([ADR-012](ADR/ADR-012-retiro-del-warmup.md)). Las cifras del informe se tomaron con 100 000 iteraciones descartadas | Las corridas con y sin warmup no se comparan entre sí |
 | Medición | 1 000 000 iteraciones | Suficiente para un p99.99 con sentido estadístico |
 | Payload del estímulo | Fijo, **32 bytes** | Idéntico en todas las variantes o la comparación no vale |
 | Payload de la respuesta | Fijo, **32 bytes** | Ídem |
@@ -91,12 +91,12 @@ equipos distintos, los números no son comparables y el estudio pierde su tesis.
 |---|---|---|
 | **Coordinated omission** | Medir solo lo que el sistema alcanzó a atender, ignorando el retraso acumulado | Closed-loop con 1 en vuelo, o registrar el tiempo previsto de envío |
 | Promedio en vez de percentiles | Comodidad | Percentiles obligatorios |
-| Sin warmup | Cachés fríos, JIT sin compilar, CPU en baja frecuencia | 100 k iteraciones descartadas |
+| Sin warmup | Cachés fríos, JIT sin compilar, CPU en baja frecuencia | Aceptado desde ADR-012: no mezclar esas corridas con las del informe, tomadas con 100 k descartadas |
 | Asignación de memoria en el bucle caliente | GC o `malloc` en la ruta medida | Buffers y array de muestras preasignados |
 | Nagle activo | El kernel agrupa paquetes pequeños → picos de ~40 ms | `TCP_NODELAY` en todas las variantes TCP |
 | Reloj de pared | Salta con NTP y ajustes horarios | Reloj monótono |
 | Escribir logs dentro del bucle | La E/S domina la medición | Volcar al final |
-| Medir el arranque del proceso | Contamina las primeras muestras | Conexión establecida en el warmup |
+| Medir el arranque del proceso | Contamina las primeras muestras | Conexión y autoprueba antes del bucle medido |
 | Una sola corrida | La varianza entre corridas se oculta | 3 rondas independientes |
 
 ## 6. Formato de salida — común a las 4 variantes

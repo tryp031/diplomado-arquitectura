@@ -1,6 +1,6 @@
 /*
  * Variante Memoria compartida C — cliente medidor sobre memoria compartida.
- *   --host <ignorado> --port 9103 --payload 32 --warmup 100000 --iters 1000000 --out <CSV>
+ *   --host <ignorado> --port 9103 --payload 32 --iters 1000000 --out <CSV>
  * Qué se mide: t0 justo ANTES de escribir el estímulo, t1 justo DESPUÉS de tener la
  * respuesta completa en buffer local. Mide también el piso del propio reloj, que a
  * esta escala ya no es despreciable.
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     const char *host = "127.0.0.1";
     int port = 9103;
     size_t payload = 32;
-    uint64_t warmup = 100000, iters = 1000000;
+    uint64_t iters = 1000000;
     const char *salida = NULL;
     int reintentos = 50;
     uint64_t lote = 1000, lote_rondas = 200;   /* contraste por lotes, ver mas abajo */
@@ -43,7 +43,6 @@ int main(int argc, char **argv)
         if (!strcmp(argv[i], "--host") && i + 1 < argc)            host = argv[++i];
         else if (!strcmp(argv[i], "--port") && i + 1 < argc)       port = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--payload") && i + 1 < argc)    payload = (size_t)atol(argv[++i]);
-        else if (!strcmp(argv[i], "--warmup") && i + 1 < argc)     warmup = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--iters") && i + 1 < argc)      iters = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--out") && i + 1 < argc)        salida = argv[++i];
         else if (!strcmp(argv[i], "--reintentos") && i + 1 < argc) reintentos = atoi(argv[++i]);
@@ -221,11 +220,6 @@ int main(int argc, char **argv)
         printf("[cliente memoria-compartida-c] MODO CONTROL (--sin-clasificar): solo se verifica el eco.\n");
     }
     fflush(stdout);
-
-    /* --- WARMUP: descartado ------------------------------------------------- */
-    printf("[cliente memoria-compartida-c] warmup %llu iteraciones...\n", (unsigned long long)warmup);
-    fflush(stdout);
-    for (uint64_t i = 0; i < warmup; i++) INTERCAMBIO(ciclo[i & 15]);
 
     /* --- MEDICIÓN ------------------------------------------------------------ */
     printf("[cliente memoria-compartida-c] midiendo %llu iteraciones...\n", (unsigned long long)iters);

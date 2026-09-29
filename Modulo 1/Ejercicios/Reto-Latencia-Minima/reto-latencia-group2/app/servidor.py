@@ -368,9 +368,9 @@ def estimulo(vid: str, host: str) -> dict:
             latencia_sistema_ns=latencia,
             control_overhead_ns=total_control - latencia,
             ts_control_responde=ahora(),
-            nota="estimulo suelto: el cliente arranca en frio, sin warmup, y mide UN "
-                 "intercambio. Sirve para ver que clasifica, no para comparar con el "
-                 "p50 de una medicion completa, que sale de un millon de intercambios en caliente."))
+            nota="estimulo suelto: el cliente arranca en frio y mide UN intercambio. "
+                 "Sirve para ver que clasifica, no para comparar con el p50 de una "
+                 "medicion completa, que sale de un millon de intercambios."))
 
     host_id = id_de_ip(ip)
     msg = struct.pack("<II", host_id, 0) + b"\x00" * (PAYLOAD - 8)
@@ -455,15 +455,13 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
         iters = max(1000, min(int(iters), 1_000_000))
     except (TypeError, ValueError):
         iters = 50_000
-    # Sin warmup desde la web (decisión del 28/09): la interfaz muestra el sistema tal como
-    # arranca. run.sh conserva --warmup para las mediciones del informe.
 
     with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
         salida = Path(tmp.name)
 
     cmd = resolver_cmd(v["cliente"], d) + [
         "--port", str(v["puerto"]), "--tabla", str(TABLA),
-        "--warmup", "0", "--iters", str(iters), "--out", str(salida),
+        "--iters", str(iters), "--out", str(salida),
     ]
     if hilos > 1:
         if not v.get("concurrencia", True):

@@ -88,6 +88,9 @@ sin warmup, y mide UN intercambio. Da del orden de 1–2 µs donde el informe re
 millón de intercambios en caliente. Cada respuesta lleva esa nota adjunta para que nadie
 tome el número de la pantalla como resultado del reto.
 
+> **Nota 2026-09-29:** el warmup se retiró de los clientes ([ADR-012](ADR-012-retiro-del-warmup.md)).
+> Las menciones de arriba describen el sistema tal como estaba al decidir este ADR.
+
 ### Nota 4 — el CSV
 
 Orden final: `n, fecha, hora_inicio, hora_fin, variante, host, ip, web_ms, sistema_us`.
