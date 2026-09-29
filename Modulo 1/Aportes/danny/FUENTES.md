@@ -99,9 +99,9 @@ las notas del orador. **No presentarlo como reproducible en vivo.**
 | **Fecha** | 2026-09-28 (revisada el mismo día con las notas de Danny) |
 | **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
 | **Tema** | Versión 2 de la presentación del Reto de Latencia Mínima |
-| **Tipo** | `borrador` — presentación en elaboración, no aprobada por el equipo |
+| **Tipo** | `entregable` — presentación de la sustentación del 29/09 |
 | **Fuentes** | `m1-presentacion-reto-latencia-danny.html` (estilos, portada y lámina del reto) · diagramas de Danny del 28/09 · trade-offs redactados por Danny · ejecución propia del 28/09, ronda 4 (`sistema/resultados/*-4.csv` + `.log`) · `resultados/LEEME.md` (14/09, 17/09 y 24/09) · código y ZIP entregable revisados el 28/09 (`hacer-zip.sh`) |
-| **Estado** | **DRAFT v2** · ⬜ sin revisar por Freddy ni Camilo |
+| **Estado** | `vigente` · **versión oficial** por decisión de Danny del 28/09 · sin revisión registrada de Freddy ni Camilo |
 | **Origen** | Elaborado con Claude Code. Los cuatro diagramas se redibujaron como SVG a partir de las imágenes de Danny; en el de medición se quitó el paso «clasifica el host». Las cifras salen de `analyze.py` sobre la ronda 4. Se midió en la ronda 4 y no en la 1 para no archivar la oficial del 24/09 ni mezclar días en las rondas 1-3 |
 
 **Qué contiene:** 9 láminas: portada · la solución que entregamos · arquitectura · dos
