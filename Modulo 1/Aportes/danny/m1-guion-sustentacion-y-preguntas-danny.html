@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guion de sustentación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+  :root{
+    --ground:#F1F4F4; --surface:#FFFFFF; --surface-2:#E7EDED;
+    --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+    --rule:#CDDADC; --rule-2:#E1E9EA;
+    --accent:#0A6C7C; --accent-soft:#DBEDEF;
+    --signal:#A85B0C; --signal-soft:#F7E8D4;
+    --ok:#1B6B45; --ok-soft:#DCEFE4;
+    --bad:#9B2C2C; --bad-soft:#F7E0E0;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+      --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+      --rule:#233A3F; --rule-2:#1A2E32;
+      --accent:#5CB9C8; --accent-soft:#123338;
+      --signal:#E0A257; --signal-soft:#33240F;
+      --ok:#6FCB9B; --ok-soft:#10301F;
+      --bad:#E88C8C; --bad-soft:#331616;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#6FCB9B; --ok-soft:#10301F;
+    --bad:#E88C8C; --bad-soft:#331616;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.65}
+  .wrap{max-width:860px;margin:0 auto;padding:48px 16px 96px}
+  .kicker{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.6vw,2.8rem);line-height:1.08;letter-spacing:-.024em;text-wrap:balance;margin:0 0 16px}
+  h2{font-family:var(--sans);font-weight:600;font-size:1.45rem;letter-spacing:-.015em;margin:56px 0 6px}
+  .lede{color:var(--ink-2);font-size:1.12rem;margin:0 0 20px;text-wrap:pretty}
+  .meta{font-family:var(--sans);font-size:.85rem;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px 18px;margin:0}
+  .meta b{color:var(--ink-2);font-weight:500}
+  .sub{color:var(--ink-2);margin:0 0 20px}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;overflow-wrap:anywhere}
+  strong{font-weight:600}
+  em.tag{font-style:normal;font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:6px;white-space:nowrap}
+  em.tag.prob{background:var(--signal-soft);color:var(--signal)}
+
+  .warn{background:var(--signal-soft);border:1px solid color-mix(in srgb,var(--signal) 30%,transparent);border-radius:12px;padding:20px 22px;margin:36px 0 0}
+  .warn h2{margin:0 0 12px;font-size:1.1rem;color:var(--signal)}
+  .warn ol{margin:0;padding-left:1.3em}
+  .warn li{margin:0 0 10px}
+  .warn li:last-child{margin:0}
+  .nosay{list-style:none;padding:0;margin:8px 0 0}
+  .nosay li{margin:0 0 6px;font-family:var(--sans);font-size:.92rem}
+  .nosay s{color:var(--bad);text-decoration-thickness:1.5px}
+
+  .slides{display:grid;gap:10px;margin:18px 0 0;padding:0;list-style:none}
+  .slide{background:var(--surface);border:1px solid var(--rule-2);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);display:grid;grid-template-columns:44px 1fr;gap:4px 14px}
+  .slide .n{font-family:var(--mono);font-size:1.3rem;color:var(--accent);line-height:1.2}
+  .slide .t{font-family:var(--sans);font-weight:600;font-size:1rem;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+  .slide .t span{font-family:var(--mono);font-weight:400;font-size:.78rem;color:var(--ink-3);white-space:nowrap}
+  .slide p{grid-column:2;margin:0;color:var(--ink-2)}
+  .slide.key{border-color:var(--accent)}
+  .three{background:var(--accent-soft);border-radius:12px;padding:16px 20px;margin:16px 0 0}
+  .three ol{margin:6px 0 0;padding-left:1.3em}
+
+  .toolbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(6px);padding:12px 0;margin:12px 0 4px;border-bottom:1px solid var(--rule-2);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .chip,.btn{font-family:var(--sans);font-size:.82rem;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;cursor:pointer;min-height:32px}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+  .btn:hover,.chip:hover{border-color:var(--accent)}
+  .spacer{flex:1}
+  .count{font-family:var(--mono);font-size:.78rem;color:var(--ink-3)}
+
+  details.q{background:var(--surface);border:1px solid var(--rule-2);border-radius:12px;margin:10px 0;box-shadow:var(--shadow)}
+  details.q[hidden]{display:none}
+  details.q summary{list-style:none;cursor:pointer;padding:14px 18px;display:grid;grid-template-columns:36px 1fr 22px;gap:10px;align-items:baseline;font-family:var(--sans);font-weight:500}
+  details.q summary::-webkit-details-marker{display:none}
+  details.q summary .num{font-family:var(--mono);color:var(--accent);font-size:.9rem}
+  details.q summary .chev{color:var(--ink-3);transition:transform .15s;justify-self:end}
+  details.q[open] summary .chev{transform:rotate(90deg)}
+  details.q summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}
+  .ans{padding:0 18px 16px 64px;color:var(--ink)}
+  .ans p{margin:0 0 10px}
+  .ans ul{margin:0 0 10px;padding-left:1.2em}
+  .ans .key{border-left:3px solid var(--accent);padding-left:12px}
+  .cat{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:block;margin-top:2px;font-weight:400}
+
+  .tbl{overflow-x:auto;margin:6px 0 12px;border:1px solid var(--rule-2);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  th{background:var(--surface-2);font-weight:600;color:var(--ink-2)}
+  td.num{font-family:var(--mono);white-space:nowrap;text-align:right}
+  tr:last-child td{border-bottom:0}
+
+  footer{margin-top:64px;font-family:var(--sans);font-size:.8rem;color:var(--ink-3);border-top:1px solid var(--rule-2);padding-top:16px}
+  @media (max-width:560px){
+    .slide{grid-template-columns:32px 1fr}
+    .ans{padding:0 16px 16px 16px}
+    details.q summary{grid-template-columns:30px 1fr 18px}
+  }
+  @media print{
+    .toolbar{display:none}
+    details.q{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="kicker">Módulo 1 · Reto de Latencia Mínima · Group 2</p>
+  <h1>Guion de sustentación y preguntas probables</h1>
+  <p class="lede">El profesor elige a cualquiera del equipo para exponer. Esto es lo mínimo que los tres tenemos que poder contar solos, más las preguntas que es probable que haga.</p>
+  <p class="meta"><span><b>Autor:</b> Daniel Mazo</span><span><b>Fecha:</b> 29/09/2026</span><span><b>Tipo:</b> investigación (preparado con IA)</span><span><b>Presentación:</b> v2, 9 láminas</span></p>
+
+  <section class="warn" aria-labelledby="w">
+    <h2 id="w">⚠ Tres cosas que hay que saber antes de exponer</h2>
+    <ol>
+      <li><strong>Hay dos juegos de cifras, y los dos son correctos.</strong> La presentación usa la corrida del <strong>28/09</strong> (1 × 1 M). El informe PDF usa la del <strong>24/09</strong> (3 × 1 M). Si el profesor ve la diferencia, la respuesta está en la pregunta 6.</li>
+      <li><strong>Hoy (29/09) se quitó el warmup del código</strong> (ADR-012, todavía <em>Propuesta</em>: falta que Freddy y Camilo lo ratifiquen). Las cifras de la presentación y del informe <strong>sí</strong> se tomaron con warmup de 100 000. La nota «Reproducir» de la lámina de resultados trae <code>--warmup 100000</code>, y <strong>ese comando ahora falla</strong>. No lo lean en voz alta ni lo ejecuten en vivo. Ver la pregunta 12.</li>
+      <li><strong>Frases que NO se dicen:</strong>
+        <ul class="nosay">
+          <li><s>«Memoria compartida tiene el peor caso acotado»</s> → falso: su máximo fue 17,6 µs (28/09) y 42 µs (24/09).</li>
+          <li><s>«Memoria compartida es mejor»</s> → depende del atributo de calidad que se priorice.</li>
+          <li><s>«Memoria compartida nunca pasa de 1 ms»</s> → lo correcto es «<strong>no lo observamos</strong>».</li>
+        </ul>
+      </li>
+    </ol>
+  </section>
+
+  <h2>Parte 1 — Guion</h2>
+  <p class="sub">Unos 5 minutos, una idea por lámina.</p>
+  <ol class="slides">
+    <li class="slide"><span class="n">1</span><div class="t">Portada <span>0:10</span></div><p>«Somos el Group 2 y este es nuestro reto de latencia mínima.» Y pasar.</p></li>
+    <li class="slide"><span class="n">2</span><div class="t">La solución que entregamos <span>0:40</span></div><p>Hicimos <strong>dos soluciones</strong> que responden exactamente lo mismo, más una <strong>web</strong> para operarlas. El servicio no es un eco: <strong>clasifica una IP</strong> como LOCAL, EXTERNO o DESCONOCIDO. Las dos soluciones comparten esa lógica, y el proyecto comprueba que clasifiquen igual. Por eso la comparación es justa.</p></li>
+    <li class="slide"><span class="n">3</span><div class="t">Dos caminos para el mismo mensaje <span>0:40</span></div><p>Lo que cambia es <strong>cuántas capas del sistema operativo atraviesa el mensaje</strong>. TCP Python pasa por llamadas al sistema, la pila de red y el planificador, a la ida y a la vuelta. En memoria compartida C, un proceso escribe y el otro lee, sin el sistema operativo en medio. <strong>Salvedad que decimos antes de que la pregunten:</strong> cambian a la vez el camino y el lenguaje, así que la diferencia no se puede atribuir a una sola de las dos causas.</p></li>
+    <li class="slide"><span class="n">4</span><div class="t">Un plano que controla, dos que se miden <span>0:30</span></div><p>La web <strong>enciende y muestra, pero no cronometra</strong>. Un navegador vive en milisegundos: si midiéramos desde ahí, estaríamos midiendo el navegador.</p></li>
+    <li class="slide"><span class="n">5</span><div class="t">Dónde empieza y dónde para el cronómetro <span>0:30</span></div><p>El cronómetro arranca <strong>justo antes de enviar</strong> y para cuando <strong>la respuesta llegó completa</strong> (ida y vuelta). La conexión se abre una sola vez y queda fuera. Mismo reloj y mismo mensaje de 32 bytes en las dos soluciones.</p></li>
+    <li class="slide"><span class="n">6</span><div class="t">Demostración <span>1:00</span></div><p>Llegar con la web <strong>ya abierta</strong> en <code>127.0.0.1:8080</code>: se encienden las dos, se manda un host de la lista y una IP a mano (usar <code>192.0.2.50</code>, nunca una IP real) y se lanza una medición corta. <strong>Plan B:</strong> si la demo falla, pasar a la siguiente lámina; ningún número sale de la demo.</p></li>
+    <li class="slide"><span class="n">7</span><div class="t">Resultados <span>0:40</span></div><p>TCP Python: <strong>15,3 µs</strong> de mediana. Memoria compartida C: <strong>83 ns</strong>, es decir, <strong>184×</strong> más rápida por mediana. Hoy ninguna pasó de 1 ms, pero el 24/09, <strong>con el mismo código</strong>, TCP pasó de 1 ms <strong>164 veces</strong>. Y el máximo depende de cuántas muestras se miren: <strong>por eso reportamos percentiles</strong>.</p></li>
+    <li class="slide key"><span class="n">8</span><div class="t">Atributos de calidad comparados <span>0:40</span></div><p><strong>Esta es la lámina que demuestra que entendimos el módulo.</strong> TCP gana en flexibilidad, concurrencia e interoperabilidad, y pierde en previsibilidad del peor caso. Memoria compartida gana en previsibilidad, y pierde en recursos (ocupa un núcleo entero), escalabilidad (un cliente a la vez) y flexibilidad (misma máquina, no corre en Windows nativo).</p></li>
+    <li class="slide key"><span class="n">9</span><div class="t">¿Bajamos del milisegundo? <span>0:30</span></div><p>Por mediana, <strong>las dos, y de sobra</strong> (66× y 12 048× por debajo). Por la cola, TCP depende del día. Cerrar despacio: <strong>«El milisegundo ya lo cumple la solución simple. La pregunta de arquitectura es qué estamos dispuestos a sacrificar para ir más rápido.»</strong> Y parar ahí.</p></li>
+  </ol>
+  <div class="three">
+    <strong>Si solo recuerdas tres cosas:</strong>
+    <ol>
+      <li>Las dos cumplen por mediana.</li>
+      <li>La cola de TCP depende del estado del sistema operativo, no del código.</li>
+      <li>Elegir entre las dos es un trade-off de atributos de calidad, no un ganador.</li>
+    </ol>
+  </div>
+
+  <h2>Parte 2 — Preguntas probables del profesor</h2>
+  <p class="sub">Intenta responder en voz alta antes de abrir cada una.</p>
+
+  <div class="toolbar" role="toolbar" aria-label="Filtros de preguntas">
+    <button class="chip" data-f="all" aria-pressed="true">Todas</button>
+    <button class="chip" data-f="perc" aria-pressed="false">Percentiles</button>
+    <button class="chip" data-f="res" aria-pressed="false">Resultados</button>
+    <button class="chip" data-f="met" aria-pressed="false">Metodología</button>
+    <button class="chip" data-f="dis" aria-pressed="false">Diseño</button>
+    <span class="spacer"></span>
+    <span class="count" id="count"></span>
+    <button class="btn" id="openAll">Abrir todas</button>
+    <button class="btn" id="closeAll">Cerrar todas</button>
+  </div>
+
+  <div id="qs">
+    <!-- Percentiles -->
+    <details class="q" data-c="perc"><summary><span class="num">01</span><span>¿Qué significa cada percentil?<span class="cat">Percentiles</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Se ordenan de menor a mayor el millón de tiempos medidos:</p>
+        <div class="tbl"><table>
+          <thead><tr><th>Métrica</th><th>Qué dice</th><th>TCP Python</th><th>Mem. compartida C</th></tr></thead>
+          <tbody>
+            <tr><td><strong>p50</strong> (mediana)</td><td>La mitad de los intercambios tardó esto o menos. Es el caso típico</td><td class="num">15,3 µs</td><td class="num">0,083 µs</td></tr>
+            <tr><td><strong>p99</strong></td><td>99 de cada 100 tardaron esto o menos; <strong>1 de cada 100</strong> tardó más</td><td class="num">21,6 µs</td><td class="num">0,125 µs</td></tr>
+            <tr><td><strong>p99.9</strong></td><td>999 de cada 1 000 tardaron esto o menos; <strong>1 de cada 1 000</strong> tardó más (en 1 M, unos 1 000 intercambios)</td><td class="num">31,2 µs</td><td class="num">0,167 µs</td></tr>
+            <tr><td><strong>máximo</strong></td><td>El peor intercambio de todos, <strong>uno solo</strong></td><td class="num">622,5 µs</td><td class="num">17,6 µs</td></tr>
+          </tbody>
+        </table></div>
+        <p class="key">Por ejemplo: «un p99.9 de 31 µs quiere decir que solo 1 de cada 1 000 intercambios tardó más de 31 µs».</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="perc"><summary><span class="num">02</span><span>¿Por qué percentiles y no el promedio?<span class="cat">Percentiles</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Porque el promedio <strong>esconde la cola</strong>, que es justo lo que importa en baja latencia. Unos pocos intercambios de 15 ms mueven el promedio, pero no dicen cuántos fueron ni qué tan malos. Con los percentiles se ve la forma de la distribución. Nuestra especificación (<code>ESPEC-MEDICION.md</code> §3) <strong>prohíbe usar el promedio como titular</strong>.</p>
+        <p><em class="tag">Complementario</em>Si quiere ir más allá: un usuario real hace muchas peticiones. Si una página dispara 100 llamadas, la probabilidad de que al menos una caiga por encima del p99 es 1 − 0,99<sup>100</sup> ≈ <strong>63 %</strong>. La cola la sufre casi todo el mundo, no «el 1 %».</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="perc"><summary><span class="num">03</span><span>¿Por qué esos percentiles y no otros?<span class="cat">Percentiles</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <ul>
+          <li><strong>p50</strong>: para decir cuánto tarda un intercambio normal.</li>
+          <li><strong>p99 y p99.9</strong>: para ver la cola, es decir, qué tan malo es el caso raro pero frecuente.</li>
+          <li><strong>máximo</strong>: porque el enunciado habla de «menos de 1 ms», y lo que decide si alguna muestra se pasó es el peor caso.</li>
+        </ul>
+        <p>El análisis calcula además p90 y p99.99 (<code>ESPEC-MEDICION.md</code> §3). La lámina muestra los cuatro que cuentan la historia.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="perc"><summary><span class="num">04</span><span>¿Por qué un millón de intercambios?<span class="cat">Percentiles</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Para que los percentiles altos tengan sentido estadístico. Con 1 M, el p99.99 todavía deja 100 muestras por encima. Con 10 000, el p99.9 dependería de 10 muestras.</p>
+        <p>La lámina 7 lo muestra: el máximo de TCP fue <strong>46,5 µs</strong> mirando 10 000 intercambios, <strong>105 µs</strong> mirando 100 000 y <strong>622,5 µs</strong> mirando el millón.</p>
+        <p class="key"><strong>Un máximo no significa nada si no se dice sobre cuántas muestras se tomó.</strong></p>
+      </div>
+    </details>
+
+    <details class="q" data-c="perc"><summary><span class="num">05</span><span>¿Cómo calcularon los percentiles?<span class="cat">Percentiles</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Con <strong>un solo script</strong> (<code>analyze.py</code>) para las dos soluciones, así ninguna calcula sus percentiles a su manera. El método es rango más cercano (<em>nearest-rank</em>), sin interpolar: posición <code>ceil(p·n) − 1</code> en la lista ordenada.</p>
+      </div>
+    </details>
+
+    <!-- Resultados -->
+    <details class="q" data-c="res"><summary><span class="num">06</span><span>¿Por qué la presentación y el informe tienen cifras distintas?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Son dos corridas del mismo código en la misma máquina: el informe usa la del 24/09 (3 × 1 M) y la presentación la del 28/09 (1 × 1 M). Las medianas casi no cambian (TCP ≈ 15 µs, C = 83 ns). <strong>La cola sí cambia</strong>, y ese es justamente el hallazgo.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="res"><summary><span class="num">07</span><span>¿Por qué TCP pasó de 1 ms 164 veces un día y ninguna otro, con el mismo código?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Porque la cola de TCP <strong>depende del estado del sistema operativo</strong>: planificador, interrupciones y otros procesos. No depende del diseño del programa. El 24/09 la máquina tenía carga 5,76 sobre 10 núcleos; el 28/09, 3,8.</p>
+        <p><em class="tag prob">Probable</em>No está demostrado: la correlación con la carga encaja, pero no aislamos la causa.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="res"><summary><span class="num">08</span><span>¿Cumplen el objetivo de 1 ms?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Por mediana, sí: TCP está 66× por debajo y memoria compartida 12 048×. Por la cola, TCP depende del día (164 de 3 M sobre 1 ms el 24/09, ninguna el 28/09), y memoria compartida no pasó en ninguna corrida.</p>
+        <p class="key"><strong>Que no lo observáramos no quiere decir que no pueda pasar.</strong></p>
+      </div>
+    </details>
+
+    <details class="q" data-c="res"><summary><span class="num">09</span><span>Entonces, ¿memoria compartida tiene el peor caso garantizado?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p><strong>No.</strong> Su máximo fue 17,6 µs, más de 200 veces su mediana, y eso sin ninguna llamada al sistema. Esos picos los ponen las interrupciones, el hardware y la migración del hilo entre núcleos (en macOS/arm64 no se puede fijar un hilo a un núcleo).</p>
+        <p class="key">Lo defendible es que <strong>sacó varias fuentes de variabilidad del camino, no todas</strong>.</p>
+      </div>
+    </details>
+
+    <!-- Metodología -->
+    <details class="q" data-c="met"><summary><span class="num">10</span><span>¿Qué miden exactamente? ¿Por qué no solo la ida?<span class="cat">Metodología</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>El tiempo de ida y vuelta completo, desde antes de enviar hasta tener la respuesta entera (frontera F1, ADR-001). No medimos solo la ida porque exigiría dos relojes sincronizados con más precisión que la propia latencia, y eso entre procesos no se consigue.</p>
+        <p class="key">Además, <strong>F1 es la frontera más desfavorable de las defendibles</strong>: si solo hubiéramos medido la llamada al sistema, habríamos reportado unos 5 µs. Elegir la medida que nos perjudica le da credibilidad al resultado.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="met"><summary><span class="num">11</span><span>¿Qué reloj usan y por qué importa?<span class="cat">Metodología</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Un reloj monotónico con resolución real de <strong>41,67 ns</strong>. En el M4, <code>CLOCK_MONOTONIC</code> avanza a saltos de 1 000 ns: con ese reloj, el 97,6 % de las muestras de memoria compartida (~83 ns) habrían salido en <strong>cero</strong> (ADR-003).</p>
+        <p class="key">Regla: la granularidad del reloj debe ser al menos 10 veces menor que lo que se mide.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="met"><summary><span class="num">12</span><span>¿Hicieron warmup? El código no lo tiene.<span class="cat">Metodología</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Las cifras del informe y de la presentación <strong>sí</strong> se tomaron con 100 000 intercambios de calentamiento descartados, que sirven para calentar cachés y dejar que la CPU suba de frecuencia. El 29/09 se quitó del código (ADR-012).</p>
+        <p class="key">Por eso una corrida nueva <strong>no se compara</strong> con las del informe: sin warmup, la cola sube.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="met"><summary><span class="num">13</span><span>¿La web no afecta la medición?<span class="cat">Metodología</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>No. La web solo enciende las soluciones y muestra los resultados; el cronómetro vive en el cliente de cada plano de datos. Además verificamos que medir desde la web no escribe en los resultados oficiales.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="met"><summary><span class="num">14</span><span>¿Clasificar la IP no contamina la medición?<span class="cat">Metodología</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Lo medimos por separado: <strong>1,945 ns por llamada</strong>. Primero intentamos restar dos corridas, pero la variación entre rondas (±13 ns) era mayor que el efecto (~2 ns). Era ruido que parecía señal, así que descartamos ese método (INFORME §6.3).</p>
+      </div>
+    </details>
+
+    <!-- Diseño -->
+    <details class="q" data-c="dis"><summary><span class="num">15</span><span>¿Por qué Python y C?<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Python, porque es el candidato más lento que se nos ocurre: <strong>si Python cumple, el umbral no es el reto</strong>. C, porque en Java el recolector de basura y el JIT meten pausas en la cola, y en Python el intérprete cuesta más que la latencia que queremos medir.</p>
+        <p class="key"><strong>Limitación declarada:</strong> como cambian a la vez el lenguaje y el camino, no podemos decir cuánto de los 184× se debe a cada uno.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="dis"><summary><span class="num">16</span><span>¿Por qué espera activa y no semáforos?<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Porque un semáforo o un <em>futex</em> vuelve a meter al planificador, que es justo lo que queremos sacar del camino. El precio: <strong>cada proceso ocupa un núcleo al 100 %</strong> aunque no haya trabajo.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="dis"><summary><span class="num">17</span><span>¿Qué es <code>TCP_NODELAY</code>?<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Desactiva el algoritmo de Nagle, que agrupa los mensajes pequeños antes de enviarlos. Si se deja activo, aparecen picos de unos 40 ms. Es el error clásico de este ejercicio.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="dis"><summary><span class="num">18</span><span>En la lámina dicen «contenedores», pero el informe descarta contenedores.<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>En la lámina, «contenedor» se usa en el sentido del <strong>modelo C4</strong>: una unidad que se ejecuta por separado. No es Docker. Docker sí se descartó porque añade una red virtualizada, y eso <strong>sube</strong> la latencia.</p>
+      </div>
+    </details>
+
+    <details class="q" data-c="dis"><summary><span class="num">19</span><span>¿Por qué no usaron un broker como Kafka o un framework web?<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p>Porque no están en el alcance y van en contra del objetivo. Un broker añade un salto de red y persistencia, varios órdenes de magnitud más de latencia. Un framework mete capas en la ruta crítica. No hay nada que guardar, ni un requisito de disponibilidad que justifique reintentos.</p>
+        <p class="key"><strong>Justificar lo que no se construyó también es arquitectura.</strong></p>
+      </div>
+    </details>
+
+    <details class="q" data-c="dis"><summary><span class="num">20</span><span>¿Cuál usarían en producción?<span class="cat">Diseño</span></span><span class="chev">›</span></summary>
+      <div class="ans">
+        <p><strong>Depende del atributo de calidad que priorice el negocio.</strong> Para casi cualquier servicio: TCP, porque ya cumple el milisegundo y además da red, varios clientes y portabilidad. Para memoria compartida hace falta un caso que exija <strong>determinismo extremo en una sola máquina</strong> y que pueda pagar núcleos dedicados y código atado a la plataforma.</p>
+        <p><em class="tag">Complementario</em>Es el caso de la comunicación entre procesos en sistemas de trading de baja latencia.</p>
+      </div>
+    </details>
+  </div>
+
+  <footer>
+    Fuentes: presentación v2 (ronda 4, 28/09) · <code>INFORME.md</code> (24/09) · <code>ESPEC-MEDICION.md</code> · ADR-001, ADR-003, ADR-012. Lo marcado <em>Complementario</em> no sale del material del diplomado. Tecla <code>T</code>: tema claro/oscuro.
+  </footer>
+</main>
+<script>
+(function(){
+  var qs = Array.prototype.slice.call(document.querySelectorAll('details.q'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var count = document.getElementById('count');
+  var filter = 'all';
+
+  function visible(){ return qs.filter(function(q){ return !q.hidden; }); }
+  function update(){
+    var v = visible();
+    var open = v.filter(function(q){ return q.open; }).length;
+    count.textContent = open + ' / ' + v.length + ' abiertas';
+  }
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      filter = c.getAttribute('data-f');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', String(o === c)); });
+      qs.forEach(function(q){ q.hidden = !(filter === 'all' || q.getAttribute('data-c') === filter); });
+      update();
+    });
+  });
+  document.getElementById('openAll').addEventListener('click', function(){ visible().forEach(function(q){ q.open = true; }); update(); });
+  document.getElementById('closeAll').addEventListener('click', function(){ visible().forEach(function(q){ q.open = false; }); update(); });
+  qs.forEach(function(q){ q.addEventListener('toggle', update); });
+
+  var root = document.documentElement;
+  try { var t = localStorage.getItem('guion-tema'); if (t) root.setAttribute('data-theme', t); } catch(e) {}
+  document.addEventListener('keydown', function(e){
+    if ((e.key === 't' || e.key === 'T') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      var dark = root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = dark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('guion-tema', next); } catch(e) {}
+    }
+  });
+  update();
+})();
+</script>
+</body>
+</html>
