@@ -1,36 +1,17 @@
 #!/usr/bin/env python3
 """
-clasificador.py — EL DOMINIO del reto, para las variantes interpretadas (A y B).
+clasificador.py — el dominio del reto para la variante en Python.
 
-Carga la MISMA `tabla-hosts.csv` que usa `clasificador.h`. Esa es la razón de que el
-dominio viva en un CSV y no en código: dos lenguajes, una sola fuente de verdad. Si la
-tabla estuviera duplicada en C y en Python, la comparación B vs Bc dejaría de aislar el
-efecto del lenguaje y pasaría a mezclar «lenguaje» con «dos tablas que divergieron».
+Carga la MISMA `tabla-hosts.csv` que usa `clasificador.h`: dos lenguajes, una sola
+fuente de verdad. Si la tabla estuviera duplicada en C y en Python, una comparación
+entre lenguajes mezclaría el efecto del lenguaje con dos tablas que divergieron.
 
-Decisión registrada en ADR-004.
-
-─────────────────────────────────────────────────────────────────────────────────
-ASIMETRÍA DECLARADA FRENTE A LA VERSIÓN EN C — hay que decirla, no esconderla
-
-  C      barrido de 16 ranuras de tiempo constante, sin ramas   ~1-3 ns
+Asimetría declarada frente a C:
+  C      barrido de 16 ranuras en tiempo constante, sin ramas   ~1-3 ns
   Python búsqueda en `dict`                                     ~40 ns
-
-No son el mismo algoritmo, y por tanto B y Bc no hacen exactamente el mismo trabajo.
-Se acepta deliberadamente, por dos razones:
-
-  1. Replicar el barrido de 16 en Python costaría ~2 µs, es decir el 15 % del p50 de
-     la variante B (13,2 µs). ESO SÍ contaminaría la medición. El `dict` cuesta 40 ns:
-     el 0,3 %.
-  2. Un `dict` es lo que escribiría cualquier desarrollador de Python. Forzar un
-     barrido manual para «igualar» al C sería una distorsión artificial del lenguaje
-     que precisamente estamos midiendo.
-
-Consecuencia honesta que va al informe: **Python no puede ofrecer la garantía de tiempo
-constante que sí ofrece C.** El `dict` usa hashing, y su coste depende de colisiones y
-del estado de la tabla. Para este ejercicio da igual (40 ns sobre 13 200 ns); en un
-sistema de autorización real, no daría igual. Es un trade-off del lenguaje, y es
-material del informe, no un defecto que corregir.
-─────────────────────────────────────────────────────────────────────────────────
+Replicar el barrido en Python costaría ~2 µs (~15 % del p50 de TCP Python) y sí
+contaminaría la medición; el `dict` cuesta ~0,3 % y es lo idiomático. El precio es
+que Python no garantiza tiempo constante: el hashing depende de colisiones.
 """
 
 from __future__ import annotations
@@ -76,7 +57,7 @@ def cargar(ruta: Path) -> dict[int, int]:
                 raise SystemExit(
                     f"clasificador: la tabla excede {TABLA_MAX} filas. El límite es una "
                     f"DECISIÓN de diseño (64 B = 1 línea de caché), no un detalle: "
-                    f"subirlo invalida ADR-004."
+                    f"subirlo rompe la garantía de que clasificar no contamina la medición."
                 )
             if ver == "local":
                 v = VEREDICTO_LOCAL

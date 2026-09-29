@@ -1,56 +1,21 @@
 #!/usr/bin/env python3
 """
-Variante TCP Python — cliente medidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
+Variante TCP Python — cliente medidor sobre TCP crudo.
 
-Este archivo es la PLANTILLA de medición. Toda variante replica exactamente este
-bucle; solo cambia el transporte. Todo lo demás está congelado en
-docs/ESPEC-MEDICION.md y no debe modificarse por variante.
-
-Frontera de medición F1 (ADR-001):
+Frontera de medición F1:
     t0 = inmediatamente ANTES de la llamada de escritura
-    t1 = inmediatamente DESPUÉS de que la respuesta esté completamente leída
-    latencia = t1 - t0   (RTT en espacio de usuario)
+    t1 = inmediatamente DESPUÉS de leer la respuesta completa
+    latencia = t1 - t0   (RTT en espacio de usuario; no incluye conexión ni arranque)
 
-No incluye: establecimiento de conexión (se paga en el warmup) ni arranque del proceso.
+Los 16 estímulos se construyen antes del bucle y se recorren con `i & 15` (un AND,
+sin división ni asignaciones). Mezcla medida: 10 LOCAL · 6 EXTERNO · 0 DESCONOCIDO;
+el caso DESCONOCIDO se ejercita en la autoprueba de arranque y en `demo.py`.
 
-─────────────────────────────────────────────────────────────────────────────────
-EL CICLO DE ESTÍMULOS — decisión que hay que declarar en el informe (ADR-004 §4)
+`--hilos N` lanza N clientes concurrentes, cada uno con su conexión, sus estímulos y
+su array de muestras: nada compartido en la ruta caliente. N=1 es el caso sin contención.
 
-Los 16 estímulos se construyen ANTES del bucle y se recorren con `i & 15`: un AND,
-sin módulo (que es una división) y sin asignar memoria por iteración.
-
-Mezcla de veredictos en el bucle medido:  10 LOCAL · 6 EXTERNO · 0 DESCONOCIDO.
-
-Que no haya DESCONOCIDO en el bucle medido NO sesga el resultado, y esa afirmación
-está verificada, no supuesta: el clasificador en C compila a 16 `csel` sin un solo
-salto condicional, así que los tres veredictos cuestan exactamente lo mismo. El caso
-DESCONOCIDO se ejercita en la autoprueba de arranque y en `demo.py`.
-─────────────────────────────────────────────────────────────────────────────────
-CONCURRENCIA — `--hilos N` (añadido el 15/09, ADR-006)
-
-Hasta ahora se medía el caso MÁS FAVORABLE que existe: un cliente, un servidor, cero
-contención. En producción eso no ocurre nunca. `--hilos N` lanza N clientes a la vez,
-cada uno con su propia conexión, y permite trazar cómo se degrada la cola p99,9 al
-subir la concurrencia — que es la curva que de verdad separa arquitecturas.
-
-  · N=1 es EXACTAMENTE lo que se medía antes. Las 9,15 M de muestras históricas
-    siguen siendo válidas y comparables: son el punto N=1 de la curva.
-  · El CSV gana una columna `hilo`. `analyze.py` lee la latencia de la columna 1, así
-    que los CSV nuevos y viejos se analizan igual.
-  · Cada hilo tiene su conexión, sus estímulos y su array de muestras. No comparten
-    nada en la ruta caliente: ni un lock, ni un contador, ni un buffer.
-
-LOTES — por qué el progreso se reporta entre lotes y no por iteración
-
-Mostrar avance exige actualizar un contador, y un contador dentro del bucle medido es
-trabajo que se cronometra junto con el intercambio. La medición no puede pagar por su
-propia barra de progreso.
-
-Solución: las iteraciones se agrupan en LOTES. El cronómetro sigue midiendo cada
-intercambio por separado —la frontera F1 no cambia—, pero el contador de progreso se
-toca entre lote y lote, fuera de toda medición. Es la misma técnica de lotes que usa
-`control-dominio/micro.c`, aplicada a otro fin.
-─────────────────────────────────────────────────────────────────────────────────
+El progreso se reporta ENTRE lotes, nunca por iteración: un contador dentro del bucle
+medido se cronometraría junto con el intercambio.
 """
 
 import argparse
@@ -91,7 +56,7 @@ def main() -> None:
     ap.add_argument("--out", type=Path, required=True, help="CSV de salida")
     ap.add_argument("--reintentos", type=int, default=50)
     ap.add_argument("--hilos", type=int, default=1,
-                    help="clientes concurrentes; 1 = el caso historico (ADR-006)")
+                    help="clientes concurrentes; 1 = sin contención")
     ap.add_argument("--lote", type=int, default=10_000,
                     help="iteraciones por lote; el progreso se reporta ENTRE lotes")
     ap.add_argument("--tabla", type=Path,
@@ -103,7 +68,7 @@ def main() -> None:
 
     # --- FUERA de la ruta caliente ------------------------------------------
     tabla = clasificador.cargar(a.tabla)
-    clasificador.resumen("cliente B", a.tabla, tabla)
+    clasificador.resumen("cliente tcp-python", a.tabla, tabla)
 
     ids = list(tabla.keys())
     assert len(ids) == 16, f"el ciclo exige exactamente 16 hosts, hay {len(ids)}"
@@ -112,9 +77,8 @@ def main() -> None:
     esperado = [tabla[hid] for hid in ids]
     leer_ver = struct.Struct("<BxxxI").unpack_from
 
-    # Reparto de las iteraciones entre hilos. Cada hilo mide `iters` completas: subir
-    # la concurrencia no reduce el trabajo de nadie, aumenta la carga total. Es lo que
-    # se quiere observar — cómo se degrada CADA cliente cuando hay más clientes.
+    # Cada hilo mide `iters` completas: subir la concurrencia aumenta la carga total,
+    # y se observa cómo se degrada cada cliente cuando hay más clientes.
     n_lotes = max(1, -(-a.iters // a.lote))        # techo de la división
     lotes_hechos = [0] * a.hilos                   # un entero por hilo: sin lock
     resultados: list[list[int] | None] = [None] * a.hilos
@@ -128,7 +92,7 @@ def main() -> None:
             vista = memoryview(buf)
 
             # Enlaces locales: evita búsquedas de atributo en la ruta caliente.
-            reloj = time.perf_counter_ns      # monótono, ns (ESPEC §2, ADR-003)
+            reloj = time.perf_counter_ns      # monótono, ns; el mismo reloj en todas las variantes
             enviar = sock.sendall
             recibir = sock.recv_into
             n_payload = a.payload
@@ -143,8 +107,7 @@ def main() -> None:
                     leidos += j
 
             # --- AUTOPRUEBA: el sistema clasifica bien ANTES de medir nada ----
-            # Solo el primer hilo: los demás hablan con el mismo servidor y la misma
-            # tabla, así que repetirla 8 veces ensucia el log sin cerrar ningún riesgo.
+            # Solo el primer hilo: los demás usan el mismo servidor y la misma tabla.
             if k == 0:
                 for est, esp in zip(ciclo, esperado):
                     intercambio(est)
@@ -153,28 +116,27 @@ def main() -> None:
                     if v != esp or eco != hid:
                         raise SystemExit(f"error de integridad: esperaba veredicto {esp} "
                                          f"para {hid}, recibí {v} con eco {eco}")
-                # El caso DESCONOCIDO — el "pepito5" de las notas del equipo.
+                # Caso DESCONOCIDO: un host que no está en la tabla.
                 desconocido = clasificador.id_de_ip("203.0.113.77")   # TEST-NET-3, RFC 5737
                 intercambio(clasificador.armar_estimulo(desconocido, 0, a.payload))
                 v, _ = leer_ver(buf, 0)
                 if v != clasificador.VEREDICTO_DESCONOCIDO:
                     raise SystemExit(f"error de integridad: un host fuera de tabla devolvió {v}")
-                print("[cliente B] autoprueba OK: 16 hosts de tabla + 1 desconocido", flush=True)
+                print("[cliente tcp-python] autoprueba OK: 16 hosts de tabla + 1 desconocido", flush=True)
 
             # --- WARMUP: descartado ------------------------------------------
             # Estabiliza cachés, TLB, ramp-up de frecuencia de CPU y rutas del kernel.
             for i in range(a.warmup):
                 intercambio(ciclo[i & 15])
 
-            # Nadie empieza a medir hasta que TODOS terminaron el warmup. Si no, los
-            # primeros hilos medirían un tramo sin contención y la curva saldría
-            # mejor de lo que es — el sesgo iría justo en la dirección que halaga.
+            # Nadie mide hasta que TODOS terminaron el warmup: si no, los primeros
+            # hilos medirían un tramo sin contención y la curva saldría mejor de lo que es.
             listos.wait(timeout=120)
 
             # --- MEDICIÓN, por lotes -----------------------------------------
-            # El cronómetro sigue midiendo CADA intercambio (frontera F1 intacta).
-            # El lote solo marca dónde es seguro tocar el contador de progreso.
-            latencias = [0] * a.iters          # preasignado (ESPEC §5)
+            # El cronómetro mide CADA intercambio; el lote solo marca dónde es seguro
+            # tocar el contador de progreso.
+            latencias = [0] * a.iters          # preasignado: nada se asigna en el bucle
             i = 0
             for lote in range(n_lotes):
                 fin = min(i + a.lote, a.iters)
@@ -194,8 +156,8 @@ def main() -> None:
             lotes_hechos[k] = n_lotes
 
     # --- Supervisor: informa avance sin tocar la ruta caliente ---------------
-    # Lee los contadores que los hilos dejan ENTRE lotes. El plano de control lee estas
-    # líneas para mostrar hilos activos y lotes procesados.
+    # Lee los contadores que los hilos dejan ENTRE lotes. El plano de control (app/)
+    # interpreta estas líneas PROGRESO: no cambiar su formato clave=valor.
     fin_todo = threading.Event()
 
     def supervisor() -> None:
@@ -203,10 +165,10 @@ def main() -> None:
             hechos = sum(lotes_hechos)
             total = n_lotes * a.hilos
             vivos = sum(1 for k in range(a.hilos) if lotes_hechos[k] < n_lotes)
-            print(f"[cliente B] PROGRESO hilos={vivos}/{a.hilos} "
+            print(f"[cliente tcp-python] PROGRESO hilos={vivos}/{a.hilos} "
                   f"lotes={hechos}/{total} iters_por_lote={a.lote}", flush=True)
 
-    print(f"[cliente B] midiendo {a.iters:,} iteraciones x {a.hilos} hilo(s) "
+    print(f"[cliente tcp-python] midiendo {a.iters:,} iteraciones x {a.hilos} hilo(s) "
           f"en {n_lotes} lote(s) de {a.lote:,}…", flush=True)
 
     hilos = [threading.Thread(target=trabajador, args=(k,)) for k in range(a.hilos)]
@@ -222,9 +184,8 @@ def main() -> None:
         raise SystemExit("error durante la medición:\n  " + "\n  ".join(errores))
 
     # --- VOLCADO: siempre al final, nunca dentro del bucle -------------------
-    # La columna `hilo` va TERCERA a propósito: analyze.py lee la latencia de la
-    # columna 1, así que los CSV con y sin concurrencia se analizan con la misma
-    # herramienta y las corridas históricas siguen siendo legibles.
+    # La columna `hilo` va tercera: la latencia sigue en la columna 1 y los CSV con
+    # y sin concurrencia se analizan con la misma herramienta.
     a.out.parent.mkdir(parents=True, exist_ok=True)
     total = 0
     with a.out.open("w", newline="") as fh:
@@ -234,7 +195,7 @@ def main() -> None:
             for i, v in enumerate(muestras or [], start=1):
                 w.writerow((i, v, k))
                 total += 1
-    print(f"[cliente B] {total:,} muestras ({a.hilos} hilo[s]) -> {a.out}", flush=True)
+    print(f"[cliente tcp-python] {total:,} muestras ({a.hilos} hilo[s]) -> {a.out}", flush=True)
 
 
 if __name__ == "__main__":

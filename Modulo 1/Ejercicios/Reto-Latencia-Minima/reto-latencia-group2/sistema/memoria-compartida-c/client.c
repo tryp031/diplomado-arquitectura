@@ -1,17 +1,9 @@
 /*
  * Variante Memoria compartida C — cliente medidor sobre memoria compartida.
- *
- * Contrato del harness (ver ../README.md):
- *   --host <ignorado> --port 9103 --payload 32
- *   --warmup 100000 --iters 1000000 --out <ruta CSV>
- *
- * Frontera de medición F1 (ADR-001), idéntica a la de la variante TCP Python:
- *   t0 = inmediatamente ANTES de escribir el estímulo
- *   t1 = inmediatamente DESPUÉS de tener la respuesta completa en buffer local
- *
- * Añade algo que las otras variantes no necesitan: mide el PISO DE MEDICIÓN
- * (el coste del propio par de llamadas al reloj). A esta escala el instrumento
- * ya no es despreciable frente a lo medido, y callarlo sería deshonesto.
+ *   --host <ignorado> --port 9103 --payload 32 --warmup 100000 --iters 1000000 --out <CSV>
+ * Frontera F1: t0 justo ANTES de escribir el estímulo, t1 justo DESPUÉS de tener la
+ * respuesta completa en buffer local. Mide también el piso del propio reloj, que a
+ * esta escala ya no es despreciable.
  */
 #include <errno.h>
 #include <fcntl.h>
@@ -44,8 +36,8 @@ int main(int argc, char **argv)
     int reintentos = 50;
     uint64_t lote = 1000, lote_rondas = 200;   /* contraste por lotes, ver mas abajo */
     const char *ruta_tabla = "tabla-hosts.csv";
-    int sin_clasificar = 0;                     /* corrida de control, ADR-004 §5 */
-    const char *clasificar = NULL;              /* modo estimulo suelto — ADR-009 */
+    int sin_clasificar = 0;                     /* corrida de control: veredicto fijo */
+    const char *clasificar = NULL;              /* modo estimulo suelto */
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--host") && i + 1 < argc)            host = argv[++i];
@@ -64,8 +56,7 @@ int main(int argc, char **argv)
     }
     (void)host;
 
-    /* El modo --clasificar responde UNA pregunta y sale: no produce CSV ni corrida,
-       asi que no exige --out ni --iters. Ver ADR-009. */
+    /* El modo --clasificar responde UNA pregunta y sale: no exige --out ni --iters. */
     if (clasificar) {
         iters = 1;
     } else {
@@ -80,7 +71,7 @@ int main(int argc, char **argv)
 
     /* FUERA de la ruta caliente. */
     if (clasificador_cargar(ruta_tabla) < 0) return 1;
-    clasificador_resumen("cliente D", ruta_tabla);
+    clasificador_resumen("cliente memoria-compartida-c", ruta_tabla);
     if (g_tabla_n != TABLA_MAX) {
         fprintf(stderr, "el ciclo exige exactamente %d hosts, hay %d\n", TABLA_MAX, g_tabla_n);
         return 1;
@@ -88,12 +79,11 @@ int main(int argc, char **argv)
 
 #ifdef __APPLE__
     if (pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0) != 0)
-        fprintf(stderr, "[cliente D] aviso: no se pudo fijar la clase de QoS\n");
+        fprintf(stderr, "[cliente memoria-compartida-c] aviso: no se pudo fijar la clase de QoS\n");
 #endif
 
-    /* --- "Conexión": abrir la región que creó el servidor, con reintentos --------
-       Equivale al connect() de la variante TCP Python y, como allí, se paga fuera de la
-       medición (ADR-001: la frontera F1 excluye el establecimiento). */
+    /* --- "Conexión": abrir la región que creó el servidor, con reintentos. Equivale
+       al connect() y queda fuera de la medición. */
     char nombre[64];
     snprintf(nombre, sizeof nombre, NOMBRE_SHM_FMT, port);
 
@@ -104,7 +94,7 @@ int main(int argc, char **argv)
         usleep(50000);
     }
     if (fd < 0) {
-        fprintf(stderr, "error: no se pudo abrir %s — ¿esta corriendo el servidor D?\n", nombre);
+        fprintf(stderr, "error: no se pudo abrir %s — ¿esta corriendo el servidor de memoria compartida?\n", nombre);
         return 1;
     }
 
@@ -112,20 +102,16 @@ int main(int argc, char **argv)
     close(fd);
     if (r == MAP_FAILED) { perror("mmap"); return 1; }
 
-    /* Ciclo de 16 estimulos PRECONSTRUIDOS, recorrido con `i & 15` (ADR-004 §4).
-       Mezcla en el bucle medido: 10 LOCAL / 6 EXTERNO / 0 DESCONOCIDO. Que falte
-       DESCONOCIDO no sesga: `clasificar` es de tiempo constante (16 csel, 0 saltos). */
+    /* Ciclo de 16 estimulos PRECONSTRUIDOS, recorrido con `i & 15`. Que falte
+       DESCONOCIDO en la mezcla no sesga: `clasificar` es de tiempo constante. */
     static unsigned char ciclo[TABLA_MAX][PAYLOAD_MAX];
     for (int i = 0; i < TABLA_MAX; i++)
         armar_estimulo(ciclo[i], payload, g_tabla_id[i], (uint32_t)i);
 
     unsigned char recibido[PAYLOAD_MAX];
 
-    /* --- Array de muestras PREASIGNADO y PRE-TOCADO --------------------------
-       calloc no falla las páginas hasta el primer acceso. Si el primer write
-       ocurriera dentro del bucle caliente, cada página nueva provocaría un fallo
-       de página — una llamada al kernel, justo lo que esta variante evita.
-       Escribirlo entero aquí lo saca de la medición. */
+    /* --- Array de muestras PREASIGNADO y PRE-TOCADO: si la primera escritura de cada
+       página ocurriera en el bucle medido, provocaría un fallo de página (kernel). */
     uint64_t *latencias = malloc(iters * sizeof(uint64_t));
     if (!latencias) { fprintf(stderr, "error: sin memoria para %llu muestras\n",
                               (unsigned long long)iters); return 1; }
@@ -143,12 +129,12 @@ int main(int argc, char **argv)
                 piso[i] = b - a;
             }
             qsort(piso, N_PISO, sizeof(uint64_t), cmp_u64);
-            printf("[cliente D] piso de medicion (par de llamadas al reloj): "
+            printf("[cliente memoria-compartida-c] piso de medicion (par de llamadas al reloj): "
                    "min=%llu ns  p50=%llu ns  p99=%llu ns\n",
                    (unsigned long long)piso[0],
                    (unsigned long long)piso[N_PISO / 2],
                    (unsigned long long)piso[(N_PISO * 99) / 100]);
-            printf("[cliente D] granularidad del reloj ~41.67 ns (contador de 24 MHz): las medidas\n"
+            printf("[cliente memoria-compartida-c] granularidad del reloj ~41.67 ns (contador de 24 MHz): las medidas\n"
                    "            individuales estan CUANTIZADAS en multiplos de ese valor. Reportarlo.\n");
             free(piso);
         }
@@ -162,7 +148,7 @@ int main(int argc, char **argv)
     uint64_t n = base;
     uint64_t desajustes = 0, giros_perdidos = 0;
 
-    /* --- El intercambio. Es toda la variante: 4 líneas. --------------------- */
+    /* --- El intercambio: escribir, publicar con release, girar hasta la respuesta. */
 #define INTERCAMBIO(EST)                                                                  \
     do {                                                                                  \
         memcpy(r->peticion.dato, (EST), payload);                                         \
@@ -176,15 +162,9 @@ int main(int argc, char **argv)
     } while (0)
 
     /* --- MODO ESTIMULO SUELTO (--clasificar) --------------------------------
-       Una sola pregunta, se imprime el veredicto y se sale. Existe para que el
-       plano de control pueda hablarle a este sistema, que no tiene sockets que
-       aceptar (ADR-002). NO toca el bucle medido ni la autoprueba: es una rama
-       que retorna antes de llegar a ellos, asi que ninguna cifra del informe
-       depende de este codigo.
-
-       El cronometro sigue siendo la frontera F1 (ADR-001): las mismas dos marcas
-       alrededor del mismo intercambio. Lo que el plano de control agregue por
-       lanzar el proceso queda fuera y se reporta aparte, como web_ms. */
+       Una pregunta, se imprime el veredicto y se sale: es como el plano de control
+       le habla a un sistema sin sockets. Retorna antes del bucle medido, asi que
+       no afecta ninguna medicion. Cronometra con la misma frontera F1. */
     if (clasificar) {
         unsigned char est[PAYLOAD_MAX];
         uint32_t hid = id_de_ip(clasificar);
@@ -197,12 +177,12 @@ int main(int argc, char **argv)
         uint32_t eco;
         memcpy(&eco, recibido + OFF_ECO_ID, sizeof eco);
         if (eco != hid) {
-            fprintf(stderr, "[cliente D] eco incorrecto: el sistema respondio a otra pregunta\n");
+            fprintf(stderr, "[cliente memoria-compartida-c] eco incorrecto: el sistema respondio a otra pregunta\n");
             free(latencias);
             return 1;
         }
         if (giros_perdidos) {
-            fprintf(stderr, "[cliente D] el servidor no respondio dentro del limite de espera\n");
+            fprintf(stderr, "[cliente memoria-compartida-c] el servidor no respondio dentro del limite de espera\n");
             free(latencias);
             return 1;
         }
@@ -214,41 +194,41 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    /* --- WARMUP: descartado (ESPEC §2) -------------------------------------- */
     /* ---- AUTOPRUEBA: verificar que el sistema CLASIFICA antes de medir nada ---- */
     for (int i = 0; i < TABLA_MAX; i++) {
         INTERCAMBIO(ciclo[i]);
         uint32_t eco;
         memcpy(&eco, recibido + OFF_ECO_ID, sizeof eco);
         if (eco != g_tabla_id[i]) {
-            fprintf(stderr, "[cliente D] eco incorrecto en la entrada %d — revisar barreras\n", i);
+            fprintf(stderr, "[cliente memoria-compartida-c] eco incorrecto en la entrada %d — revisar barreras\n", i);
             return 1;
         }
         if (!sin_clasificar && recibido[OFF_VEREDICTO] != g_tabla_ver[i]) {
-            fprintf(stderr, "[cliente D] veredicto incorrecto en la entrada %d\n", i);
+            fprintf(stderr, "[cliente memoria-compartida-c] veredicto incorrecto en la entrada %d\n", i);
             return 1;
         }
     }
-    if (!sin_clasificar) {   /* El caso DESCONOCIDO — el "pepito5" de las notas del equipo. */
+    if (!sin_clasificar) {   /* El caso DESCONOCIDO: un host que no esta en la tabla. */
         unsigned char e[PAYLOAD_MAX];
         armar_estimulo(e, payload, id_de_ip("203.0.113.77"), 0);  /* TEST-NET-3, RFC 5737 */
         INTERCAMBIO(e);
         if (recibido[OFF_VEREDICTO] != VEREDICTO_DESCONOCIDO) {
-            fprintf(stderr, "[cliente D] un host fuera de tabla devolvio %u\n", recibido[OFF_VEREDICTO]);
+            fprintf(stderr, "[cliente memoria-compartida-c] un host fuera de tabla devolvio %u\n", recibido[OFF_VEREDICTO]);
             return 1;
         }
-        printf("[cliente D] autoprueba OK: %d hosts de tabla + 1 desconocido\n", TABLA_MAX);
+        printf("[cliente memoria-compartida-c] autoprueba OK: %d hosts de tabla + 1 desconocido\n", TABLA_MAX);
     } else {
-        printf("[cliente D] MODO CONTROL (--sin-clasificar): solo se verifica el eco.\n");
+        printf("[cliente memoria-compartida-c] MODO CONTROL (--sin-clasificar): solo se verifica el eco.\n");
     }
     fflush(stdout);
 
-    printf("[cliente D] warmup %llu iteraciones...\n", (unsigned long long)warmup);
+    /* --- WARMUP: descartado ------------------------------------------------- */
+    printf("[cliente memoria-compartida-c] warmup %llu iteraciones...\n", (unsigned long long)warmup);
     fflush(stdout);
     for (uint64_t i = 0; i < warmup; i++) INTERCAMBIO(ciclo[i & 15]);
 
     /* --- MEDICIÓN ------------------------------------------------------------ */
-    printf("[cliente D] midiendo %llu iteraciones...\n", (unsigned long long)iters);
+    printf("[cliente memoria-compartida-c] midiendo %llu iteraciones...\n", (unsigned long long)iters);
     fflush(stdout);
 
     for (uint64_t i = 0; i < iters; i++) {
@@ -258,32 +238,26 @@ int main(int argc, char **argv)
         uint64_t t1 = ahora_ns();
         latencias[i] = t1 - t0;
 
-        /* Validación FUERA de la sección cronometrada (ADR-002, riesgo de barreras
-           mal puestas): si las barreras fallaran, el eco no coincidiría. Se comprueba
-           el eco y no el veredicto porque el eco vale en ambos modos. */
+        /* Validación FUERA de la sección cronometrada: si las barreras fallaran, el
+           eco no coincidiría. Se comprueba el eco porque vale en ambos modos. */
         uint32_t eco;
         memcpy(&eco, recibido + OFF_ECO_ID, sizeof eco);
         if (eco != g_tabla_id[i & 15]) desajustes++;
     }
 
-    if (giros_perdidos) fprintf(stderr, "[cliente D] AVISO: %llu esperas agotaron el limite de giro\n",
+    if (giros_perdidos) fprintf(stderr, "[cliente memoria-compartida-c] AVISO: %llu esperas agotaron el limite de giro\n",
                                 (unsigned long long)giros_perdidos);
-    if (desajustes)     fprintf(stderr, "[cliente D] AVISO: %llu respuestas con contenido inesperado "
+    if (desajustes)     fprintf(stderr, "[cliente memoria-compartida-c] AVISO: %llu respuestas con contenido inesperado "
                                 "— revisar barreras de memoria\n", (unsigned long long)desajustes);
     if (!desajustes && !giros_perdidos)
-        printf("[cliente D] integridad OK: %llu/%llu respuestas correctas\n",
+        printf("[cliente memoria-compartida-c] integridad OK: %llu/%llu respuestas correctas\n",
                (unsigned long long)iters, (unsigned long long)iters);
 
     /* --- CONTRASTE POR LOTES ------------------------------------------------
-       Con ~41.67 ns de granularidad, una latencia de unos cientos de ns cabe en
-       3-5 tics del reloj: la mediana por muestra sale cuantizada. Cronometrar un
-       LOTE de N intercambios con un solo par de llamadas al reloj y dividir da una
-       media con precision muy por debajo del tic.
-
-       NO sustituye a los percentiles: una media por lote no tiene cola, y la cola es
-       justo lo que interesa (AC-2). Es un CONTRASTE: si la media por lotes y el p50
-       por muestra no coinciden, una de las dos mediciones esta mal. Se reportan las
-       dos, etiquetadas, nunca una en lugar de la otra. */
+       Con ~41.67 ns de granularidad la muestra individual sale cuantizada.
+       Cronometrar un LOTE con un solo par de lecturas y dividir da una media por
+       debajo del tic. NO sustituye a los percentiles (una media no tiene cola): si
+       no coincide con el p50, una de las dos mediciones esta mal. */
     if (lote > 0 && lote_rondas > 0) {
         uint64_t *medias = malloc(lote_rondas * sizeof(uint64_t));
         if (medias) {
@@ -295,13 +269,13 @@ int main(int argc, char **argv)
                 medias[k] = (t1 - t0) / lote;
             }
             qsort(medias, lote_rondas, sizeof(uint64_t), cmp_u64);
-            printf("[cliente D] contraste por lotes (%llu intercambios x %llu rondas): "
+            printf("[cliente memoria-compartida-c] contraste por lotes (%llu intercambios x %llu rondas): "
                    "min=%llu ns  mediana=%llu ns  max=%llu ns por intercambio\n",
                    (unsigned long long)lote, (unsigned long long)lote_rondas,
                    (unsigned long long)medias[0],
                    (unsigned long long)medias[lote_rondas / 2],
                    (unsigned long long)medias[lote_rondas - 1]);
-            printf("[cliente D] (media por lote: sin cola. Los percentiles salen de las "
+            printf("[cliente memoria-compartida-c] (media por lote: sin cola. Los percentiles salen de las "
                    "muestras individuales del CSV.)\n");
             free(medias);
         }
@@ -309,7 +283,7 @@ int main(int argc, char **argv)
 
     munmap(r, sizeof(region_t));
 
-    /* --- VOLCADO: al final, nunca dentro del bucle (ESPEC §5) ---------------- */
+    /* --- VOLCADO: al final, nunca dentro del bucle medido ------------------- */
     FILE *fh = fopen(salida, "w");
     if (!fh) { perror("fopen"); free(latencias); return 1; }
     fputs("iteracion,latencia_ns\n", fh);
@@ -319,6 +293,6 @@ int main(int argc, char **argv)
     fclose(fh);
     free(latencias);
 
-    printf("[cliente D] %llu muestras -> %s\n", (unsigned long long)iters, salida);
+    printf("[cliente memoria-compartida-c] %llu muestras -> %s\n", (unsigned long long)iters, salida);
     return 0;
 }

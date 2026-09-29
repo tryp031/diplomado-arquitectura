@@ -1,42 +1,20 @@
 #!/usr/bin/env python3
 """
-Variante TCP Python — servidor sobre TCP crudo.  IMPLEMENTACIÓN DE REFERENCIA.
+Variante TCP Python — servidor sobre TCP crudo.
 
-Qué hace (dominio del reto, ADR-004):
-  Recibe 32 B con un identificador de host (IPv4) y responde 32 B con un veredicto:
-  LOCAL / EXTERNO / DESCONOCIDO, según la tabla precargada `tabla-hosts.csv`.
+Recibe 32 B con un identificador de host (IPv4) y responde 32 B con el veredicto
+LOCAL / EXTERNO / DESCONOCIDO según `tabla-hosts.csv`, cargada una sola vez al arrancar.
 
-Contrato que cumple (ver ../README.md):
-  - Escucha permanentemente (requisito básico del enunciado).
-  - Ante un estímulo de N bytes responde con N bytes: una RESPUESTA ESPECÍFICA,
-    que depende del estímulo. Con el eco puro anterior la respuesta era constante.
-  - La clasificación NO hace E/S, NO asigna memoria y NO consulta nada externo:
-    la tabla se carga una sola vez, al arrancar.
-
-Decisiones de diseño relevantes para la latencia:
-  - TCP_NODELAY: desactiva el algoritmo de Nagle. Sin esto el kernel agrupa paquetes
-    pequeños y aparecen picos de decenas de milisegundos. Es EL error clásico del reto.
+Decisiones que afectan la latencia:
+  - TCP_NODELAY: sin él, Nagle agrupa paquetes pequeños y aparecen picos de decenas de ms.
   - Conexión persistente: el handshake se paga una vez, no por iteración.
-  - recv_into sobre un buffer preasignado: cero asignaciones de memoria por iteración.
-  - pack_into sobre un bytearray preasignado: la respuesta se escribe EN SITIO, sin
-    construir un objeto bytes nuevo en cada vuelta.
-  - `dict.get` enlazado a una variable local: evita la búsqueda de atributo por iteración.
+  - recv_into / pack_into sobre buffers preasignados: cero asignaciones por iteración.
+  - La clasificación no hace E/S ni consulta nada externo.
 
-CONCURRENCIA (añadida el 15/09 — ADR-006)
-  Un hilo por conexión. El hilo se crea en `accept()`, es decir FUERA de la ruta
-  caliente: con un solo cliente el bucle de intercambio es byte por byte el mismo que
-  antes, y por eso las mediciones previas siguen siendo comparables. Eso no se supone:
-  se verifica midiendo con un cliente y comparando contra el histórico.
-
-  Cada hilo tiene sus PROPIOS buffers. Antes eran tres variables compartidas del
-  ámbito de `main()`; con hilos, dos clientes escribiendo `resp` a la vez se pisarían
-  la respuesta y cada uno podría recibir el veredicto del otro. No daría error: daría
-  resultados incorrectos de vez en cuando, que es peor.
-
-  Lo que este servidor NO hace, a propósito: crecer un hilo «cada X peticiones». Un
-  hilo por conexión responde a una causa real —hay un cliente más que atender—;
-  un hilo cada X peticiones es una política sin causa, y el número de hilos pasaría a
-  depender de cuándo se mire. Ver ADR-006.
+Concurrencia: un hilo por conexión, creado en `accept()`, fuera de la ruta caliente.
+Con un solo cliente el bucle de intercambio es idéntico al de un servidor sin hilos.
+Cada hilo tiene sus propios buffers: compartirlos haría que dos clientes se pisaran
+la respuesta y recibieran el veredicto del otro, sin ningún error visible.
 """
 
 import argparse
@@ -61,19 +39,17 @@ def main() -> None:
 
     # --- FUERA de la ruta caliente: una sola vez, al arrancar ----------------
     tabla = clasificador.cargar(a.tabla)
-    clasificador.resumen("servidor B", a.tabla, tabla)
+    clasificador.resumen("servidor tcp-python", a.tabla, tabla)
 
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     srv.bind((a.host, a.port))
-    # El backlog era 1: con varios clientes concurrentes, el segundo era rechazado
-    # antes de que nadie pudiera atenderlo.
+    # Backlog amplio: con 1, un segundo cliente concurrente sería rechazado.
     srv.listen(64)
-    print(f"[servidor B] escuchando en {a.host}:{a.port}, payload={a.payload}B", flush=True)
+    print(f"[servidor tcp-python] escuchando en {a.host}:{a.port}, payload={a.payload}B", flush=True)
 
-    # Enlaces locales: sin búsquedas de atributo ni de global en la ruta caliente.
-    # Son de SOLO LECTURA y se comparten entre hilos sin peligro; lo que no se puede
-    # compartir son los buffers de escritura, que se crean por hilo.
+    # Enlaces locales: sin búsquedas de atributo en la ruta caliente. Son de solo
+    # lectura y se comparten entre hilos sin peligro.
     obtener = tabla.get
     DESCONOCIDO = clasificador.VEREDICTO_DESCONOCIDO
     leer_id = struct.Struct("<I").unpack_from
@@ -90,9 +66,8 @@ def main() -> None:
             vivos += 1
             atendidas += 1
             v, t = vivos, atendidas
-        # Este print está fuera del bucle de intercambio: se paga una vez por conexión.
-        # Lo lee el plano de control para mostrar cuántos hilos hay vivos.
-        print(f"[servidor B] HILOS vivos={v} atendidas={t} conexión de {par}", flush=True)
+        # Fuera del bucle de intercambio: se paga una vez por conexión.
+        print(f"[servidor tcp-python] HILOS vivos={v} atendidas={t} conexión de {par}", flush=True)
 
         # Buffers PROPIOS de este hilo. Compartirlos sería una condición de carrera.
         buf = bytearray(n)
@@ -120,7 +95,7 @@ def main() -> None:
             with candado:
                 vivos -= 1
                 v = vivos
-            print(f"[servidor B] HILOS vivos={v} conexión cerrada", flush=True)
+            print(f"[servidor tcp-python] HILOS vivos={v} conexión cerrada", flush=True)
 
     while True:
         conn, par = srv.accept()

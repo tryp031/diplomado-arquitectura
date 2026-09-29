@@ -1,24 +1,9 @@
 /* ¿Cuesta lo mismo decir LOCAL que decir EXTERNO?
  *
- * clasificador.h AFIRMA ser de tiempo constante: recorre siempre las 16 ranuras con
- * seleccion condicional, sin salida anticipada. Este programa lo MIDE, que es otra
- * cosa. La distincion es la misma que ya obligo a escribir micro.c: afirmar que el
- * clasificador es despreciable sin medirlo habria sido metodo, no resultado.
- *
- * POR QUE IMPORTA — dos razones independientes que apuntan a la misma propiedad:
- *
- *   1. Metodologica. Si el veredicto cambiara el coste, la latencia dependeria del
- *      dato: dos corridas con distinta mezcla de IPs darian numeros distintos y la
- *      comparacion entre transportes quedaria contaminada por que se pregunto.
- *
- *   2. Seguridad. Seria un canal lateral temporal: midiendo el tiempo de respuesta
- *      se podria deducir si un host esta en la lista negra, sin que el sistema lo
- *      diga. En un control de acceso real eso es una fuga.
- *
- * POR QUE AISLADO Y NO POR RTT: el efecto buscado es de ~2 ns y el RTT de la variante
- * mas rapida es 83 ns, el de B 13 400 ns. Medirlo por RTT es el error que este mismo
- * directorio ya documento: la varianza entre rondas se traga la senal y se reporta
- * ruido como resultado.
+ * clasificador.h AFIRMA ser de tiempo constante; este programa lo MIDE. Si el veredicto
+ * cambiara el coste, la latencia dependeria del dato (sesgo entre corridas) y habria un
+ * canal lateral temporal. Se mide aislado y no por RTT: el efecto buscado es de ~2 ns
+ * y la varianza del RTT se tragaria la senal.
  *
  *   ./veredicto ../tabla-hosts.csv
  */
@@ -100,16 +85,10 @@ int main(int argc, char **argv)
     printf("    DESCONOCIDO      %8.3f   %8.3f\n", des / 1000.0, p99_d / 1000.0);
     printf("\n    diferencia maxima entre veredictos: %.3f ns\n", dispersion);
 
-    /* El criterio NO es un umbral elegido a dedo —eso seria decidir el resultado
-       antes de medirlo—. Es una comparacion entre dos dispersiones:
-     *
+    /* Criterio sin umbral a dedo: se comparan dos dispersiones.
      *   entre veredictos : cuanto se separan los tres p50 entre si
      *   dentro de uno    : cuanto se mueve UN mismo veredicto entre rondas (p99 - p50)
-     *
-     * Si la primera es menor que la segunda, la diferencia atribuida al veredicto es
-     * mas pequena que el ruido que el mismo veredicto produce al repetirse: no se
-     * puede afirmar que exista. Es el mismo razonamiento que invalido el primer
-     * intento de micro.c, donde 7 ns de "senal" resultaron ser varianza entre rondas. */
+     * Si la primera es menor, la diferencia atribuida al veredicto es ruido. */
     double ruido_l = (p99_l - loc) / 1000.0;
     double ruido_e = (p99_e - ext) / 1000.0;
     double ruido_d = (p99_d - des) / 1000.0;

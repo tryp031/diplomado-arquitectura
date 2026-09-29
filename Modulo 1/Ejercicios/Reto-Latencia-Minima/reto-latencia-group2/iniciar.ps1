@@ -1,9 +1,7 @@
 # iniciar.ps1 — arranca el proyecto en Windows.
 #
-# Este archivo NO duplica la logica de iniciar.sh: es un lanzador. Todo lo que
-# decide algo (que falta, que se puede correr) vive en doctor.py y servidor.py,
-# en Python, que corre igual en los tres sistemas. Dos implementaciones de la
-# misma comprobacion divergen; en este proyecto ya paso una vez.
+# Solo es un lanzador: lo que decide algo vive en doctor.py y servidor.py (Python),
+# para no tener dos implementaciones de la misma comprobacion.
 #
 #   .\iniciar.ps1           arranca en el puerto 8080
 #   .\iniciar.ps1 8081      arranca en otro puerto
@@ -18,10 +16,8 @@ $ErrorActionPreference = "Stop"
 $Aqui = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # ── Encontrar un Python usable ───────────────────────────────────────────────
-# `py` es el lanzador oficial de Windows y es el que acierta cuando hay varias
-# versiones instaladas. `python` a secas en Windows 10/11 puede ser el alias de
-# la Microsoft Store, que abre la tienda en vez de ejecutar nada: por eso se
-# comprueba que responda de verdad antes de darlo por bueno.
+# `py` es el lanzador oficial de Windows. `python` a secas puede ser el alias de la
+# Microsoft Store, que abre la tienda: por eso se comprueba que responda de verdad.
 $Python = $null
 foreach ($cand in @(@("py", "-3"), @("python3"), @("python"))) {
     $exe = $cand[0]
@@ -73,9 +69,9 @@ if (Get-Command make -ErrorAction SilentlyContinue) {
         }
     }
 } else {
-    # Escenario previsto, no un fallo: ver README, «Tres caminos».
+    # Escenario previsto en Windows nativo, no un fallo.
     Write-Host "  Sin compilador de C: camino Windows nativo." -ForegroundColor Yellow
-    Write-Host "  Funcionan la interfaz y las variantes en Python (B, y A y C cuando esten)."
+    Write-Host "  Funcionan la interfaz y la variante TCP Python."
     Write-Host "  Las variantes en C y la medicion oficial necesitan WSL2:  wsl --install"
 }
 

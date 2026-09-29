@@ -1,6 +1,4 @@
-# -D_GNU_SOURCE: sin él, en Linux/WSL2 no compila: bajo -std=c11 la biblioteca C deja sin
-# declarar clock_gettime (usado por reloj.h). No cambia el nivel de optimización.
-# Mismo diagnóstico y mismo fix que memoria-compartida-c/Makefile.
+# -D_GNU_SOURCE: sin él no compila en Linux/WSL2 (clock_gettime de reloj.h).
 CC      ?= cc
 CFLAGS  ?= -std=c11 -O2 -Wall -Wextra -D_GNU_SOURCE
 all: micro veredicto

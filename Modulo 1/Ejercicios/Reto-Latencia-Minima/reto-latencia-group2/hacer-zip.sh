@@ -24,6 +24,9 @@
 #   binarios            server, client, micro, veredicto: se compilan con make
 #   __pycache__/        artefactos de Python
 #   comunicaciones/     correspondencia del equipo, citada en ADR-005
+#   README.md (todos)   decision del equipo del 28/09: el ZIP lleva solo codigo
+#   hacer-zip.sh        herramienta de empaquetado, no parte del sistema
+#   contrato/coherencia binario compilado; viaja coherencia.c
 set -euo pipefail
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,8 +41,8 @@ mkdir -p "$RAIZ"
 
 # Se copia por lista blanca: lo que no este nombrado aqui, no viaja. Es mas seguro
 # que una lista negra, donde un archivo nuevo se cuela solo.
-for item in app contrato sistema README.md verificar.py doctor.py \
-            doctor.cmd iniciar.sh iniciar.cmd iniciar.ps1 hacer-zip.sh; do
+for item in app contrato sistema verificar.py doctor.py \
+            doctor.cmd iniciar.sh iniciar.cmd iniciar.ps1; do
   [[ -e "$AQUI/$item" ]] || { echo "aviso: falta $item" >&2; continue; }
   cp -R "$AQUI/$item" "$RAIZ/"
 done
@@ -50,40 +53,8 @@ find "$RAIZ" -name '__pycache__' -type d -prune -exec rm -rf {} + 2>/dev/null ||
 find "$RAIZ" \( -name '.DS_Store' -o -name '*.pyc' -o -name '*.o' \) -delete 2>/dev/null || true
 rm -f "$RAIZ/sistema/memoria-compartida-c/server" "$RAIZ/sistema/memoria-compartida-c/client"
 rm -f "$RAIZ/sistema/control-dominio/micro" "$RAIZ/sistema/control-dominio/veredicto"
-
-# El codigo cita los ADR por ruta y en el ZIP no estan: hay que decir donde buscarlos,
-# o el evaluador encuentra referencias colgando.
-cat > "$RAIZ/LEEME-ENTREGABLE.txt" <<'NOTA'
-RETO DE LATENCIA MINIMA — ENTREGABLE 1: CODIGO FUENTE
-Group 2 · Freddy Aparicio · Camilo Cespedes · Daniel Mazo
-
-COMO ARRANCARLO
-  macOS / Linux   ./iniciar.sh
-  Windows         iniciar.cmd
-  Si algo falla   python3 doctor.py   (dice que falta y como conseguirlo)
-
-COMO MEDIR (solo macOS, Linux o WSL2)
-  cd sistema
-  ./run.sh tcp-python 1 --warmup 100000 --iters 1000000
-  ./run.sh memoria-compartida-c 1 --warmup 100000 --iters 1000000
-  ./analyze.py --md resultados/resultados-*.csv
-
-SOBRE LAS REFERENCIAS A docs/ADR/...
-  El codigo cita decisiones de diseno por su numero de ADR (ADR-001 a ADR-011).
-  Esos documentos NO viajan en este ZIP: son el ENTREGABLE 2, la documentacion
-  tecnica en PDF. Cada mencion en el codigo tiene alli su justificacion completa.
-
-SOBRE LOS RESULTADOS
-  sistema/resultados/ no viaja aqui: son ~143 MB de evidencia. Los registros de
-  ejecucion van en el ENTREGABLE 3.
-
-QUE ES CADA COSA
-  sistema/    PLANO DE DATOS  — lo que el reto mide. El cronometro vive aqui.
-  app/        PLANO DE CONTROL — enciende y muestra. NO mide: un navegador vive en
-              milisegundos y el sistema responde en microsegundos.
-  contrato/   herramientas que verifican que el experimento sigue siendo valido.
-  verificar.py  comprueba que el experimento mide lo que dice medir.
-NOTA
+rm -f "$RAIZ/contrato/coherencia"
+find "$RAIZ" -name 'README.md' -delete
 
 rm -f "$DESTINO"
 ( cd "$STAGING" && zip -q -r "$DESTINO" reto-latencia-group2 -x '*.git*' )
@@ -93,8 +64,8 @@ echo "  peso:     $(du -h "$DESTINO" | cut -f1)"
 echo "  archivos: $(unzip -l "$DESTINO" | tail -1 | awk '{print $2}')"
 echo
 echo "Comprobacion — nada de esto deberia aparecer:"
-if unzip -l "$DESTINO" | grep -E 'docs/|resultados/|__pycache__|\.pyc'; then
+if unzip -l "$DESTINO" | grep -E 'docs/|resultados/|__pycache__|\.pyc|README\.md|LEEME-ENTREGABLE|hacer-zip\.sh|contrato/coherencia$'; then
   echo "  !! el ZIP trae algo que no deberia" >&2; exit 1
 else
-  echo "  ok: sin docs/, sin resultados/, sin artefactos"
+  echo "  ok: sin docs/, sin resultados/, sin README, sin artefactos"
 fi

@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 """
-graficas.py — genera las figuras del informe en SVG, sin dependencias externas.
+graficas.py — genera las figuras de resultados en SVG, sin dependencias externas.
 
-Por qué SVG a mano y no matplotlib: el harness es compartido por cuatro personas.
-Una dependencia obliga a los cuatro a instalarla y a que coincidan las versiones, o las
-figuras dejan de ser reproducibles. Con la librería estándar, cualquiera regenera las
-figuras con `python3 graficas.py` y salen idénticas. SVG además es vectorial: se incrusta
-en el PDF sin pixelarse.
+Solo librería estándar: cualquiera del equipo regenera figuras idénticas con
+`python3 graficas.py` sin instalar ni alinear versiones. SVG es vectorial.
 
 Uso:
     ./graficas.py                      # agrega rondas 1-3 de cada variante en resultados/
-    ./graficas.py --out ../docs/graficas/
+    ./graficas.py --out <directorio>
 """
 import argparse
 import csv
@@ -32,16 +29,13 @@ ORDEN = ["tcp-python", "memoria-compartida-c"]
 PERCENTILES = [0, 50, 90, 99, 99.9, 99.99, 99.999]
 
 
-# Las rondas que sustentan el informe son 1, 2 y 3: 1 000 000 de iteraciones cada una,
-# 3 000 000 por variante. Cualquier otra numeracion es exploratoria — la 0 son corridas
-# de validacion y la 9 pruebas rapidas de 20 000 iteraciones— y NO entra en las figuras.
-# Hasta el 17/09 este filtro solo excluia la ronda 0: la 9 se colaba y las figuras decian
-# n=3 020 000 mientras la tabla del informe decia 3 000 000. No fallaba: mentia en silencio.
+# Solo las rondas oficiales 1, 2 y 3 (1 000 000 de iteraciones cada una). La 0
+# (validación) y la 9 (pruebas rápidas) son exploratorias y NO entran en las figuras.
 RONDAS_DEL_INFORME = (1, 2, 3)
 
 
 def cargar(dir_res, rondas=RONDAS_DEL_INFORME):
-    """Agrega las rondas del informe de cada variante. resultados-<VAR>-<RONDA>.csv"""
+    """Agrega las rondas oficiales de cada variante. resultados-<VAR>-<RONDA>.csv"""
     series = defaultdict(list)
     for ruta in sorted(glob.glob(os.path.join(dir_res, "resultados-*.csv"))):
         m = re.match(r"resultados-([A-Za-z][A-Za-z0-9-]*)-(\d)\.csv$", os.path.basename(ruta))
@@ -52,8 +46,7 @@ def cargar(dir_res, rondas=RONDAS_DEL_INFORME):
             continue
         with open(ruta) as fh:
             lector = csv.DictReader(fh)
-            # Por NOMBRE, nunca por posicion: el 15/09 se anadio la columna `hilo` al final
-            # y analyze.py, que leia la ultima, empezo a reportar ceros sin dar error.
+            # Por NOMBRE, nunca por posición: la última columna es `hilo`, no la latencia.
             if not lector.fieldnames or "latencia_ns" not in lector.fieldnames:
                 raise SystemExit(
                     f"{ruta}: no tiene columna 'latencia_ns' (cabecera: {lector.fieldnames}).\n"
@@ -136,7 +129,7 @@ class Lienzo:
 
 
 def grafica_percentiles(series, salida):
-    """Curva de percentiles. Es LA figura del informe: muestra la cola, que es donde
+    """Curva de percentiles. Es la figura principal: muestra la cola, que es donde
     se decide el cumplimiento. Eje X estirado hacia la cola (escala -log10(1-p))."""
     an, al, m = 940, 520, {"l": 90, "r": 75, "t": 70, "b": 70}
     vals = [pct(d, q) for d in series.values() for q in PERCENTILES] + \
@@ -145,7 +138,7 @@ def grafica_percentiles(series, salida):
     ymax = max(vals) * 2
 
     c = Lienzo(an, al, m, "Latencia por percentil — dónde se decide el cumplimiento",
-               "3 rondas × 1 000 000 por variante · RTT de aplicación (frontera F1, ADR-001) · escala logarítmica",
+               "3 rondas × 1 000 000 por variante · RTT de aplicación (frontera F1) · escala logarítmica",
                ymin, ymax)
     c.eje_y("latencia (escala log)")
 
@@ -255,8 +248,8 @@ def main():
     aqui = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser()
     ap.add_argument("--resultados", default=os.path.join(aqui, "resultados"))
-    # Las figuras son PRODUCTO del analisis, no parte del sistema: viven en docs/ y
-    # por eso no viajan en el ZIP del codigo fuente (nota 7 del 21/09, ADR-010).
+    # Las figuras son producto del análisis, no parte del sistema: por defecto se
+    # escriben fuera de sistema/.
     ap.add_argument("--out", default=os.path.join(os.path.dirname(aqui), "docs", "graficas"))
     a = ap.parse_args()
 

@@ -1,63 +1,19 @@
 /*
  * clasificador.h — EL DOMINIO del reto, compartido por todas las variantes compiladas.
+ *   Estimulo  = identificador de host (IPv4, 4 bytes) + numero de secuencia.
+ *   Respuesta = veredicto LOCAL / EXTERNO / DESCONOCIDO. 32 bytes en ambos sentidos.
  *
- * Que hace el sistema (decision registrada en ADR-004):
- *   Estimulo  = un identificador de host (direccion IPv4, 4 bytes) + numero de secuencia.
- *   Respuesta = un veredicto: LOCAL / EXTERNO / DESCONOCIDO.
+ * Invariantes de la ruta caliente:
+ *  1. La tabla cabe en UNA linea de cache (16 x 4 B = 64 B): vive en L1, sin fallos
+ *     de cache que metan varianza en los percentiles altos.
+ *  2. Tiempo constante: recorre SIEMPRE las 16 ranuras con seleccion condicional
+ *     (csel/cmov), sin salida anticipada. LOCAL, EXTERNO y DESCONOCIDO cuestan lo
+ *     mismo; si no, la latencia dependeria del dato (sesgo y canal lateral temporal).
+ *  3. Sin asignar memoria, sin llamadas al sistema, sin E/S: el CSV se lee una vez.
  *
- * Esto sustituye al eco puro. NO cambia el transporte, NO cambia la frontera de
- * medicion F1 (ADR-001), NO cambia el tamano del payload: siguen siendo 32 bytes
- * en ambos sentidos. Solo cambia que significan esos bytes.
- *
- * ───────────────────────────────────────────────────────────────────────────────
- * LAS TRES PROPIEDADES QUE HACEN DEFENDIBLE ESTE DOMINIO
- *
- *  1. CABE EN UNA LINEA DE CACHE.  16 entradas x 4 B = 64 B exactos.
- *     La objecion clasica contra clasificar dentro de la ruta caliente es que una
- *     busqueda en tabla no es O(1) constante: los fallos de cache meten varianza en
- *     los percentiles altos y contaminan la comparacion de transportes. Con 64 bytes
- *     la tabla vive en L1 permanentemente y esa objecion desaparece por construccion.
- *
- *  2. ES DE TIEMPO CONSTANTE.  Sin salida anticipada, sin ramas dependientes del dato.
- *     El bucle recorre SIEMPRE las 16 ranuras y acumula el resultado con una seleccion
- *     condicional (csel en arm64, cmov en x86), no con un salto. Por tanto clasificar
- *     LOCAL, EXTERNO o DESCONOCIDO cuesta exactamente lo mismo.
- *
- *     Esto no lo pide el enunciado. Se hace porque sin ello la latencia dependeria del
- *     dato, y entonces: (a) la comparacion entre variantes quedaria sesgada por la
- *     mezcla de veredictos de cada corrida, y (b) en un sistema real de autorizacion
- *     seria un canal lateral temporal. La primera razon es metodologica y la segunda
- *     es de seguridad; ambas apuntan a la misma decision.
- *
- *  3. NO ASIGNA MEMORIA, NO HACE LLAMADAS AL SISTEMA, NO HACE E/S.
- *     El CSV se parsea una sola vez al arrancar. La ruta caliente solo lee memoria.
- *
- * ───────────────────────────────────────────────────────────────────────────────
- * TRAMPA VERIFICADA — NO convertir la tabla en constantes del codigo
- *
- * La tabla se carga de un ARCHIVO en tiempo de ejecucion. Eso no es comodidad: es
- * lo que impide que el compilador conozca su contenido.
- *
- * Comprobado con `cc -O2 -S` en Apple Silicon:
- *   - Tabla cargada del CSV  -> emite 16 `csel` consecutivos, 0 saltos condicionales.
- *                               El barrido existe y es de tiempo constante. CORRECTO.
- *   - Tabla conocida en compilacion -> el optimizador PLIEGA EL BUCLE ENTERO y lo
- *                               reduce a `cmp w0,#0 ; csel`. El clasificador
- *                               DESAPARECE del binario.
- *
- * Consecuencia: si alguien "simplifica" esto poniendo las IPs como literales en el
- * codigo, la corrida de control que mide el coste del clasificador medira CERO — y
- * la conclusion "clasificar es despreciable" seria un artefacto del optimizador, no
- * un resultado. El experimento se invalidaria en silencio.
- *
- * Esto es un ejemplo, medible, de que la frontera del sistema medido no la fija solo
- * el codigo fuente: la fija el codigo DESPUES del compilador.
- * ───────────────────────────────────────────────────────────────────────────────
- *
- * Coste esperado: 16 comparaciones + 16 selecciones sobre una linea de cache caliente.
- * Del orden de 1-3 ns en Apple Silicon. El informe lo MIDE (corrida con y sin tabla),
- * no lo afirma: ver ADR-004 §5.
- * ───────────────────────────────────────────────────────────────────────────────
+ * NO convertir la tabla en constantes del codigo: con la tabla conocida en compilacion
+ * el optimizador pliega el bucle y el clasificador desaparece del binario (comprobado
+ * con `cc -O2 -S`). Cargarla del CSV en tiempo de ejecucion es lo que lo impide.
  */
 #ifndef LATM_CLASIFICADOR_H
 #define LATM_CLASIFICADOR_H
@@ -75,9 +31,8 @@
 #define VEREDICTO_LOCAL       1u
 #define VEREDICTO_DESCONOCIDO 2u
 
-/* Ranura libre: 0xFFFFFFFF es 255.255.255.255 (broadcast limitado), que nunca puede
-   ser un host consultado. Asi las ranuras vacias participan del barrido sin acertar
-   jamas, y el coste no depende de cuantas entradas reales haya. */
+/* Ranura libre: 255.255.255.255 (broadcast) nunca es un host consultado. Las ranuras
+   vacias participan del barrido sin acertar, y el coste no depende de cuantas haya. */
 #define RANURA_LIBRE 0xFFFFFFFFu
 
 /* 16 x 4 B = 64 B alineados: UNA linea de cache, nunca falla. */
@@ -87,8 +42,7 @@ static int g_tabla_n = 0;
 
 /*
  * RUTA CALIENTE. Tiempo constante: 16 iteraciones siempre, sin salida anticipada.
- * `id` llega en orden de red, igual que lo produce inet_pton, y la tabla se guarda
- * en ese mismo orden: cero conversiones de endianness aqui.
+ * `id` y la tabla estan en orden de red (como inet_pton): sin conversiones aqui.
  */
 static inline uint8_t clasificar(uint32_t id)
 {
@@ -128,7 +82,7 @@ static inline int clasificador_cargar(const char *ruta)
         if (g_tabla_n >= TABLA_MAX) {
             fprintf(stderr, "clasificador: la tabla excede %d filas. El limite es una\n"
                             "              DECISION de diseno (64 B = 1 linea de cache),\n"
-                            "              no un detalle: subirlo invalida ADR-004.\n", TABLA_MAX);
+                            "              no un detalle: subirlo invalida la comparacion.\n", TABLA_MAX);
             fclose(fh);
             return -1;
         }
@@ -198,8 +152,7 @@ static inline void clasificador_resumen(const char *etiqueta, const char *ruta)
  *                                           8..31  relleno
  *
  * Binario de tamano fijo, no texto: serializar y parsear costaria mas que el
- * transporte en las variantes rapidas. Mismo tamano en ambos sentidos que el eco
- * puro anterior, asi que las mediciones previas siguen siendo comparables en forma.
+ * transporte en las variantes rapidas.
  */
 #define OFF_HOST_ID   0
 #define OFF_SEQ       4

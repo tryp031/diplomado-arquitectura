@@ -1,37 +1,9 @@
 #!/usr/bin/env python3
 """
-servidor.py — PLANO DE CONTROL del sistema.
-
-═══════════════════════════════════════════════════════════════════════════════
-LO MÁS IMPORTANTE DE ESTE ARCHIVO: ESTE PROCESO NO ES EL SISTEMA DEL RETO.
-
-El reto pide latencia por debajo de 1 ms. Un servidor HTTP y un navegador viven
-en milisegundos: si el sistema medido fuera esta aplicación web, el objetivo
-estaría perdido antes de empezar.
-
-Por eso hay DOS PLANOS, y la separación es la decisión arquitectónica del módulo:
-
-  PLANO DE CONTROL  (este archivo + index.html)   milisegundos   NO se mide
-      Formularios, listas, botones, gráficas. Pide cosas y muestra resultados.
-              │
-              ▼  "medí 50 000 intercambios contra la variante TCP Python"
-  PLANO DE DATOS  (sistema/variante-*)            µs y ns        SÍ se mide
-      cliente ⇄ servidor. EL CRONÓMETRO VIVE AQUÍ DENTRO, nunca en el navegador.
-
-Es el mismo patrón por el que el panel de una máquina industrial no es la
-máquina: la enciende, la configura y muestra sus sensores, pero el trabajo real
-ocurre en otro sitio y se mide allí.
-
-CONSECUENCIA PRÁCTICA, que el formulario de estímulos hace visible a propósito:
-al pedir un estímulo desde el navegador se reportan DOS números —lo que tardó el
-sistema (µs, medido aquí con reloj monótono alrededor del intercambio real) y lo
-que tardó el viaje completo desde el navegador (ms). Verlos juntos es la
-demostración de por qué la web no puede ser el sistema.
-═══════════════════════════════════════════════════════════════════════════════
-
-Sin dependencias: solo la biblioteca estándar de Python 3. Es deliberado — el
-proyecto lo comparten tres personas y cada dependencia obliga a las tres a
-instalarla. Misma razón por la que `graficas.py` no usa matplotlib.
+servidor.py — PLANO DE CONTROL: enciende, apaga y observa las variantes del plano
+de datos (sistema/). Este proceso NO es el sistema del reto y no se mide: vive en
+milisegundos; el cronómetro vive en los clientes del plano de datos, nunca en el
+navegador. Solo biblioteca estándar de Python 3, sin dependencias.
 
 Uso:
     python3 app/servidor.py              # http://127.0.0.1:8080
@@ -64,16 +36,15 @@ RAIZ = AQUI.parent
 SISTEMA = RAIZ / "sistema"
 TABLA = SISTEMA / "tabla-hosts.csv"
 
-TABLA_MAX = 16          # 16 x 4 B = 64 B = una línea de caché. Ver ADR-004.
+TABLA_MAX = 16          # 16 x 4 B = 64 B: la tabla cabe en una línea de caché.
 PAYLOAD = 32
 UMBRAL_NS = 1_000_000   # 1 ms
 
 VEREDICTOS = {0: "EXTERNO", 1: "LOCAL", 2: "DESCONOCIDO"}
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Catálogo de variantes. `socket` indica si se le puede mandar un estímulo suelto
-# desde aquí: la variante Memoria compartida C usa memoria compartida y solo habla con su cliente en
-# C, así que participa en las mediciones pero no en el formulario de estímulos.
+# Catálogo de variantes. `socket` indica si se le habla por TCP desde aquí; la de
+# memoria compartida solo habla con su propio cliente en C.
 # ──────────────────────────────────────────────────────────────────────────────
 VARIANTES = {
     "tcp-python": {
@@ -99,15 +70,14 @@ VARIANTES = {
     },
 }
 
-# Quien admite --hilos. Se declara aqui, en el catalogo, y no se deduce en la interfaz:
-# el plano de control no debe ofrecer lo que el plano de datos no puede hacer.
+# Quien admite --hilos se declara en el catalogo: el plano de control no debe
+# ofrecer lo que el plano de datos no puede hacer.
 for _v in VARIANTES.values():
     _v.setdefault("concurrencia", True)
     _v.setdefault("porque_no", "")
 
-# Progreso de la medicion en curso. Lo alimenta el propio cliente medidor, que emite
-# lineas PROGRESO entre lotes —nunca dentro del tramo cronometrado—. El plano de
-# control solo las lee: no cronometra nada y no participa en la medicion.
+# Progreso de la medicion en curso: lo alimentan las lineas PROGRESO que el cliente
+# medidor emite entre lotes, nunca dentro del tramo cronometrado.
 progreso: dict = {"activa": False, "variante": None, "hilos": 0, "hilos_total": 0,
                   "lotes": 0, "lotes_total": 0}
 
@@ -116,13 +86,8 @@ conexiones: dict[str, socket.socket] = {}
 candado = threading.Lock()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Historial de estímulos.
-#
-# Vive aquí y no solo en el navegador para que el log sobreviva a un F5 y se
-# pueda descargar aunque se cierre la pestaña. Es estado en el plano de control
-# —algo que en general conviene evitar— pero acotado a propósito: un buffer
-# circular en memoria, sin disco, sin base de datos, que se pierde al apagar.
-# El plano de datos no sabe que existe y nada de esto toca la ruta caliente.
+# Historial de estímulos: buffer circular en memoria (sobrevive a un F5, se pierde
+# al apagar). No toca la ruta caliente del plano de datos.
 # ──────────────────────────────────────────────────────────────────────────────
 HISTORIAL_MAX = 500
 historial: collections.deque = collections.deque(maxlen=HISTORIAL_MAX)
@@ -142,7 +107,7 @@ def anotar(entrada: dict) -> dict:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# La tabla de hosts — el dominio (ADR-004)
+# La tabla de hosts — el dominio
 # ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -182,17 +147,8 @@ WINDOWS = sys.platform.startswith("win")
 
 def resolver_cmd(cmd: list[str], d: Path) -> list[str]:
     """
-    Traduce un comando del catalogo al de ESTE sistema operativo.
-
-    El catalogo VARIANTES se escribe en notacion POSIX (`python3`, `./server`) porque
-    ese es el entorno de referencia donde se mide. Traducir aqui, en un solo sitio,
-    evita que el catalogo se llene de condicionales por sistema —que es como empiezan
-    a divergir dos versiones de la misma verdad.
-
-      python3    -> sys.executable, el MISMO interprete que corre el plano de control.
-                    En Windows el ejecutable se llama `python`, y usar `sys.executable`
-                    ademas garantiza que servidor y variante compartan version.
-      ./server   -> ruta absoluta, con .exe en Windows.
+    Traduce un comando del catalogo (notacion POSIX) al de ESTE sistema operativo:
+    python3 -> sys.executable (mismo interprete); ./server -> ruta absoluta (.exe en Windows).
     """
     cmd = list(cmd)
     if cmd[0] == "python3":
@@ -216,13 +172,9 @@ def como_liberar_puerto(puerto: int) -> str:
 
 def puerto_ocupado(puerto: int) -> bool:
     """
-    ¿Alguien tiene ya ese puerto? Se responde intentando bindearlo nosotros, que
-    es exactamente la pregunta que el servidor hará un instante después.
-
-    Sondearlo con connect_ex NO sirve: al ponerle timeout el socket queda en modo
-    no bloqueante y devuelve EINPROGRESS/EAGAIN en vez de 0, así que un puerto
-    ocupado se veía libre. SO_REUSEADDR deja rebindear un TIME_WAIT —que no
-    estorba— pero nunca un LISTEN vivo, que es justo lo que queremos detectar.
+    ¿Alguien tiene ya ese puerto? Se prueba bindeándolo, que es lo que hará el
+    servidor. connect_ex con timeout no sirve (devuelve EINPROGRESS y un puerto
+    ocupado parece libre). SO_REUSEADDR admite un TIME_WAIT, nunca un LISTEN vivo.
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -238,14 +190,13 @@ def compilar(vid: str):
     if not (d / "Makefile").exists():
         return None
     if shutil.which("make") is None:
-        # Camino Windows nativo: no hay cadena de compilacion. Es un escenario
-        # PREVISTO (ver README, "tres caminos"), no un fallo: el plano de control y
-        # las variantes en Python funcionan igual. Se dice que falta y como tenerlo.
+        # Windows nativo sin cadena de compilacion: escenario previsto, no un fallo.
+        # El plano de control y las variantes en Python funcionan igual.
         return ("Esta variante esta escrita en C y aqui no hay compilador (`make`).\n\n"
                 "En Windows, las variantes en C y la medicion oficial necesitan WSL2:\n"
                 "  wsl --install\n\n"
                 "Sin WSL2 podes usar igual el plano de control y las variantes en Python.\n"
-                "Ver README.md, seccion «Tres caminos».")
+                "Para todo lo demas, abrilo desde macOS, Linux o una terminal de WSL2.")
     r = subprocess.run(["make"], cwd=d, capture_output=True, text=True)
     return None if r.returncode == 0 else (r.stderr or r.stdout)[-800:]
 
@@ -257,9 +208,8 @@ def arrancar(vid: str) -> dict:
         if vid in procesos and procesos[vid].poll() is None:
             return {"ok": True, "aviso": "ya estaba corriendo"}
 
-        # Un servidor huerfano de una sesion anterior sigue escuchando: pasa cada vez
-        # que se cierra la terminal sin Ctrl-C. El bind fallaria con un
-        # "Address already in use" que no dice nada; mejor decir que pasa y como salir.
+        # Un servidor huerfano de una sesion anterior (terminal cerrada sin Ctrl-C)
+        # sigue escuchando: mejor explicarlo que dejar un "Address already in use".
         if puerto_ocupado(v["puerto"]):
             time.sleep(0.3)                      # margen por si acabamos de pararlo
             if puerto_ocupado(v["puerto"]):
@@ -320,7 +270,7 @@ def corriendo(vid: str) -> bool:
 # Un estímulo suelto — el formulario de la interfaz
 # ──────────────────────────────────────────────────────────────────────────────
 def conexion(vid: str) -> socket.socket:
-    """Conexión persistente: el handshake se paga una vez, fuera de la medición (F1)."""
+    """Conexión persistente: el handshake se paga una vez, fuera de la medición."""
     s = conexiones.get(vid)
     if s is not None:
         return s
@@ -332,18 +282,10 @@ def conexion(vid: str) -> socket.socket:
 
 def estimulo_por_cliente(v: dict, ip: str) -> tuple:
     """
-    Un estimulo contra una variante que no habla por sockets: se lanza SU cliente
-    con `--clasificar`, que hace un solo intercambio y reporta el veredicto.
-
-    Por que asi y no manteniendo un cliente residente: la region compartida tiene
-    UNA ranura por sentido. Un cliente permanente del plano de control la ocupa, y
-    si alguien lanza una medicion a la vez, los dos se pisan el payload y la corrida
-    sale contaminada SIN dar error. Por eso este camino es de usar y tirar, y por eso
-    se niega a correr mientras haya una medicion en curso.
-
-    El precio es el arranque del proceso (milisegundos). No entra en la cifra del
-    reto: la latencia que se devuelve la mide el cliente entre sus dos marcas de la
-    frontera F1, igual que en una corrida.
+    Estimulo contra una variante sin sockets: se lanza SU cliente con `--clasificar`
+    (un solo intercambio). Es de usar y tirar porque la region compartida tiene UNA
+    ranura por sentido: un cliente residente pisaria una medicion en curso sin dar
+    error. La latencia devuelta la mide el propio cliente; el arranque no cuenta.
     """
     if progreso.get("activa"):
         raise RuntimeError(
@@ -375,24 +317,14 @@ def estimulo_por_cliente(v: dict, ip: str) -> tuple:
 
 def estimulo(vid: str, host: str) -> dict:
     """
-    Manda UN estímulo y devuelve el veredicto con el log completo de tiempos.
+    Manda UN estímulo y devuelve el veredicto con el log de tiempos.
 
-    DOS RELOJES, Y NO SE MEZCLAN (ADR-003):
-
-      · reloj MONÓTONO (time.perf_counter_ns) — origen arbitrario, no retrocede,
-        no lo mueve NTP. Es el único del que salen DURACIONES.
-      · reloj de PARED (datetime.now) — dice a qué hora pasó algo, sirve para
-        correlacionar con otros logs, y no sirve para medir.
-
-    Restar un reloj contra otro —o el del servidor contra el del navegador, que
-    ni siquiera están sincronizados— da un número sin significado. Por eso cada
-    campo del registro lleva de qué reloj vino, y las restas se hacen siempre
+    Dos relojes que no se mezclan: MONÓTONO (perf_counter_ns) para duraciones y de
+    PARED (datetime.now) para saber a qué hora pasó. Las restas se hacen siempre
     dentro de un mismo reloj.
 
-    La frontera F1 (ADR-001) sigue siendo exactamente las mismas dos líneas:
-    t0 antes del sendall, t1 tras leer los 32 bytes completos. Las marcas nuevas
-    se toman FUERA de ese par, nunca entre medio: el cronómetro del reto no se
-    ensancha ni un nanosegundo por tener mejor logging.
+    Frontera de medición (F1): t0 antes del sendall, t1 tras leer los 32 bytes
+    completos. Cualquier otra marca va FUERA de ese par.
     """
     seq = next(secuencia)
     ts_recibe = ahora()
@@ -413,9 +345,8 @@ def estimulo(vid: str, host: str) -> dict:
     filas = leer_tabla()
     ip = next((f["ip"] for f in filas if f["nombre"] == host), host)
     if not ip_valida(ip):
-        # Ni está en la tabla ni es una IP: es el caso «pepito5» de las notas del
-        # equipo. Se resuelve sin tocar el plano de datos, así que no hay F1 que
-        # medir: la latencia del sistema queda en null, no en cero.
+        # Ni está en la tabla ni es una IP: se resuelve sin tocar el plano de datos,
+        # así que la latencia del sistema queda en null, no en cero.
         return anotar(dict(base, ok=True, ip=None, veredicto="DESCONOCIDO",
                            latencia_sistema_ns=None, t0_f1_ns=None, t1_f1_ns=None,
                            control_overhead_ns=time.perf_counter_ns() - t_entra,
@@ -424,8 +355,8 @@ def estimulo(vid: str, host: str) -> dict:
                                 "resuelto en el plano de control, sin viaje al plano de datos"))
 
     if not v["socket"]:
-        # Esta variante no tiene conexiones que aceptar (ADR-002): se le habla
-        # lanzando su propio cliente en C, una vez por estimulo. Ver ADR-009.
+        # Esta variante no tiene conexiones que aceptar: se le habla lanzando su
+        # propio cliente en C, una vez por estimulo.
         try:
             ver_byte, latencia = estimulo_por_cliente(v, ip)
         except Exception as e:                                  # noqa: BLE001
@@ -439,7 +370,7 @@ def estimulo(vid: str, host: str) -> dict:
             ts_control_responde=ahora(),
             nota="estimulo suelto: el cliente arranca en frio, sin warmup, y mide UN "
                  "intercambio. Sirve para ver que clasifica, no para comparar con el "
-                 "p50 del informe, que sale de un millon de intercambios en caliente."))
+                 "p50 de una medicion completa, que sale de un millon de intercambios en caliente."))
 
     host_id = id_de_ip(ip)
     msg = struct.pack("<II", host_id, 0) + b"\x00" * (PAYLOAD - 8)
@@ -501,9 +432,8 @@ def percentiles(m: list) -> dict:
 
 def medir(vid: str, iters, hilos: int = 1) -> dict:
     """
-    Corre el cliente REAL de la variante. Aquí no se mide nada desde Python: se
-    lanza el mismo binario que produce los resultados del informe y se leen sus
-    muestras. La única diferencia con `run.sh` es quién aprieta el botón.
+    Corre el cliente REAL de la variante (el mismo que usa `run.sh`) y lee sus
+    muestras. Aquí no se mide nada desde Python.
     """
     if not corriendo(vid):
         return {"ok": False, "error": f"Arrancá primero el servidor de la variante {vid}."}
@@ -511,10 +441,8 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
     v = VARIANTES[vid]
     d = SISTEMA / v["dir"]
 
-    # Los servidores atienden UNA conexión a la vez: es lo correcto para el reto
-    # (un solo cliente, una petición en vuelo — supuesto S2), pero significa que la
-    # conexión persistente del formulario de estímulos dejaría al cliente medidor
-    # esperando para siempre. Se suelta antes de medir y se vuelve a abrir sola.
+    # Los servidores atienden UNA conexión a la vez: la conexión persistente del
+    # formulario de estímulos dejaría al medidor esperando. Se suelta antes de medir.
     with candado:
         s = conexiones.pop(vid, None)
         if s:
@@ -543,8 +471,7 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
                     + v.get("porque_no", "")}
         cmd += ["--hilos", str(hilos)]
 
-    # Popen y no subprocess.run: con `run` no hay salida hasta que el proceso termina,
-    # y entonces no habria nada que mostrar mientras la medicion ocurre.
+    # Popen y no run: se necesita leer el progreso mientras la medicion ocurre.
     t0 = time.perf_counter()
     progreso.update({"activa": True, "variante": vid, "hilos": hilos,
                      "hilos_total": hilos, "lotes": 0, "lotes_total": 0})
@@ -565,9 +492,8 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
                     pass
         codigo = proc.wait(timeout=300)
     finally:
-        # Al cerrar, el contador salta al total: el ultimo reporte del supervisor cae
-        # hasta 0,4 s antes del final, y dejar "152 de 160" en pantalla sugiere que
-        # algo quedo a medias cuando en realidad termino entero.
+        # Al cerrar, el contador salta al total: el ultimo reporte llega hasta 0,4 s
+        # antes del final y dejaria un progreso a medias en pantalla.
         progreso.update({"activa": False, "hilos": 0,
                          "lotes": progreso.get("lotes_total", 0) or progreso.get("lotes", 0)})
     dur = time.perf_counter() - t0
@@ -715,8 +641,7 @@ def main():
         sys.exit(f"error: no encuentro {TABLA}\n"
                  f"Ejecutalo desde la raíz del proyecto:  python3 app/servidor.py")
 
-    # SIGHUP incluido: cerrar la ventana de la terminal es justo el caso que dejaba
-    # servidores huerfanos escuchando y bloqueaba el siguiente arranque.
+    # SIGHUP incluido: cerrar la terminal no debe dejar servidores huerfanos.
     for sig in ("SIGINT", "SIGTERM", "SIGHUP"):
         if hasattr(signal, sig):
             signal.signal(getattr(signal, sig), apagar)
@@ -728,7 +653,7 @@ def main():
     print("  │                                                            │")
     print("  │  Este proceso NO es el sistema del reto: lo enciende y      │")
     print("  │  muestra sus mediciones. El cronómetro vive en el plano     │")
-    print("  │  de datos (sistema/variante-*), nunca en el navegador.      │")
+    print("  │  de datos (carpeta sistema/), nunca en el navegador.        │")
     print("  │                                                            │")
     print("  │  Ctrl-C para bajar todo.                                    │")
     print("  └────────────────────────────────────────────────────────────┘")

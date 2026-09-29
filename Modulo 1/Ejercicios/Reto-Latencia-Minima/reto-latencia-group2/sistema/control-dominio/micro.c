@@ -1,5 +1,6 @@
 /* Microbenchmark AISLADO de clasificar(): sin sockets, sin shm, sin planificador.
-   Tecnica de lotes (ADR-003): un par de llamadas al reloj por cada N iteraciones. */
+   Tecnica de lotes: un par de lecturas del reloj por cada N iteraciones, para medir
+   por debajo de la granularidad del reloj. */
 #include "clasificador.h"
 #include "reloj.h"
 

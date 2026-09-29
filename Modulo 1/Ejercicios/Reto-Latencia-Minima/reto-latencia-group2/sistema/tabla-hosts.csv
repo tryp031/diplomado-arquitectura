@@ -13,7 +13,7 @@
 #
 # Limite duro: 16 filas. 16 x 4 bytes = 64 bytes = UNA linea de cache.
 #   Ese limite es una DECISION de diseno, no una casualidad: es lo que permite
-#   afirmar que la clasificacion no contamina la medicion. Ver ADR-004.
+#   afirmar que la clasificacion no contamina la medicion.
 #
 # veredicto: local | externo
 #

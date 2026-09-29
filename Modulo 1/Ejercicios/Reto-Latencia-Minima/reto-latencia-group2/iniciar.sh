@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Arranca el plano de control y abre el navegador.
-#
-# El plano de control NO es el sistema del reto: enciende los servidores del
-# plano de datos y muestra lo que miden. Ver README.md.
+# El plano de control NO es el sistema medido: enciende los servidores del
+# plano de datos y muestra lo que miden.
 set -euo pipefail
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PUERTO="${1:-8080}"
