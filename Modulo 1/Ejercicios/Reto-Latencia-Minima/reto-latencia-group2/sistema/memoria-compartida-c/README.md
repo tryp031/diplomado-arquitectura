@@ -2,7 +2,7 @@
 
 **Responsable:** Daniel Mazo Serna · **Estado:** implementada y medida (3 rondas) · 2026-09-10
 **Decisiones de diseño:** [`ADR-002`](../../docs/ADR/ADR-002-variante-D-memoria-compartida.md)
-**Frontera de medición:** [`ADR-001`](../../docs/ADR/ADR-001-frontera-de-medicion.md) (F1, idéntica a las demás variantes)
+**Frontera de medición:** [`ADR-001`](../../docs/ADR/ADR-001-frontera-de-medicion.md) (idéntica a las demás variantes)
 
 Función en el estudio: marcar el extremo inferior. No es «la mejor arquitectura» —
 es el límite físico, y sirve para cuantificar qué hay que sacrificar para llegar ahí.

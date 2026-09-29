@@ -86,7 +86,7 @@ conexiones: dict[str, socket.socket] = {}
 candado = threading.Lock()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Historial de estímulos: buffer circular en memoria (sobrevive a un F5, se pierde
+# Historial de estímulos: buffer circular en memoria (sobrevive a recargar la página, se pierde
 # al apagar). No toca la ruta caliente del plano de datos.
 # ──────────────────────────────────────────────────────────────────────────────
 HISTORIAL_MAX = 500
@@ -323,7 +323,7 @@ def estimulo(vid: str, host: str) -> dict:
     PARED (datetime.now) para saber a qué hora pasó. Las restas se hacen siempre
     dentro de un mismo reloj.
 
-    Frontera de medición (F1): t0 antes del sendall, t1 tras leer los 32 bytes
+    Qué se mide: t0 antes del sendall, t1 tras leer los 32 bytes
     completos. Cualquier otra marca va FUERA de ese par.
     """
     seq = next(secuencia)
@@ -380,7 +380,7 @@ def estimulo(vid: str, host: str) -> dict:
     try:
         with candado:
             s = conexion(vid)
-            # ── frontera F1: el cronómetro empieza y termina aquí ─────────────
+            # ── el cronómetro empieza y termina aquí ─────────────
             t0 = time.perf_counter_ns()
             s.sendall(msg)
             leidos = 0
@@ -455,14 +455,15 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
         iters = max(1000, min(int(iters), 1_000_000))
     except (TypeError, ValueError):
         iters = 50_000
-    warmup = max(500, iters // 10)
+    # Sin warmup desde la web (decisión del 28/09): la interfaz muestra el sistema tal como
+    # arranca. run.sh conserva --warmup para las mediciones del informe.
 
     with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
         salida = Path(tmp.name)
 
     cmd = resolver_cmd(v["cliente"], d) + [
         "--port", str(v["puerto"]), "--tabla", str(TABLA),
-        "--warmup", str(warmup), "--iters", str(iters), "--out", str(salida),
+        "--warmup", "0", "--iters", str(iters), "--out", str(salida),
     ]
     if hilos > 1:
         if not v.get("concurrencia", True):
@@ -519,7 +520,7 @@ def medir(vid: str, iters, hilos: int = 1) -> dict:
         return {"ok": False, "error": "El cliente no produjo muestras."}
 
     res = percentiles(muestras)
-    res.update({"ok": True, "variante": vid, "nombre": v["nombre"], "warmup": warmup,
+    res.update({"ok": True, "variante": vid, "nombre": v["nombre"],
                 "segundos": round(dur, 2), "consola": (r_salida or "")[-1200:]})
     return res
 
