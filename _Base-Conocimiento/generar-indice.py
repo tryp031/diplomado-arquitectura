@@ -153,8 +153,8 @@ def main():
     for patron, desc, titulo_propio in [
         ("Consolidado/m1-consolidado.html", "Las notas de estudio del Módulo 1: las 5 fuentes fusionadas, con las contradicciones registradas.", None),
         ("Aportes/danny/m1-clasificador-hosts-danny.html", "Qué construimos en el reto, cómo funciona y dónde encaja cada pieza. El documento de la reunión.", None),
-        ("Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html", "Versión 2 de la sustentación: 9 láminas, con demo del sistema y la ejecución del 28/09 junto a las anteriores. Borrador: sin revisar por Freddy ni Camilo.", "Presentación del reto v2 — Módulo 1"),
-        ("Aportes/danny/m1-presentacion-reto-latencia-danny.html", "Primer draft de la sustentación, con las cifras de la corrida oficial del 24/09 y el apéndice técnico. Se conserva junto a la v2.", "Presentación del reto — Módulo 1"),
+        ("Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html", "La presentación oficial de la sustentación del 29/09: 9 láminas, con demo del sistema y la ejecución del 28/09.", "Presentación oficial del reto — Módulo 1"),
+        ("Aportes/danny/m1-presentacion-reto-latencia-danny.html", "Primer draft de la sustentación, con las cifras del 24/09 y el apéndice técnico. Superado por la v2: se conserva, no se presenta.", "Presentación del reto — Módulo 1"),
     ]:
         for d in docs:
             if str(d["rel"]).endswith(patron):
