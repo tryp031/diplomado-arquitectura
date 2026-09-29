@@ -4,15 +4,18 @@
 - **Para:** Freddy, Camilo y Danny. El profesor elige a cualquiera para exponer: los tres
   tenemos que poder contarlo solos.
 - **Presentación que se usa:** `Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html` (9 láminas).
-- **Fuentes de las cifras:** la lámina de resultados (ronda 4, 28/09) y `INFORME.md` (24/09).
+- **Fuentes de las cifras:** la lámina de resultados y el PDF `informe_arquitectura_reto_latencia_minima_grupo2.pdf`
+  (§10). Los dos usan la **misma corrida, la del 28/09** (1 × 1 M por variante).
 
 ---
 
 ## ⚠ Tres cosas que hay que saber antes de exponer
 
-1. **Hay dos juegos de cifras, y los dos son correctos.** La presentación usa la corrida del
-   **28/09** (1 × 1 M). El informe PDF usa la del **24/09** (3 × 1 M). Si el profesor ve la
-   diferencia, la respuesta está en la pregunta 6.
+1. **La presentación y el informe usan la misma corrida (28/09), pero redondean distinto.**
+   Para memoria compartida C, la presentación dice p50 **83 ns**, **184×** y **12 048×**; el
+   informe PDF dice **80 ns**, **191×** y **12 500×**. En voz alta digan **83 ns**: el propio
+   informe (§10.2) explica que el reloj solo puede dar 42, 83, 125 ns…, así que 80 ns es un
+   redondeo, no un valor que se haya medido. Ver la pregunta 6.
 2. **Hoy (29/09) se quitó el warmup del código** (ADR-012, todavía *Propuesta*: falta que
    Freddy y Camilo lo ratifiquen). Las cifras de la presentación y del informe **sí** se
    tomaron con warmup de 100 000. La nota «Reproducir» de la lámina de resultados trae
@@ -93,10 +96,15 @@ posición `ceil(p·n) − 1` en la lista ordenada.
 
 ### Sobre los resultados
 
-**6. ¿Por qué la presentación y el informe tienen cifras distintas?**
-Son dos corridas del mismo código en la misma máquina: el informe usa la del 24/09
-(3 × 1 M) y la presentación la del 28/09 (1 × 1 M). Las medianas casi no cambian
-(TCP ≈ 15 µs, C = 83 ns). **La cola sí cambia**, y ese es justamente el hallazgo.
+**6. ¿Por qué la presentación dice 83 ns y el informe 80 ns?**
+Es la misma corrida, la del 28/09. El reloj avanza en pasos de 41,67 ns, así que cada
+medición de memoria compartida solo puede valer 42, 83, 125 ns…; el 71,1 % cayó en 83 ns. La
+presentación da el valor exacto y el informe lo redondeó a dos cifras (80, 120, 170 ns). De
+ahí salen también 184× frente a 191×.
+- **Si citan 71 ns:** es la segunda forma de medir del informe, que cronometra lotes de 1 000
+  intercambios y divide. Se reportan las dos cifras y ninguna es «la verdadera».
+- **La corrida del 24/09** aparece en el informe (§10.4) solo para comparar: con el mismo
+  código, TCP pasó de 1 ms 164 veces.
 
 **7. ¿Por qué TCP pasó de 1 ms 164 veces un día y ninguna otro, con el mismo código?**
 Porque la cola de TCP **depende del estado del sistema operativo**: planificador,
@@ -114,6 +122,9 @@ pasó en ninguna corrida. **Que no lo observáramos no quiere decir que no pueda
 sistema. Esos picos los ponen las interrupciones, el hardware y la migración del hilo entre
 núcleos (en macOS/arm64 no se puede fijar un hilo a un núcleo). Lo defendible es que
 **sacó varias fuentes de variabilidad del camino, no todas**.
+*Ojo con el informe §10.3:* dice que «importa que el peor caso esté acotado por diseño». Es
+el **criterio** que se usa para evaluar, no una afirmación de que memoria compartida lo
+cumpla. Si lo citan, esa es la respuesta.
 
 ### Sobre la metodología
 

@@ -158,10 +158,10 @@ preguntas 9 y 1.
 | **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
 | **Tema** | Guion de la sustentación del Reto de Latencia Mínima + 20 preguntas probables del docente |
 | **Tipo** | `investigacion` — elaborado con IA a partir del deck v2 y del informe |
-| **Fuentes** | `m1-presentacion-reto-latencia-v2-danny.html` (cifras ronda 4, 28/09) · `INFORME.md` (24/09) · `ESPEC-MEDICION.md` · ADR-001, 003, 012 · conocimiento complementario marcado como tal |
+| **Fuentes** | `m1-presentacion-reto-latencia-v2-danny.html` (cifras ronda 4, 28/09) · `informe_arquitectura_reto_latencia_minima_grupo2.pdf` §10 (misma corrida del 28/09) · `ESPEC-MEDICION.md` · ADR-001, 003, 012 · conocimiento complementario marcado como tal |
 | **Estado** | vigente · ⬜ sin consolidar |
 
-**Qué contiene:** tres advertencias previas (dos juegos de cifras, warmup retirado, frases prohibidas) ·
+**Qué contiene:** tres advertencias previas (misma corrida con redondeo distinto en deck e informe, warmup retirado, frases prohibidas) ·
 guion lámina por lámina con tiempos · 20 preguntas con respuesta (percentiles, resultados, metodología, diseño).
 
 **Versión HTML:** mismo contenido que el `.md`, pensado para estudiar. Las respuestas vienen plegadas, se

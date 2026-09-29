@@ -128,7 +128,7 @@
   <section class="warn" aria-labelledby="w">
     <h2 id="w">⚠ Tres cosas que hay que saber antes de exponer</h2>
     <ol>
-      <li><strong>Hay dos juegos de cifras, y los dos son correctos.</strong> La presentación usa la corrida del <strong>28/09</strong> (1 × 1 M). El informe PDF usa la del <strong>24/09</strong> (3 × 1 M). Si el profesor ve la diferencia, la respuesta está en la pregunta 6.</li>
+      <li><strong>La presentación y el informe usan la misma corrida (28/09), pero redondean distinto.</strong> Para memoria compartida C, la presentación dice p50 <strong>83 ns</strong>, <strong>184×</strong> y <strong>12 048×</strong>; el informe PDF dice <strong>80 ns</strong>, <strong>191×</strong> y <strong>12 500×</strong>. En voz alta digan <strong>83 ns</strong>: el propio informe (§10.2) explica que el reloj solo puede dar 42, 83, 125 ns…, así que 80 ns es un redondeo, no un valor que se haya medido. Ver la pregunta 6.</li>
       <li><strong>Hoy (29/09) se quitó el warmup del código</strong> (ADR-012, todavía <em>Propuesta</em>: falta que Freddy y Camilo lo ratifiquen). Las cifras de la presentación y del informe <strong>sí</strong> se tomaron con warmup de 100 000. La nota «Reproducir» de la lámina de resultados trae <code>--warmup 100000</code>, y <strong>ese comando ahora falla</strong>. No lo lean en voz alta ni lo ejecuten en vivo. Ver la pregunta 12.</li>
       <li><strong>Frases que NO se dicen:</strong>
         <ul class="nosay">
@@ -228,9 +228,13 @@
     </details>
 
     <!-- Resultados -->
-    <details class="q" data-c="res"><summary><span class="num">06</span><span>¿Por qué la presentación y el informe tienen cifras distintas?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
+    <details class="q" data-c="res"><summary><span class="num">06</span><span>¿Por qué la presentación dice 83 ns y el informe 80 ns?<span class="cat">Resultados</span></span><span class="chev">›</span></summary>
       <div class="ans">
-        <p>Son dos corridas del mismo código en la misma máquina: el informe usa la del 24/09 (3 × 1 M) y la presentación la del 28/09 (1 × 1 M). Las medianas casi no cambian (TCP ≈ 15 µs, C = 83 ns). <strong>La cola sí cambia</strong>, y ese es justamente el hallazgo.</p>
+        <p>Es la misma corrida, la del 28/09. El reloj avanza en pasos de 41,67 ns, así que cada medición de memoria compartida solo puede valer 42, 83, 125 ns…; el 71,1 % cayó en 83 ns. La presentación da el valor exacto y el informe lo redondeó a dos cifras (80, 120, 170 ns). De ahí salen también 184× frente a 191×.</p>
+        <ul>
+          <li><strong>Si citan 71 ns:</strong> es la segunda forma de medir del informe, que cronometra lotes de 1 000 intercambios y divide. Se reportan las dos cifras y ninguna es «la verdadera».</li>
+          <li><strong>La corrida del 24/09</strong> aparece en el informe (§10.4) solo para comparar: con el mismo código, TCP pasó de 1 ms 164 veces.</li>
+        </ul>
       </div>
     </details>
 
@@ -252,6 +256,7 @@
       <div class="ans">
         <p><strong>No.</strong> Su máximo fue 17,6 µs, más de 200 veces su mediana, y eso sin ninguna llamada al sistema. Esos picos los ponen las interrupciones, el hardware y la migración del hilo entre núcleos (en macOS/arm64 no se puede fijar un hilo a un núcleo).</p>
         <p class="key">Lo defendible es que <strong>sacó varias fuentes de variabilidad del camino, no todas</strong>.</p>
+        <p><em class="tag prob">Ojo</em>El informe (§10.3) dice que «importa que el peor caso esté acotado por diseño». Es el <strong>criterio</strong> que se usa para evaluar, no una afirmación de que memoria compartida lo cumpla. Si lo citan, esa es la respuesta.</p>
       </div>
     </details>
 
@@ -331,7 +336,7 @@
   </div>
 
   <footer>
-    Fuentes: presentación v2 (ronda 4, 28/09) · <code>INFORME.md</code> (24/09) · <code>ESPEC-MEDICION.md</code> · ADR-001, ADR-003, ADR-012. Lo marcado <em>Complementario</em> no sale del material del diplomado. Tecla <code>T</code>: tema claro/oscuro.
+    Fuentes: presentación v2 e informe PDF de arquitectura (§10), ambos con la corrida del 28/09 · <code>ESPEC-MEDICION.md</code> · ADR-001, ADR-003, ADR-012. Lo marcado <em>Complementario</em> no sale del material del diplomado. Tecla <code>T</code>: tema claro/oscuro.
   </footer>
 </main>
 <script>
