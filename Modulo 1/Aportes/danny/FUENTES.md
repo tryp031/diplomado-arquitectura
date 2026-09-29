@@ -148,3 +148,22 @@ oficial. Todo lo demás es elaboración propia. Lo que no sale del diplomado va 
 `Complementario` dentro del documento (patrón Saga, fecha y maniobra inversa de la Ley de Conway,
 WCAG) y las observaciones propias van marcadas `Criterio` — incluye un reparo al enunciado de las
 preguntas 9 y 1.
+
+## `m1-guion-sustentacion-y-preguntas-danny.md` + `.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-09-29 |
+| **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
+| **Tema** | Guion de la sustentación del Reto de Latencia Mínima + 20 preguntas probables del docente |
+| **Tipo** | `investigacion` — elaborado con IA a partir del deck v2 y del informe |
+| **Fuentes** | `m1-presentacion-reto-latencia-v2-danny.html` (cifras ronda 4, 28/09) · `INFORME.md` (24/09) · `ESPEC-MEDICION.md` · ADR-001, 003, 012 · conocimiento complementario marcado como tal |
+| **Estado** | vigente · ⬜ sin consolidar |
+
+**Qué contiene:** tres advertencias previas (dos juegos de cifras, warmup retirado, frases prohibidas) ·
+guion lámina por lámina con tiempos · 20 preguntas con respuesta (percentiles, resultados, metodología, diseño).
+
+**Versión HTML:** mismo contenido que el `.md`, pensado para estudiar. Las respuestas vienen plegadas, se
+puede filtrar por tema (percentiles · resultados · metodología · diseño) y con `T` se cambia entre tema
+claro y oscuro. Si cambia una cifra, se actualizan los dos archivos.
