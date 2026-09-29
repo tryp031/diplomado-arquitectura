@@ -44,7 +44,7 @@ y es lo que se agregó el 14/09 para tener algo que demostrar (ADR-004).
 | Decisión | Qué pasa sin ella |
 |---|---|
 | **`TCP_NODELAY`** | Sin desactivar Nagle, el kernel agrupa paquetes pequeños y aparecen picos de **decenas de milisegundos**. Es el error clásico de este reto. |
-| **Conexión persistente** | El *handshake* se pagaría en cada iteración, y se estaría midiendo `connect()`, no el intercambio. Se paga una vez, en el warmup, fuera de F1 (ADR-001). |
+| **Conexión persistente** | El *handshake* se pagaría en cada iteración, y se estaría midiendo `connect()`, no el intercambio. Se paga una vez, en el warmup, fuera del tramo medido (ADR-001). |
 | **`recv_into` sobre buffer preasignado** | Cada `recv()` normal asigna un objeto nuevo: memoria por iteración dentro de la ruta caliente. |
 | **`pack_into` sobre `bytearray`** | La respuesta se escribe en sitio, sin construir un `bytes` nuevo en cada vuelta. |
 

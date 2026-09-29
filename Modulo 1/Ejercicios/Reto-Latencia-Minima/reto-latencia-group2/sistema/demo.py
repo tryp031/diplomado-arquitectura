@@ -7,7 +7,7 @@ tiempo que tardó. Uso:  python3 demo.py --variante tcp-python
 
 Es un programa aparte y no un modo del cliente medidor: un `print` a terminal cuesta
 10-50 µs, cientos de veces la latencia medida. Mismo servidor, cliente distinto.
-El tiempo mostrado es real (mismo reloj, misma frontera F1) pero es UNA muestra: los
+El tiempo mostrado es real (mismo reloj, mismo tramo medido) pero es UNA muestra: los
 resultados salen de `run.sh` + `analyze.py`, nunca de aquí.
 """
 
@@ -98,7 +98,7 @@ def main() -> None:
 
         estimulo = clasificador.armar_estimulo(host_id, 0, a.payload)
 
-        # Misma frontera F1 que el harness: t0 antes de escribir, t1 tras leer todo.
+        # Mismo tramo medido que el harness: t0 antes de escribir, t1 tras leer todo.
         try:
             t0 = time.perf_counter_ns()
             sock.sendall(estimulo)

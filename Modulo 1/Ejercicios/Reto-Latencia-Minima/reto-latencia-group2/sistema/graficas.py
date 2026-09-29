@@ -138,7 +138,7 @@ def grafica_percentiles(series, salida):
     ymax = max(vals) * 2
 
     c = Lienzo(an, al, m, "Latencia por percentil — dónde se decide el cumplimiento",
-               "3 rondas × 1 000 000 por variante · RTT de aplicación (frontera F1) · escala logarítmica",
+               "3 rondas × 1 000 000 por variante · RTT de aplicación · escala logarítmica",
                ymin, ymax)
     c.eje_y("latencia (escala log)")
 

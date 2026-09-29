@@ -471,7 +471,7 @@
           div({className: 'sistema'},
             span({className: 'lbl'}, 'El sistema'),
             span({className: 'v'}, fmt(res.latencia_sistema_ns)),
-            small(null, 'reloj monótono alrededor del intercambio real · frontera F1')),
+            small(null, 'reloj monótono alrededor del intercambio real')),
           div({className: 'web'},
             span({className: 'lbl'}, 'Desde el navegador'),
             span({className: 'v'}, fmt(res.latencia_web_ns)),
@@ -555,7 +555,7 @@
       celda('  referencia') + SEP + celda('el objetivo del enunciado es 1 ms = 1000 us'),
       '',
       celda('COLUMNAS'),
-      celda('  sistema_us') + SEP + celda('lo que tarda el SISTEMA, frontera F1 - es la UNICA medicion del reto'),
+      celda('  sistema_us') + SEP + celda('lo que tarda el SISTEMA en el intercambio - es la UNICA medicion del reto'),
       celda('  web_ms') + SEP + celda('lo que anade el navegador (HTTP + JSON + React) - solo contraste'),
       celda('  hora_inicio / hora_fin') + SEP + celda('reloj de PARED: dicen cuando paso, no cuanto tardo'),
       celda('  fila sin tiempos') + SEP + celda('si sistema_us y web_ms van vacios, ese estimulo fallo: no hubo respuesta que medir'),
@@ -574,7 +574,7 @@
 
   /*
    * Tabla plana, una fila por estímulo; muestra LO MISMO que el CSV.
-   * inicio/fin son las marcas del NAVEGADOR; tras un F5 se cae a las del servidor
+   * inicio/fin son las marcas del NAVEGADOR; tras recargar la página se cae a las del servidor
    * (mismo reloj de pared, misma zona).
    */
   function Historial(props) {
@@ -633,10 +633,10 @@
           'mismos valores: se abre en Excel y se entiende sin convertir nada. La unidad va en el ' +
           'nombre de la columna —', bold(null, 'sistema_us'), ' en microsegundos, ',
           bold(null, 'web_ms'), ' en milisegundos— para que cada columna se pueda ordenar y graficar.'),
-        p(null, 'Las marcas de la frontera F1 no viajan aquí: la medición oficial del reto no sale ' +
+        p(null, 'Las marcas del cronómetro del sistema no viajan aquí: la medición oficial del reto no sale ' +
           'del plano de control, sale de ', code(null, 'sistema/run.sh'), '.'),
         p(null, 'El log vive en el navegador y en un buffer circular de 500 entradas en el plano de ' +
-          'control, así sobrevive a un F5. No toca disco ni la ruta caliente del plano de datos.')));
+          'control, así sobrevive a recargar la página. No toca disco ni la ruta caliente del plano de datos.')));
   }
 
   /* ═══════════ Histograma ═══════════ */
@@ -707,25 +707,25 @@
                    sub: res
                      ? res.nombre + ' · ' + miles(res.n) + ' muestras · ' +
                        (hilos > 1 ? hilos + ' clientes concurrentes · ' : '1 cliente · ') +
-                       miles(res.warmup) + ' warmup · ' + res.segundos + ' s'
+                       res.segundos + ' s'
                      : 'Lanza el cliente real de la variante: el mismo de la medición oficial.'},
         b({className: 'btn', type: 'button', onClick: medir, disabled: corr || !activos.length},
           corr ? 'Midiendo…' : 'Ejecutar medición')),
       activos.length === 0
         ? div({className: 'aviso a-info'}, 'Arrancá al menos una variante para poder medir.')
         : div({className: 'filtros'},
-            div({className: 'control', style: {flex: '0 1 260px'}},
+            div({className: 'control', style: {flex: '1 1 240px'}},
               lbl({htmlFor: 'mv'}, 'Variante'),
               sel({id: 'mv', value: variante, onChange: function (e) { setVariante(e.target.value); }},
                 activos.map(function (v) { return opt({key: v.id, value: v.id}, v.nombre); }))),
-            div({className: 'control', style: {flex: '0 1 220px'}},
+            div({className: 'control', style: {flex: '1 1 360px'}},
               lbl({htmlFor: 'mi'}, 'Iteraciones'),
               sel({id: 'mi', value: iters, onChange: function (e) { setIters(parseInt(e.target.value, 10)); }},
                 opt({value: 10000}, '10 000 · rápido'),
                 opt({value: 50000}, '50 000'),
                 opt({value: 200000}, '200 000'),
-                opt({value: 1000000}, '1 000 000 · como la medición oficial'))),
-            div({className: 'control', style: {flex: '0 1 240px'}},
+                opt({value: 1000000}, '1 000 000 · mismo volumen que la oficial'))),
+            div({className: 'control', style: {flex: '1 1 300px'}},
               lbl({htmlFor: 'mh'}, 'Clientes concurrentes'),
               sel({id: 'mh', value: hilos, disabled: !admiteHilos,
                    onChange: function (e) { setHilos(parseInt(e.target.value, 10)); }},
@@ -789,7 +789,7 @@
       });
     }, []);
 
-    // El log se siembra del buffer del servidor (sobrevive a un F5).
+    // El log se siembra del buffer del servidor (sobrevive a recargar la página).
     ue(function () {
       recargar();
       api('/api/historial').then(function (r) {
@@ -843,7 +843,7 @@
             'de las variantes. Esta página es el plano de control, no el sistema.'),
           h(Porque, {titulo: 'la separación en dos planos'},
             p(null, 'El plano de datos —cliente y servidor, en C y en Python— es lo que el reto mide, ' +
-              'y su cronómetro vive ahí dentro (frontera F1).'),
+              'y su cronómetro vive ahí dentro.'),
             p(null, 'Un navegador añade milisegundos; el sistema responde en microsegundos. Si ' +
               'midiéramos desde acá estaríamos midiendo el navegador.'))),
         h(Estimulo, {estado: estado, onLog: anotar})),

@@ -1,7 +1,7 @@
 /*
  * Variante Memoria compartida C — cliente medidor sobre memoria compartida.
  *   --host <ignorado> --port 9103 --payload 32 --warmup 100000 --iters 1000000 --out <CSV>
- * Frontera F1: t0 justo ANTES de escribir el estímulo, t1 justo DESPUÉS de tener la
+ * Qué se mide: t0 justo ANTES de escribir el estímulo, t1 justo DESPUÉS de tener la
  * respuesta completa en buffer local. Mide también el piso del propio reloj, que a
  * esta escala ya no es despreciable.
  */
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
     /* --- MODO ESTIMULO SUELTO (--clasificar) --------------------------------
        Una pregunta, se imprime el veredicto y se sale: es como el plano de control
        le habla a un sistema sin sockets. Retorna antes del bucle medido, asi que
-       no afecta ninguna medicion. Cronometra con la misma frontera F1. */
+       no afecta ninguna medicion. Cronometra el mismo tramo. */
     if (clasificar) {
         unsigned char est[PAYLOAD_MAX];
         uint32_t hid = id_de_ip(clasificar);

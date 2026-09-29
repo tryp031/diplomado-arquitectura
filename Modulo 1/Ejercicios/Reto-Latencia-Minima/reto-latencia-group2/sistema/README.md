@@ -73,7 +73,7 @@ ESTÍMULO — 32 B                            RESPUESTA — 32 B
  IPv4 en orden de red                       LOCAL(1) · EXTERNO(0) · DESCONOCIDO(2)
 ```
 
-Mismo tamaño en ambos sentidos que antes: **el transporte y la frontera F1 no cambian.**
+Mismo tamaño en ambos sentidos que antes: **el transporte y el tramo medido no cambian.**
 
 ### Lo único que tiene que hacer tu servidor
 

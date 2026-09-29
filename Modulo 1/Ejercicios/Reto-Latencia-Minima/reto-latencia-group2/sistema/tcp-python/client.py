@@ -2,7 +2,7 @@
 """
 Variante TCP Python — cliente medidor sobre TCP crudo.
 
-Frontera de medición F1:
+Qué se mide:
     t0 = inmediatamente ANTES de la llamada de escritura
     t1 = inmediatamente DESPUÉS de leer la respuesta completa
     latencia = t1 - t0   (RTT en espacio de usuario; no incluye conexión ni arranque)
