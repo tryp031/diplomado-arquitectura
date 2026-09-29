@@ -1,25 +1,11 @@
 /*
  * reloj.h — instrumento de medición COMPARTIDO por todas las variantes compiladas.
+ * Todas usan el MISMO reloj: si cada una tuviera el suyo, la diferencia entre dos
+ * resultados incluiría la diferencia entre dos relojes.
  *
- * Está aquí y no dentro de una variante por la misma razón que analyze.py está aquí:
- * el atributo AC-3 (comparabilidad) exige que las variantes usen el MISMO instrumento,
- * no uno equivalente. Si cada una define su propio reloj, la diferencia entre dos
- * resultados incluye la diferencia entre dos relojes.
- *
- * ───────────────────────────────────────────────────────────────────────────────
- * DESVIACIÓN DELIBERADA DE ESPEC §2 — ver ADR-003
- *
- * Granularidad real medida en el equipo de referencia (Apple M4, macOS 26.6, arm64):
- *
- *     CLOCK_MONOTONIC        1000 ns   <- lo que ESPEC §2 nombraba primero
- *     CLOCK_MONOTONIC_RAW      41 ns
- *     CLOCK_UPTIME_RAW         41 ns   <- menor sobrecoste, el elegido
- *     contador de hardware   41.67 ns  <- piso físico (timebase 125/3 = 24 MHz)
- *
- * "Resolución de ns" describe las UNIDADES del valor devuelto, no la GRANULARIDAD
- * con la que avanza. CLOCK_MONOTONIC devuelve nanosegundos y salta de microsegundo
- * en microsegundo. Confundir ambas cosas fue el error de la especificación original.
- * ───────────────────────────────────────────────────────────────────────────────
+ * Granularidad medida en Apple M4 (arm64): CLOCK_MONOTONIC avanza de 1000 en 1000 ns;
+ * CLOCK_UPTIME_RAW avanza de ~41 ns (contador de 24 MHz) con el menor sobrecoste, por
+ * eso es el elegido. "Devuelve ns" describe las unidades, no la granularidad.
  */
 #ifndef LATM_RELOJ_H
 #define LATM_RELOJ_H
@@ -63,10 +49,8 @@ static int latm_cmp_u64(const void *a, const void *b)
 }
 
 /*
- * Verifica y reporta la granularidad real del reloj y el sobrecoste de un par de
- * lecturas. ADR-003 lo vuelve OBLIGATORIO para toda variante: sin esto no se sabe
- * si el instrumento alcanza al fenómeno.
- *
+ * Reporta la granularidad real del reloj y el sobrecoste de un par de lecturas: sin
+ * esto no se sabe si el instrumento alcanza al fenómeno medido.
  * Devuelve la granularidad en ns (menor delta no nulo entre lecturas consecutivas).
  */
 static inline uint64_t reloj_verificar(const char *etiqueta)
@@ -97,12 +81,13 @@ static inline uint64_t reloj_verificar(const char *etiqueta)
     return gran;
 }
 
-/* Regla de ADR-003: la granularidad debe ser >=10x menor que el p50 esperado. */
+/* La granularidad debe ser >=10x menor que el p50 esperado; si no, las muestras
+   salen cuantizadas y hace falta el contraste por lotes. */
 static inline void reloj_avisar_si_grueso(const char *etiqueta, uint64_t gran, uint64_t p50_esperado_ns)
 {
     if (gran && p50_esperado_ns && gran * 10 > p50_esperado_ns)
         printf("[%s] AVISO: granularidad %llu ns frente a p50 esperado %llu ns: las muestras\n"
-               "        estaran CUANTIZADAS. ADR-003 exige contraste por lotes.\n",
+               "        estaran CUANTIZADAS. Contrastar con la medicion por lotes.\n",
                etiqueta, (unsigned long long)gran, (unsigned long long)p50_esperado_ns);
 }
 

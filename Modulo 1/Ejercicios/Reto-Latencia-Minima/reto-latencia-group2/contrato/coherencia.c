@@ -1,17 +1,10 @@
 /*
  * coherencia.c — ¿clasifican igual la version en C y la version en Python?
  *
- * No mide nada y no forma parte del sistema: es una herramienta del contrato de
- * trabajo. Lee IPs por la entrada estandar y escribe el veredicto que da
- * clasificador.h, para que verificar.py compare esa salida con la de
- * clasificador.py sobre las mismas entradas.
- *
- * Por que importa: B clasifica con clasificador.py y D con clasificador.h. El
- * informe compara sus latencias, y esa comparacion solo vale si ambas hacen el
- * MISMO trabajo. Si los dos clasificadores dejan de coincidir, B y D pasan a
- * hacer trabajos distintos y la comparacion deja de significar nada —sin que
- * ningun test falle y sin que nadie se entere—. Esta comprobacion es barata y
- * cierra ese agujero.
+ * No mide nada: lee IPs por la entrada estandar y escribe el veredicto de
+ * clasificador.h, para que verificar.py lo compare con el de clasificador.py.
+ * TCP Python usa clasificador.py y Memoria compartida C usa clasificador.h: comparar
+ * sus latencias solo vale si ambas hacen el MISMO trabajo.
  *
  *   cc -O2 -I../sistema -o coherencia coherencia.c
  */

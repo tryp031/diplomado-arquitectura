@@ -11,8 +11,7 @@
     --signal:#A85C0C;
     --ok:#2B6A4B; --alert:#9C2B26; --alert-soft:#F7E6E5;
 
-    /* Paleta categórica — validada con validate_palette.js (los seis chequeos).
-       Orden fijo: la variante 1 toma el slot 1; nunca se recicla ni se reasigna. */
+    /* Paleta categórica. Orden fijo: la variante 1 toma el slot 1; nunca se reasigna. */
     --s1:#0F7BA8; --s2:#E08A00; --s3:#A64DC4; --s4:#CC3A2E; --s5:#00806B;
 
     --display:"Chivo","Helvetica Neue",Arial,sans-serif;
@@ -183,8 +182,8 @@
   <div class="arch">
     <h3>Este visor no mide. Lee.</h3>
     <p>Un navegador añade milisegundos: renderizado, JavaScript, el bucle de eventos. Si midiera desde aquí, los números serían del navegador y no del sistema — mil veces peores, y sin ningún valor.</p>
-    <p>La cadena es: <code>harness (C/Python)</code> → <code>CSV crudo</code> → <code>generar-datos.py</code> → <code>este visor</code>. Las nueve millones de muestras se condensan en 2,4 KB de percentiles e histogramas; el dato crudo queda versionado en <code>resultados/</code>.</p>
-    <p><strong>El visor es un instrumento de lectura y no forma parte del sistema medido.</strong> Eso va declarado en el informe.</p>
+    <p>La cadena es: <code>harness (C/Python)</code> → <code>CSV crudo</code> → <code>generar-datos.py</code> → <code>este visor</code>. Las nueve millones de muestras se condensan en 2,4 KB de percentiles e histogramas; el dato crudo son los CSV que <code>run.sh</code> escribe en <code>resultados/</code>.</p>
+    <p><strong>El visor es un instrumento de lectura y no forma parte del sistema medido.</strong></p>
   </div>
 </section>
 

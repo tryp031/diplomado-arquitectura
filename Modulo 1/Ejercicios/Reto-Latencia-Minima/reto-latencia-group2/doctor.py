@@ -2,16 +2,9 @@
 """
 doctor.py — ¿qué puede correr ESTA máquina, y qué le falta?
 
-Existe porque el equipo trabaja en sistemas distintos (macOS y Windows) y el reto
-NO es portable de forma uniforme: el plano de control es Python puro y corre en
-todas partes, pero el plano de datos usa POSIX —memoria compartida, sockets ICMP,
-un compilador de C— y eso en Windows nativo no existe.
-
-La respuesta a «¿no me funciona?» no debería ser preguntarle a alguien. Debería
-ser este archivo, diciendo exactamente qué falta y con qué comando se obtiene.
-
-Se escribe en Python y no en bash + PowerShell a propósito: dos implementaciones
-de la misma comprobación divergen. Ya pasó en este proyecto con tabla-hosts.csv.
+El plano de control es Python puro y corre en todas partes; el plano de datos usa
+POSIX (memoria compartida, compilador de C), que Windows nativo no tiene. Está en
+Python y no en bash + PowerShell para no tener dos comprobaciones que diverjan.
 
     python3 doctor.py
 """
@@ -112,7 +105,7 @@ def main() -> int:
               "La variante Memoria compartida C usa POSIX y no existe en\n"
               "Windows. Para tenerla, instalá WSL2:\n"
               "  wsl --install\n"
-              "Sin eso el resto del sistema funciona igual (ver README, «Tres caminos»).")
+              "Sin eso funcionan igual la interfaz y la variante TCP Python.")
     else:
         linea(FALTA, "no hay compilador de C o falta make",
               "macOS:  xcode-select --install\n"
@@ -131,9 +124,7 @@ def main() -> int:
     # ── Qué variantes existen hoy ────────────────────────────────────────────
     print()
     print("  VARIANTES DISPONIBLES AQUÍ")
-    # Alcance: TCP Python y Memoria compartida C (ADR-007). A y C nunca se
-    # implementaron; Bc y E
-    # se midieron y se retiraron del arbol el 16/09 — ver docs/archivo/.
+    # Alcance de la entrega: TCP Python y Memoria compartida C.
     catalogo = [
         ("tcp-python",           "tcp-python",           "TCP Python",           "python"),
         ("memoria-compartida-c", "memoria-compartida-c", "Memoria compartida C", "c"),

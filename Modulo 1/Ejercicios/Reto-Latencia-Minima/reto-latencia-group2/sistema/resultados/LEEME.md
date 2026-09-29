@@ -52,7 +52,28 @@ el mismo código**. Por eso las anteriores no se borran: son la evidencia de esa
 | `*-0.csv` / `.log` (08/09) | validación del harness, antes de fijar el método |
 | `*-9.csv` / `.log` (14/09) | prueba rápida de 20 000 iteraciones |
 
-**Convención de rondas:** 1-3 son las del informe · 0 es validación · 9 es prueba rápida.
+## La ejecución de la presentación — 28/09/2026 (ronda 4)
+
+La presentación v2 (`Modulo 1/Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html`)
+muestra **una sola ejecución más corta**, a pedido de Daniel el 28/09. No reemplaza a la
+oficial del 24/09: va en la **ronda 4** justamente para no archivar la ronda 1 del 24/09 ni
+dejar en `resultados/` un conjunto 1-3 con días mezclados.
+
+| Archivo | Tomada | Iteraciones | Carga (1 min) |
+|---|---|---|---|
+| `resultados-tcp-python-4.csv` + `.log` | 2026-09-28 | 1 000 000 × 1 | 3,81 |
+| `resultados-memoria-compartida-c-4.csv` + `.log` | 2026-09-28 | 1 000 000 × 1 | 3,77 |
+
+Mismos parámetros que la oficial (`--warmup 100000 --iters 1000000`), misma máquina.
+
+| | p50 | p99.9 | máx | > 1 ms |
+|---|---|---|---|---|
+| TCP Python | 15 250 ns | 31 167 ns | 622 541 ns | 0 / 1 M |
+| Memoria compartida C | 83 ns | 167 ns | 17 625 ns | 0 / 1 M |
+
+Se regeneran con `./analyze.py --md resultados/resultados-*-4.csv`.
+
+**Convención de rondas:** 1-3 son las del informe · 4 es la de la presentación v2 · 0 es validación · 9 es prueba rápida.
 `graficas.py` y `analyze.py` sólo agregan 1-3. Hasta el 17/09 la 9 se colaba en las
 figuras y decían `n=3 020 000` mientras la tabla decía 3 000 000: no fallaba, mentía.
 

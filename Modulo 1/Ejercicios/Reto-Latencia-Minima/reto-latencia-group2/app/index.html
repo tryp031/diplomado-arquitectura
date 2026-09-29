@@ -9,12 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-  /*
-   * Dirección visual: laboratorio claro. Cards redondeadas sobre papel frío,
-   * un azul de marca que manda, y el dato numérico siempre en monoespaciada.
-   * Todo color vive en tokens: el modo oscuro solo los reasigna, nunca redefine
-   * reglas — así una card nueva hereda los dos temas sin tocarla.
-   */
+  /* Todo color vive en tokens: el modo oscuro solo los reasigna, nunca redefine reglas. */
   :root{
     --ink:#16213c; --muted:#6d7890; --soft:#8a93a5;
     --paper:#f5f7fb; --surface:#ffffff; --field:#fbfcff;
@@ -54,17 +49,12 @@
   a{color:inherit}
 
   /* ── barra superior ─────────────────────────────────────────────────────── */
-  /* Flota al hacer scroll: con cuatro secciones largas, volver al menu obligaba a
-     subir hasta arriba. `sticky` y no `fixed` para que siga ocupando su sitio en el
-     flujo y no tape el contenido al cargar la pagina.
-     El fondo es opaco a proposito: translucido con blur, los numeros de latencia que
-     pasan por debajo se leen a traves de la barra. */
+  /* `sticky` y no `fixed`: flota al hacer scroll sin tapar el contenido al cargar.
+     Fondo opaco para que los numeros que pasan por debajo no se lean a traves. */
   .nav{display:flex; align-items:center; justify-content:space-between; gap:12px;
     background:var(--surface); border:1px solid var(--line); padding:11px 14px 11px 18px;
     border-radius:16px; box-shadow:var(--sh-s); flex-wrap:wrap;
     position:sticky; top:12px; z-index:60}
-  /* El indicador de variantes activas es informacion en vivo: al flotar, deja de
-     hacer falta bajar a la seccion de servidores para saber si algo esta corriendo. */
   @media (max-width:850px){ .nav{top:8px; padding:9px 12px} }
   .brand{font-size:20px; font-weight:900; letter-spacing:-.03em; line-height:1.1}
   .brand b{color:var(--blue)}
@@ -82,8 +72,6 @@
   /* ── hero ───────────────────────────────────────────────────────────────── */
   .hero{display:grid; grid-template-columns:1.1fr .9fr; gap:22px; margin:22px 0}
   @media (max-width:980px){ .hero{grid-template-columns:1fr} }
-  /* La card de estímulo es más alta que el texto del hero; centrar reparte el
-     aire en vez de dejarlo todo abajo. */
   .intro{background:var(--blue); color:#fff; border-radius:24px; padding:34px;
     position:relative; overflow:hidden;
     display:flex; flex-direction:column; justify-content:center}
@@ -99,8 +87,7 @@
   /* ── secciones y cards ──────────────────────────────────────────────────── */
   .section{background:var(--surface); border:1px solid var(--line); border-radius:20px;
     padding:24px; margin:18px 0;
-    /* Alto de la barra flotante + su separacion: sin esto, un clic en el menu
-       deja el titulo de la seccion escondido detras de la propia barra. */
+    /* Alto de la barra flotante: que el menu no deje el titulo tapado. */
     scroll-margin-top:104px}
   .test{background:var(--surface); border:1px solid var(--line); border-radius:24px;
     padding:25px; box-shadow:var(--sh-m)}
@@ -250,16 +237,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script>
 /*
- * Interfaz del PLANO DE CONTROL.
- *
- * React 18 desde CDN, sin paso de compilación: no hay npm, ni Webpack, ni
- * node_modules. Se usa React.createElement con alias cortos en vez de JSX para
- * no depender de Babel en el navegador — una dependencia menos que pueda fallar
- * en medio de la demostración frente al curso.
- *
- * Esta página NO mide el sistema. El único cronómetro que corre aquí se mide a
- * sí mismo, y está a propósito: al lado del número real del plano de datos,
- * muestra cuánto añade la web. Ese contraste es el argumento del proyecto.
+ * Interfaz del PLANO DE CONTROL. React 18 desde CDN con React.createElement (sin
+ * JSX, sin compilación). Esta página NO mide el sistema: su único cronómetro mide
+ * el viaje web, como contraste con la latencia del plano de datos.
  */
 (function () {
   'use strict';
@@ -306,9 +286,7 @@
   function api(ruta, opciones) {
     return fetch(ruta, Object.assign({headers: {'Content-Type': 'application/json'}}, opciones || {}))
       .then(function (r) { return r.json(); })
-      // «Failed to fetch» es lo que dice el navegador, no lo que necesita saber quien
-      // lo lee: casi siempre el servidor se bajó (Ctrl-C, terminal cerrada) y la
-      // pestaña siguió abierta. El mensaje dice qué hacer, como doctor.py.
+      // «Failed to fetch» casi siempre es que el servidor se bajó con la pestaña abierta.
       .catch(function (e) {
         return {ok: false, error: 'Sin conexión con el plano de control. Casi siempre es que el ' +
           'servidor se bajó y esta pestaña quedó abierta: volvé a arrancarlo (./iniciar.sh en ' +
@@ -317,9 +295,7 @@
       });
   }
   function clasePill(v) { return v === 'LOCAL' ? '' : v === 'EXTERNO' ? 'ext' : 'desc'; }
-  // toISOString() devuelve UTC; el servidor sella en hora local. Mezclar las dos
-  // se lee como un salto de horas que no existe, así que el navegador sella con
-  // el mismo formato y la misma zona que el servidor.
+  // Hora local con el mismo formato que el servidor (toISOString daría UTC).
   function isoLocal(d) {
     var z = function (n, w) { return String(n).padStart(w || 2, '0'); };
     var off = -d.getTimezoneOffset(), sg = off >= 0 ? '+' : '-';
@@ -328,20 +304,14 @@
            z(d.getHours()) + ':' + z(d.getMinutes()) + ':' + z(d.getSeconds()) + '.' +
            z(d.getMilliseconds(), 3) + '000' + sg + z(Math.floor(off / 60)) + ':' + z(off % 60);
   }
-  /*
-   * El nombre lleva quién, qué, con qué filtro y cuándo — en ese orden, y con la
-   * fecha en ISO para que el explorador los ordene solos:
-   *     group2-estimulos-tcp-python-2026-09-14_2057.csv
-   * Un archivo suelto en Descargas tiene que decir de dónde salió sin abrirlo.
-   */
+  /* Nombre autoexplicativo y ordenable: group2-estimulos-tcp-python-2026-09-14_2057.csv */
   function nombreArchivo(ext, filtro) {
     var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
     return 'group2-estimulos-' + (filtro || 'todas') + '-' +
            d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '_' +
            z(d.getHours()) + z(d.getMinutes()) + '.' + ext;
   }
-  // La página la sirve el propio servidor.py en localhost: no hay sandbox que
-  // bloquee la descarga, así que un Blob + <a download> alcanza. Sin librerías.
+  // Servida desde localhost: un Blob + <a download> alcanza.
   function descargar(nombre, texto, tipo) {
     var url = URL.createObjectURL(new Blob([texto], {type: tipo + ';charset=utf-8'}));
     var el = document.createElement('a');
@@ -381,10 +351,7 @@
     function todas(acc) {
       var pend = reales.filter(function (v) { return acc === 'arrancar' ? !v.corriendo : v.corriendo; });
       setBusy('*');
-      /* El aviso se limpia al EMPEZAR, igual que hace accion(). Sin esto, el error de
-         una tentativa anterior —el tipico: un servidor huerfano ocupando el puerto—
-         seguia en pantalla despues de que el reintento funcionara, describiendo un
-         problema ya resuelto. Solo debe sobrevivir el error de ESTA pasada. */
+      /* El aviso se limpia al EMPEZAR: solo debe quedar el error de ESTA pasada. */
       props.avisar(null);
       pend.reduce(function (cad, v) {
         return cad.then(function () {
@@ -418,8 +385,7 @@
 
   /* ═══════════ Estímulo ═══════════ */
   function Estimulo(props) {
-    // Antes se exigia v.socket y memoria compartida no aparecia nunca en el
-    // formulario. Ahora se le habla lanzando su cliente en C — ver ADR-009.
+    // Todas las variantes activas: a la de memoria compartida se le habla lanzando su cliente en C.
     var activos = props.estado.variantes.filter(function (v) { return v.corriendo; });
     var tabla = props.estado.tabla;
     var sv = us(''), variante = sv[0], setVariante = sv[1];
@@ -525,40 +491,22 @@
 
   /* ═══════════ Historial ═══════════ */
   /*
-   * Columnas del CSV. Una por cada cosa que la tabla de la interfaz muestra, con
-   * los MISMOS valores ya formateados: lo que se ve en pantalla es lo que se abre
-   * en Excel. Sin columnas tecnicas —la frontera F1 y el overhead del control se
-   * sustentan con sistema/resultados/, que es la medicion oficial; esto es el
-   * registro de lo que se pregunto desde la web, no evidencia del informe—.
-   *
-   * La UNIDAD VA EN EL ENCABEZADO, no en la celda. `fmt()` es adaptativa (elige
-   * ns, us o ms segun la magnitud) y eso en pantalla esta bien, pero en una
-   * columna mezclaria unidades: 83 ns junto a 13,5 us deja de poder ordenarse.
-   * Aqui cada columna tiene una unidad fija y la celda lleva solo el numero.
+   * Columnas del CSV: lo mismo que muestra la tabla de la interfaz. Es un registro
+   * de lo preguntado desde la web, no la medicion oficial del reto.
+   * La UNIDAD VA EN EL ENCABEZADO y es fija por columna, para poder ordenar.
    */
   var SEP = ',';
 
-  /* Coma como separador de campos: es el estandar y lo lee cualquier herramienta
-     sin configurar nada. Obliga a que el decimal sea PUNTO, y de ahi sale la unica
-     trampa del archivo: en Excel con configuracion regional es-CO el punto es
-     separador de MILES, asi que `75.792` puede leerse como 75792. Por eso el
-     archivo abre con la directiva `sep=,` —que Excel reconoce— y por eso se emite
-     sin separador de miles: si no hay puntos de millar, no hay ambiguedad que
-     resolver mal. Ver la nota al pie de la cabecera. */
+  /* Separador coma => decimal PUNTO y sin separador de miles. En Excel es-CO el
+     punto es de miles; por eso el archivo abre con la directiva `sep=,`. */
   function dec(v, max) {
     if (v === null || v === undefined || isNaN(v)) return '';
     return v.toLocaleString('en-US', {maximumFractionDigits: max, useGrouping: false});
   }
   function fecha(iso) { var m = /^(\d{4}-\d{2}-\d{2})/.exec(iso || ''); return m ? m[1] : ''; }
-  /* Hora de pared con milisegundos, IGUAL que la tabla de la interfaz.
-     Va envuelta en ="..." porque Excel reconoce 21:02:08.754 como una hora y la
-     reformatea a su manera: se come las horas y redondea a decimas, con lo que
-     inicio y fin —que difieren en 1-4 ms— salen identicos en pantalla. El prefijo
-     `=` la fija como texto y se ve el valor exacto. Excel y Sheets lo evaluan; una
-     herramienta que lea el CSV en crudo vera el envoltorio, que es el precio de que
-     esto se abra bien en la hoja de calculo, que es para lo que existe.
-     Solo se aplica a las horas: hacerlo con texto de entrada como `detalle` abriria
-     la puerta a inyeccion de formulas. */
+  /* Hora de pared con milisegundos, envuelta en ="..." para que Excel no la
+     reformatee ni redondee. Solo a las horas: con texto de entrada abriria la
+     puerta a inyeccion de formulas. */
   function horaTexto(iso) {
     var m = /T(\d{2}:\d{2}:\d{2}\.\d{1,6})/.exec(iso || '');
     return m ? '="' + m[1].slice(0, 12) + '"' : '';
@@ -573,11 +521,8 @@
     ['host',        function (e) { return e.host; }],
     ['ip',          function (e) { return e.ip; }],
     ['web_ms',      function (e) { return e.latencia_web_ns == null ? '' : dec(e.latencia_web_ns / 1000000, 1); }],
-    /* Dos decimales, no uno. `fmt()` en pantalla usa 1 decimal a partir de 10 us,
-       pero aqui la columna cubre TODO el rango del reto de una vez: con un solo
-       decimal Memoria compartida C (0,083 us) se redondea a 0,1 y desaparece la cifra que
-       sostiene el informe. Con dos queda 0,08, que es como la reportan analyze.py
-       y la tabla de resultados. */
+    /* Dos decimales: con uno, Memoria compartida C (0,083 us) se redondearia a 0,1.
+       Con dos queda 0,08, igual que lo reporta analyze.py. */
     ['sistema_us',  function (e) { return e.latencia_sistema_ns == null ? '' : dec(e.latencia_sistema_ns / 1000, 2); }]
   ];
 
@@ -594,12 +539,9 @@
     es.forEach(function (e) { if (e.variante) vars[e.variante] = e.nombre_variante || e.variante; });
     var ms = mediana(es.map(function (e) { return e.latencia_sistema_ns; }).filter(Boolean));
 
-    /* Encabezado ejecutivo: cuatro lineas de clave;valor, sin `#`. Excel no trata
-       `#` como comentario —lo mete como fila de datos—, asi que un bloque
-       clave/valor se lee como el encabezado de un informe en vez de como basura. */
+    /* Encabezado clave/valor sin `#`: Excel no trata `#` como comentario. */
     var L = [
-      /* Excel respeta esta directiva por encima de su configuracion regional: sin
-         ella, un Excel es-CO abre el archivo entero en la columna A. */
+      /* Sin esta directiva, un Excel es-CO abre todo en la columna A. */
       'sep=' + SEP,
       celda('Reto de Latencia Minima') + SEP + celda('Group 2'),
       celda('Generado') + SEP + celda(new Date().toLocaleString('es-CO', {hour12: false}).replace(',', '')),
@@ -631,14 +573,9 @@
 
 
   /*
-   * Tabla plana, una fila por estímulo. Desde el 16/09 esta tabla y el CSV
-   * muestran LO MISMO, a propósito: lo que se ve en pantalla es lo que se abre en
-   * Excel. Las marcas de F1 y el overhead del control ya no se exportan desde
-   * aquí —los sustenta sistema/resultados/, que es la medición oficial—.
-   *
-   * inicio/fin son las marcas del NAVEGADOR cuando existen; para las entradas
-   * que vienen del buffer del servidor tras un F5 se cae a las del servidor,
-   * que es el mismo reloj de pared y la misma zona.
+   * Tabla plana, una fila por estímulo; muestra LO MISMO que el CSV.
+   * inicio/fin son las marcas del NAVEGADOR; tras un F5 se cae a las del servidor
+   * (mismo reloj de pared, misma zona).
    */
   function Historial(props) {
     var es = props.entradas;
@@ -685,9 +622,7 @@
                 td({className: 't'}, hora(e.ts_nav_envio || e.ts_control_recibe)),
                 td({className: 't'}, hora(e.ts_nav_recibe || e.ts_control_responde)),
                 td({className: 't'}, e.nombre_variante || e.variante || '—'),
-                /* Quitada la columna VEREDICTO (nota 5), una fila fallida se veia igual
-                   que una correcta: mismos guiones en los tiempos. La marca va aqui para
-                   no reintroducir la columna — ADR-009. */
+                /* Sin columna de veredicto, la marca ⚠ distingue una fila fallida. */
                 td({className: 'host', title: e.ok ? '' : (e.error || 'falló')},
                   (e.ok ? '' : '⚠ ') + e.host + (e.ip ? ' → ' + e.ip : '')),
                 td({className: 'num s'}, fmt(e.latencia_sistema_ns)),
@@ -737,8 +672,7 @@
     var activos = props.estado.variantes.filter(function (v) { return v.corriendo; });
     var sv = us(''), variante = sv[0], setVariante = sv[1];
     var si = us(50000), iters = si[0], setIters = si[1];
-    /* Clientes concurrentes. 1 es el caso historico: las mediciones del informe se
-       tomaron asi, y por eso sigue siendo el valor por defecto (ADR-006). */
+    /* Clientes concurrentes. 1 por defecto: es como se toma la medicion oficial. */
     var sh = us(1), hilos = sh[0], setHilos = sh[1];
     var sr = us(null), res = sr[0], setRes = sr[1];
     var se = us(null), err = se[0], setErr = se[1];
@@ -752,9 +686,7 @@
     var vsel = activos.filter(function (v) { return v.id === variante; })[0];
     var admiteHilos = !vsel || vsel.concurrencia !== false;
 
-    // Si se cambia a una variante que no admite concurrencia, el valor vuelve a 1.
-    // Dejarlo en 8 y deshabilitar el control mostraria un numero que no es el que se
-    // va a usar: la interfaz estaria mintiendo sobre lo que va a medir.
+    // Si la variante no admite concurrencia, el valor vuelve a 1: no mostrar uno que no se usara.
     ue(function () {
       if (!admiteHilos && hilos !== 1) setHilos(1);
     }, [admiteHilos]);
@@ -762,9 +694,7 @@
     function medir() {
       if (!variante) return;
       setCorr(true); setErr(null); setRes(null);
-      // Recarga inmediata: el sondeo rapido solo arranca cuando el estado dice que hay
-      // una medicion activa, y esperar al sondeo lento (4 s) dejaba el indicador en
-      // blanco justo durante los primeros segundos, que es cuando se mira.
+      // Recarga inmediata para que el sondeo rapido de progreso arranque ya.
       if (props.recargar) props.recargar();
       api('/api/medir', {method: 'POST', body: JSON.stringify({variante: variante, iters: iters, hilos: hilos})})
         .then(function (r) { setCorr(false); if (!r.ok) setErr(r.error); else setRes(r); if (props.recargar) props.recargar(); });
@@ -778,7 +708,7 @@
                      ? res.nombre + ' · ' + miles(res.n) + ' muestras · ' +
                        (hilos > 1 ? hilos + ' clientes concurrentes · ' : '1 cliente · ') +
                        miles(res.warmup) + ' warmup · ' + res.segundos + ' s'
-                     : 'Lanza el cliente real de la variante: el mismo que produce el informe.'},
+                     : 'Lanza el cliente real de la variante: el mismo de la medición oficial.'},
         b({className: 'btn', type: 'button', onClick: medir, disabled: corr || !activos.length},
           corr ? 'Midiendo…' : 'Ejecutar medición')),
       activos.length === 0
@@ -794,19 +724,18 @@
                 opt({value: 10000}, '10 000 · rápido'),
                 opt({value: 50000}, '50 000'),
                 opt({value: 200000}, '200 000'),
-                opt({value: 1000000}, '1 000 000 · como el informe'))),
+                opt({value: 1000000}, '1 000 000 · como la medición oficial'))),
             div({className: 'control', style: {flex: '0 1 240px'}},
               lbl({htmlFor: 'mh'}, 'Clientes concurrentes'),
               sel({id: 'mh', value: hilos, disabled: !admiteHilos,
                    onChange: function (e) { setHilos(parseInt(e.target.value, 10)); }},
                 admiteHilos
-                  ? [opt({key: 1, value: 1}, '1 · como el informe'),
+                  ? [opt({key: 1, value: 1}, '1 · como la medición oficial'),
                      opt({key: 2, value: 2}, '2'),
                      opt({key: 4, value: 4}, '4'),
                      opt({key: 8, value: 8}, '8 · carga alta')]
                   : opt({value: 1}, '1 · esta variante no admite más')))),
-      // No se oculta el control: que aparezca deshabilitado CON su razon enseña algo
-      // del sistema. Ocultarlo dejaria al usuario creyendo que se nos olvidó.
+      // Deshabilitado CON su razon, no oculto: explica un limite real del sistema.
       !admiteHilos && vsel && vsel.porque_no
         ? h(Porque, {titulo: 'por qué ' + vsel.id + ' no admite clientes concurrentes'},
             vsel.porque_no.split('\n\n').map(function (t, i) { return p({key: i}, t); }))
@@ -860,8 +789,7 @@
       });
     }, []);
 
-    // El log se siembra del buffer del servidor: así sobrevive a un F5. Después
-    // cada estímulo se agrega en caliente, sin volver a pedir la lista entera.
+    // El log se siembra del buffer del servidor (sobrevive a un F5).
     ue(function () {
       recargar();
       api('/api/historial').then(function (r) {
@@ -871,10 +799,8 @@
       return function () { clearInterval(t); };
     }, [recargar]);
 
-    // Mientras hay una medicion en curso se sondea mas seguido: 4 s es un buen ritmo
-    // para el estado general, pero convierte una barra de progreso en un reloj parado.
-    // Esto son peticiones al PLANO DE CONTROL; no tocan el plano de datos ni la
-    // medicion, que corre en otro proceso con su propio cronometro.
+    // Con medicion en curso se sondea mas seguido. Solo consulta al plano de control:
+    // no toca la medicion, que corre en otro proceso con su propio cronometro.
     ue(function () {
       if (!estado || !estado.progreso || !estado.progreso.activa) return;
       var t = setInterval(recargar, 700);
@@ -929,7 +855,7 @@
       ftr(null,
         'Group 2 · Pontificia Universidad Javeriana Cali', h('br'),
         'El plano de datos vive en ', code(null, 'sistema/'), ' y se mide con ', code(null, './run.sh'),
-        ' — los resultados del informe salen de ahí, nunca de esta página.'));
+        ' — los resultados oficiales salen de ahí, nunca de esta página.'));
   }
 
   ReactDOM.createRoot(document.getElementById('raiz')).render(h(App));

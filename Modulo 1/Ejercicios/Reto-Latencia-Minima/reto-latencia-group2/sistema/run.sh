@@ -13,10 +13,6 @@ RONDA="${2:?uso: ./run.sh <VARIANTE> <RONDA> [args extra del cliente]}"
 shift 2
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# El alcance de la entrega son las variantes TCP Python y Memoria compartida C
-# (ADR-007). Las variantes A y C nunca se
-# implementaron; los controles Bc y E se midieron y se retiraron del arbol el 16/09.
-# Sus hallazgos siguen en docs/archivo/ y su codigo en el historial de git.
 case "$VARIANTE" in
   tcp-python)           DIR="$AQUI/tcp-python" ;;
   memoria-compartida-c) DIR="$AQUI/memoria-compartida-c" ;;
@@ -28,14 +24,10 @@ OUT="$AQUI/resultados/resultados-${VARIANTE}-${RONDA}.csv"
 LOG="$AQUI/resultados/ejecucion-${VARIANTE}-${RONDA}.log"
 mkdir -p "$AQUI/resultados" "$AQUI/resultados/archivo"
 
-# Los resultados crudos son la EVIDENCIA del informe (atributo AC-4): toda cifra debe
-# poder reproducirse desde un CSV versionado. Sobrescribirlos en silencio destruye esa
-# cadena — ya ocurrio una vez, el 14/09, y se perdieron las corridas del 10/09.
-# Ahora una corrida repetida ARCHIVA lo anterior con su fecha en vez de pisarlo.
-#
-# La fecha sale de la cabecera `fecha:` del log, no del mtime: el .log esta versionado
-# y un `git clone` o `checkout` le pone la fecha del checkout. El 24/09 eso archivo
-# la corrida del 17/09 con fecha del 23/09. El mtime queda solo como respaldo.
+# Los resultados crudos son la evidencia: toda cifra debe poder reproducirse desde
+# su CSV. Una corrida repetida ARCHIVA la anterior con su fecha en vez de pisarla.
+# La fecha sale de la cabecera `fecha:` del log, no del mtime (un checkout de git
+# cambia el mtime); el mtime queda solo como respaldo.
 marca_log=""
 if [[ -f "$LOG" ]]; then
   marca_log=$(sed -n 's/^fecha: *\([0-9]\{4\}\)-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}\):\([0-9]\{2\}\):\([0-9]\{2\}\).*/\1\2\3-\4\5\6/p' "$LOG" | head -1)
@@ -56,7 +48,7 @@ echo "== variante $VARIANTE, ronda $RONDA =="
   echo "host:      $(uname -a)"
   echo "cpu:       $(sysctl -n machdep.cpu.brand_string 2>/dev/null || lscpu 2>/dev/null | head -20)"
   echo "nucleos:   $(sysctl -n hw.ncpu 2>/dev/null || nproc)"
-  echo "carga:     $(uptime | sed 's/.*load average[s]*: *//')"   # supuesto S4 del informe
+  echo "carga:     $(uptime | sed 's/.*load average[s]*: *//')"   # la carga de la maquina afecta la latencia
   echo "python:    $(python3 --version)"
   echo "compilador: $(cc --version 2>/dev/null | head -1 || echo 'n/a')"
   echo "variante:  $VARIANTE   ronda: $RONDA"
@@ -71,7 +63,7 @@ if [[ -f "$DIR/Makefile" ]]; then
   make -C "$DIR" 2>&1 | tee -a "$LOG"
 fi
 
-# Toda variante recibe la MISMA tabla de hosts: el dominio no se replica (ADR-004).
+# Toda variante recibe la MISMA tabla de hosts: el dominio no se replica.
 TABLA="$AQUI/tabla-hosts.csv"
 [[ -f "$TABLA" ]] || { echo "falta $TABLA" >&2; exit 2; }
 

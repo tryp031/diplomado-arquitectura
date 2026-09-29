@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 """
-verificar.py — el contrato de trabajo del proyecto.
+verificar.py — comprueba que el EXPERIMENTO sigue siendo valido.
 
-Comprueba los invariantes que sostienen las conclusiones del informe. No es un
-test de que el codigo funcione: es un test de que el EXPERIMENTO sigue siendo
-valido. Un sistema puede funcionar perfectamente y a la vez haber dejado de medir
-lo que dice medir.
-
-Cada invariante aqui existe porque romperlo INVALIDA algo en silencio —sin error,
-sin caida, sin que nadie se entere hasta que alguien pregunta en la sustentacion—.
-Por eso la salida no dice solo que fallo: dice que conclusion del informe deja de
-sostenerse y en que ADR esta la decision.
-
-LIMITE HONESTO: mientras el proyecto no este en un repositorio, esto DETECTA, no
-IMPIDE. Se corre antes de dar algo por terminado y antes de empaquetar. El dia que
-haya repositorio, el mismo archivo se engancha como hook de pre-commit sin cambiar
-una linea.
+No prueba que el codigo funcione: prueba los invariantes cuya ruptura invalida la
+medicion en silencio (sin error ni caida). Cada fallo dice que conclusion deja de
+sostenerse y por que. Detecta, no impide: se corre antes de dar algo por terminado.
 
     python3 verificar.py              comprueba
     python3 verificar.py --registrar  fija los hashes actuales como referencia
@@ -39,13 +28,12 @@ REGISTRO = AQUI / "contrato" / "invariantes.json"
 TABLA_MAX = 16
 PAYLOAD = 32
 
-# Archivos que fijan el METODO. Cambiarlos no es un cambio de codigo: es un cambio
-# de experimento, y exige registrar la decision antes de que los numeros nuevos
-# puedan compararse con los viejos.
+# Archivos que fijan el METODO: cambiarlos es cambiar el experimento, y los
+# numeros nuevos dejan de ser comparables con los viejos.
 VIGILADOS = {
-    "sistema/reloj.h": ("AC-3 · comparabilidad entre variantes", "ADR-003"),
-    "sistema/clasificador.h": ("el dominio y el formato de 32 bytes", "ADR-004"),
-    "sistema/clasificador.py": ("el dominio en las variantes interpretadas", "ADR-004"),
+    "sistema/reloj.h": ("la comparabilidad entre variantes", "todas miden con el mismo reloj"),
+    "sistema/clasificador.h": ("el dominio y el formato de 32 bytes", "C y Python clasifican igual, 32 B"),
+    "sistema/clasificador.py": ("el dominio en las variantes interpretadas", "C y Python clasifican igual, 32 B"),
 }
 
 # Rangos que SI pueden aparecer como datos de ejemplo: no pertenecen a nadie y no
@@ -107,7 +95,7 @@ def inv_tamano_tabla() -> None:
             f"{TABLA_MAX} x 4 B = 64 B = una linea de cache. Pasarse saca la tabla de L1,\n"
             "los fallos de cache meten varianza en los percentiles altos, y entonces\n"
             "'clasificar no contamina la medicion' deja de ser cierto.",
-            "ADR-004")
+            "maximo 16 hosts: la tabla cabe en una linea de cache")
     else:
         bien(f"la tabla cabe en una linea de cache ({n}/{TABLA_MAX} hosts = {n*4} B)")
 
@@ -130,7 +118,7 @@ def inv_direcciones() -> None:
             "blanca, RFC 5737 para la negra): no pertenecen a nadie y no enrutan.\n"
             "Una IP real convierte un ejemplo en una afirmacion sobre un tercero —y en\n"
             "un caso de control de acceso, en una acusacion—.",
-            "ADR-004")
+            "solo direcciones reservadas en los datos de ejemplo")
     else:
         bien("todas las direcciones estan en rangos reservados (RFC 1918 / 5737)")
 
@@ -158,7 +146,7 @@ def inv_metodo_estable(registrar: bool) -> None:
                 f"Este archivo fija {motivo}.\n"
                 "Cambiarlo no es un cambio de codigo, es un cambio de EXPERIMENTO: las\n"
                 "mediciones anteriores dejan de ser comparables con las nuevas.\n"
-                "Si el cambio es intencionado: registra un ADR, vuelve a medir lo que\n"
+                "Si el cambio es intencionado: documenta el motivo, vuelve a medir lo que\n"
                 "haga falta, y despues corre `python3 verificar.py --registrar`.",
                 adr)
         else:
@@ -208,9 +196,9 @@ def inv_coherencia_clasificadores() -> None:
             "\n".join(desacuerdos) + "\n"
             "TCP Python clasifica con clasificador.py y Memoria compartida C con\n"
             "clasificador.h. Si los dos dejan de coincidir, las dos variantes hacen\n"
-            "trabajos distintos y la unica comparacion que\n"
-            "queda en pie deja de decir lo que el informe afirma que dice.",
-            "ADR-004")
+            "trabajos distintos y la comparacion de sus latencias\n"
+            "deja de significar lo que afirma.",
+            "C y Python deben clasificar igual")
     else:
         bien(f"C y Python clasifican igual ({len(casos)} casos, incluidos ausentes)")
 
@@ -228,12 +216,12 @@ def inv_payload() -> None:
         sospechosas.append(d.name)
     if sospechosas:
         aviso("no se encontro rastro del payload de 32 B en: " + ", ".join(sospechosas),
-              "Revisar a mano. El contrato es 32 B en ambos sentidos (ADR-004).")
+              "Revisar a mano. El contrato es 32 B en ambos sentidos.")
     else:
         bien(f"todas las variantes implementadas usan el payload de {PAYLOAD} B")
 
 
-# ── 6 y 7 · La evidencia del informe se puede rastrear ───────────────────────
+# ── 6 y 7 · Cada resultado se puede atribuir a una maquina ───────────────────
 def inv_evidencia() -> None:
     resultados = SISTEMA / "resultados"
     if not resultados.exists():
@@ -248,7 +236,7 @@ def inv_evidencia() -> None:
             "El log es lo unico que dice EN QUE MAQUINA se tomo la corrida. Sin el, la\n"
             "cifra no se puede atribuir a una plataforma y analyze.py no puede impedir\n"
             "que se compare con corridas de otra.",
-            "ADR-005")
+            "cada CSV viaja con el log de su plataforma")
     else:
         bien(f"los {len(csvs)} CSV de resultados tienen su log con la plataforma")
 
@@ -260,9 +248,8 @@ def inv_copia_unica() -> None:
                if d.is_dir() and d != AQUI and (d / "clasificador.h").exists()]
     if gemelas:
         mal("hay otra copia del plano de datos: " + ", ".join(d.name for d in gemelas),
-            "Dos copias divergen en silencio. Ya paso el 14/09: las dos tablas del\n"
-            "dominio dejaron de coincidir y la que se empaqueto era la que habia perdido\n"
-            "la justificacion de sus direcciones.\n"
+            "Dos copias divergen en silencio: la tabla del dominio de una deja de\n"
+            "coincidir con la de la otra sin que nada falle.\n"
             "La fuente unica de verdad es este directorio.")
     else:
         bien("una sola copia del plano de datos")
@@ -287,8 +274,8 @@ def main() -> int:
     print()
     print("  " + "-" * 62)
     if fallos:
-        print(f"  {len(fallos)} invariante(s) roto(s). Cada uno invalida algo del informe.")
-        print("  Arreglalo, o registra un ADR explicando por que el experimento cambio.")
+        print(f"  {len(fallos)} invariante(s) roto(s). Cada uno invalida algo de la medicion.")
+        print("  Arreglalo, o documenta por que cambio el experimento y vuelve a medir.")
         print()
         return 1
     print(f"  Todo en orden{f' ({len(avisos)} aviso[s])' if avisos else ''}.")

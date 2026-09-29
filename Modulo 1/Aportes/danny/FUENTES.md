@@ -91,6 +91,35 @@ las notas del orador. **No presentarlo como reproducible en vivo.**
 
 ---
 
+## `m1-presentacion-reto-latencia-v2-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-09-28 (revisada el mismo día con las notas de Danny) |
+| **Módulo** | 1 — Fundamentos de la Arquitectura de Software |
+| **Tema** | Versión 2 de la presentación del Reto de Latencia Mínima |
+| **Tipo** | `borrador` — presentación en elaboración, no aprobada por el equipo |
+| **Fuentes** | `m1-presentacion-reto-latencia-danny.html` (estilos, portada y lámina del reto) · diagramas de Danny del 28/09 · trade-offs redactados por Danny · ejecución propia del 28/09, ronda 4 (`sistema/resultados/*-4.csv` + `.log`) · `resultados/LEEME.md` (14/09, 17/09 y 24/09) · código y ZIP entregable revisados el 28/09 (`hacer-zip.sh`) |
+| **Estado** | **DRAFT v2** · ⬜ sin revisar por Freddy ni Camilo |
+| **Origen** | Elaborado con Claude Code. Los cuatro diagramas se redibujaron como SVG a partir de las imágenes de Danny; en el de medición se quitó el paso «clasifica el host». Las cifras salen de `analyze.py` sobre la ronda 4. Se midió en la ronda 4 y no en la 1 para no archivar la oficial del 24/09 ni mezclar días en las rondas 1-3 |
+
+**Qué contiene:** 9 láminas: portada · la solución que entregamos · arquitectura · dos
+caminos para el mismo mensaje · dónde para el cronómetro · demostración · resultados ·
+atributos de calidad · ¿bajamos del milisegundo? No trae apéndice: la gráfica de percentiles, el C4 y los límites del
+experimento siguen en el draft v1.
+
+**Contradicción registrada:** la cifra principal de la v2 es la de la **ejecución del 28/09**
+(1 × 1 M). El informe y el draft v1 usan la del **24/09** (3 × 1 M), que es la oficial. No se
+contradicen en el veredicto por mediana, pero sí en las cifras: 15,3 µs frente a 14,9 µs de p50
+en TCP Python, y 0 frente a 164 muestras sobre 1 ms. La v2 muestra junto a la del 28/09 solo la
+oficial del 24/09 (decisión de Danny del 28/09: se retiraron el 14/09 y el 17/09 de la lámina). Queda por decidir en equipo cuál se cita en la sustentación.
+
+**Cambio de término:** la lámina de atributos usa «flexibilidad» en lugar de «portabilidad»,
+siguiendo ISO/IEC 25010:2023 (conocimiento complementario, no material del diplomado).
+
+---
+
 ## `m1-autoevaluacion-danny.html`
 
 | Campo | Valor |

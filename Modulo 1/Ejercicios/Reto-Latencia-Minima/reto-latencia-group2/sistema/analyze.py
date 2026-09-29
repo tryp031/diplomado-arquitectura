@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-Análisis compartido de latencias — Reto de Latencia Mínima (Módulo 1).
+Análisis compartido de latencias — Reto de Latencia Mínima.
 
-ÚNICO script autorizado para calcular métricas. Ninguna variante calcula sus propios
-percentiles: todas producen CSV crudo y este script los interpreta. Así los cuatro
-resultados son comparables por construcción.
+Único script que calcula métricas: todas las variantes producen CSV crudo y este
+script los interpreta, así los resultados son comparables por construcción.
 
 Uso:
     ./analyze.py resultados/*.csv
     ./analyze.py --histograma resultados/resultados-tcp-python-1.csv
-    ./analyze.py --md resultados/*.csv > ../resultados-tabla.md
+    ./analyze.py --md resultados/*.csv
 
-Método de percentiles: rango más cercano (nearest-rank), sin interpolación. Es el
-correcto para latencias: devuelve siempre una muestra observada, nunca un valor inventado.
+Percentiles por rango más cercano (nearest-rank), sin interpolación: devuelve
+siempre una muestra observada, nunca un valor inventado.
 """
 
 import argparse
@@ -22,22 +21,16 @@ import statistics
 import sys
 from pathlib import Path
 
-# Percentiles obligatorios según ESPEC-MEDICION.md §3
+# Percentiles que se reportan en todas las variantes.
 PERCENTILES = [50.0, 90.0, 99.0, 99.9, 99.99]
 
 
 def leer_csv(ruta: Path) -> list[int]:
     """Lee un CSV de muestras y devuelve las latencias en ns.
 
-    La columna se localiza POR NOMBRE, no por posicion. Leer `fila[-1]` funciono
-    mientras el formato fue `iteracion,latencia_ns`, y se rompio en silencio el 15/09
-    cuando la concurrencia (ADR-006) anadio una tercera columna `hilo`: la ultima
-    columna paso a ser el numero de hilo, que vale 0 en una corrida de un solo hilo.
-    El resultado no era un error sino un analisis de puros ceros, informando ademas
-    «p99.9 < 1 ms: SI» sobre datos inexistentes.
-
-    Por eso aqui se prefiere fallar ruidosamente a adivinar: un CSV cuyo formato no
-    se reconoce detiene el analisis en vez de producir un numero que nadie verifica.
+    La columna se localiza POR NOMBRE, no por posición: leer la última columna daría
+    el número de hilo (0) y un análisis de puros ceros sin ningún error. Un CSV cuyo
+    formato no se reconoce detiene el análisis en vez de producir un número falso.
     """
     muestras: list[int] = []
     with ruta.open(newline="") as fh:
@@ -158,24 +151,10 @@ def imprimir_tabla_md(resumenes: list[dict]) -> None:
     print("El umbral del enunciado se evalúa contra **p99.9**, no contra la media.")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Guarda de comparabilidad (ADR-005)
-#
-# `reloj.h` ya defiende el principio para el instrumento: si cada variante define
-# su propio reloj, la diferencia entre dos resultados incluye la diferencia entre
-# dos relojes. El principio se extiende solo a la maquina: si Freddy mide en WSL2
-# sobre un portatil Windows y Danny en un M4, la diferencia entre sus numeros
-# incluye la diferencia entre dos computadoras — y el informe la leeria como si
-# fuera diferencia entre arquitecturas.
-#
-# Desde que el equipo trabaja en sistemas distintos, esa mezcla dejo de ser
-# hipotetica. La regla no se escribe en el README: se hace cumplir aqui, que es
-# por donde pasa toda cifra que llega al informe.
-#
-# La plataforma NO se guarda en el CSV: ya esta en el .log hermano que escribe
-# run.sh. Leerla de ahi evita cambiar un formato del que dependen las corridas ya
-# hechas.
-# ──────────────────────────────────────────────────────────────────────────────
+# Guarda de comparabilidad: corridas de máquinas distintas no se mezclan en una
+# tabla, porque la diferencia incluiría la diferencia entre computadoras y se leería
+# como diferencia entre arquitecturas. La plataforma se lee del .log hermano que
+# escribe run.sh, sin cambiar el formato del CSV.
 def plataforma_de(ruta: Path) -> str:
     """Identidad de la maquina donde se tomo esta corrida, o 'desconocida'."""
     log = ruta.parent / ruta.name.replace("resultados-", "ejecucion-").replace(".csv", ".log")
@@ -200,10 +179,10 @@ def main() -> None:
     ap.add_argument("--histograma", action="store_true", help="imprime histograma logarítmico")
     ap.add_argument("--md", action="store_true", help="solo la tabla comparativa en Markdown")
     ap.add_argument("--mezclar-plataformas", action="store_true",
-                    help="comparar corridas de maquinas distintas (ver ADR-005: normalmente NO se debe)")
+                    help="comparar corridas de maquinas distintas (normalmente NO se debe)")
     args = ap.parse_args()
 
-    # Guarda de comparabilidad — ADR-005.
+    # Guarda de comparabilidad.
     plataformas: dict[str, list[str]] = {}
     for ruta in args.csv:
         plataformas.setdefault(plataforma_de(ruta), []).append(ruta.name)
@@ -215,10 +194,10 @@ def main() -> None:
                 print(f"      {a}", file=sys.stderr)
         print("\n  La diferencia entre estos numeros incluye la diferencia entre las dos\n"
               "  maquinas, no solo entre las dos arquitecturas. Una tabla asi dice algo\n"
-              "  distinto de lo que parece decir. Ver docs/ADR/ADR-005.\n\n"
+              "  distinto de lo que parece decir.\n\n"
               "  Lo correcto: una tabla por plataforma, cada una con su equipo declarado.\n"
               "  Si aun asi necesitas la mezcla, pedila explicitamente con\n"
-              "  --mezclar-plataformas y deja dicho en el informe que la tabla las mezcla.\n",
+              "  --mezclar-plataformas y declara junto a la tabla que las mezcla.\n",
               file=sys.stderr)
         raise SystemExit(2)
     if len(plataformas) == 1 and "desconocida" not in plataformas:

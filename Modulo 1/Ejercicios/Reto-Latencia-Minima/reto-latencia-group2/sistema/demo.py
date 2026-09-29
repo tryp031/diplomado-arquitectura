@@ -1,36 +1,14 @@
 #!/usr/bin/env python3
 """
-demo.py — DEMOSTRACIÓN EN VIVO del sistema (entregable 5 del enunciado).
+demo.py — demostración en vivo del sistema.
 
-Escribes un host, el sistema responde el veredicto y el tiempo que tardó.
+Escribes un host (nombre de la tabla o IP) y el servidor responde el veredicto y el
+tiempo que tardó. Uso:  python3 demo.py --variante tcp-python
 
-    $ python3 demo.py --variante tcp-python
-    host> pepito
-      pepito           127.0.0.1        LOCAL           14.2 µs
-    host> google
-      google           142.250.78.14    EXTERNO         13.9 µs
-    host> pepito5
-      pepito5          ?                DESCONOCIDO      -       (no está en la tabla)
-
-═══════════════════════════════════════════════════════════════════════════════
-POR QUÉ ESTO ES UN PROGRAMA APARTE Y NO UN MODO DEL CLIENTE MEDIDOR
-
-Un `print` a terminal cuesta entre 10 y 50 µs. Eso es 600 veces el p50 de la
-variante Memoria compartida C (64 ns). Si la demostración compartiera la ruta caliente con la
-medición, la medición dejaría de medir el sistema y pasaría a medir la terminal.
-
-Por eso: MISMO servidor, sin tocar una línea; cliente distinto.
-
-  MODO DEMO                        MODO MEDICIÓN
-  1 estímulo por tecla             1 000 000 iteraciones seguidas
-  imprime en pantalla              array preasignado, volcado al final
-  el printf domina el tiempo       nada de E/S en el bucle
-
-El número que muestra esta demo es REAL —se mide con el mismo reloj monótono y la
-misma frontera F1—, pero es UNA muestra, y una muestra no es una medición. Los
-resultados del informe salen de `run.sh` + `analyze.py`, nunca de aquí. La demo
-demuestra que el sistema FUNCIONA; el harness demuestra CUÁNTO TARDA.
-═══════════════════════════════════════════════════════════════════════════════
+Es un programa aparte y no un modo del cliente medidor: un `print` a terminal cuesta
+10-50 µs, cientos de veces la latencia medida. Mismo servidor, cliente distinto.
+El tiempo mostrado es real (mismo reloj, misma frontera F1) pero es UNA muestra: los
+resultados salen de `run.sh` + `analyze.py`, nunca de aquí.
 """
 
 import argparse
@@ -113,7 +91,7 @@ def main() -> None:
         try:
             host_id = clasificador.id_de_ip(ip)
         except OSError:
-            # No está en la tabla y tampoco es una IP: es el caso 'pepito5'.
+            # No está en la tabla y tampoco es una IP: DESCONOCIDO sin consultar al servidor.
             print(f"    {entrada:<16} {'?':<16} {AMAR}DESCONOCIDO{FIN}"
                   f"      {GRIS}—   (no está en la tabla){FIN}")
             continue

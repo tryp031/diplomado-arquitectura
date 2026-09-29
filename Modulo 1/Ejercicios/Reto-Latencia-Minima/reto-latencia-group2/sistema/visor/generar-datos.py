@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 """
-generar-datos.py — condensa los CSV crudos en un JSON para el visor.
+generar-datos.py — condensa los CSV crudos de resultados/ en un JSON para el visor.
 
-Por qué existe: los resultados son 9,15 millones de filas. Meterlas en una página
-web sería imposible y además inútil: de una distribución se leen sus percentiles y
-su forma, no sus muestras una por una.
-
-Este script NO mide nada. Lee lo que el harness ya midió. Esa separación es
-deliberada y va declarada en el informe: el visor es un instrumento de lectura y
-no forma parte del sistema medido. Un navegador añade milisegundos; si midiera
-desde ahí, los números serían del navegador, no del sistema.
+No mide nada: lee lo que el harness ya midió. El visor es un instrumento de lectura;
+un navegador añade milisegundos y sus números serían del navegador, no del sistema.
 
 Uso:  python3 visor/generar-datos.py > visor/datos.js
 """
@@ -23,7 +17,7 @@ AQUI = Path(__file__).resolve().parent
 RES = AQUI.parent / "resultados"
 
 # Binning logarítmico COMPARTIDO por todas las variantes: sin un eje común no hay
-# comparación posible entre distribuciones (atributo AC-3).
+# comparación posible entre distribuciones.
 DEC_INI, DEC_FIN, POR_DEC = 1, 8, 12          # de 10^1 ns (10 ns) a 10^8 ns (100 ms)
 N_BINS = (DEC_FIN - DEC_INI) * POR_DEC
 
