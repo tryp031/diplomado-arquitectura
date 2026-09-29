@@ -9,10 +9,10 @@ Documenta: **Freddy Aparicio** (asignado el 15/09, ADR-007).
 
 ```bash
 # corrida completa, la que sostiene el informe
-../run.sh tcp-python 1 --warmup 100000 --iters 1000000
+../run.sh tcp-python 1 --iters 1000000
 
 # corrida corta de prueba
-../run.sh tcp-python 9 --warmup 20000 --iters 100000
+../run.sh tcp-python 9 --iters 100000
 
 # a mano, servidor y cliente por separado
 python3 server.py --port 9101 --tabla ../tabla-hosts.csv
@@ -44,7 +44,7 @@ y es lo que se agregó el 14/09 para tener algo que demostrar (ADR-004).
 | Decisión | Qué pasa sin ella |
 |---|---|
 | **`TCP_NODELAY`** | Sin desactivar Nagle, el kernel agrupa paquetes pequeños y aparecen picos de **decenas de milisegundos**. Es el error clásico de este reto. |
-| **Conexión persistente** | El *handshake* se pagaría en cada iteración, y se estaría midiendo `connect()`, no el intercambio. Se paga una vez, en el warmup, fuera del tramo medido (ADR-001). |
+| **Conexión persistente** | El *handshake* se pagaría en cada iteración, y se estaría midiendo `connect()`, no el intercambio. Se paga una vez, al conectar, antes de la autoprueba y fuera del tramo medido (ADR-001). |
 | **`recv_into` sobre buffer preasignado** | Cada `recv()` normal asigna un objeto nuevo: memoria por iteración dentro de la ruta caliente. |
 | **`pack_into` sobre `bytearray`** | La respuesta se escribe en sitio, sin construir un `bytes` nuevo en cada vuelta. |
 

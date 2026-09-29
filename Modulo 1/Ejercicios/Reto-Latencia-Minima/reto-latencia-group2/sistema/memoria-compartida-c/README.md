@@ -159,7 +159,7 @@ devuelve `KERN_NOT_SUPPORTED`, verificado).
 |---|---|
 | `common.h` | Región compartida, alineación a línea de caché, reloj, pausa de spin |
 | `server.c` | Servidor: gira sobre la bandera, responde payload fijo. Escucha permanentemente |
-| `client.c` | Cliente medidor: piso de medición, warmup, medición, contraste por lotes, CSV |
+| `client.c` | Cliente medidor: piso de medición, medición, contraste por lotes, CSV |
 | `Makefile` | `-std=c11 -O2 -Wall -Wextra -pedantic` (no `-O3`: ver comentario en el archivo) |
 
 Resultados en `../resultados/resultados-memoria-compartida-c-{1,2,3}.csv` y `../resultados/ejecucion-memoria-compartida-c-{1,2,3}.log`.

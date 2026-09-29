@@ -330,7 +330,7 @@ Toda decisión técnica debe poder rastrearse hasta un driver. Las que no se ras
 | `TCP_NODELAY` en variantes TCP | D1 | AC-1, AC-2 | ESPEC §5 |
 | Closed-loop, 1 petición en vuelo | D4 | AC-1 (evita *coordinated omission*) | ESPEC §2 |
 | Reloj monótono en ns | D4 | AC-4 | ESPEC §2 |
-| Warmup de 100 k descartado | D4 | AC-2 | ESPEC §2 |
+| Sin warmup (antes: 100 k descartado) | D4 | AC-2 | ADR-012 |
 | Array de muestras preasignado | D1, D4 | AC-1 (no contaminar la ruta caliente) | ESPEC §2 |
 | Reportar percentiles, no promedio | D6 | AC-2 | ESPEC §3 |
 | Un único `analyze.py` | D4 | AC-3 | `harness/README.md` |

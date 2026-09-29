@@ -95,6 +95,10 @@ planificador ocurridos en medio.
 **Excluye:** establecimiento de la conexión (se paga una sola vez, durante el warmup), arranque
 del proceso, y el warmup mismo.
 
+> **Nota 2026-09-29:** el warmup se retiró ([ADR-012](ADR-012-retiro-del-warmup.md)). La
+> conexión sigue fuera del tramo medido: se establece antes de la autoprueba. La frontera F1
+> no cambia.
+
 **Vinculante para las cuatro variantes.** Ninguna puede redefinirla por su cuenta.
 
 ## Justificación

@@ -14,7 +14,7 @@ buena voluntad.
 ```bash
 cd sistema
 ./run.sh tcp-python 1                   # variante TCP Python, ronda 1, por defecto
-./run.sh tcp-python 1 --warmup 20000 --iters 100000   # corrida corta de prueba
+./run.sh tcp-python 1 --iters 100000   # corrida corta de prueba
 ./run.sh memoria-compartida-c 1         # variante Memoria compartida C
 ./analyze.py --md resultados/*.csv      # tabla comparativa final
 
@@ -137,7 +137,7 @@ Si tu variante cumple estas cuatro cosas, encaja con el resto sin coordinación 
 
 ```
 --host 127.0.0.1   --port <puerto>   --payload 32   --tabla <ruta al CSV>
---warmup 100000    --iters 1000000   --out <ruta CSV>
+--iters 1000000    --out <ruta CSV>
 ```
 
 `run.sh` pasa `--tabla` automáticamente. No lo codifiques por defecto en tu variante.
@@ -163,7 +163,7 @@ No reinventarlo. Lo que **no** se negocia:
 |---|---|
 | `t0` justo antes de escribir, `t1` justo después de leer la respuesta completa | Es la frontera declarada (ESPEC §1). Cambiarla invalida la comparación. |
 | Reloj **monótono** en ns | `perf_counter_ns` · `clock_gettime(CLOCK_MONOTONIC)` · `steady_clock` · `System.nanoTime()`. Nunca reloj de pared. |
-| Warmup descartado (100 k) | Cachés, TLB, JIT, ramp-up de frecuencia de CPU. |
+| Sin warmup (ADR-012) | Se mide desde el primer intercambio tras la autoprueba. Las corridas de `resultados/` tomadas con warmup de 100 k no se mezclan con las nuevas. |
 | Array de muestras **preasignado** | Asignar memoria en el bucle caliente contamina la medición. |
 | Volcado a CSV **al final** | Escribir a disco dentro del bucle mide el disco, no el transporte. |
 | Closed-loop, **1 petición en vuelo** | Evita *coordinated omission*. Y hay que declararlo en el informe. |
