@@ -1,0 +1,96 @@
+fecha:     2026-09-28T22:14:42-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+carga:     3.81 3.68 2.93
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  tcp-python   ronda: 4
+args:      --warmup 100000 --iters 1000000
+---
+ejecutable: python3 /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tcp-python/server.py
+[cliente tcp-python] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[servidor tcp-python] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos) — dict, no barrido; ver docstring
+[cliente tcp-python] midiendo 1,000,000 iteraciones x 1 hilo(s) en 100 lote(s) de 10,000…
+[servidor tcp-python] escuchando en 127.0.0.1:9101, payload=32B
+[servidor tcp-python] HILOS vivos=1 atendidas=1 conexión de ('127.0.0.1', 50886)
+[cliente tcp-python] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=0/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=3/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=5/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=8/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=11/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=13/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=16/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=19/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=21/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=24/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=27/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=29/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=32/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=34/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=37/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=39/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=42/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=45/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=47/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=50/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=53/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=55/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=58/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=61/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=63/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=66/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=68/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=71/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=74/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=76/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=79/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=82/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=84/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=87/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=90/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=92/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=95/100 iters_por_lote=10000
+[cliente tcp-python] PROGRESO hilos=1/1 lotes=97/100 iters_por_lote=10000
+[servidor tcp-python] HILOS vivos=0 conexión cerrada
+[cliente tcp-python] 1,000,000 muestras (1 hilo[s]) -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/resultados/resultados-tcp-python-4.csv
+plataforma: Darwin/arm64 · Apple M4
+
+=== resultados-tcp-python-4 ===
+  n              1,000,000
+  mín                    7.58 µs
+  p50                   15.25 µs
+  p90                   16.79 µs
+  p99                   21.62 µs
+  p99.9                 31.17 µs
+  p99.99                67.50 µs
+  máx                  622.54 µs
+  desv. est.             2.36 µs
+  media                 15.19 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-tcp-python-4
+        6.310 µs |                                                                573 ( 0.06%)
+        7.943 µs | ###                                                         40,194 ( 4.02%)
+       10.000 µs | #                                                           18,413 ( 1.84%)
+       12.589 µs | ########################################################   717,056 (71.71%)
+       15.849 µs | ################                                           206,265 (20.63%)
+       19.953 µs | #                                                           14,197 ( 1.42%)
+       25.119 µs |                                                              2,358 ( 0.24%)
+       31.623 µs |                                                                399 ( 0.04%)
+       39.811 µs |                                                                299 ( 0.03%)
+       50.119 µs |                                                                119 ( 0.01%)
+       63.096 µs |                                                                 70 ( 0.01%)
+       79.433 µs |                                                                 30 ( 0.00%)
+      100.000 µs |                                                                 15 ( 0.00%)
+      125.893 µs |                                                                  8 ( 0.00%)
+      158.489 µs |                                                                  1 ( 0.00%)
+      199.526 µs |                                                                  1 ( 0.00%)
+      251.189 µs |                                                                  1 ( 0.00%)
+      316.228 µs |                                                                  0 ( 0.00%)
+      398.107 µs |                                                                  0 ( 0.00%)
+      501.187 µs |                                                                  1 ( 0.00%)

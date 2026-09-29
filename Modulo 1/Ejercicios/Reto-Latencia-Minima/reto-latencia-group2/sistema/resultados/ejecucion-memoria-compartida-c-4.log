@@ -1,0 +1,86 @@
+fecha:     2026-09-28T22:15:05-05:00
+host:      Darwin Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+cpu:       Apple M4
+nucleos:   10
+carga:     3.77 3.68 2.95
+python:    Python 3.13.5
+compilador: Apple clang version 21.0.0 (clang-2100.3.34.2)
+variante:  memoria-compartida-c   ronda: 4
+args:      --warmup 100000 --iters 1000000
+---
+compilando memoria-compartida-c...
+make: Nothing to be done for `all'.
+ejecutable: /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/memoria-compartida-c/server
+[servidor memoria-compartida-c] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[servidor memoria-compartida-c] shm=/latm-D-9103 payload=32B region=256B — girando (un nucleo al 100%)
+[cliente memoria-compartida-c] tabla '/Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/tabla-hosts.csv': 16 hosts (10 locales, 6 externos), 64 B = 1 linea(s) de cache
+[cliente memoria-compartida-c] piso de medicion (par de llamadas al reloj): min=0 ns  p50=0 ns  p99=42 ns
+[cliente memoria-compartida-c] granularidad del reloj ~41.67 ns (contador de 24 MHz): las medidas
+            individuales estan CUANTIZADAS en multiplos de ese valor. Reportarlo.
+[cliente memoria-compartida-c] autoprueba OK: 16 hosts de tabla + 1 desconocido
+[cliente memoria-compartida-c] warmup 100000 iteraciones...
+[cliente memoria-compartida-c] midiendo 1000000 iteraciones...
+[cliente memoria-compartida-c] integridad OK: 1000000/1000000 respuestas correctas
+[cliente memoria-compartida-c] contraste por lotes (1000 intercambios x 200 rondas): min=67 ns  mediana=71 ns  max=106 ns por intercambio
+[cliente memoria-compartida-c] (media por lote: sin cola. Los percentiles salen de las muestras individuales del CSV.)
+[cliente memoria-compartida-c] 1000000 muestras -> /Users/danny/Documents/2026/Diplomado Arquitectura de Software y Claud Computing/Modulo 1/Ejercicios/Reto-Latencia-Minima/reto-latencia-group2/sistema/resultados/resultados-memoria-compartida-c-4.csv
+[servidor memoria-compartida-c] fin, 1300017 peticiones atendidas
+plataforma: Darwin/arm64 · Apple M4
+
+=== resultados-memoria-compartida-c-4 ===
+  n              1,000,000
+  mín                    0.00 µs
+  p50                    0.08 µs
+  p90                    0.08 µs
+  p99                    0.12 µs
+  p99.9                  0.17 µs
+  p99.99                 0.29 µs
+  máx                   17.62 µs
+  desv. est.             0.05 µs
+  media                  0.08 µs   <- NO usar como métrica principal
+  ¿p99.9 < 1 ms?           SÍ
+
+  histograma (log, 10 cubos/década) — resultados-memoria-compartida-c-4
+        0.001 µs |                                                                 53 ( 0.01%)
+        0.001 µs |                                                                  0 ( 0.00%)
+        0.002 µs |                                                                  0 ( 0.00%)
+        0.002 µs |                                                                  0 ( 0.00%)
+        0.003 µs |                                                                  0 ( 0.00%)
+        0.003 µs |                                                                  0 ( 0.00%)
+        0.004 µs |                                                                  0 ( 0.00%)
+        0.005 µs |                                                                  0 ( 0.00%)
+        0.006 µs |                                                                  0 ( 0.00%)
+        0.008 µs |                                                                  0 ( 0.00%)
+        0.010 µs |                                                                  0 ( 0.00%)
+        0.013 µs |                                                                  0 ( 0.00%)
+        0.016 µs |                                                                  0 ( 0.00%)
+        0.020 µs |                                                                  0 ( 0.00%)
+        0.025 µs |                                                                  0 ( 0.00%)
+        0.032 µs |                                                                  0 ( 0.00%)
+        0.040 µs | ##################                                         232,968 (23.30%)
+        0.050 µs |                                                                  0 ( 0.00%)
+        0.063 µs |                                                                  0 ( 0.00%)
+        0.079 µs | ########################################################   711,375 (71.14%)
+        0.100 µs | ####                                                        51,326 ( 5.13%)
+        0.126 µs |                                                                  0 ( 0.00%)
+        0.158 µs |                                                              3,769 ( 0.38%)
+        0.200 µs |                                                                393 ( 0.04%)
+        0.251 µs |                                                                 51 ( 0.01%)
+        0.316 µs |                                                                 13 ( 0.00%)
+        0.398 µs |                                                                  6 ( 0.00%)
+        0.501 µs |                                                                  0 ( 0.00%)
+        0.631 µs |                                                                  5 ( 0.00%)
+        0.794 µs |                                                                  6 ( 0.00%)
+        1.000 µs |                                                                  6 ( 0.00%)
+        1.259 µs |                                                                  6 ( 0.00%)
+        1.585 µs |                                                                  2 ( 0.00%)
+        1.995 µs |                                                                  0 ( 0.00%)
+        2.512 µs |                                                                  3 ( 0.00%)
+        3.162 µs |                                                                  4 ( 0.00%)
+        3.981 µs |                                                                  1 ( 0.00%)
+        5.012 µs |                                                                  2 ( 0.00%)
+        6.310 µs |                                                                  1 ( 0.00%)
+        7.943 µs |                                                                  4 ( 0.00%)
+       10.000 µs |                                                                  2 ( 0.00%)
+       12.589 µs |                                                                  1 ( 0.00%)
+       15.849 µs |                                                                  3 ( 0.00%)
