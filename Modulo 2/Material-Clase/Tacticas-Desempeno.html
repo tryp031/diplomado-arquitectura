@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tácticas de Desempeno — deck oficial del Módulo 2</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Tácticas de Desempeno — deck oficial del Módulo 2</h1>
+  <p class="meta">Tacticas-Desempeno.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#lámina-1">Lámina 1</a></li><li><a href="#lámina-2">Lámina 2</a></li><li><a href="#lámina-3">Lámina 3</a></li><li><a href="#lámina-4">Lámina 4</a></li><li><a href="#lámina-5">Lámina 5</a></li><li><a href="#lámina-6">Lámina 6</a></li><li><a href="#lámina-7">Lámina 7</a></li><li><a href="#lámina-8">Lámina 8</a></li><li><a href="#lámina-9">Lámina 9</a></li><li><a href="#lámina-10">Lámina 10</a></li><li><a href="#lámina-11">Lámina 11</a></li><li><a href="#lámina-12">Lámina 12</a></li><li><a href="#lámina-13">Lámina 13</a></li><li><a href="#lámina-14">Lámina 14</a></li><li><a href="#lámina-15">Lámina 15</a></li><li><a href="#lámina-16">Lámina 16</a></li><li><a href="#lámina-17">Lámina 17</a></li><li><a href="#lámina-18">Lámina 18</a></li><li><a href="#lámina-19">Lámina 19</a></li><li><a href="#lámina-20">Lámina 20</a></li><li><a href="#lámina-21">Lámina 21</a></li><li><a href="#lámina-22">Lámina 22</a></li><li><a href="#lámina-23">Lámina 23</a></li><li><a href="#lámina-24">Lámina 24</a></li><li><a href="#lámina-25">Lámina 25</a></li><li><a href="#lámina-26">Lámina 26</a></li><li><a href="#lámina-27">Lámina 27</a></li><li><a href="#lámina-28">Lámina 28</a></li><li><a href="#lámina-29">Lámina 29</a></li><li><a href="#lámina-30">Lámina 30</a></li><li><a href="#lámina-31">Lámina 31</a></li><li><a href="#lámina-32">Lámina 32</a></li><li><a href="#lámina-33">Lámina 33</a></li><li><a href="#lámina-34">Lámina 34</a></li><li><a href="#lámina-35">Lámina 35</a></li><li><a href="#lámina-36">Lámina 36</a></li><li><a href="#lámina-37">Lámina 37</a></li><li><a href="#lámina-38">Lámina 38</a></li><li><a href="#lámina-39">Lámina 39</a></li><li><a href="#lámina-40">Lámina 40</a></li><li><a href="#lámina-41">Lámina 41</a></li><li><a href="#lámina-42">Lámina 42</a></li><li><a href="#lámina-43">Lámina 43</a></li><li><a href="#lámina-44">Lámina 44</a></li><li><a href="#lámina-45">Lámina 45</a></li><li><a href="#lámina-46">Lámina 46</a></li><li><a href="#lámina-47">Lámina 47</a></li><li><a href="#lámina-48">Lámina 48</a></li><li><a href="#lámina-49">Lámina 49</a></li><li><a href="#lámina-50">Lámina 50</a></li><li><a href="#lámina-51">Lámina 51</a></li><li><a href="#lámina-52">Lámina 52</a></li><li><a href="#lámina-53">Lámina 53</a></li><li><a href="#lámina-54">Lámina 54</a></li><li><a href="#lámina-55">Lámina 55</a></li><li><a href="#lámina-56">Lámina 56</a></li></ol></nav>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Recursos complementarios, Brightspace, Unidad 3 de 5). <strong>Fuente:</strong> <code>TacticasDesempeno.pptx</code> — Bass, Clements, Kazman, <em>Software Architecture in Practice</em>, 4th ed. (citado en el propio deck). <strong>Extraído:</strong> 2026-09-30, texto de las láminas tal cual. Se tradujo del inglés con traducción automática en el deck original (hay frases torpes). <strong>Límite de la extracción:</strong> solo texto. Los diagramas, figuras y tablas dibujadas como imagen NO están; las láminas que quedan vacías o con solo título dependen de una imagen. <strong>Este archivo no se edita.</strong> Las notas y críticas van en <code>Aportes/</code>.</p></blockquote>
+<hr>
+<h2 id="lámina-1">Lámina 1</h2>
+<p>DESEMPEÑO</p>
+<p>(PERFORMANCE)</p>
+<h2 id="lámina-2">Lámina 2</h2>
+<p>Rendimiento - Performance</p>
+<p>"It’s about time"</p>
+<p>Desempeño, es eso: se trata de tiempo y de la capacidad del sistema de para cumplir con los requisitos de tiempo. El hecho es que las operaciones en las computadoras toman tiempo. Los cálculos toman un tiempo del orden de miles de nanosegundos, el acceso al disco (ya sea de estado sólido o giratorio) toma un tiempo del orden de decenas de milisegundos, y el acceso a la red toma un tiempo que va desde cientos de microsegundos dentro del mismo centro de datos hasta más de 100 milisegundos para mensajes intercontinentales. El tiempo debe tenerse en cuenta al diseñar su sistema para el rendimiento.</p>
+<p>Definición</p>
+<h2 id="lámina-3">Lámina 3</h2>
+<p>Rendimiento - Performance</p>
+<p>La concurrencia es uno de los conceptos más importantes que un arquitecto debe comprender y uno de los temas menos enseñados en los cursos de informática. La concurrencia se refiere a las operaciones que ocurren en paralelo.</p>
+<p>La concurrencia ocurre cada vez que su sistema crea un nuevo subproceso, porque los subprocesos, por definición, son secuencias de control independientes. La multitarea en su sistema es compatible con subprocesos independientes. Múltiples usuarios son compatibles simultáneamente en su sistema mediante el uso de subprocesos. La simultaneidad también ocurre cada vez que su sistema se ejecuta en más de un procesador, ya sea que esos procesadores estén empaquetados por separado o como procesadores de múltiples núcleos.</p>
+<p>Concurrencia</p>
+<h2 id="lámina-4">Lámina 4</h2>
+<p>ESCENARIO</p>
+<h2 id="lámina-5">Lámina 5</h2>
+<p>Desempeño - Performance</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Source</p>
+<p>The stimulus can come from a user (or multiple users), from an external system, or from some portion of the system under consideration.</p>
+<p>External:</p>
+<p>User request</p>
+<p>Request from external system</p>
+<p>Data arriving from a sensor or other system</p>
+<p>Internal:</p>
+<p>One component may make a request of another component.</p>
+<p>A timer may generate a notification.</p>
+<p>Stimulus</p>
+<p>The stimulus is the arrival of an event. The event can be a request for service or a notification of some state of either the system under consideration or an external system.</p>
+<p>Arrival of a periodic, sporadic, or stochastic event:</p>
+<p>A periodic event arrives at a predictable interval.</p>
+<p>A stochastic event arrives according to some probability distribution.</p>
+<p>A sporadic event arrives according to a pattern that is neither periodic nor stochastic.</p>
+<h2 id="lámina-6">Lámina 6</h2>
+<p>Desempeño - Performance</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Artifacts</p>
+<p>The artifact stimulated may be the whole system or just a portion of the system. For example, a power-on event may stimulate the whole system. A user request may arrive at (stimulate) the user interface.</p>
+<p>Whole system</p>
+<p>Component within the system</p>
+<p>Environment</p>
+<p>The state of the system or component when the stimulus arrives. Unusual modes—error mode, overloaded mode—will affect the response. For example, three unsuccessful login attempts are allowed before a device is locked out.</p>
+<p>Runtime. The system or component can be operating in: Normal mode, Emergency mode, Error correction mode, Peak load, Overload mode, Degraded operation mode, Some other defined mode of the system</p>
+<h2 id="lámina-7">Lámina 7</h2>
+<p>Desempeño - Performance</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response</p>
+<p>The system will process the stimulus. Processing the stimulus will take time. This time may be required for computation, or it may be required because processing is blocked by contention for shared resources. Requests can fail to be satisfied because the system is overloaded or because of a failure somewhere in the processing chain.</p>
+<p>System returns a response</p>
+<p>System returns an error</p>
+<p>System generates no response</p>
+<p>System ignores the request if overloaded</p>
+<p>System changes the mode or level of service</p>
+<p>System services a higher-priority event</p>
+<p>System consumes resources</p>
+<h2 id="lámina-8">Lámina 8</h2>
+<p>Desempeño - Performance</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response measure</p>
+<p>System returns a response</p>
+<p>System returns an error</p>
+<p>System generates no response</p>
+<p>System ignores the request if overloaded</p>
+<p>System changes the mode or level of service</p>
+<p>System services a higher-priority event</p>
+<p>System consumes resources</p>
+<p>The (maximum, minimum, mean, median) time the response takes (latency)</p>
+<p>The number or percentage of satisfied requests over some time interval (throughput) or set of events received</p>
+<p>The number or percentage of requests that go unsatisfied</p>
+<p>The variation in response time (jitter)</p>
+<p>Usage level of a computing resource</p>
+<h2 id="lámina-9">Lámina 9</h2>
+<p>Desempeño - Performance</p>
+<p>Ejemplo de un Escenario concreto</p>
+<p>500 usuarios inician 2.000 solicitudes en un intervalo de 30 segundos, en condiciones normales de funcionamiento. El sistema procesa todas las solicitudes con una latencia promedio de dos segundos.</p>
+<h2 id="lámina-10">Lámina 10</h2>
+<p>TÁCTICAS</p>
+<h2 id="lámina-11">Lámina 11</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Objetivo: Generar una respuesta a los eventos que llegan al sistema bajo alguna restricción basada en el tiempo o en los recursos. El evento puede ser uno solo o una secuencia, y es el desencadenante para realizar el cálculo. Las tácticas de desempeño controlan el tiempo o los recursos utilizados para generar una respuesta.</p>
+<h2 id="lámina-12">Lámina 12</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>En cualquier momento durante el período posterior a la llegada de un evento, pero antes de que se complete la respuesta, el sistema o está trabajando para responder a ese evento o el procesamiento está bloqueado por algún motivo. Esto lleva a los dos contribuyentes básicos al tiempo de respuesta y al uso de recursos: tiempo de procesamiento (cuando el sistema está trabajando para responder y consumiendo recursos activamente) y tiempo bloqueado (cuando el sistema no puede responder).</p>
+<h2 id="lámina-13">Lámina 13</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Tiempo de procesamiento y uso de recursos. El procesamiento consume recursos, lo que lleva tiempo. Los eventos son manejados por la ejecución de uno o más componentes, cuyo tiempo empleado es un recurso. Los recursos de hardware incluyen CPU, almacenes de datos, ancho de banda de comunicación de red y memoria. Los recursos de software incluyen entidades definidas por el sistema bajo diseño. Por ejemplo, los grupos de subprocesos y los búferes deben administrarse y el acceso a las secciones críticas debe ser secuencial.</p>
+<h2 id="lámina-14">Lámina 14</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Por ejemplo, supongamos que un componente genera un mensaje. Puede colocarse en la red, luego de lo cual llega a otro componente. Luego se coloca en un búfer; transformado de alguna manera; procesado de acuerdo con algún algoritmo; transformado para salida; colocado en un búfer de salida; y enviado hacia algún componente, otro sistema o algún actor. Cada uno de estos pasos contribuye a la latencia general y al consumo de recursos del procesamiento de ese evento.</p>
+<h2 id="lámina-15">Lámina 15</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Tiempo bloqueado y contención de recursos. Un cómputo se puede bloquear debido a la contención de algún recurso necesario, porque el recurso no está disponible o porque el cómputo depende del resultado de otros cómputos que aún no están disponibles:</p>
+<p>Contención de recursos. Muchos recursos pueden ser utilizados por un solo cliente a la vez. Como consecuencia, otros clientes deben esperar para acceder a esos recursos</p>
+<p>Disponibilidad de recursos. Incluso en ausencia de contención, el cálculo no puede continuar si un recurso no está disponible. La falta de disponibilidad puede deberse a que el recurso esté fuera de línea o a una falla del componente por cualquier motivo.</p>
+<h2 id="lámina-16">Lámina 16</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Dependencia de otros cálculos. Un cómputo puede tener que esperar porque debe sincronizarse con los resultados de otro cómputo o porque está esperando los resultados de un cómputo que inició</p>
+<h2 id="lámina-17">Lámina 17</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas</p>
+<p>Fuente: Software Architecture in Practice, 4th Edition</p>
+<h2 id="lámina-18">Lámina 18</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Una forma de aumentar el rendimiento es administrar cuidadosamente la demanda de recursos. Esto se puede hacer reduciendo la cantidad de eventos procesados o limitando la velocidad a la que el sistema responde a los eventos.</p>
+<h2 id="lámina-19">Lámina 19</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Gestionar solicitudes de trabajo. Una forma de reducir el trabajo es reducir la cantidad de solicitudes que ingresan al sistema para realizar el trabajo. Las formas de hacerlo incluyen lo siguiente:</p>
+<p>Gestionar llegada de eventos. Una forma común de administrar las llegadas de eventos desde un sistema externo es establecer un acuerdo de nivel de servicio (SLA) que especifique la tasa máxima de llegada de eventos que está dispuesto a admitir. Un SLA es un acuerdo de la forma "El sistema o componente procesará X eventos que lleguen por unidad de tiempo con un tiempo de respuesta de Y". Este acuerdo restringe tanto al sistema (debe proporcionar esa respuesta) como al cliente (si realiza más de X solicitudes por unidad de tiempo, la respuesta no está garantizada).</p>
+<h2 id="lámina-20">Lámina 20</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Gestionar solicitudes de trabajo. Una forma de reducir el trabajo es reducir la cantidad de solicitudes que ingresan al sistema para realizar el trabajo. Las formas de hacerlo incluyen lo siguiente:</p>
+<p>Administrar la frecuencia de muestreo. En los casos en que el sistema no pueda mantener niveles de respuesta adecuados, puede reducir la frecuencia de muestreo de los estímulos, por ejemplo, la velocidad a la que se reciben los datos de un sensor o la cantidad de cuadros de video por segundo que procesa. Por supuesto, el precio que se paga aquí es la fidelidad de la transmisión de video o la información que recopila de los datos del sensor.</p>
+<h2 id="lámina-21">Lámina 21</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Limite la respuesta al evento. Cuando los eventos llegan al sistema (o componente) demasiado rápido para ser procesados, entonces los eventos deben ponerse en cola hasta que puedan procesarse, o simplemente se descartan. Puede elegir procesar eventos solo hasta una tasa máxima establecida, lo que garantiza un procesamiento predecible para los eventos que realmente se procesan.</p>
+<h2 id="lámina-22">Lámina 22</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Priorizar eventos. Si no todos los eventos son igualmente importantes, puede imponer un esquema de prioridad que clasifique los eventos según la importancia de atenderlos. Si no hay suficientes recursos disponibles para atenderlos cuando surjan, es posible que se ignoren los eventos de baja prioridad. Ignorar eventos consume recursos mínimos (incluido el tiempo), lo que aumenta el rendimiento en comparación con un sistema que atiende todos los eventos todo el tiempo.</p>
+<h2 id="lámina-23">Lámina 23</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Reducir la sobrecarga computacional. Para los eventos que sí ingresan al sistema, se pueden implementar los siguientes enfoques para reducir la cantidad de trabajo involucrado en el manejo de cada evento:</p>
+<p>Reducir la indirección</p>
+<p>Coubicar los recursos de comunicación</p>
+<p>Limpieza periódica</p>
+<h2 id="lámina-24">Lámina 24</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Tiempos de ejecución acotados. Puede poner un límite a la cantidad de tiempo de ejecución que se utiliza para responder a un evento. Para algoritmos iterativos dependientes de datos, limitar el número de iteraciones es un método para acotar los tiempos de ejecución. Sin embargo, el costo suele ser un cálculo menos preciso. Si adopta esta táctica, deberá evaluar su efecto sobre la precisión y ver si el resultado es "suficientemente bueno". Esta táctica de gestión de recursos se combina con frecuencia con la táctica de gestión de la tasa de muestreo.</p>
+<h2 id="lámina-25">Lámina 25</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Control Resource Demand</p>
+<p>Aumentar la eficiencia en el uso de los recursos. Mejorar la eficiencia de los algoritmos utilizados en áreas críticas puede disminuir la latencia y mejorar el rendimiento y el consumo de recursos. Esta es, para algunos programadores, su principal táctica de rendimiento. Si el sistema no funciona adecuadamente, intentan “afinar” su lógica de procesamiento.</p>
+<h2 id="lámina-26">Lámina 26</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Aumentar los recursos. Los procesadores más rápidos, los procesadores adicionales, la memoria adicional y las redes más rápidas tienen el potencial de mejorar el rendimiento. El costo suele ser una consideración en la elección de los recursos, pero aumentarlos es, en muchos casos, la forma más económica de obtener una mejora inmediata.</p>
+<h2 id="lámina-27">Lámina 27</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Introducir la concurrencia. Si las solicitudes se pueden procesar en paralelo, el tiempo bloqueado se puede reducir. La simultaneidad se puede introducir procesando diferentes flujos de eventos en diferentes subprocesos o creando subprocesos adicionales para procesar diferentes conjuntos de actividades.</p>
+<h2 id="lámina-28">Lámina 28</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Mantener múltiples copias de cómputo. Esta táctica reduce la contención que ocurriría si todas las solicitudes de servicio se asignaran a una sola instancia. Los servicios replicados en una arquitectura de microservicios o los servidores web replicados en un grupo de servidores son ejemplos de réplicas de computación. Un balanceador de carga es una pieza de software que asigna trabajo nuevo a uno de los servidores duplicados disponibles; los criterios de asignación varían, pero pueden ser tan simples como un esquema de turnos o asignar la siguiente solicitud al servidor menos ocupado.</p>
+<h2 id="lámina-29">Lámina 29</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Mantener múltiples copias de datos. Dos ejemplos comunes de mantenimiento de múltiples copias de datos son la replicación de datos y el almacenamiento en caché.</p>
+<p>La replicación de datos implica mantener copias separadas de los datos para reducir la contención de múltiples accesos simultáneos. Debido a que los datos que se replican suelen ser una copia de los datos existentes, mantener las copias coherentes y sincronizadas se convierte en una responsabilidad que debe asumir el sistema.</p>
+<p>El almacenamiento en caché también implica mantener copias de datos (con un conjunto de datos que posiblemente sea un subconjunto del otro), pero en almacenamiento con diferentes velocidades de acceso.</p>
+<h2 id="lámina-30">Lámina 30</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Tamaños de cola limitados. Esta táctica controla el número máximo de llegadas en cola y, en consecuencia, los recursos utilizados para procesar las llegadas. Si adopta esta táctica, debe establecer una política sobre lo que sucede cuando las colas se desbordan y decidir si es aceptable no responder a los eventos perdidos. Esta táctica se combina frecuentemente con la táctica de respuesta al evento límite.</p>
+<h2 id="lámina-31">Lámina 31</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Programar recursos. Cada vez que se produce una contención por un recurso, se debe programar el recurso. Los procesadores están programados, los búferes están programados y las redes están programadas. Su preocupación como arquitecto es entender las características del uso de cada recurso y elegir la estrategia de programación que sea compatible con él.</p>
+<h2 id="lámina-32">Lámina 32</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Políticas de Programación Una política de programación tiene conceptualmente dos partes: una asignación de prioridad y un despacho. Todas las políticas de programación asignan prioridades. En algunos casos, la asignación es tan simple como primero en entrar/primero en salir (o FIFO). En otros casos, puede estar ligado a la fecha límite de la solicitud o a su importancia semántica. Los criterios en competencia para la programación incluyen el uso óptimo de los recursos, la importancia de la solicitud, la minimización de la cantidad de recursos utilizados, la minimización de la latencia, la maximización del rendimiento, la prevención del hambre para garantizar la equidad, etc.</p>
+<h2 id="lámina-33">Lámina 33</h2>
+<p>Desempeño - Performance</p>
+<p>Tácticas - Manage Resources</p>
+<p>Políticas de Programación Algunas políticas de programación:</p>
+<p>Primero en entrar primero en salir (FIFO)</p>
+<p>Programación de prioridad fija</p>
+<p>Importancia semántica</p>
+<p>Programación dinámica de prioridades. Round robin, Earliest-deadline-first, Least-slack-first</p>
+<p>Programación estática</p>
+<h2 id="lámina-34">Lámina 34</h2>
+<p>PATRONES</p>
+<h2 id="lámina-35">Lámina 35</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones</p>
+<p>Service Mesh (Malla de Servicio) El patrón de malla de servicios se utiliza en arquitecturas de microservicios. La característica principal de la malla es un sidecar, una especie de proxy que acompaña a cada microservicio y que brinda capacidades ampliamente útiles para abordar problemas independientes de la aplicación, como las comunicaciones entre servicios, el monitoreo y la seguridad. Un sidecar se ejecuta junto con cada microservicio y maneja toda la comunicación y coordinación entre servicios. Se implementan juntos, lo que reduce la latencia debido a las redes y, por lo tanto, aumenta el rendimiento. Este enfoque permite a los desarrolladores separar la funcionalidad (la lógica empresarial central) del microservicio de la implementación, la gestión y el mantenimiento de aspectos transversales, como la autenticación y la autorización, el descubrimiento de servicios, el equilibrio de carga, el cifrado y la observabilidad.</p>
+<h2 id="lámina-36">Lámina 36</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Service Mesh</p>
+<p>Fuente: TechTarget – Service Mesh</p>
+<h2 id="lámina-37">Lámina 37</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Service Mesh</p>
+<p>Beneficios:</p>
+<p>El software para gestionar las preocupaciones transversales se puede comprar listo para usar o implementarlo y mantenerlo un equipo de especialistas que no hace nada más, lo que permite a los desarrolladores de la lógica empresarial centrarse solo en esa preocupación.</p>
+<p>Una malla de servicios impone la implementación de funciones de utilidad en el mismo procesador que los servicios que usan esas funciones de utilidad. Esto reduce el tiempo de comunicación entre el servicio y sus utilidades ya que la comunicación no necesita usar mensajes de red.</p>
+<p>La malla de servicios se puede configurar para que la comunicación dependa del contexto, lo que simplifica funciones como las pruebas Canary y A/B.</p>
+<h2 id="lámina-38">Lámina 38</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Service Mesh</p>
+<p>Tradeoffs:</p>
+<p>Los sidecars introducen más procesos de ejecución, y cada uno de ellos consumirá algo de potencia de procesamiento, lo que aumentará la sobrecarga del sistema.</p>
+<p>Un sidecar normalmente incluye múltiples funciones, y no todas serán necesarias en cada servicio o cada invocación de un servicio.</p>
+<h2 id="lámina-39">Lámina 39</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones</p>
+<p>Load Balancer (Balanceador de carga) es un tipo de intermediario que maneja los mensajes que se originan en un conjunto de clientes y determina qué instancia de un servicio debe responder a esos mensajes. La clave de este patrón es que el balanceador de carga sirve como un único punto de contacto para los mensajes entrantes, por ejemplo, una sola dirección IP, pero luego distribuye las solicitudes a un grupo de proveedores (servidores o servicios) que pueden responder a la petición. De esta forma, la carga se puede equilibrar entre el grupo de proveedores. El balanceador de carga implementa algún tipo de táctica de recursos de programación. El algoritmo de programación puede ser muy simple, como por turnos, o puede tener en cuenta la carga de cada proveedor, o el número de solicitudes en espera de servicio en cada proveedor.</p>
+<h2 id="lámina-40">Lámina 40</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Load Balancer</p>
+<p>Fuente: Software Architecture in Practice, 4th Edition</p>
+<h2 id="lámina-41">Lámina 41</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Load Balancer</p>
+<p>Beneficios:</p>
+<p>Cualquier falla de un servidor es invisible para los clientes (suponiendo que aún queden algunos recursos de procesamiento).</p>
+<p>Al compartir la carga entre varios proveedores, la latencia se puede mantener más baja y más predecible para los clientes.</p>
+<p>Es relativamente simple agregar más recursos (más servidores, servidores más rápidos) al grupo disponible para el equilibrador de carga y ningún cliente necesita saberlo.</p>
+<h2 id="lámina-42">Lámina 42</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Load Balancer</p>
+<p>Tradeoffs:</p>
+<p>El algoritmo de equilibrio de carga debe ser muy rápido; de lo contrario, puede contribuir a problemas de rendimiento.</p>
+<p>El equilibrador de carga es un cuello de botella potencial o un punto único de falla, por lo que a menudo se replica (e incluso se equilibra la carga).</p>
+<h2 id="lámina-43">Lámina 43</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones</p>
+<p>Throttling (Estrangulamiento) El patrón de limitación es un paquete de la táctica de gestión de solicitudes de trabajo. Se utiliza para limitar el acceso a algún recurso o servicio importante. En este patrón, normalmente hay un intermediario, un regulador, que supervisa (solicita) el servicio y determina si se puede atender una solicitud entrante.</p>
+<p>Fuente: RedHat – Understanding Throttling Architecture Pattern</p>
+<h2 id="lámina-44">Lámina 44</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Throttling</p>
+<p>Beneficios:</p>
+<p>Al limitar las solicitudes entrantes, puede manejar con elegancia las variaciones en la demanda. Al hacerlo, los servicios nunca se sobrecargan; se pueden mantener en un "punto óptimo" de rendimiento donde manejan las solicitudes de manera eficiente</p>
+<h2 id="lámina-45">Lámina 45</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Throttling</p>
+<p>Tradeoffs:</p>
+<p>La lógica de estrangulamiento debe ser muy rápida; de lo contrario, puede contribuir a problemas de rendimiento.</p>
+<p>Si la demanda de los clientes excede regularmente la capacidad, los búferes deberán ser muy grandes o existe el riesgo de perder solicitudes.</p>
+<p>Este patrón puede ser difícil de agregar a un sistema existente donde los clientes y los servidores están estrechamente acoplados</p>
+<h2 id="lámina-46">Lámina 46</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones</p>
+<p>Map-Reduce El patrón map-reduce realiza eficientemente un tipo distribuido y paralelo de un gran conjunto de datos y proporciona un medio simple para que el programador especifique el análisis que se realizará. A diferencia de nuestros otros patrones de rendimiento, que son independientes de cualquier aplicación, el patrón map-reduce está diseñado específicamente para brindar un alto rendimiento a un tipo específico de problema recurrente: clasificar y analizar un gran conjunto de datos. Este problema lo experimenta cualquier organización que maneja datos masivos (piense en Google, Facebook, Yahoo y Netflix) y todas estas organizaciones, de hecho, usan map-reduce.</p>
+<h2 id="lámina-47">Lámina 47</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<p>El patrón map-reduce tiene tres partes:</p>
+<p>El primero es una infraestructura especializada que se encarga de asignar software a los nodos de hardware en un entorno informático paralelo masivo y maneja la clasificación de los datos según sea necesario. La segunda y la tercera son dos funciones codificadas por el programador llamadas, como era de esperar, mapear y reducir.</p>
+<h2 id="lámina-48">Lámina 48</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<ol><li>La función map toma como entrada una clave y un conjunto de datos. Utiliza la clave para codificar los datos en un conjunto de buckets.  Un archivo de entrada se divide en partes y se crean varias instancias de mapa para procesar cada parte. Una vez que se han mapeado todos los datos de entrada, la infraestructura map-reduce mezcla estos cubos y luego los asigna a nuevos nodos de procesamiento (posiblemente reutilizando los nodos utilizados en la fase de mapeo) para la fase de reducción. Por ejemplo, todos los tréboles podrían asignarse a un grupo de instancias, todos los diamantes a otro grupo, y así sucesivamente.</li></ol>
+<h2 id="lámina-49">Lámina 49</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<ol><li>Todo el análisis pesado tiene lugar en la función de reducción. El número de instancias de reducción corresponde al número de buckets generados por la función de mapa. La fase de reducción hace un análisis especificado por el programador y luego emite los resultados de ese análisis. El conjunto de salida es casi siempre mucho más pequeño que los conjuntos de entrada, de ahí el nombre "reducir".</li></ol>
+<h2 id="lámina-50">Lámina 50</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<h2 id="lámina-51">Lámina 51</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<p>Fuente: MongoDB Manual – Map Reduce</p>
+<h2 id="lámina-52">Lámina 52</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<p>Beneficios:</p>
+<p>Los conjuntos de datos sin ordenar extremadamente grandes se pueden analizar de manera eficiente mediante la explotación del paralelismo.</p>
+<p>Una falla de cualquier instancia tiene solo un pequeño impacto en el procesamiento, ya que map-reduce generalmente divide grandes conjuntos de datos de entrada en muchos más pequeños para su procesamiento, asignando cada uno a su propia instancia.</p>
+<h2 id="lámina-53">Lámina 53</h2>
+<p>Desempeño - Performance</p>
+<p>Patrones – Map Reduce</p>
+<p>Tradeoffs:</p>
+<p>Si no tiene grandes conjuntos de datos, la sobrecarga que genera el patrón map-reduce no está justificada.</p>
+<p>Si no puede dividir su conjunto de datos en subconjuntos de tamaño similar, se perderán las ventajas del paralelismo.</p>
+<p>Las operaciones que requieren múltiples reducciones son complejas de orquestar.</p>
+<h2 id="lámina-54">Lámina 54</h2>
+<p>Desempeño - Performance</p>
+<p>Tipos de Pruebas</p>
+<h2 id="lámina-55">Lámina 55</h2>
+<p>Bibliografía</p>
+<p>Len Bass, Paul Clements, Rick Kazman. Software Architecture in Practice. 4th Edition. SEI / Addison-Wesley, 2022​</p>
+<h2 id="lámina-56">Lámina 56</h2>
+<p>_(sin texto: la lámina es una imagen)_</p></main>
+<footer><p>Generado desde <code>Tacticas-Desempeno.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Diplomado en Arquitectura de Software y Cloud Computing</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Diplomado en Arquitectura de Software y Cloud Computing</h1>
+  <p class="meta">Modulo2-Brightspace.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#unidad-3-de-5-módulo-2">Unidad 3 de 5 — Módulo 2</a></li><li><a href="#estructura-de-la-unidad-orden-del-menú-lateral">Estructura de la unidad (orden del menú lateral)</a></li><li><a href="#1-contenidos-obligatorios">1. Contenidos obligatorios</a></li><li><a href="#4-conclusiones">4. Conclusiones</a></li><li><a href="#5-recursos-complementarios">5. Recursos complementarios</a></li></ol></nav>
+<main><h2 id="unidad-3-de-5-módulo-2">Unidad 3 de 5 — Módulo 2</h2>
+<blockquote><p><strong>Tipo:</strong> <code>material-oficial</code>. Texto de las páginas de Brightspace guardadas el 28/09/2026. <strong>Extraído:</strong> 2026-09-30. <strong>Este archivo no se edita.</strong> <strong>Estado en Brightspace al guardar:</strong> «1 de 5 requisitos completados» (solo <em>Contenidos obligatorios</em>).</p></blockquote>
+<h2 id="estructura-de-la-unidad-orden-del-menú-lateral">Estructura de la unidad (orden del menú lateral)</h2>
+<ol><li>Contenidos obligatorios — ✅ completado</li><li>Evidencia de aprendizaje: autoevaluación M2 — cuestionario (<code>quiz_summary.d2l?qi=303577</code>)</li><li>Evidencia de aprendizaje: actividad M2 — entrega (<code>content/402764/fullscreen/3088707</code>)</li><li>Conclusiones</li><li>Recursos complementarios</li></ol>
+<blockquote><p>⚠️ <strong>Lo que NO quedó capturado</strong> (las páginas 2 y 3 se guardaron como marco vacío: el contenido real vive en un <code>iframe</code> que exige sesión): - <strong>Enunciado, rúbrica, formato y fecha de la actividad M2.</strong> - Reglas de la autoevaluación M2 (nº de intentos, tiempo, nº de preguntas). - Las 4 presentaciones Genially y el video de YouTube de «Contenidos obligatorios» (embebidos externos): <code>view.genially.com/683a05d4…</code>, <code>…683a0687…</code>, <code>…683a077a…</code>, <code>…683a085c…</code> y <code>youtube.com/embed/MbUXkPdKaGw</code>.</p></blockquote>
+<hr>
+<h2 id="1-contenidos-obligatorios">1. Contenidos obligatorios</h2>
+<h3 id="introducción">Introducción</h3>
+<p>En este primer tema del módulo, te sumergirás en los requerimientos de calidad que acompañan a los requerimientos funcionales, como la latencia, disponibilidad y seguridad. Aprenderás a identificar los requerimientos arquitecturalmente significativos (ASRs), esenciales para diseñar sistemas robustos y eficientes. Descubrirás cómo estos atributos de calidad influyen en el diseño y funcionamiento de un sistema a través de ejemplos prácticos.</p>
+<p>Este tema te proporcionará las bases necesarias para entender la importancia de los ASRs en la arquitectura de software, preparándote para abordar los desafíos que estos presentan y optimizar el rendimiento, la escalabilidad y la confiabilidad del sistema.</p>
+<p>Presentación interactiva: <strong>Requerimientos de calidad</strong> — explora los requerimientos de calidad, su importancia, clasificación y relación con las tácticas de diseño. <em>(Genially #1, no capturado)</em></p>
+<h3 id="profundización">Profundización</h3>
+<p>Se profundiza en las tácticas de arquitectura que aseguran la calidad: disponibilidad, desempeño y seguridad, y cómo cada uno impacta el diseño y funcionamiento de un sistema, con ejemplos y escenarios prácticos.</p>
+<ul><li><strong>Disponibilidad (AVAILABILITY)</strong> — presentación interactiva: definición, importancia y factores que la afectan; ejemplos y estrategias de continuidad operativa. <em>(Genially #2, no capturado)</em></li><li><strong>Desempeño (PERFORMANCE)</strong> — presentación interactiva: incluye rendimiento y concurrencia; definición, factores y métricas de evaluación. <em>(Genially #3, no capturado)</em></li><li><strong>Seguridad (SECURITY)</strong> — <strong>video</strong>: confidencialidad, integridad y disponibilidad; privacidad y regulaciones como GDPR que protegen la información de identificación personal (PII). <em>(YouTube, no capturado)</em></li></ul>
+<h3 id="cierre">Cierre</h3>
+<ul><li><strong>Interoperabilidad (INTEROPERABILITY)</strong> — presentación interactiva: cómo los sistemas interactúan eficazmente; integración e intercambio entre componentes heterogéneos; escenarios concretos (ejemplos del sector salud) y tácticas como <strong>descubrimiento de servicios, orquestación y adaptación de interfaces</strong>. <em>(Genially #4, no capturado)</em></li></ul>
+<hr>
+<h2 id="4-conclusiones">4. Conclusiones</h2>
+<p>En este módulo, hemos explorado cómo las tácticas de arquitectura aseguran la calidad de los sistemas de software. Abordamos los Requerimientos Arquitecturalmente Significativos (ASRs) y su impacto en la arquitectura del sistema, así como los atributos de disponibilidad, desempeño, seguridad e interoperabilidad descritos así:</p>
+<ul><li><strong>Disponibilidad:</strong> asegura que el sistema esté siempre listo para realizar su tarea, incluso en situaciones de falla.</li><li><strong>Desempeño:</strong> optimiza el tiempo y la concurrencia para mejorar el rendimiento del sistema.</li><li><strong>Seguridad:</strong> protege los datos contra el acceso no autorizado y garantiza la privacidad.</li><li><strong>Interoperabilidad:</strong> facilita la integración y comunicación efectiva entre sistemas heterogéneos.</li></ul>
+<p>En resumen, estas tácticas construyen sistemas robustos y optimizados, moldeando experiencias y fortaleciendo la confianza del cliente.</p>
+<hr>
+<h2 id="5-recursos-complementarios">5. Recursos complementarios</h2>
+<h3 id="presentaciones-adicionales-capturadas-en-tacticas-md">Presentaciones adicionales (capturadas en <code>Tacticas-*.md</code>)</h3>
+<ul><li>Tácticas Usabilidad · Tácticas Seguridad · Tácticas Disponibilidad · Tácticas Desplegabilidad · Tácticas Desempeño</li></ul>
+<h3 id="material-adicional">Material adicional</h3>
+<ul><li>Eliot (2021). <em>Disaster Recovery (DR) Architecture on AWS</em>, Partes I–IV. AWS Architecture Blog.</li><ul><li>I: https://aws.amazon.com/es/blogs/architecture/disaster-recovery-dr-architecture-on-aws-part-i-strategies-for-recovery-in-the-cloud/</li><li>II (Backup and Restore): https://aws.amazon.com/es/blogs/architecture/disaster-recovery-dr-architecture-on-aws-part-ii-backup-and-restore-with-rapid-recovery/</li><li>III (Pilot Light y Warm Standby): https://aws.amazon.com/es/blogs/architecture/disaster-recovery-dr-architecture-on-aws-part-iii-pilot-light-and-warm-standby/</li><li>IV (Multi-site Active/Active): https://aws.amazon.com/es/blogs/architecture/disaster-recovery-dr-architecture-on-aws-part-iv-multi-site-active-active/</li></ul><li>Enaqx (s.f.). <em>Awesome pentest</em> [GitHub]. https://github.com/enaqx/awesome-pentest#tools</li><li>Fowler (2014). <em>Circuit Breaker</em>. https://martinfowler.com/bliki/CircuitBreaker.html</li><li>Hodgson (2017). <em>Feature toggles (aka feature flags)</em>. https://martinfowler.com/articles/feature-toggles.html</li><li>Netflix Technology Blog (2019). <em>Tips for high availability</em>. https://netflixtechblog.medium.com/tips-for-high-availability-be0472f2599c</li><li>OWASP (s.f.). <em>OWASP Top 10:2021</em>. https://owasp.org/Top10/</li><li>SANS Institute (s.f.). <em>CWE Top 25 Most Dangerous Software Weaknesses</em>. https://www.sans.org/top25-software-errors/</li><li>SAFECode (2018). <em>Fundamental practices for secure software development</em> (2nd ed.). https://safecode.org/uncategorized/fundamental-practices-secure-software-development/</li><li>Schmitt (2024). <em>SAST vs. DAST: When to use them</em>. https://circleci.com/blog/sast-vs-dast-when-to-use-them/</li><li>Sharma (2023). <em>From big bang to canary…</em> Medium/ByteByteGo. https://medium.com/bytebytego-system-design-alliance/from-big-bang-to-canary-exploring-software-deployment-strategies-for-a-flawless-release-with-3610e89ea789</li></ul>
+<h3 id="referencias-bibliográficas">Referencias bibliográficas</h3>
+<ul><li>Len Bass, Paul Clements, Rick Kazman. <em>Software Architecture in Practice</em>, 4th ed. SEI / Addison-Wesley, 2022.</li><li>Mark Richards, Neal Ford. <em>Fundamentals of Software Architecture: An Engineering Approach</em>. O'Reilly, 2020.</li></ul></main>
+<footer><p>Generado desde <code>Modulo2-Brightspace.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

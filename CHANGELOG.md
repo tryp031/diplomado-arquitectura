@@ -12,6 +12,31 @@ el detalle línea por línea está en `git log`.
 
 ---
 
+## 2026-09-30
+
+Arranca el Módulo 2 (30/09 → 20/10). Danny, desde `docs/daniel-m2-apertura`.
+
+### Añadido
+- **`Modulo 2/`:** README, temario, material oficial capturado (5 decks de tácticas, enunciado del Reto 2 en
+  PDF y Markdown, transcripción de los 4 Genially obligatorios, páginas de Brightspace) y dos aportes de Danny:
+  `m2-cuaderno-estudio-danny` (cuaderno de estudio con autoevaluación y glosario) y
+  `m2-analisis-apertura-danny` (errores del material y análisis del Reto 2). Cada Markdown tiene su HTML generado.
+- **`INDICE.html`:** buscador, filtros por tipo y autor, panel «Ahora» del módulo en curso (fechas de encuentros y
+  cierre calculadas con la fecha de hoy), tira de estado de los 5 módulos y módulos plegables.
+
+### Cambiado
+- **`_Base-Conocimiento/generar-indice.py` y `estilo.py`:** el índice se reorganiza por módulo (el más reciente
+  primero, los cerrados plegados), añade «Guías del módulo» (README y temario) y limpia el Markdown crudo de las
+  descripciones de los ADR. El CSS compartido de los demás documentos no cambia; solo `CSS_INDICE`.
+- **`.gitignore`:** excluye los `.pptx` oficiales de M2 (≈ 23 MB); se versiona el texto extraído.
+- **`_Base-Conocimiento/INDICE.md`:** fila del Módulo 2.
+
+### Pendiente (declarado, no resuelto)
+- Video de Seguridad (YouTube), script de k6 del reto y hora de cierre: no disponibles al capturar.
+- Las dos rúbricas oficiales del Reto 2 no coinciden: a preguntar en el encuentro del 06/10.
+
+---
+
 ## 2026-09-23
 
 Cierra los PR #7 y #8 (Camilo): quedaron atrapados por el rename de ADR-008 — tocaban

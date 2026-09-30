@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Actividad M2 — Reto 2: Sistema de alerta para flota vehicular</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Actividad M2 — Reto 2: Sistema de alerta para flota vehicular</h1>
+  <p class="meta">Actividad-Reto2.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#contexto-del-reto">Contexto del reto</a></li><li><a href="#requerimientos-funcionales">Requerimientos funcionales</a></li><li><a href="#requerimientos-no-funcionales">Requerimientos no funcionales</a></li><li><a href="#entregables">Entregables</a></li><li><a href="#escenario-de-pruebas">Escenario de pruebas</a></li><li><a href="#restricciones">Restricciones</a></li><li><a href="#rúbrica-lámina-titulada-rúbrica-de-presentación-25-puntos">Rúbrica (lámina titulada «Rúbrica de Presentación», 2.5 puntos)</a></li><li><a href="#rúbrica-m2-en-brightspace-segunda-rúbrica-oficial-capturada-2026-09-30">Rúbrica M2 en Brightspace (segunda rúbrica oficial, capturada 2026-09-30)</a></li><li><a href="#configuraciones-solicitadas-imagen">Configuraciones solicitadas [imagen]</a></li><li><a href="#lo-que-el-enunciado-no-dice-anotación-no-es-del-curso">Lo que el enunciado NO dice (anotación; no es del curso)</a></li></ol></nav>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Brightspace → Módulo 2 → «Evidencia de aprendizaje: actividad M2»). <strong>Fuente:</strong> <code>Actividad-Reto2.pdf</code> (8 láminas, archivo original <code>Actividad - Reto 2 (1).pdf</code>), descargado 2026-09-30 con sesión de Danny. <strong>Transcripción:</strong> texto de las láminas tal cual; lo de las imágenes (láminas 7 y 8) está descrito abajo, marcado como <code>[imagen]</code>. <strong>Este archivo no se edita.</strong> Las observaciones propias van en <code>Aportes/</code>. El bloque «Lo que el enunciado NO dice» es anotación de Danny/IA, <strong>no</strong> del curso.</p></blockquote>
+<p><strong>Entrega en Brightspace:</strong> carga de archivos (hasta 2 GB), audio o video. La fecha de cierre <strong>no aparece</strong> en la página capturada; el envío es individual.</p>
+<hr>
+<h2 id="contexto-del-reto">Contexto del reto</h2>
+<p>Estás a cargo del diseño e implementación de un sistema de alerta temprana para una flota vehicular. Cada vehículo envía constantemente su posición geográfica y su estado de operación a través de un endpoint. En situaciones críticas, como cuando el conductor presiona un botón de pánico o los sensores detectan una anomalía, se envía un evento de tipo <code>Emergency</code>.</p>
+<p>Tu objetivo es garantizar que:</p>
+<ul><li>Se reciban y procesen <strong>1000 eventos</strong> correctamente.</li><li>Se envíe una alerta por correo electrónico a una cuenta Gmail específica <strong>en el momento en que se reciba</strong> un evento de tipo <code>Emergency</code>.</li><li>Se cumplan las restricciones técnicas dadas (límite de peticiones, instancias máximas de procesadores, etc.).</li></ul>
+<h3 id="objetivo">Objetivo</h3>
+<ul><li>Implementar una solución arquitectónica que permita recibir los eventos de los vehículos en tiempo real.</li><li>Detectar eventos de emergencia en el flujo continuo de datos.</li><li>Enviar una notificación por correo a la cuenta Gmail configurada <strong>en menos de 30 segundos</strong> desde la recepción del evento.</li></ul>
+<h2 id="requerimientos-funcionales">Requerimientos funcionales</h2>
+<ul><li><strong>Recepción de eventos:</strong> endpoint que pueda recibir <strong>1000 solicitudes en 30 segundos</strong>; el <strong>100 %</strong> de las solicitudes procesadas correctamente.</li><li><strong>Detección de emergencias:</strong> identificar eventos de tipo <code>Emergency</code> en el flujo continuo; registrar un log con la <strong>fecha y hora exacta de la recepción</strong>.</li><li><strong>Notificación por correo:</strong> enviar un correo a una cuenta Gmail configurada al detectar <code>Emergency</code>; registrar un log con la <strong>fecha y hora del envío</strong>.</li></ul>
+<h2 id="requerimientos-no-funcionales">Requerimientos no funcionales</h2>
+<ul><li><strong>Tasa de peticiones:</strong> si se usa API Gateway, tasa máxima <strong>15 peticiones por segundo (rate)</strong>. El valor de <strong>burst puede quedar en su configuración predeterminada</strong>.</li><li><strong>Capacidad de procesamiento:</strong> si se usan procesadores como Docker, Lambda, ALB, EC2, ECS, máximo <strong>10 instancias activas simultáneamente</strong>.</li><li><strong>Logs:</strong> registros claros con la hora exacta de (a) la recepción del evento <code>Emergency</code> y (b) el envío exitoso del correo.</li><li><strong>Tiempo de entrega del correo:</strong></li><ul><li>&lt; 15 s → 2.5 puntos</li><li>entre 15 y 45 s → 1.5 puntos</li><li>&gt; 45 s → 0.5 puntos</li><li>El tiempo se mide <strong>entre el último envío realizado en k6 y la hora de envío del correo y recepción del mismo</strong>.</li></ul><li><strong>Estándar del correo:</strong> a una cuenta Gmail <strong>personal</strong> configurada por el estudiante; contenido claro, indicando que se recibió un evento <code>Emergency</code>.</li></ul>
+<h2 id="entregables">Entregables</h2>
+<ol><li><strong>Código fuente:</strong> toda la implementación para recibir eventos, detectar emergencias y enviar correos.</li><li><strong>Documentación técnica:</strong></li><ul><li><strong>Decisiones de arquitectura:</strong> justificar por qué se eligieron los componentes y servicios.</li><li><strong>Atributo de calidad más importante:</strong> explicar cuál es y por qué fue priorizado.</li><li><strong>Diagrama de la arquitectura:</strong> representación visual clara.</li><li><strong>Tácticas de arquitectura:</strong> explicar las tácticas usadas para cumplir los objetivos.</li></ul><li><strong>Logs de ejecución:</strong> archivo o consola que muestre la recepción del <code>Emergency</code> y el envío exitoso del correo.</li><li><strong>Video de explicación</strong> (para quienes <strong>no</strong> asisten al encuentro sincrónico): cómo se creó la arquitectura y todos los detalles del documento técnico e implementación. Quienes <strong>sí</strong> asisten deben <strong>generar una presentación</strong> detallando toda la implementación y mostrando <strong>demo en vivo</strong>.</li></ol>
+<h2 id="escenario-de-pruebas">Escenario de pruebas</h2>
+<ul><li>Se <strong>proporcionará</strong> un script de k6 que envía 1000 peticiones en 30 segundos al endpoint configurado por el estudiante.</li><li>El script simula vehículos que envían eventos <code>Position</code> y <code>Emergency</code>.</li><li>El sistema debe detectar el <code>Emergency</code> y ejecutar la notificación.</li></ul>
+<h2 id="restricciones">Restricciones</h2>
+<ul><li>No superar <strong>15 peticiones por segundo</strong> en el API Gateway.</li><li>Los procesadores de peticiones (Lambda, Docker, ECS…) no pueden exceder <strong>10 instancias simultáneas</strong>.</li><li>Usar una cuenta Gmail para la notificación.</li><li>El envío de correos debe ser <strong>consistente y medible</strong>.</li></ul>
+<h2 id="rúbrica-lámina-titulada-rúbrica-de-presentación-25-puntos">Rúbrica (lámina titulada «Rúbrica de Presentación», 2.5 puntos)</h2>
+<div class="tw"><table><thead><tr><th>Criterio</th><th>Ponderación</th></tr></thead><tbody><tr><td>Justificación de decisiones de arquitectura</td><td>0.5</td></tr><tr><td>Atributo de calidad más importante</td><td>0.5</td></tr><tr><td>Diagrama de arquitectura</td><td>0.5</td></tr><tr><td>Tácticas de arquitectura</td><td>1.0</td></tr><tr><td><strong>Subtotal documentación técnica</strong></td><td><strong>2.5</strong></td></tr><tr><td>Tiempo de entrega del correo (&lt; 15 s)</td><td>2.5</td></tr><tr><td>Tiempo de entrega del correo (15–45 s)</td><td>1.5</td></tr><tr><td>Tiempo de entrega del correo (&gt; 45 s)</td><td>0.5</td></tr><tr><td><strong>Subtotal «demostración en vivo»</strong></td><td><strong>2.5</strong> (máximo)</td></tr></tbody></table></div>
+<p>Total máximo aparente: <strong>5.0 puntos</strong>.</p>
+<h2 id="rúbrica-m2-en-brightspace-segunda-rúbrica-oficial-capturada-2026-09-30">Rúbrica M2 en Brightspace (segunda rúbrica oficial, capturada 2026-09-30)</h2>
+<p>Ficha de la asignación «Evidencia de aprendizaje: actividad M2», envío <strong>individual</strong> (<code>grpid=0</code>), sin fecha de entrega visible en la página. Rúbrica de 5 criterios con 5 niveles (Excelente 5 · Bueno 4 · Aceptable 3 · Deficiente 2 · Insuficiente 1). Los <strong>descriptores de cada celda vienen vacíos</strong> en la página.</p>
+<div class="tw"><table><thead><tr><th>Criterio</th></tr></thead><tbody><tr><td>Diseño de la arquitectura</td></tr><tr><td>Implementación técnica y funcionalidad</td></tr><tr><td>Documentación técnica</td></tr><tr><td>Pruebas y análisis de resultados</td></tr><tr><td>Presentación y explicación</td></tr></tbody></table></div>
+<p>Puntuación general: <strong>Nivel 4 ≥ 11 pts · Nivel 3 ≥ 8 · Nivel 2 ≥ 5 · Nivel 1 ≥ 0</strong>. <em>No coincide con la rúbrica del PDF de arriba (2.5 + 2.5). Además, 5 criterios × 5 puntos suman 25, pero los umbrales llegan solo a 11: la escala es ambigua. Ver «Lo que el enunciado NO dice».</em></p>
+<h2 id="configuraciones-solicitadas-imagen">Configuraciones solicitadas <code>[imagen]</code></h2>
+<ul><li><strong>API Gateway, stage <code>prod</code>:</strong> Rate <strong>15</strong>, Burst <strong>2000</strong>, cache cluster inactivo, method-level caching inactivo, sin Web ACL.</li><li><strong>Payload de ejemplo:</strong></li></ul>
+<pre class="lang-json"><code>{
+  &quot;type&quot;: &quot;Position&quot;,
+  &quot;vehicle_plate&quot;: &quot;ABC-123&quot;,
+  &quot;coordinates&quot;: { &quot;latitude&quot;: 12.345, &quot;longitude&quot;: 67.890 },
+  &quot;status&quot;: &quot;OK&quot;
+}</code></pre>
+<ul><li><strong>Correo de ejemplo:</strong> asunto «🚨 Alerta de Emergencia 🚨»; cuerpo con título «Alerta de Emergencia», <code>Placa: VFH-600</code>, <code>Estado: OK</code>, <code>Evento: Emergency</code>.</li><li><strong>Salida esperada de k6:</strong> 1 escenario, <strong>10 VUs máx.</strong>, 1000 iteraciones compartidas, <code>maxDuration 30s</code>; <code>checks 100.00% 1000 out of 1000</code> (<code>is status 200</code>); <code>http_req_failed 0.00%</code>; <code>http_reqs 1000 → 35.69/s</code>; duración de petición avg ≈ 176 ms, p(95) ≈ 272 ms; corrida de ≈ 28 s.</li></ul>
+<hr>
+<h2 id="lo-que-el-enunciado-no-dice-anotación-no-es-del-curso">Lo que el enunciado NO dice (anotación; no es del curso)</h2>
+<ol><li><strong>Tensión 15 rps vs 35 rps.</strong> 1000 peticiones en 30 s son ≈ 33–36 req/s (lo confirma la propia salida de k6: 35.69/s), más del doble del <em>rate</em> de 15. Lo que hace viable el «100 % procesado» es el <strong>burst de 2000</strong> (de la imagen), no el rate. Pero el texto dice que el burst «puede quedar en su configuración predeterminada» y la imagen muestra 2000: <strong>no son equivalentes a simple vista</strong>. <strong>Verificar cuál es el valor por defecto real en la cuenta AWS de cada uno antes de diseñar</strong> y no asumir.</li><li><strong>Dónde se mide el tiempo del correo.</strong> «Último envío en k6» → «recepción del correo»: la medida incluye la entrega de Gmail, que el estudiante no controla. Además, el objetivo del enunciado es <strong>&lt; 30 s</strong>, pero la rúbrica puntúa con cortes en <strong>15 s y 45 s</strong>; no hay un corte en 30.</li><li><strong>Rúbrica inconsistente.</strong> La lámina se titula «Reto 1» y llama «Demostración en vivo» al subtotal de tiempo de correo (los tres renglones de tiempo son excluyentes, no suman).</li><li><strong>El k6 «se proporcionará»</strong>: no lo tenemos. Conseguirlo antes de medir.</li><li><strong>No se dice</strong> la fecha de cierre ni el peso de la actividad en la nota. El envío aparece como <strong>individual</strong> (<code>grpid=0</code>). La ventana del módulo termina el 20/10, pero la hora de cierre no consta.</li><li><strong>El atributo «más importante» es entregable explícito (0.5 pts)</strong>: es exactamente el hilo conductor que el profesor echó de menos en M1.</li><li><strong>Sesgo AWS:</strong> todo el enunciado asume AWS (API Gateway, Lambda, ECS, ALB). El diplomado declara sesgo AWS-first; no dice si se admite otra nube.</li></ol></main>
+<footer><p>Generado desde <code>Actividad-Reto2.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

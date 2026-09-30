@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tácticas de Seguridad — deck oficial del Módulo 2</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Tácticas de Seguridad — deck oficial del Módulo 2</h1>
+  <p class="meta">Tacticas-Seguridad.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#lámina-1">Lámina 1</a></li><li><a href="#lámina-2">Lámina 2</a></li><li><a href="#lámina-3">Lámina 3</a></li><li><a href="#lámina-4">Lámina 4</a></li><li><a href="#lámina-5">Lámina 5</a></li><li><a href="#lámina-6">Lámina 6</a></li><li><a href="#lámina-7">Lámina 7</a></li><li><a href="#lámina-8">Lámina 8</a></li><li><a href="#lámina-9">Lámina 9</a></li><li><a href="#lámina-10">Lámina 10</a></li><li><a href="#lámina-11">Lámina 11</a></li><li><a href="#lámina-12">Lámina 12</a></li><li><a href="#lámina-13">Lámina 13</a></li><li><a href="#lámina-14">Lámina 14</a></li><li><a href="#lámina-15">Lámina 15</a></li><li><a href="#lámina-16">Lámina 16</a></li><li><a href="#lámina-17">Lámina 17</a></li><li><a href="#lámina-18">Lámina 18</a></li><li><a href="#lámina-19">Lámina 19</a></li><li><a href="#lámina-20">Lámina 20</a></li><li><a href="#lámina-21">Lámina 21</a></li><li><a href="#lámina-22">Lámina 22</a></li><li><a href="#lámina-23">Lámina 23</a></li><li><a href="#lámina-24">Lámina 24</a></li><li><a href="#lámina-25">Lámina 25</a></li><li><a href="#lámina-26">Lámina 26</a></li><li><a href="#lámina-27">Lámina 27</a></li><li><a href="#lámina-28">Lámina 28</a></li><li><a href="#lámina-29">Lámina 29</a></li><li><a href="#lámina-30">Lámina 30</a></li><li><a href="#lámina-31">Lámina 31</a></li><li><a href="#lámina-32">Lámina 32</a></li><li><a href="#lámina-33">Lámina 33</a></li><li><a href="#lámina-34">Lámina 34</a></li><li><a href="#lámina-35">Lámina 35</a></li><li><a href="#lámina-36">Lámina 36</a></li><li><a href="#lámina-37">Lámina 37</a></li><li><a href="#lámina-38">Lámina 38</a></li><li><a href="#lámina-39">Lámina 39</a></li><li><a href="#lámina-40">Lámina 40</a></li><li><a href="#lámina-41">Lámina 41</a></li><li><a href="#lámina-42">Lámina 42</a></li><li><a href="#lámina-43">Lámina 43</a></li></ol></nav>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Recursos complementarios, Brightspace, Unidad 3 de 5). <strong>Fuente:</strong> <code>TacticasSeguridad.pptx</code> — Bass, Clements, Kazman, <em>Software Architecture in Practice</em>, 4th ed. (citado en el propio deck). <strong>Extraído:</strong> 2026-09-30, texto de las láminas tal cual. Se tradujo del inglés con traducción automática en el deck original (hay frases torpes). <strong>Límite de la extracción:</strong> solo texto. Los diagramas, figuras y tablas dibujadas como imagen NO están; las láminas que quedan vacías o con solo título dependen de una imagen. <strong>Este archivo no se edita.</strong> Las notas y críticas van en <code>Aportes/</code>.</p></blockquote>
+<hr>
+<h2 id="lámina-1">Lámina 1</h2>
+<p>SEGURIDAD</p>
+<p>(SECURITY)</p>
+<h2 id="lámina-2">Lámina 2</h2>
+<p>Seguridad - Security</p>
+<p>La Seguridad es una medida de la capacidad del sistema para proteger los datos y la información del acceso no autorizado y al mismo tiempo proporcionar acceso a las personas y los sistemas que están autorizados. Un ataque, es decir, una acción realizada contra un sistema informático con la intención de causar daño, puede tomar varias formas. Puede tratarse de un intento no autorizado de acceder a datos o servicios o de modificar datos, o puede tener la intención de denegar servicios a usuarios legítimos.</p>
+<p>Definición</p>
+<h2 id="lámina-3">Lámina 3</h2>
+<p>Seguridad - Security</p>
+<p>El enfoque más simple para caracterizar la seguridad se centra en tres características: Confidencialidad, Integridad y Disponibilidad:</p>
+<p>La confidencialidad es la propiedad de que los datos o servicios están protegidos contra el acceso no autorizado. Por ejemplo, un pirata informático no puede acceder a sus declaraciones de impuestos sobre la renta en una computadora del gobierno.</p>
+<p>La integridad es la propiedad de que los datos o servicios no están sujetos a manipulación no autorizada. Por ejemplo, su calificación no ha cambiado desde que su instructor la asignó.</p>
+<p>La disponibilidad es la propiedad de que el sistema estará disponible para un uso legítimo. Por ejemplo, un ataque de denegación de servicio no le impedirá pedir este libro en una librería en línea.</p>
+<p>Definición</p>
+<h2 id="lámina-4">Lámina 4</h2>
+<p>Seguridad - Security</p>
+<p>Un tema muy relacionado con la seguridad es la calidad de la privacidad. Las preocupaciones sobre la privacidad se han vuelto más importantes en los últimos años y están consagradas en la ley en la Unión Europea a través del Reglamento General de Protección de Datos (GDPR). Otras jurisdicciones han adoptado regulaciones similares.</p>
+<p>Lograr la privacidad se trata de limitar el acceso a la información, lo que a su vez se trata de qué información se debe limitar el acceso y a quién se debe permitir el acceso. El término general para la información que debe mantenerse privada es información de identificación personal (PII).</p>
+<p>Privacidad</p>
+<h2 id="lámina-5">Lámina 5</h2>
+<p>Seguridad - Security</p>
+<p>El Instituto Nacional de Estándares y Tecnología (NIST) define la PII como “cualquier información sobre una persona mantenida por una agencia, incluida (1) cualquier información que pueda usarse para distinguir o rastrear la identidad de una persona, como nombre, número de seguro social, fecha y lugar de nacimiento, apellido de soltera de la madre o registros biométricos; y (2) cualquier otra información que esté vinculada o pueda vincularse a un individuo, como información médica, educativa, financiera y laboral”.</p>
+<p>Privacidad</p>
+<h2 id="lámina-6">Lámina 6</h2>
+<p>ESCENARIO</p>
+<h2 id="lámina-7">Lámina 7</h2>
+<p>Seguridad - Security</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Source</p>
+<p>The attack may be from outside the organization or from inside the organization. The source of the attack may be either a human or another system. It may have been previously identified (either correctly or incorrectly) or may be currently unknown.</p>
+<p>Human</p>
+<p>Another system</p>
+<p>which is:</p>
+<p>Inside the organization</p>
+<p>Outside the organization</p>
+<p>Previously identified</p>
+<p>Unknown</p>
+<p>Stimulus</p>
+<p>The stimulus is an attack.</p>
+<p>An unauthorized attempt to:</p>
+<p>Display data</p>
+<p>Capture data</p>
+<p>Change or delete data</p>
+<p>Access system services</p>
+<p>Change the system’s behavior</p>
+<p>Reduce availability</p>
+<h2 id="lámina-8">Lámina 8</h2>
+<p>Seguridad - Security</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Artifacts</p>
+<p>What is the target of the attack?</p>
+<p>System services</p>
+<p>Data within the system</p>
+<p>A component or resources of the system</p>
+<p>Data produced or consumed by the system</p>
+<p>Environment</p>
+<p>What is the state of the system when the attack occurs?</p>
+<p>The system is:</p>
+<p>Online or offline</p>
+<p>Connected to or disconnected from a network</p>
+<p>Behind a firewall or open to a network</p>
+<p>Fully operational</p>
+<p>Partially operational</p>
+<p>Not operational</p>
+<p>Response</p>
+<p>The system ensures that confidentiality, integrity, and availability are maintained.</p>
+<p>Transactions are carried out in a fashion such that</p>
+<h2 id="lámina-9">Lámina 9</h2>
+<p>Seguridad - Security</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response</p>
+<p>The system ensures that confidentiality, integrity, and availability are maintained.</p>
+<p>Transactions are carried out in a fashion such that</p>
+<p>Data or services are protected from unauthorized access</p>
+<p>Data or services are not being manipulated without authorization</p>
+<p>Parties to a transaction are identified with assurance</p>
+<p>The parties to the transaction cannot repudiate their involvements</p>
+<p>The data, resources, and system services will be available for legitimate use</p>
+<h2 id="lámina-10">Lámina 10</h2>
+<p>Seguridad - Security</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response</p>
+<p>The system ensures that confidentiality, integrity, and availability are maintained.</p>
+<p>The system tracks activities within it by</p>
+<p>Recording access or modification</p>
+<p>Recording attempts to access data, resources, or services</p>
+<p>Notifying appropriate entities (people or systems) when an apparent attack is occurring</p>
+<h2 id="lámina-11">Lámina 11</h2>
+<p>Seguridad - Security</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response measure</p>
+<p>Measures of a system’s response are related to the frequency of successful attacks, the time and cost to resist and repair attacks, and the consequential damage of those attacks.</p>
+<p>One or more of the following:</p>
+<p>How much of a resource is compromised or ensured</p>
+<p>Accuracy of attack detection</p>
+<p>How much time passed before an attack was detected</p>
+<p>How many attacks were resisted</p>
+<p>How long it takes to recover from a successful attack</p>
+<p>How much data is vulnerable to a particular attack</p>
+<h2 id="lámina-12">Lámina 12</h2>
+<p>Seguridad - Security</p>
+<p>Ejemplo de un Escenario concreto</p>
+<p>Un empleado descontento en una ubicación remota intenta modificar incorrectamente la tabla de tasas de pago durante las operaciones normales. Se detecta el acceso no autorizado, el sistema mantiene un registro de auditoría y los datos correctos se restauran en un día.</p>
+<h2 id="lámina-13">Lámina 13</h2>
+<p>TÁCTICAS</p>
+<h2 id="lámina-14">Lámina 14</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas</p>
+<p>Un método para pensar en cómo lograr la Seguridad en un sistema es centrarse en la seguridad física. Las instalaciones seguras solo permiten un acceso limitado a ellas (p. ej., mediante el uso de vallas y puntos de control de seguridad), tienen medios para detectar intrusos (p. ej., exigiendo que los visitantes legítimos lleven insignias), tienen mecanismos de disuasión (p. ej., con guardias armados), tienen capacidad de reacción (p. ej., cierre automático de puertas) y mecanismos de recuperación (p. ej., copia de seguridad fuera del sitio). Estos conducen a nuestras cuatro categorías de tácticas: detectar, resistir, reaccionar y recuperarse.</p>
+<h2 id="lámina-15">Lámina 15</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas</p>
+<p>Fuente: Software Architecture in Practice, 4th Edition</p>
+<h2 id="lámina-16">Lámina 16</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Detectar Ataques</p>
+<p>Detectar intrusión. Esta táctica compara el tráfico de red o los patrones de solicitud de servicios dentro de un sistema con un conjunto de firmas o patrones conocidos de comportamiento malicioso almacenados en una base de datos. Las firmas se pueden basar en las características del protocolo, las características de la solicitud, los tamaños de la carga útil, las aplicaciones, la dirección de origen o destino o el número de puerto.</p>
+<h2 id="lámina-17">Lámina 17</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Detectar Ataques</p>
+<p>Detectar denegación de servicio. Esta táctica compara el patrón o la firma del tráfico de red que ingresa a un sistema con perfiles históricos de ataques de denegación de servicio (DoS) conocidos.</p>
+<h2 id="lámina-18">Lámina 18</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Detectar Ataques</p>
+<p>Verificar la integridad del mensaje. Esta táctica emplea técnicas como sumas de verificación o valores hash para verificar la integridad de los mensajes, archivos de recursos, archivos de implementación y archivos de configuración. Una suma de verificación es un mecanismo de validación en el que el sistema mantiene por separado información redundante para archivos y mensajes, y utiliza esta información redundante para verificar el archivo o mensaje. Un valor hash es una cadena única generada por una función hash, cuya entrada puede ser archivos o mensajes. Incluso un ligero cambio en los archivos o mensajes originales da como resultado un cambio significativo en el valor hash.</p>
+<h2 id="lámina-19">Lámina 19</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Detectar Ataques</p>
+<p>Detectar anomalías en la entrega de mensajes. Esta táctica busca detectar posibles ataques de intermediarios, en los que una parte malintencionada intercepta (y posiblemente modifica) los mensajes. Si los tiempos de entrega de mensajes son normalmente estables, al verificar el tiempo que lleva entregar o recibir un mensaje, es posible detectar un comportamiento de tiempo sospechoso. Del mismo modo, un número anormal de conexiones y desconexiones puede indicar un ataque de este tipo.</p>
+<h2 id="lámina-20">Lámina 20</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Identificar actores. La identificación de actores (usuarios o computadoras remotas) se enfoca en identificar la fuente de cualquier entrada externa al sistema. Los usuarios generalmente se identifican a través de ID de usuario. Otros sistemas pueden ser "identificados" a través de códigos de acceso, direcciones IP, protocolos, puertos o algún otro medio.</p>
+<h2 id="lámina-21">Lámina 21</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Autenticar actores. La autenticación significa garantizar que un actor es realmente quien o lo que pretende ser. Las contraseñas, las contraseñas de un solo uso, los certificados digitales, la autenticación de dos factores y la identificación biométrica proporcionan un medio para la autenticación. Otro ejemplo es CAPTCHA (Prueba de Turing pública completamente automatizada para diferenciar a las computadoras de los humanos), un tipo de prueba de desafío-respuesta que se utiliza para determinar si el usuario es humano. Los sistemas pueden requerir una reautenticación periódica, como cuando su teléfono inteligente se bloquea automáticamente después de un período de inactividad.</p>
+<h2 id="lámina-22">Lámina 22</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Autorizar actores. Autorización significa garantizar que un actor autenticado tiene los derechos para acceder y modificar datos o servicios. Este mecanismo generalmente se habilita al proporcionar algunos mecanismos de control de acceso dentro de un sistema. El control de acceso se puede asignar por actor, por clase de actor o por función.</p>
+<h2 id="lámina-23">Lámina 23</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Acceso limitado. Esta táctica consiste en limitar el acceso a los recursos informáticos. Limitar el acceso puede significar restringir la cantidad de puntos de acceso a los recursos o restringir el tipo de tráfico que puede pasar a través de los puntos de acceso. Ambos tipos de límites minimizan la superficie de ataque de un sistema. Por ejemplo, una zona desmilitarizada (DMZ) se usa cuando una organización quiere permitir que los usuarios externos accedan a ciertos servicios pero no a otros. La DMZ se encuentra entre Internet y una intranet, y está protegida por un par de firewalls, uno a cada lado. El cortafuegos interno es un único punto de acceso a la intranet; funciona como un límite para el número de puntos de acceso y controla el tipo de tráfico permitido a través de la intranet.</p>
+<h2 id="lámina-24">Lámina 24</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Limite la exposición. Esta táctica se enfoca en minimizar los efectos del daño causado por una acción hostil. Es una defensa pasiva ya que no evita de forma proactiva que los atacantes hagan daño. La limitación de la exposición generalmente se realiza al reducir la cantidad de datos o servicios a los que se puede acceder a través de un único punto de acceso y, por lo tanto, se ven comprometidos en un solo ataque.</p>
+<h2 id="lámina-25">Lámina 25</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Cifrar datos. La confidencialidad generalmente se logra aplicando alguna forma de encriptación a los datos y la comunicación. El cifrado brinda protección adicional a los datos mantenidos de manera persistente más allá de la que está disponible a partir de la autorización. Los enlaces de comunicación, en comparación, pueden no tener controles de autorización. En tales casos, el cifrado es la única protección para pasar datos a través de enlaces de comunicación de acceso público. El cifrado puede ser simétrico (los lectores y escritores usan la misma clave) o asimétrico (los lectores y escritores usan claves públicas y privadas emparejadas).</p>
+<h2 id="lámina-26">Lámina 26</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Entidades separadas. La separación de diferentes entidades limita el alcance de un ataque. La separación dentro del sistema se puede realizar a través de la separación física en diferentes servidores conectados a diferentes redes, el uso de máquinas virtuales o un "espacio de aire", es decir, al no tener una conexión electrónica entre las diferentes partes de un sistema. Finalmente, los datos confidenciales se separan con frecuencia de los datos no confidenciales para reducir la posibilidad de ataques por parte de los usuarios que tienen acceso a datos no confidenciales.</p>
+<h2 id="lámina-27">Lámina 27</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Validar entrada. Limpiar y verificar la entrada a medida que la recibe un sistema, o parte de un sistema, es una importante línea de defensa inicial para resistir los ataques. Esto a menudo se implementa mediante el uso de un marco de seguridad o una clase de validación para realizar acciones como el filtrado, la canonicalización y la desinfección de la entrada. La validación de datos es la principal forma de defensa contra ataques como la inyección SQL, en la que se inserta código malicioso en sentencias SQL, y el cross-site scripting (XSS), en el que el código malicioso de un servidor se ejecuta en un cliente.</p>
+<h2 id="lámina-28">Lámina 28</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Resistir Ataques</p>
+<p>Cambiar la configuración de credenciales. Muchos sistemas tienen configuraciones de seguridad predeterminadas asignadas cuando se entrega el sistema. Obligar al usuario a cambiar esa configuración evitará que los atacantes obtengan acceso al sistema a través de configuraciones que pueden estar disponibles públicamente. De manera similar, muchos sistemas requieren que los usuarios elijan una nueva contraseña después de un período de tiempo máximo.</p>
+<h2 id="lámina-29">Lámina 29</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Reaccionar a Ataques</p>
+<p>Revocar el acceso. Si el sistema o un administrador del sistema cree que se está produciendo un ataque, el acceso puede verse severamente limitado a recursos confidenciales, incluso para usuarios y usos normalmente legítimos. Por ejemplo, si su escritorio se vio comprometido por un virus, su acceso a ciertos recursos puede estar limitado hasta que elimine el virus de su sistema.</p>
+<h2 id="lámina-30">Lámina 30</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Reaccionar a Ataques</p>
+<p>Restringir inicio de sesión. Los intentos fallidos repetitivos de inicio de sesión pueden indicar un posible ataque. Muchos sistemas limitan el acceso desde una computadora en particular si hay repetidos intentos fallidos de acceder a una cuenta desde esa computadora. Por supuesto, los usuarios legítimos pueden cometer errores al intentar iniciar sesión, por lo que el acceso limitado puede durar solo un cierto período de tiempo. En algunos casos, los sistemas duplican el período de tiempo de bloqueo después de cada intento fallido de inicio de sesión.</p>
+<h2 id="lámina-31">Lámina 31</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Reaccionar a Ataques</p>
+<p>Informar a los actores. Los ataques en curso pueden requerir la acción de los operadores, otro personal o sistemas cooperantes. Dicho personal o sistemas, el conjunto de actores relevantes, deben ser notificados cuando el sistema ha detectado un ataque.</p>
+<h2 id="lámina-32">Lámina 32</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Recuperarse de Ataques</p>
+<p>Auditoría. Auditamos los sistemas, es decir, mantenemos un registro de las acciones del usuario y del sistema y sus efectos, para ayudar a rastrear las acciones de un atacante e identificarlo. Podemos analizar las pistas de auditoría para intentar enjuiciar a los atacantes o crear mejores defensas en el futuro.</p>
+<h2 id="lámina-33">Lámina 33</h2>
+<p>Seguridad - Security</p>
+<p>Tácticas - Recuperarse de Ataques</p>
+<p>No repudio. Esta táctica garantiza que el remitente de un mensaje no pueda negar posteriormente haber enviado el mensaje y que el destinatario no pueda negar haber recibido el mensaje. Por ejemplo, no puede negarse a pedir algo por Internet, y el comerciante no puede negarse a recibir su pedido. Esto podría lograrse con alguna combinación de firmas digitales y autenticación por parte de terceros confiables.</p>
+<h2 id="lámina-34">Lámina 34</h2>
+<p>PATRONES</p>
+<h2 id="lámina-35">Lámina 35</h2>
+<p>Seguridad - Security</p>
+<p>Patrones - Intercepting Validator</p>
+<p>Validador interceptor. Este patrón inserta un elemento de software, un envoltorio, entre el origen y el destino de los mensajes. Este enfoque adquiere mayor importancia cuando la fuente de los mensajes está fuera del sistema. La responsabilidad más común de este patrón es implementar la táctica de verificación de la integridad del mensaje, pero también puede incorporar tácticas como detectar intrusiones y detectar denegación de servicio (al comparar mensajes con patrones de intrusión conocidos) o detectar anomalías en la entrega de mensajes.</p>
+<h2 id="lámina-36">Lámina 36</h2>
+<p>Seguridad - Security</p>
+<p>Patrones – Intercepting Validator</p>
+<p>Beneficios</p>
+<p>Según el validador específico que cree e implemente, este patrón puede cubrir la mayor parte de la línea de costa de la categoría de tácticas de "detección de ataques", todo en un solo paquete.</p>
+<h2 id="lámina-37">Lámina 37</h2>
+<p>Seguridad - Security</p>
+<p>Patrones – Intercepting Validator</p>
+<p>Tradeoffs</p>
+<p>Como siempre, la introducción de un intermediario exige un precio de rendimiento. Los patrones de intrusión cambian y evolucionan con el tiempo, por lo que este componente debe mantenerse actualizado para que mantenga su eficacia. Esto impone una obligación de mantenimiento a la organización responsable del sistema.</p>
+<h2 id="lámina-38">Lámina 38</h2>
+<p>Seguridad - Security</p>
+<p>Patrones - Intrusion Prevention System (IPS)</p>
+<p>Sistema de Prevención de Intrusión. Un sistema de prevención de intrusiones (IPS) es un elemento independiente cuyo objetivo principal es identificar y analizar cualquier actividad sospechosa. Si la actividad se considera aceptable, se permite. Por el contrario, si es sospechosa, la actividad se previene y denuncia. Estos sistemas buscan patrones sospechosos de uso general, no solo mensajes anómalos.</p>
+<h2 id="lámina-39">Lámina 39</h2>
+<p>Seguridad - Security</p>
+<p>Patrones - Intrusion Prevention System (IPS)</p>
+<p>Beneficios</p>
+<p>Estos sistemas pueden abarcar la mayoría de las tácticas de "detectar ataques" y "reaccionar a los ataques".</p>
+<h2 id="lámina-40">Lámina 40</h2>
+<p>Seguridad - Security</p>
+<p>Patrones - Intrusion Prevention System (IPS)</p>
+<p>Tradeoffs</p>
+<p>Los patrones de actividad que busca un IPS cambian y evolucionan con el tiempo, por lo que la base de datos de patrones debe estar constantemente actualizada.</p>
+<p>Los sistemas que emplean un IPS incurren en un costo de rendimiento.</p>
+<p>Los IPS están disponibles como componentes comerciales listos para usar, lo que hace que no sea necesario desarrollarlos, pero quizás no se adapten del todo a una aplicación específica.</p>
+<h2 id="lámina-41">Lámina 41</h2>
+<p>Seguridad - Security</p>
+<p>Lecturas Recomendadas</p>
+<p>OWASP Top Ten 2021</p>
+<p>CWE/SANS TOP 25 Most Dangerous Software Errors</p>
+<p>Fundamental Practices for Secure Software Development, Third Edition</p>
+<p>Awesome Penetration Testing</p>
+<p>SAST vs DAST What they are and when to use them</p>
+<h2 id="lámina-42">Lámina 42</h2>
+<p>Bibliografía</p>
+<p>Len Bass, Paul Clements, Rick Kazman. Software Architecture in Practice. 4th Edition. SEI / Addison-Wesley, 2022​</p>
+<h2 id="lámina-43">Lámina 43</h2>
+<p>_(sin texto: la lámina es una imagen)_</p></main>
+<footer><p>Generado desde <code>Tacticas-Seguridad.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>
