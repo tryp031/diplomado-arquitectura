@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cuaderno de estudio — Módulo 2: Requerimientos y tácticas de arquitectura</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Cuaderno de estudio — Módulo 2: Requerimientos y tácticas de arquitectura</h1>
+  <p class="meta">m2-cuaderno-estudio-danny.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#1-cómo-usar-este-cuaderno">1. Cómo usar este cuaderno</a></li><li><a href="#2-la-cadena-del-módulo">2. La cadena del módulo</a></li><li><a href="#3-requerimientos-de-calidad-y-asr">3. Requerimientos de calidad y ASR</a></li><li><a href="#4-el-escenario-de-calidad">4. El escenario de calidad</a></li><li><a href="#5-disponibilidad">5. Disponibilidad</a></li><li><a href="#6-desempeño">6. Desempeño</a></li><li><a href="#7-seguridad">7. Seguridad</a></li><li><a href="#8-interoperabilidad">8. Interoperabilidad</a></li><li><a href="#9-desplegabilidad-y-usabilidad-complementarios">9. Desplegabilidad y usabilidad (complementarios)</a></li><li><a href="#10-cada-táctica-cuesta-algo-la-matriz-de-trade-offs">10. Cada táctica cuesta algo: la matriz de trade-offs</a></li><li><a href="#11-el-reto-2-como-laboratorio">11. El Reto 2 como laboratorio</a></li><li><a href="#12-autoevaluación-responde-sin-mirar">12. Autoevaluación (responde sin mirar)</a></li><li><a href="#13-errores-y-ambigüedades-del-material-resumen">13. Errores y ambigüedades del material (resumen)</a></li><li><a href="#14-glosario-rápido">14. Glosario rápido</a></li><li><a href="#15-qué-falta-por-estudiar">15. Qué falta por estudiar</a></li></ol></nav>
+<main><div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Autor</strong></td><td>Daniel Mazo Serna (Danny), con asistencia de IA</td></tr><tr><td><strong>Fecha</strong></td><td>2026-09-30</td></tr><tr><td><strong>Módulo</strong></td><td>2 — Requerimientos y Tácticas de Arquitectura de Software</td></tr><tr><td><strong>Tipo</strong></td><td><code>apunte</code> — notas de estudio propias; <strong>no es material oficial</strong></td></tr><tr><td><strong>Fuentes</strong></td><td>Material oficial M2 (5 decks de tácticas, 4 Genially, enunciado del Reto 2) · Bass, Clements, Kazman, <em>Software Architecture in Practice</em> 4ª ed. (citado por los decks)</td></tr><tr><td><strong>Límites</strong></td><td>Falta el video de Seguridad. La autoevaluación oficial no se abrió. Los Genially se leyeron como texto plano (sin imágenes ni orden de láminas).</td></tr><tr><td><strong>Estado</strong></td><td>vigente · ⬜ sin consolidar</td></tr></tbody></table></div>
+<blockquote><p>Cada afirmación lleva su etiqueta: <strong><span class="pill b-curso">Curso</span></strong> está en el material oficial · <strong><span class="pill b-compl">Complementario</span></strong> es conocimiento externo al curso · <strong><span class="pill b-recom">Recomendación</span></strong> es criterio de arquitecto · <strong><span class="pill b-hipo">Hipótesis</span></strong> es una propuesta sin validar.</p></blockquote>
+<hr>
+<h2 id="1-cómo-usar-este-cuaderno">1. Cómo usar este cuaderno</h2>
+<h3 id="tres-pasadas-no-una">Tres pasadas, no una</h3>
+<ol><li><strong>Entender.</strong> Lee las secciones 2 a 4 sin memorizar. Meta: explicar con tus palabras qué es un ASR y cómo pasa de requisito a táctica.</li><li><strong>Aplicar.</strong> Haz la sección 11 (el Reto 2 como laboratorio) con lápiz. Meta: que cada concepto tenga un número del reto al lado.</li><li><strong>Comprobar.</strong> Responde la autoevaluación (sección 12) <strong>sin mirar</strong>, y marca lo que falló. Solo entonces abre la autoevaluación oficial.</li></ol>
+<h3 id="qué-escribir-a-mano">Qué escribir a mano</h3>
+<ul><li>La cadena <strong>ASR → escenario → táctica → patrón → trade-off</strong>, de memoria.</li><li>Las 6 partes del escenario de calidad.</li><li>La frase que el profesor echó de menos en M1: <strong>«Priorizamos X, por Y, a costa de Z.»</strong></li></ul>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> El objetivo de M2 no es memorizar listas de tácticas (hay más de 60 en los decks). Es poder, ante un requisito, decir qué atributo pesa más, qué táctica lo logra y qué se sacrifica.</p>
+<hr>
+<h2 id="2-la-cadena-del-módulo">2. La cadena del módulo</h2>
+<pre class="lang-text"><code>Requisitos funcionales ─┐
+                        ├─&gt; ASR ──&gt; Escenario de calidad ──&gt; Táctica ──&gt; Patrón ──&gt; Trade-off
+Requisitos de calidad ──┘   (los que condicionan        (medible)     (decisión    (paquete      (qué mejora
+                             la estructura)                            concreta)   de tácticas)   y qué empeora)</code></pre>
+<div class="tw"><table><thead><tr><th>Eslabón</th><th>Pregunta que responde</th><th>Dónde se ve en el reto</th></tr></thead><tbody><tr><td>ASR</td><td>¿Qué requisito de calidad condiciona la arquitectura?</td><td>Que la alerta llegue rápido y que no se pierda ningún evento</td></tr><tr><td>Escenario</td><td>¿Cómo se expresa de forma medible?</td><td>«Con 1000 eventos en 30 s, el correo llega en menos de 15 s»</td></tr><tr><td>Táctica</td><td>¿Qué decisión lo logra?</td><td>Colas acotadas, concurrencia, reintento</td></tr><tr><td>Patrón</td><td>¿Qué paquete de tácticas ya está probado?</td><td>Load balancer, circuit breaker</td></tr><tr><td>Trade-off</td><td>¿Qué sacrifico?</td><td>Durabilidad de la cola a cambio de latencia</td></tr></tbody></table></div>
+<p><strong><span class="pill b-curso">Curso</span></strong> M1 enseñó que toda decisión es un trade-off. M2 baja un nivel: dado un atributo, qué decisiones concretas lo logran.</p>
+<hr>
+<h2 id="3-requerimientos-de-calidad-y-asr">3. Requerimientos de calidad y ASR</h2>
+<h3 id="definiciones-curso">Definiciones <strong><span class="pill b-curso">Curso</span></strong></h3>
+<ul><li>Los <strong>requerimientos de calidad</strong> (no funcionales) acompañan a los funcionales y les agregan condiciones: tiempo de respuesta, disponibilidad, confiabilidad, seguridad.</li><li>Un <strong>ASR</strong> (<em>Architecturally Significant Requirement</em>) es un requisito de calidad tan crítico que <strong>condiciona la arquitectura desde el inicio</strong>.</li><li>No todos los requisitos pesan igual. Los ASR deben definirse <strong>con claridad y de forma priorizada</strong>: algunos se descartan según el contexto, <strong>«pero nunca deben quedar sin analizar»</strong>.</li></ul>
+<h3 id="cómo-identificar-un-asr-curso">Cómo identificar un ASR <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>Preguntas guía del Genially P1:</p>
+<ul><li>¿Quién es el actor y qué evento dispara la acción?</li><li>¿Bajo qué circunstancias ocurre: carga máxima, fallos del sistema, procesos simultáneos?</li><li>¿Es una acción crítica? ¿Ocurre en tiempo real o durante una transacción sensible?</li><li>¿Qué atributos implica (rapidez, seguridad, acceso continuo) y qué elementos de la arquitectura afecta?</li></ul>
+<h3 id="la-regla-de-priorización-del-curso-curso">La regla de priorización del curso <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>El ejemplo trabajado es el Reto 1 (ping → pong):</p>
+<div class="tw"><table><thead><tr><th>Atributo</th><th>Dato del escenario</th><th>Prioridad</th><th>Por qué</th></tr></thead><tbody><tr><td>Latencia</td><td>respuesta esperada 1 ms</td><td><strong>Alta</strong></td><td>El enunciado la especificó</td></tr><tr><td>Seguridad</td><td>sin cifrado</td><td>Baja</td><td>No se consideró; se documenta igual</td></tr><tr><td>Disponibilidad</td><td>90 %</td><td>Baja</td><td>No se explicitó</td></tr></tbody></table></div>
+<p><strong>Lección:</strong> el atributo se prioriza por lo que el enunciado exige. Lo demás no se ignora: <strong>se documenta como no priorizado</strong>.</p>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> Esta es la respuesta a la observación del profesor sobre M1. Una presentación debe abrir con el atributo prioritario y derivar todo de él, no justificarlo al final.</p>
+<h3 id="el-método-add-attribute-driven-design-curso">El método ADD (Attribute-Driven Design) <strong><span class="pill b-curso">Curso</span></strong></h3>
+<div class="tw"><table><thead><tr><th>Paso</th><th>Qué se hace</th></tr></thead><tbody><tr><td>1</td><td>Revisar las entradas: propósito, requisitos funcionales primarios, escenarios de calidad, restricciones, preocupaciones</td></tr><tr><td>2</td><td>Fijar el objetivo de la iteración eligiendo <em>drivers</em></td></tr><tr><td>3</td><td>Elegir elementos del sistema a refinar</td></tr><tr><td>4</td><td>Elegir conceptos de diseño (tácticas, patrones, arquitecturas de referencia, componentes externos). <strong>Es la decisión más difícil</strong></td></tr><tr><td>5</td><td>Instanciar elementos, asignar responsabilidades y definir interfaces</td></tr><tr><td>6</td><td>Diagramar las vistas y registrar las decisiones <strong>con su justificación y los trade-offs</strong></td></tr><tr><td>7</td><td>Analizar el diseño (idealmente con otra persona) y decidir si hacen falta más iteraciones</td></tr></tbody></table></div>
+<ul><li>Los <strong>drivers</strong> son los ASR más la funcionalidad, las restricciones, las preocupaciones y el propósito del diseño.</li><li>Criterio para detenerse: <strong>«deje que el riesgo sea su guía»</strong>. Las iteraciones terminan cuando el diseño es «suficientemente bueno» para los drivers críticos.</li></ul>
+<hr>
+<h2 id="4-el-escenario-de-calidad">4. El escenario de calidad</h2>
+<h3 id="las-6-partes-curso">Las 6 partes <strong><span class="pill b-curso">Curso</span></strong></h3>
+<div class="tw"><table><thead><tr><th>Parte</th><th>Pregunta</th><th>Ejemplo (deck de Desempeño)</th></tr></thead><tbody><tr><td>Fuente</td><td>¿Quién o qué origina el estímulo?</td><td>500 usuarios</td></tr><tr><td>Estímulo</td><td>¿Qué llega?</td><td>2000 solicitudes en 30 s</td></tr><tr><td>Artefacto</td><td>¿Qué parte del sistema?</td><td>el sistema completo</td></tr><tr><td>Entorno</td><td>¿En qué estado está?</td><td>condiciones normales</td></tr><tr><td>Respuesta</td><td>¿Qué hace el sistema?</td><td>procesa todas las solicitudes</td></tr><tr><td>Medida de respuesta</td><td>¿Cómo se verifica?</td><td>latencia promedio de 2 s</td></tr></tbody></table></div>
+<ul><li>El Genially P1 usa otros nombres para lo mismo: <em>Actor, Estímulo, Ambiente, Artefacto, Respuesta esperada</em>, más <em>Unidad</em> y <em>Prioridad</em>. <strong><span class="pill b-recom">Recomendación</span></strong> Elige un solo vocabulario en el entregable.</li><li><strong>Tres estados de operación <span class="pill b-curso">Curso</span>:</strong> <em>normal</em>, <em>estrés o alta carga</em> (el sistema opera a su máxima capacidad) y <em>operación mínima</em> (estado degradado, solo lo vital).</li></ul>
+<h3 id="un-escenario-útil-pide-percentil-complementario">Un escenario útil pide percentil <strong><span class="pill b-compl">Complementario</span></strong></h3>
+<p>El ejemplo del deck usa «latencia promedio». En M1 se comprobó que el promedio esconde la cola. Un escenario bien hecho especifica <strong>percentil y condiciones de carga</strong>: «p95 &lt; 15 s con 35 req/s».</p>
+<h3 id="plantilla-para-copiar">Plantilla para copiar</h3>
+<div class="tw"><table><thead><tr><th>Parte</th><th>Tu escenario</th></tr></thead><tbody><tr><td>Fuente</td><td></td></tr><tr><td>Estímulo</td><td></td></tr><tr><td>Artefacto</td><td></td></tr><tr><td>Entorno</td><td></td></tr><tr><td>Respuesta</td><td></td></tr><tr><td>Medida de respuesta (con percentil)</td><td></td></tr></tbody></table></div>
+<hr>
+<h2 id="5-disponibilidad">5. Disponibilidad</h2>
+<h3 id="defecto-error-falla-curso">Defecto, error, falla <strong><span class="pill b-curso">Curso</span></strong></h3>
+<div class="tw"><table><thead><tr><th>Término</th><th>Significado</th><th>Ejemplo</th></tr></thead><tbody><tr><td><strong>Defecto</strong> (<em>fault</em>)</td><td>La causa</td><td>Un disco con sectores dañados</td></tr><tr><td><strong>Error</strong></td><td>Estado intermedio entre defecto y falla</td><td>El sistema lee datos corruptos pero sigue respondiendo</td></tr><tr><td><strong>Falla</strong> (<em>failure</em>)</td><td>Desviación de la especificación, <strong>visible desde fuera</strong></td><td>El usuario no puede guardar su pedido</td></tr></tbody></table></div>
+<p>La disponibilidad es la capacidad de <strong>enmascarar o reparar defectos para que no se conviertan en fallas</strong>, de modo que el tiempo de interrupción acumulado no supere un valor requerido en un intervalo dado. Los defectos se pueden prevenir, tolerar, eliminar o pronosticar.</p>
+<h3 id="cuánto-es-un-nueve-complementario">Cuánto es «un nueve» <strong><span class="pill b-compl">Complementario</span></strong></h3>
+<div class="tw"><table><thead><tr><th>Disponibilidad</th><th>Indisponibilidad por año</th></tr></thead><tbody><tr><td>99 %</td><td>≈ 3,65 días</td></tr><tr><td>99,9 %</td><td>≈ 8,8 horas</td></tr><tr><td>99,99 %</td><td>≈ 52,6 minutos</td></tr><tr><td>99,999 %</td><td>≈ 5,3 minutos</td></tr></tbody></table></div>
+<p>El deck dice que «alta disponibilidad» suele ser 99,999 % o más. <strong><span class="pill b-recom">Recomendación</span></strong> Antes de dar el número, define <strong>qué cuenta como tiempo de inactividad</strong>: los decks excluyen el mantenimiento programado, pero para el usuario sigue sin estar disponible.</p>
+<h3 id="relación-con-otros-atributos-curso">Relación con otros atributos <strong><span class="pill b-curso">Curso</span></strong></h3>
+<ul><li><strong>Con seguridad:</strong> un ataque de denegación de servicio busca precisamente que el sistema no esté disponible.</li><li><strong>Con desempeño:</strong> es difícil distinguir un sistema caído de uno extremadamente lento.</li></ul>
+<h3 id="tácticas-curso-tres-propósitos-detectar-recuperar-prevenir">Tácticas <strong><span class="pill b-curso">Curso</span></strong> — tres propósitos: detectar, recuperar, prevenir</h3>
+<div class="tw"><table><thead><tr><th>Familia</th><th>Tácticas</th></tr></thead><tbody><tr><td><strong>Detectar fallas</strong></td><td>Monitor · Ping/Echo · Heartbeat · Timestamp · Condition monitoring · Sanity checking · Voting · Exception detection · Self-test</td></tr><tr><td><strong>Recuperar: preparación y reparación</strong></td><td>Redundant spare · Rollback · Exception handling · Software upgrade · <strong>Retry</strong> · Graceful degradation</td></tr><tr><td><strong>Recuperar: reintroducción</strong></td><td>Shadow · Nonstop forwarding</td></tr><tr><td><strong>Prevenir</strong></td><td>Removal from service · Transactions · Predictive model · Exception prevention · Increase competence set</td></tr></tbody></table></div>
+<p><strong>Patrones <span class="pill b-curso">Curso</span>:</strong> <em>hot spare</em> (redundancia activa), <em>warm spare</em> (pasiva), <em>cold spare</em>, <strong>TMR</strong> (tres réplicas que votan) y <strong>Circuit breaker</strong>. El costo de cualquier repuesto redundante es el costo de tener recursos duplicados.</p>
+<p><strong><span class="pill b-compl">Complementario</span></strong> <em>Retry</em> sin <em>circuit breaker</em> puede empeorar una caída: cada cliente reintenta y multiplica la carga sobre el servicio que ya está débil.</p>
+<hr>
+<h2 id="6-desempeño">6. Desempeño</h2>
+<h3 id="se-trata-del-tiempo-curso">Se trata del tiempo <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>«<em>It's about time</em>»: es la capacidad de cumplir requisitos de tiempo. Órdenes de magnitud del deck:</p>
+<div class="tw"><table><thead><tr><th>Operación</th><th>Tiempo</th></tr></thead><tbody><tr><td>Cálculo</td><td>miles de nanosegundos</td></tr><tr><td>Red dentro de un mismo centro de datos</td><td>cientos de microsegundos</td></tr><tr><td>Red intercontinental</td><td>más de 100 ms</td></tr><tr><td>Acceso a disco</td><td>decenas de milisegundos</td></tr></tbody></table></div>
+<p><strong>Concurrencia:</strong> ocurre cada vez que el sistema crea un subproceso o corre en más de un procesador. Es de los conceptos que más debe entender un arquitecto.</p>
+<h3 id="por-qué-tarda-una-respuesta-curso">Por qué tarda una respuesta <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>Procesamiento y uso de recursos · bloqueo por contención de recursos · dependencia de otros cálculos.</p>
+<h3 id="tácticas-curso-dos-grandes-familias">Tácticas <strong><span class="pill b-curso">Curso</span></strong> — dos grandes familias</h3>
+<div class="tw"><table><thead><tr><th>Familia</th><th>Tácticas</th></tr></thead><tbody><tr><td><strong>Controlar la demanda</strong></td><td>Gestionar solicitudes de trabajo · Limitar la respuesta al evento · <strong>Priorizar eventos</strong> · Reducir la sobrecarga computacional · Tiempos de ejecución acotados · Aumentar la eficiencia de los recursos</td></tr><tr><td><strong>Gestionar recursos</strong></td><td>Aumentar recursos · <strong>Introducir concurrencia</strong> · Múltiples copias de cómputo · Múltiples copias de datos (caché) · <strong>Colas de tamaño limitado</strong> · Programar recursos</td></tr></tbody></table></div>
+<p><strong>Patrones <span class="pill b-curso">Curso</span>:</strong> Service mesh · Load balancer · Map-Reduce. El deck también trae una lámina de tipos de pruebas (sin texto en lo capturado).</p>
+<h3 id="la-cuenta-que-hay-que-saber-hacer-complementario">La cuenta que hay que saber hacer <strong><span class="pill b-compl">Complementario</span></strong></h3>
+<p><strong>Ley de Little:</strong> <code>concurrencia ≈ llegadas por segundo × duración de cada una</code>. Con 35 req/s y 0,18 s por petición se necesitan ≈ 6 en paralelo. Con 0,5 s por petición son ≈ 18. Esa aritmética decide si un límite de 10 instancias alcanza.</p>
+<hr>
+<h2 id="7-seguridad">7. Seguridad</h2>
+<p><strong>El video de este tema no se capturó.</strong> Lo de abajo sale del deck.</p>
+<h3 id="definición-y-las-tres-características-curso">Definición y las tres características <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>Capacidad de proteger datos e información del acceso no autorizado, sin negarlo a quien sí está autorizado. Se caracteriza por <strong>Confidencialidad, Integridad y Disponibilidad</strong>. El módulo también cubre privacidad y regulaciones como GDPR para información de identificación personal (PII).</p>
+<h3 id="tácticas-curso-la-analogía-del-edificio-físico">Tácticas <strong><span class="pill b-curso">Curso</span></strong> — la analogía del edificio físico</h3>
+<div class="tw"><table><thead><tr><th>Familia</th><th>Tácticas</th></tr></thead><tbody><tr><td><strong>Detectar ataques</strong></td><td>Detectar intrusión · Detectar denegación de servicio · Verificar integridad del mensaje · Detectar anomalías en la entrega de mensajes</td></tr><tr><td><strong>Resistir ataques</strong></td><td>Identificar actores · Autenticar · Autorizar · Acceso limitado · Limitar la exposición · <strong>Cifrar datos</strong> · Entidades separadas · <strong>Validar entrada</strong> · Cambiar configuración de credenciales</td></tr><tr><td><strong>Reaccionar</strong></td><td>Revocar acceso · Restringir inicio de sesión · Informar a los actores</td></tr><tr><td><strong>Recuperarse</strong></td><td>Auditoría · No repudio</td></tr></tbody></table></div>
+<p><strong>Patrones <span class="pill b-curso">Curso</span>:</strong> Intercepting validator, Intrusion Prevention System (IPS). Lecturas: OWASP Top Ten 2021, CWE/SANS Top 25, SAST vs DAST.</p>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> <em>Safety</em> (evitar estados peligrosos) y <em>security</em> (proteger información) son atributos distintos en Bass. La traducción al español del deck de Disponibilidad los mezcla bajo «seguridad».</p>
+<hr>
+<h2 id="8-interoperabilidad">8. Interoperabilidad</h2>
+<h3 id="definición-curso">Definición <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>Capacidad de un sistema de interactuar con otros <strong>independientemente de sus tecnologías, lenguajes, plataformas o protocolos</strong>. No basta con comunicarse: <strong>el receptor debe entender y procesar</strong> la información.</p>
+<h3 id="tácticas-curso-tres-categorías">Tácticas <strong><span class="pill b-curso">Curso</span></strong> — tres categorías</h3>
+<div class="tw"><table><thead><tr><th>Categoría</th><th>Idea</th><th>Variantes</th></tr></thead><tbody><tr><td><strong>Discover services</strong></td><td>Cómo encuentran y acceden a servicios en un entorno distribuido</td><td>Descubrimiento de servicios</td></tr><tr><td><strong>Orchestrate</strong></td><td>Cómo se coordinan varios servicios para una tarea compleja</td><td>Control <strong>centralizado</strong> (un orquestador) o <strong>descentralizado</strong> · monitoreo y gestión del flujo</td></tr><tr><td><strong>Tailor interface</strong></td><td>Cómo se adaptan las interfaces entre sistemas heterogéneos</td><td>Transformación de datos · Adaptadores · Interfaces estandarizadas</td></tr></tbody></table></div>
+<p><strong>Ejemplo del curso:</strong> un hospital integra gestión de pacientes, facturación, laboratorios externos y portal de citas con formato HL7. Medidas: el sistema procesa y almacena en menos de 2 s, sin ajustes manuales y sin errores de integración.</p>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> Este ejemplo es de salud. El diplomado tiene sesgo financiero: el mismo razonamiento aplica a integraciones bancarias.</p>
+<hr>
+<h2 id="9-desplegabilidad-y-usabilidad-complementarios">9. Desplegabilidad y usabilidad (complementarios)</h2>
+<p>No figuran en el temario declarado; vienen como decks de Recursos complementarios. <strong><span class="pill b-recom">Recomendación</span></strong> Estudio ligero, solo lo esencial.</p>
+<div class="tw"><table><thead><tr><th>Atributo</th><th>Familias</th><th>Patrones</th></tr></thead><tbody><tr><td><strong>Desplegabilidad</strong></td><td>Gestionar el pipeline (despliegues escalonados, rollback, scripts) · Gestionar el sistema desplegado (versiones, dependencias, <strong>feature toggle</strong>)</td><td>Microservicios · Blue/green · Rolling · Canary · A/B</td></tr><tr><td><strong>Usabilidad</strong></td><td>Iniciativa del usuario (cancelar, deshacer, pausar) · Iniciativa del sistema (modelos de tarea, usuario, sistema)</td><td>MVC · Observer · Memento</td></tr></tbody></table></div>
+<hr>
+<h2 id="10-cada-táctica-cuesta-algo-la-matriz-de-trade-offs">10. Cada táctica cuesta algo: la matriz de trade-offs</h2>
+<p>Esta tabla es la que faltó en la sustentación de M1. <strong><span class="pill b-recom">Recomendación</span></strong> Complétala tú; aquí van ejemplos resueltos.</p>
+<div class="tw"><table><thead><tr><th>Decisión</th><th>Mejora</th><th>Empeora</th></tr></thead><tbody><tr><td>Cola entre la entrada y el procesamiento</td><td>Disponibilidad (no se pierde el evento), desempeño de la ingesta</td><td>Latencia extremo a extremo; complejidad; posibles duplicados</td></tr><tr><td>Reintentos</td><td>Disponibilidad ante fallas transitorias</td><td>Carga durante una caída; latencia del peor caso</td></tr><tr><td>Redundancia activa (<em>hot spare</em>)</td><td>Disponibilidad, tiempo de recuperación</td><td>Costo</td></tr><tr><td>Caché (múltiples copias de datos)</td><td>Desempeño</td><td>Consistencia de los datos</td></tr><tr><td>Limitar tasa (<em>throttling</em>)</td><td>Protege al sistema, desempeño estable</td><td>Rechaza tráfico legítimo si el límite es bajo</td></tr><tr><td>Cifrar datos</td><td>Seguridad (confidencialidad)</td><td>Desempeño</td></tr><tr><td>Entidades separadas</td><td>Seguridad, disponibilidad (aísla fallas)</td><td>Desempeño (más saltos), operación</td></tr><tr><td>Memoria compartida en vez de red (M1)</td><td>Desempeño</td><td>Disponibilidad, seguridad, desplegabilidad</td></tr></tbody></table></div>
+<hr>
+<h2 id="11-el-reto-2-como-laboratorio">11. El Reto 2 como laboratorio</h2>
+<p><strong><span class="pill b-curso">Curso</span></strong> Sistema de alerta temprana para una flota vehicular: recibir 1000 eventos en 30 s, detectar <code>Emergency</code> y mandar un correo a Gmail. Restricciones: API Gateway a 15 req/s, máximo 10 instancias simultáneas. El diseño completo y las opciones están en <code>m2-analisis-apertura-danny.md</code> §5.</p>
+<h3 id="ejercicios-para-estudiar-con-el-reto">Ejercicios para estudiar con el reto</h3>
+<ol><li><strong>Escribe el escenario de calidad</strong> de la latencia de la alerta con las 6 partes, y cuál es su medida.</li><li><strong>Escribe el escenario de «no perder ningún evento»</strong>. ¿Qué atributo es y por qué tiene prioridad alta según la regla del curso?</li><li><strong>Calcula</strong> el ritmo real del k6: 1000 peticiones en 30 s. ¿Cuánto es frente al límite de 15 req/s? ¿Qué parámetro del API Gateway lo hace posible?</li><li><strong>Aplica la ley de Little</strong> con dos duraciones por petición (0,2 s y 0,5 s). ¿Alcanzan 10 instancias?</li><li><strong>Elige el atributo más importante</strong> y completa la frase: «Priorizamos ___, por ___, a costa de ___.»</li><li><strong>Lista tres atributos no priorizados</strong> y su justificación. Es lo que pide la regla del Genially P1.</li></ol>
+<h3 id="lo-que-hay-que-verificar-antes-de-diseñar-hipótesis">Lo que hay que verificar antes de diseñar <strong><span class="pill b-hipo">Hipótesis</span></strong></h3>
+<ul><li>El valor real del <em>burst</em> del API Gateway en nuestra cuenta (el enunciado muestra 2000 pero dice «por defecto»).</li><li>Qué proporción de los eventos del k6 son <code>Emergency</code> (el script no está disponible).</li><li>Las cuotas de envío de correo y el tiempo de salida del <em>sandbox</em> del servicio de correo.</li></ul>
+<hr>
+<h2 id="12-autoevaluación-responde-sin-mirar">12. Autoevaluación (responde sin mirar)</h2>
+<p><strong>Preguntas</strong></p>
+<ol><li>¿Qué convierte a un requisito en un ASR?</li><li>Nombra las 6 partes de un escenario de calidad.</li><li>Diferencia defecto, error y falla con un ejemplo.</li><li>¿Por qué un ASR puede tener prioridad baja y aun así debe documentarse?</li><li>¿Cuántas horas al año de inactividad permite 99,9 %?</li><li>¿Cuáles son los tres propósitos de las tácticas de disponibilidad?</li><li>¿Por qué <em>retry</em> sin <em>circuit breaker</em> puede agravar una caída?</li><li>Enuncia la ley de Little y úsala con 35 req/s y 0,5 s.</li><li>Da dos tácticas de «controlar la demanda» y dos de «gestionar recursos».</li><li>¿Cuáles son las cuatro familias de tácticas de seguridad y qué es una táctica de «resistir ataques»?</li><li>¿Qué tres categorías tienen las tácticas de interoperabilidad?</li><li>¿Qué diferencia hay entre orquestación centralizada y descentralizada?</li><li>¿Qué pasa con la seguridad cuando priorizas desempeño extremo?</li><li>¿Por qué el promedio es una mala medida de respuesta?</li><li>En el Reto 2, ¿por qué el camino que responde al cliente no debe esperar el envío del correo?</li></ol>
+<p><strong>Respuestas</strong></p>
+<ol><li>Es un requisito de calidad tan crítico que condiciona la estructura desde el inicio (P1). Se identifica con las preguntas guía: actor, evento, circunstancias, atributos y elementos afectados.</li><li>Fuente, estímulo, artefacto, entorno, respuesta y medida de respuesta.</li><li>Defecto = causa (un disco dañado); error = estado intermedio (lectura corrupta pero el sistema sigue); falla = desviación visible (el usuario no puede guardar).</li><li>Porque el enunciado no lo especificó o no se consideró. La regla del curso exige documentarlo como no priorizado: «nunca deben quedar sin analizar».</li><li>≈ 8,8 horas (0,1 % de 8760 h).</li><li>Detectar, recuperar y prevenir fallas.</li><li>Cada cliente reintenta y multiplica la carga sobre un servicio ya debilitado. El <em>circuit breaker</em> corta los intentos hasta que se recupere.</li><li><code>concurrencia ≈ llegadas/s × duración</code>. 35 × 0,5 ≈ 17,5 simultáneas.</li><li>Controlar demanda: priorizar eventos, tiempos de ejecución acotados. Gestionar recursos: introducir concurrencia, colas de tamaño limitado.</li><li>Detectar, resistir, reaccionar y recuperarse de ataques. «Resistir» evita que el ataque prospere: identificar, autenticar y autorizar actores, limitar acceso y exposición, cifrar, separar entidades, validar entrada.</li><li>Discover services, Orchestrate y Tailor interface.</li><li>Centralizada: un componente (orquestador) controla la secuencia. Descentralizada: los propios servicios se coordinan con reglas predefinidas.</li><li>Suele sacrificarse: cifrar cuesta tiempo y las fronteras de red (entidades separadas) añaden saltos. Es un trade-off a declarar, no a ocultar.</li><li>Oculta la cola de la distribución. Un escenario debe pedir percentil y condiciones de carga.</li><li>Porque cada segundo que espera consume una instancia de las 10 permitidas (ley de Little). Si se agotan, las peticiones se rechazan y se pierde el «100 % procesadas».</li></ol>
+<hr>
+<h2 id="13-errores-y-ambigüedades-del-material-resumen">13. Errores y ambigüedades del material (resumen)</h2>
+<p>El detalle está en <code>m2-analisis-apertura-danny.md</code> §3. Lo esencial <strong><span class="pill b-recom">Recomendación</span></strong>:</p>
+<ul><li>Hay <strong>dos rúbricas oficiales</strong> del Reto 2 que no coinciden (PDF y Brightspace).</li><li>El deck de Disponibilidad mezcla <em>safety</em> y <em>security</em> bajo la palabra «seguridad».</li><li>El Genially P5 (interoperabilidad) conserva el marcador «AQUí va la imagen» y un bloque de ADD pegado que no le pertenece.</li><li>El objetivo del reto dice «menos de 30 s» pero la rúbrica puntúa con cortes en 15 y 45 s.</li><li>El tiempo del correo incluye la entrega de Gmail, que no controlamos.</li></ul>
+<p><strong>Lleva estas dudas al encuentro del 06/10 como preguntas, no como correcciones.</strong></p>
+<hr>
+<h2 id="14-glosario-rápido">14. Glosario rápido</h2>
+<div class="tw"><table><thead><tr><th>Término</th><th>Definición breve</th></tr></thead><tbody><tr><td><strong>ASR</strong></td><td>Requisito arquitecturalmente significativo: condiciona la estructura desde el inicio</td></tr><tr><td><strong>Atributo de calidad</strong></td><td>Propiedad medible del sistema (latencia, disponibilidad, seguridad…)</td></tr><tr><td><strong>Escenario de calidad</strong></td><td>Forma medible de un requisito: fuente, estímulo, artefacto, entorno, respuesta, medida</td></tr><tr><td><strong>Táctica</strong></td><td>Decisión de diseño que influye en un atributo</td></tr><tr><td><strong>Patrón</strong></td><td>Paquete probado de tácticas y estructura</td></tr><tr><td><strong>Driver</strong></td><td>Entrada del diseño: ASR, funcionalidad, restricciones, preocupaciones, propósito</td></tr><tr><td><strong>ADD</strong></td><td>Attribute-Driven Design: método iterativo de 7 pasos</td></tr><tr><td><strong>Defecto / Error / Falla</strong></td><td>Causa / estado intermedio / desviación visible</td></tr><tr><td><strong>Hot / warm / cold spare</strong></td><td>Repuesto activo / pasivo / apagado</td></tr><tr><td><strong>TMR</strong></td><td>Triple Modular Redundancy: tres réplicas que votan el resultado</td></tr><tr><td><strong>Circuit breaker</strong></td><td>Corta las llamadas a un servicio fallido hasta que se recupere</td></tr><tr><td><strong>Throttling</strong></td><td>Limitar la tasa de peticiones aceptadas</td></tr><tr><td><strong>Burst</strong></td><td>Tamaño del cubo de tokens: cuántas peticiones seguidas se absorben por encima de la tasa</td></tr><tr><td><strong>Ley de Little</strong></td><td>Concurrencia ≈ tasa de llegada × duración</td></tr><tr><td><strong>Percentil (p95)</strong></td><td>Valor por debajo del cual cae el 95 % de las mediciones</td></tr><tr><td><strong>Orquestación</strong></td><td>Coordinación de servicios por un componente central</td></tr><tr><td><strong>HL7</strong></td><td>Formato de intercambio de datos de salud (ejemplo del curso)</td></tr><tr><td><strong>Safety / Security</strong></td><td>Evitar estados peligrosos / proteger la información</td></tr><tr><td><strong>PII</strong></td><td>Información de identificación personal</td></tr><tr><td><strong>k6</strong></td><td>Herramienta de pruebas de carga usada en el reto</td></tr></tbody></table></div>
+<hr>
+<h2 id="15-qué-falta-por-estudiar">15. Qué falta por estudiar</h2>
+<ul><li>El <strong>video de Seguridad</strong> (youtu.be/MbUXkPdKaGw).</li><li>Los <strong>descriptores de la rúbrica de Brightspace</strong>, que vienen vacíos.</li><li>La <strong>autoevaluación oficial</strong>: dejarla para después de las secciones 11 y 12.</li><li>Las lecturas complementarias: OWASP, AWS DR (×4), Fowler (×2), canary.</li></ul></main>
+<footer><p>Generado desde <code>m2-cuaderno-estudio-danny.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

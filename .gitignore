@@ -41,3 +41,8 @@ venv/
 
 # --- Empaquetados regenerables ---
 *.zip
+
+# --- Decks oficiales M2 (~23 MB) ---
+# Se versiona el texto extraido (Material-Clase/Tacticas-*.md); los .pptx se bajan de
+# Brightspace (Recursos complementarios) y quedan solo en local.
+**/Material-Clase/*.pptx

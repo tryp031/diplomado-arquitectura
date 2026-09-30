@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tácticas de Usabilidad — deck oficial del Módulo 2</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Tácticas de Usabilidad — deck oficial del Módulo 2</h1>
+  <p class="meta">Tacticas-Usabilidad.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#lámina-1">Lámina 1</a></li><li><a href="#lámina-2">Lámina 2</a></li><li><a href="#lámina-3">Lámina 3</a></li><li><a href="#lámina-4">Lámina 4</a></li><li><a href="#lámina-5">Lámina 5</a></li><li><a href="#lámina-6">Lámina 6</a></li><li><a href="#lámina-7">Lámina 7</a></li><li><a href="#lámina-8">Lámina 8</a></li><li><a href="#lámina-9">Lámina 9</a></li><li><a href="#lámina-10">Lámina 10</a></li><li><a href="#lámina-11">Lámina 11</a></li><li><a href="#lámina-12">Lámina 12</a></li><li><a href="#lámina-13">Lámina 13</a></li><li><a href="#lámina-14">Lámina 14</a></li><li><a href="#lámina-15">Lámina 15</a></li><li><a href="#lámina-16">Lámina 16</a></li><li><a href="#lámina-17">Lámina 17</a></li><li><a href="#lámina-18">Lámina 18</a></li><li><a href="#lámina-19">Lámina 19</a></li><li><a href="#lámina-20">Lámina 20</a></li><li><a href="#lámina-21">Lámina 21</a></li><li><a href="#lámina-22">Lámina 22</a></li><li><a href="#lámina-23">Lámina 23</a></li><li><a href="#lámina-24">Lámina 24</a></li><li><a href="#lámina-25">Lámina 25</a></li><li><a href="#lámina-26">Lámina 26</a></li><li><a href="#lámina-27">Lámina 27</a></li><li><a href="#lámina-28">Lámina 28</a></li><li><a href="#lámina-29">Lámina 29</a></li><li><a href="#lámina-30">Lámina 30</a></li><li><a href="#lámina-31">Lámina 31</a></li><li><a href="#lámina-32">Lámina 32</a></li></ol></nav>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Recursos complementarios, Brightspace, Unidad 3 de 5). <strong>Fuente:</strong> <code>TacticasUsabilidad.pptx</code> — Bass, Clements, Kazman, <em>Software Architecture in Practice</em>, 4th ed. (citado en el propio deck). <strong>Extraído:</strong> 2026-09-30, texto de las láminas tal cual. Se tradujo del inglés con traducción automática en el deck original (hay frases torpes). <strong>Límite de la extracción:</strong> solo texto. Los diagramas, figuras y tablas dibujadas como imagen NO están; las láminas que quedan vacías o con solo título dependen de una imagen. <strong>Este archivo no se edita.</strong> Las notas y críticas van en <code>Aportes/</code>.</p></blockquote>
+<hr>
+<h2 id="lámina-1">Lámina 1</h2>
+<p>USABILIDAD</p>
+<p>(USABILITY)</p>
+<h2 id="lámina-2">Lámina 2</h2>
+<p>Usabilidad - Usability</p>
+<p>La Usabilidad se refiere a qué tan fácil es para el usuario realizar una tarea deseada y el tipo de soporte al usuario que proporciona el sistema. A lo largo de los años, un enfoque en la usabilidad ha demostrado ser una de las formas más baratas y fáciles de mejorar la calidad de un sistema (o más precisamente, la percepción de la calidad por parte del usuario) y, por lo tanto, la satisfacción del usuario final.</p>
+<p>Definición</p>
+<h2 id="lámina-3">Lámina 3</h2>
+<p>Usabilidad - Usability</p>
+<p>Características del sistema de aprendizaje. Si el usuario no está familiarizado con un sistema en particular o un aspecto particular del mismo, ¿qué puede hacer el sistema para facilitar la tarea de aprender? Esto podría incluir proporcionar funciones de ayuda.</p>
+<p>Usar un sistema de manera eficiente. ¿Qué puede hacer el sistema para que el usuario sea más eficiente en su funcionamiento? Esto podría incluir permitir que el usuario redirija el sistema después de emitir un comando. Por ejemplo, el usuario puede desear suspender una tarea, realizar varias operaciones y luego reanudar esa tarea.</p>
+<p>Definición</p>
+<h2 id="lámina-4">Lámina 4</h2>
+<p>Usabilidad - Usability</p>
+<p>Minimizar el impacto de los errores de los usuarios. ¿Qué puede hacer el sistema para garantizar que un error de usuario tenga un impacto mínimo? Por ejemplo, el usuario puede querer cancelar un comando emitido incorrectamente o deshacer sus efectos.</p>
+<p>Adaptación del sistema a las necesidades del usuario. ¿Cómo puede el usuario (o el propio sistema) adaptarse para facilitar la tarea del usuario? Por ejemplo, el sistema puede completar automáticamente las URL en función de las entradas anteriores de un usuario.</p>
+<p>Definición</p>
+<h2 id="lámina-5">Lámina 5</h2>
+<p>Usabilidad - Usability</p>
+<p>Aumento de la confianza y la satisfacción. ¿Qué hace el sistema para darle al usuario la confianza de que se está tomando la acción correcta? Por ejemplo, proporcionar comentarios que indiquen que el sistema está realizando una tarea de larga duración, junto con el porcentaje de finalización hasta el momento, aumentará la confianza del usuario en el sistema.</p>
+<p>Definición</p>
+<h2 id="lámina-6">Lámina 6</h2>
+<p>ESCENARIO</p>
+<h2 id="lámina-7">Lámina 7</h2>
+<p>Usabilidad - Usability</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Source</p>
+<p>Where does the stimulus come from?</p>
+<p>The end user (who may be in a specialized role, such as a system or network administrator) is the primary source of the stimulus for usability.</p>
+<p>An external event arriving at a system (to which the user may react) may also be a stimulus source.</p>
+<p>Stimulus</p>
+<p>What does the end user want?</p>
+<p>End user wants to:</p>
+<p>Use a system efficiently</p>
+<p>Learn to use the system</p>
+<p>Minimize the impact of errors</p>
+<p>Adapt the system</p>
+<p>Configure the system</p>
+<h2 id="lámina-8">Lámina 8</h2>
+<p>Usabilidad - Usability</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Artifacts</p>
+<p>What portion of the system is being stimulated?</p>
+<p>Common examples include:</p>
+<p>A GUI</p>
+<p>A command-line interface</p>
+<p>A voice interface</p>
+<p>A touch screen</p>
+<p>Environment</p>
+<p>When does the stimulus reach the system?</p>
+<p>The user actions with which usability is concerned always occur at runtime or at system configuration time.</p>
+<p>Response</p>
+<p>How should the system respond?</p>
+<p>The system should:</p>
+<p>Provide the user with the features needed</p>
+<p>Anticipate the user’s needs</p>
+<p>Provide appropriate feedback to the user</p>
+<h2 id="lámina-9">Lámina 9</h2>
+<p>Usabilidad - Usability</p>
+<p>Escenario General</p>
+<p>Portion of Scenario</p>
+<p>Description</p>
+<p>Possible Values</p>
+<p>Response measure</p>
+<p>How is the response measured?</p>
+<p>One or more of the following:</p>
+<p>Task time</p>
+<p>Number of errors</p>
+<p>Learning time</p>
+<p>Ratio of learning time to task time</p>
+<p>Number of tasks accomplished</p>
+<p>User satisfaction</p>
+<p>Gain of user knowledge</p>
+<p>Ratio of successful operations to total operations</p>
+<p>Amount of time or data lost when an error occurs</p>
+<h2 id="lámina-10">Lámina 10</h2>
+<p>Usabilidad - Usability</p>
+<p>Ejemplo de un Escenario concreto</p>
+<p>El usuario descarga una nueva aplicación y la usa productivamente después de 2 minutos de experimentación.</p>
+<h2 id="lámina-11">Lámina 11</h2>
+<p>TÁCTICAS</p>
+<h2 id="lámina-12">Lámina 12</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas</p>
+<h2 id="lámina-13">Lámina 13</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas</p>
+<p>Fuente: Software Architecture in Practice, 4th Edition</p>
+<h2 id="lámina-14">Lámina 14</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa de Usuario</p>
+<p>Cancelar. Cuando el usuario emite un comando de cancelación, el sistema debe estar escuchando (por lo tanto, existe la responsabilidad de tener un oyente constante que no esté bloqueado por las acciones de lo que sea que se esté cancelando); la actividad que se cancela debe ser terminada; cualquier recurso que esté siendo utilizado por la actividad cancelada debe ser liberado; y los componentes que estén colaborando con la actividad cancelada deberán ser informados para que ellos también tomen las medidas correspondientes.</p>
+<h2 id="lámina-15">Lámina 15</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa de Usuario</p>
+<p>Deshacer. Para admitir la capacidad de deshacer, el sistema debe mantener una cantidad suficiente de información sobre el estado del sistema para que se pueda restaurar un estado anterior, a pedido del usuario. Tal registro puede tomar la forma de "instantáneas" de estado, por ejemplo, puntos de control, o un conjunto de operaciones reversibles. Deshacer viene en sabores. Algunos sistemas permiten un solo deshacer (donde invocar deshacer nuevamente lo revierte al estado en el que ordenó el primer deshacer, esencialmente deshacer el deshacer). En otros sistemas, ordenar múltiples operaciones de deshacer lo lleva a través de muchos estados anteriores, ya sea hasta cierto límite o hasta el momento en que se abrió la aplicación por última vez.</p>
+<h2 id="lámina-16">Lámina 16</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa de Usuario</p>
+<p>Pausa/reanudar. Cuando un usuario ha iniciado una operación de larga duración, por ejemplo, descargar un archivo grande o un conjunto de archivos de un servidor, a menudo es útil proporcionar la capacidad de pausar y reanudar la operación. Se puede pausar una operación de ejecución prolongada para liberar temporalmente recursos para que puedan reasignarse a otras tareas.</p>
+<h2 id="lámina-17">Lámina 17</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa de Usuario</p>
+<p>Agregar. Cuando un usuario realiza operaciones repetitivas u operaciones que afectan a una gran cantidad de objetos de la misma manera, es útil proporcionar la capacidad de agregar los objetos de nivel inferior en un solo grupo, de modo que la operación pueda aplicarse al grupo, liberando así al usuario de la monotonía y la posibilidad de cometer errores al realizar la misma operación repetidamente. Un ejemplo es agregar todos los objetos en una diapositiva y cambiar el texto a una fuente de 14 puntos.</p>
+<h2 id="lámina-18">Lámina 18</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa del Sistema</p>
+<p>Mantener el modelo de tareas. El modelo de tarea se utiliza para determinar el contexto, de modo que el sistema pueda tener una idea de lo que el usuario está intentando hacer y brindar asistencia. Por ejemplo, muchos motores de búsqueda brindan capacidades predictivas de escritura anticipada y muchos clientes de correo brindan corrección ortográfica. Ambas funciones se basan en modelos de tareas.</p>
+<h2 id="lámina-19">Lámina 19</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa del Sistema</p>
+<p>Mantener el modelo de usuario. Este modelo representa explícitamente el conocimiento del sistema por parte del usuario, el comportamiento del usuario en términos del tiempo de respuesta esperado y otros aspectos específicos de un usuario o una clase de usuarios. Por ejemplo, las aplicaciones de aprendizaje de idiomas monitorean constantemente las áreas donde un usuario comete errores y luego brindan ejercicios adicionales para corregir esos comportamientos. Un caso especial de esta táctica se encuentra comúnmente en la personalización de la interfaz de usuario, en la que un usuario puede modificar explícitamente el modelo de usuario del sistema.</p>
+<h2 id="lámina-20">Lámina 20</h2>
+<p>Usabilidad - Usability</p>
+<p>Tácticas - Soportar la Iniciativa del Sistema</p>
+<p>Mantener el modelo del sistema. El sistema mantiene un modelo explícito de sí mismo. Esto se utiliza para determinar el comportamiento esperado del sistema de modo que se pueda proporcionar al usuario la información adecuada. Una manifestación común de un modelo de sistema es una barra de progreso que predice el tiempo necesario para completar la actividad actual</p>
+<h2 id="lámina-21">Lámina 21</h2>
+<p>PATRONES</p>
+<h2 id="lámina-22">Lámina 22</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Model-View-Controller</p>
+<p>MVC es probablemente el patrón de usabilidad más conocido. Viene en muchas variantes, como MVP (modelo-vista-presentador), MVVM (modelo-vista-vista-modelo), MVA (modelo-vista-adaptador), etc. Esencialmente, todos estos patrones se centran en separar el modelo, la lógica de "negocios" subyacente del sistema, de su realización en una o más vistas de la interfaz de usuario. En el modelo MVC original, el modelo enviaría actualizaciones a una vista, que un usuario vería e interactuaría. Las interacciones del usuario (pulsaciones de teclas, clics de botones, movimientos del mouse, etc.) se transmiten al controlador, que las interpreta como operaciones en el modelo y luego envía esas operaciones al modelo, que cambia su estado en respuesta. La ruta inversa también era una parte del patrón MVC original. Es decir, el modelo podría cambiarse y el controlador enviaría actualizaciones a la vista.</p>
+<h2 id="lámina-23">Lámina 23</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Model-View-Controller</p>
+<p>Beneficios</p>
+<p>Debido a que MVC promueve una clara separación de preocupaciones, los cambios en un aspecto del sistema, como el diseño de la interfaz de usuario (la vista), a menudo no tienen consecuencias para el modelo o el controlador.</p>
+<p>Además, debido a que MVC promueve la separación de preocupaciones, los desarrolladores pueden trabajar en todos los aspectos del patrón (modelo, vista y controlador) de manera relativamente independiente y en paralelo. Estos aspectos separados también se pueden probar en paralelo.</p>
+<p>Un modelo puede usarse en sistemas con diferentes vistas, o una vista puede usarse en sistemas con diferentes modelos.</p>
+<h2 id="lámina-24">Lámina 24</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Model-View-Controller</p>
+<p>Tradeoffs</p>
+<p>MVC puede volverse una carga para las interfaces de usuario complejas, ya que la información a menudo se distribuye en varios componentes. Por ejemplo, si hay varias vistas del mismo modelo, un cambio en el modelo puede requerir cambios en varios componentes que de otro modo no estarían relacionados.</p>
+<p>Para interfaces de usuario simples, MVC agrega una complejidad inicial que puede no compensar los ahorros posteriores.</p>
+<p>MVC agrega una pequeña cantidad de latencia a las interacciones del usuario. Si bien esto es generalmente aceptable, puede ser problemático para las aplicaciones que requieren una latencia muy baja.</p>
+<h2 id="lámina-25">Lámina 25</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Observer</p>
+<p>El patrón de observador es una forma de vincular alguna funcionalidad con una o más vistas. Este patrón tiene un sujeto, la entidad que se observa, y uno o más observadores de ese sujeto. Los observadores necesitan registrarse con el sujeto; luego, cuando cambia el estado del sujeto, se notifica a los observadores. Este patrón se usa a menudo para implementar MVC (y sus variantes), por ejemplo, como una forma de notificar a las distintas vistas de los cambios en el modelo.</p>
+<h2 id="lámina-26">Lámina 26</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Observer</p>
+<p>Beneficios</p>
+<p>Este patrón separa alguna funcionalidad subyacente de la preocupación de cómo y cuántas veces se presenta esta funcionalidad.</p>
+<p>El patrón de observador facilita el cambio de enlaces entre el sujeto y los observadores en tiempo de ejecución.</p>
+<h2 id="lámina-27">Lámina 27</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Observer</p>
+<p>Tradeoffs</p>
+<p>El patrón de observador es excesivo si no se requieren múltiples vistas del sujeto. El patrón del observador requiere que todos los observadores se registren y desregistren con el sujeto. Si los observadores se niegan a cancelar el registro, su memoria nunca se libera, lo que resulta en una fuga de memoria. Además, esto puede afectar negativamente al rendimiento, ya que se seguirán invocando observadores obsoletos.</p>
+<p>Es posible que los observadores deban realizar un trabajo considerable para determinar si reflejar una actualización de estado y cómo, y este trabajo puede repetirse para cada observador.</p>
+<h2 id="lámina-28">Lámina 28</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Memento</p>
+<p>El patrón memento es una forma común de implementar la táctica de deshacer. Este patrón presenta tres componentes principales: el creador, el cuidador y el recuerdo. El originador está procesando algún flujo de eventos que cambian su estado (originados por la interacción del usuario). El cuidador está enviando eventos al originador que hacen que cambie su estado. Cuando el cuidador está a punto de cambiar el estado del originador, puede solicitar un recuerdo, una instantánea del estado existente, y puede usar este artefacto para restaurar ese estado existente si es necesario, simplemente devolviéndole el recuerdo al originador. De esta forma, el cuidador no sabe nada de cómo se maneja el estado; el memento es simplemente una abstracción que emplea el cuidador.</p>
+<h2 id="lámina-29">Lámina 29</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Memento</p>
+<p>Beneficios</p>
+<p>El beneficio obvio de este patrón es que delega el complicado proceso de implementar deshacer y determinar qué estado conservar a la clase que realmente está creando y administrando ese estado. En consecuencia, se conserva la abstracción del originador y el resto del sistema no necesita conocer los detalles.</p>
+<h2 id="lámina-30">Lámina 30</h2>
+<p>Usabilidad - Usability</p>
+<p>Patrones - Memento</p>
+<p>Tradeoffs</p>
+<p>Según la naturaleza del estado que se conserva, el memento puede consumir cantidades arbitrariamente grandes de memoria, lo que puede afectar el rendimiento. En un documento muy grande, intente cortar y pegar muchas secciones grandes y luego deshacer todo eso. Es probable que esto haga que su procesador de texto se ralentice notablemente.</p>
+<h2 id="lámina-31">Lámina 31</h2>
+<p>Bibliografía</p>
+<p>Len Bass, Paul Clements, Rick Kazman. Software Architecture in Practice. 4th Edition. SEI / Addison-Wesley, 2022​</p>
+<h2 id="lámina-32">Lámina 32</h2>
+<p>_(sin texto: la lámina es una imagen)_</p></main>
+<footer><p>Generado desde <code>Tacticas-Usabilidad.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>
