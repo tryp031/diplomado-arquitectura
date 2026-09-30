@@ -1,6 +1,6 @@
 # Índice maestro y estado del diplomado
 
-> Actualizado: 2026-09-15
+> Actualizado: 2026-09-30 (fila del Módulo 2). El resto del archivo conserva el estado del 15/09.
 
 ## Estado por módulo
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | 0 | Inducción / Aula Virtual | ✅ completo | ✅ analizado | `Modulo 0/Consolidado/RESUMEN-MODULO-0.md` |
 | 1 | **Fundamentos de la Arquitectura de Software** | 🟡 parcial (faltan Genially + video) | 🟡 en curso | **`Modulo 1/Consolidado/m1-consolidado.md`**, `Modulo 1/Temario/TEMARIO-M1.md`, `Modulo 1/Consolidado/ANALISIS-APERTURA-M1.md` |
-| 2 | *(pendiente de publicar)* | ⬜ | ⬜ | — |
+| 2 | **Requerimientos y tácticas de arquitectura** (Reto 2: alerta de flota vehicular) | 🟡 casi completo (falta el video de Seguridad y el script k6) | 🟡 en curso | `Modulo 2/README.md`, `Modulo 2/Aportes/danny/m2-cuaderno-estudio-danny.html` |
 | 3 | *(pendiente)* | ⬜ | ⬜ | — |
 | 4 | *(pendiente)* | ⬜ | ⬜ | — |
 | Final | *(por confirmar si existe)* | ⬜ | ⬜ | — |
