@@ -63,7 +63,7 @@ async def test_position_no_depende_de_la_cola(client_for):
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("body", [b"{no es json", b'{"type": "Position"}', b"[]"])
+@pytest.mark.parametrize("body", [b"{no es json", b'{"vehicle_plate": "X-1"}', b"[]"])
 async def test_payload_invalido_responde_400(client_for, body):
     async with client_for(FakePublisher()) as client:
         response = await client.post("/events", content=body, headers={"Content-Type": "application/json"})
@@ -75,3 +75,11 @@ async def test_health(client_for):
     async with client_for(FakePublisher()) as client:
         response = await client.get("/health")
     assert response.json() == {"status": "ok"}
+
+
+async def test_emergency_sin_placa_igual_se_encola(client_for):
+    publisher = FakePublisher()
+    async with client_for(publisher) as client:
+        response = await client.post("/events", json={"type": "Emergency"})
+    assert response.status_code == 200
+    assert publisher.published[0].vehicle_plate == "DESCONOCIDA"

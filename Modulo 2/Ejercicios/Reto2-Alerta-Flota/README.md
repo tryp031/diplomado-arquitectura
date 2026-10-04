@@ -84,6 +84,9 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 ## Antes de medir
 
+nginx resuelve las IP de `ingest` al arrancar. Si se recrea `ingest` (por ejemplo, con
+`docker compose up -d --build`), reiniciar también el gateway: `docker compose restart gateway`.
+
 Comparar el reloj del contenedor y el del equipo: `docker run --rm alpine date` vs `date`.
 Si difieren, reiniciar Docker Desktop.
 

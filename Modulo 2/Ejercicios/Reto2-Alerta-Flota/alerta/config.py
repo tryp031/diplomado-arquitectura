@@ -35,6 +35,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     concurrency = int(env.get("NOTIFIER_CONCURRENCY", "5"))
     if concurrency < 1:
         raise ValueError("NOTIFIER_CONCURRENCY debe ser >= 1")
+    max_attempts = int(env.get("MAX_ATTEMPTS", "4"))
+    if max_attempts < 1:
+        raise ValueError("MAX_ATTEMPTS debe ser >= 1")
     return Settings(
         redis_url=env.get("REDIS_URL", "redis://localhost:6379/0"),
         stream=env.get("STREAM", "emergencies"),
@@ -49,6 +52,6 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         mail_from=env.get("MAIL_FROM", "alertas@reto2.local"),
         mail_to=env.get("MAIL_TO", "danny@reto2.local"),
         notifier_concurrency=concurrency,
-        max_attempts=int(env.get("MAX_ATTEMPTS", "4")),
+        max_attempts=max_attempts,
         log_dir=env.get("LOG_DIR") or None,
     )

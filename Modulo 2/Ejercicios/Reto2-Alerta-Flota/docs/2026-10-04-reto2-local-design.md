@@ -57,7 +57,7 @@ Un solo paquete Python (`alerta/`), una imagen, dos comandos (ingest y notifier)
 
 | Módulo | Responsabilidad | Depende de |
 |---|---|---|
-| `domain.py` | Modelo `VehicleEvent`; validación **tolerante**: obligatorios `type` y `vehicle_plate`, el resto opcional, campos extra ignorados; `is_emergency()` (`type` igual a `Emergency` **sin distinguir mayúsculas**: perder una emergencia es el peor fallo) | nada |
+| `domain.py` | Modelo `VehicleEvent`; validación **tolerante**: solo `type` es obligatorio (decide el flujo); placa faltante → `DESCONOCIDA` (un `Emergency` sin placa se alerta igual), el resto opcional, campos extra ignorados; `is_emergency()` (`type` igual a `Emergency` **sin distinguir mayúsculas**: perder una emergencia es el peor fallo) | nada |
 | `ports.py` | `AlertPublisher` (lado ingesta), `AlertConsumer` (lado notifier) y `Notifier` como `typing.Protocol`; `Delivery` | `domain` |
 | `adapters/redis_queue.py` | `XADD`, `XREADGROUP`, `XACK`, `XAUTOCLAIM`, DLQ | `redis` (asyncio) |
 | `adapters/smtp_notifier.py` | Construye el correo (formato del enunciado) y lo envía | `aiosmtplib` |
@@ -86,13 +86,15 @@ Riesgo: reloj de la VM de Docker Desktop desfasado tras suspender el Mac → com
 
 | Fallo | Respuesta | Táctica |
 |---|---|---|
-| Payload inválido | 400 | Validación tolerante para no perder el «100 %» |
+| Payload inválido (JSON ilegible, no es objeto, sin `type`) | 400 | Validación tolerante para no perder el «100 %»; no se responde 200 a lo ilegible: sería mentir en el contrato |
 | Redis caído con un `Emergency` | 503 (`Position` siguen con 200) | Fallar visible antes que confirmar una alerta perdida |
 | SMTP falla | 3 reintentos (1/2/4 s) → DLQ | Reintento + cola de mensajes fallidos |
 | Notifier cae a mitad de un envío | Mensaje queda pendiente → `XAUTOCLAIM` al reiniciar | No pérdida; costo: duplicados |
 | Duplicados | **Tolerados y documentados** | Sin idempotencia: ningún ASR la exige |
 | Límite de Gmail (~500/día, Probable) | Vigilar en días de muchas corridas | — |
-| Redis o el notifier caen | `restart: unless-stopped` en compose; healthcheck en Redis e ingest (el notifier no expone HTTP) | Recuperación automática |
+| Redis o el notifier caen | `restart: unless-stopped`; el worker sobrevive a errores de la cola (`CONSUMER_ERROR` y reintento) y recrea el grupo si Redis se reinició; healthcheck en Redis e ingest | Recuperación automática |
+| Pendientes huérfanos (notifier murió con mensajes sin ACK) | Al arrancar se reclaman con inactividad 0; en caliente, cada 5 s los que llevan ≥ 60 s (más que el peor caso de un envío: 4 × 8 s + 7 s) | No pérdida |
+| Envío SMTP colgado | Timeout de 8 s por intento | Acotar la latencia |
 
 **Redis es efímero** (`--save ""`): cada `docker compose up` arranca limpio. Trade-off aceptado: si Redis cae a mitad de la prueba se pierden los pendientes; para una prueba de 30 s pesa más la reproducibilidad de cada corrida.
 

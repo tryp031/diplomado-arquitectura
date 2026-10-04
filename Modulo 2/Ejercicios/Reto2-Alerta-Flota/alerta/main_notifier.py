@@ -19,7 +19,7 @@ async def main() -> None:
     client = redis.from_url(settings.redis_url, decode_responses=True)
     queue = RedisAlertQueue(client, stream=settings.stream, group=settings.group,
                             consumer=settings.consumer, dlq_stream=settings.dlq_stream)
-    await queue.ensure_group()
+    await queue.ensure_group()  # si Redis no está listo, el proceso falla y compose lo reinicia
     notifier = SmtpNotifier(
         host=settings.smtp_host, port=settings.smtp_port, username=settings.smtp_user,
         password=settings.smtp_password, starttls=settings.smtp_starttls,
@@ -35,8 +35,10 @@ async def main() -> None:
 
     log.log("NOTIFIER_STARTED", consumer=settings.consumer,
             concurrency=settings.notifier_concurrency, smtp_host=settings.smtp_host)
-    await worker.run(stop)
-    await client.aclose()
+    try:
+        await worker.run(stop)
+    finally:
+        await client.aclose()
 
 
 if __name__ == "__main__":

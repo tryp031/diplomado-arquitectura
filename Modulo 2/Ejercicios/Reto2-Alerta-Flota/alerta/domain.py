@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 EMERGENCY = "Emergency"
+UNKNOWN_PLATE = "DESCONOCIDA"
 
 
 class InvalidEvent(ValueError):
@@ -21,6 +22,16 @@ def _required_text(payload: Mapping[str, Any], key: str) -> str:
     return value.strip()
 
 
+def _plate(payload: Mapping[str, Any]) -> str:
+    """La placa no decide el flujo: si falta se marca DESCONOCIDA en vez de rechazar el evento."""
+    value = payload.get("vehicle_plate")
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        value = str(value)
+    if not isinstance(value, str) or not value.strip():
+        return UNKNOWN_PLATE
+    return value.strip()
+
+
 @dataclass(frozen=True)
 class VehicleEvent:
     type: str
@@ -29,16 +40,17 @@ class VehicleEvent:
 
     @classmethod
     def from_payload(cls, payload: Any) -> VehicleEvent:
-        """Validación tolerante: exige `type` y `vehicle_plate`; ignora el resto.
+        """Validación tolerante: solo exige `type`, que decide el flujo; ignora el resto.
 
-        Ser estrictos contra un k6 que no conocemos arriesga el «100 % procesado».
+        Ser estrictos contra un k6 que no conocemos arriesga el «100 % procesado», y
+        rechazar un Emergency por un dato secundario perdería la alerta.
         """
         if not isinstance(payload, dict):
             raise InvalidEvent("el payload debe ser un objeto JSON")
         status = payload.get("status")
         return cls(
             type=_required_text(payload, "type"),
-            vehicle_plate=_required_text(payload, "vehicle_plate"),
+            vehicle_plate=_plate(payload),
             status=status if isinstance(status, str) else None,
         )
 

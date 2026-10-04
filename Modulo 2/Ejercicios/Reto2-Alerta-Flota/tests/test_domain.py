@@ -1,6 +1,6 @@
 import pytest
 
-from alerta.domain import EmergencyAlert, InvalidEvent, VehicleEvent
+from alerta.domain import UNKNOWN_PLATE, EmergencyAlert, InvalidEvent, VehicleEvent
 
 
 def test_payload_del_enunciado_es_valido():
@@ -43,9 +43,8 @@ def test_status_que_no_es_texto_se_descarta():
     [],
     "texto",
     {"vehicle_plate": "X-1"},
-    {"type": "Position"},
     {"type": "", "vehicle_plate": "X-1"},
-    {"type": "Position", "vehicle_plate": 123},
+    {"type": 7, "vehicle_plate": "X-1"},
 ])
 def test_payload_invalido(payload):
     with pytest.raises(InvalidEvent):
@@ -60,3 +59,16 @@ def test_alerta_ida_y_vuelta_por_campos_de_texto():
     fields = alert.to_fields()
     assert all(isinstance(v, str) for v in fields.values())
     assert EmergencyAlert.from_fields(fields) == alert
+
+
+@pytest.mark.parametrize("placa", [None, "", "  "])
+def test_emergency_sin_placa_se_acepta_como_desconocida(placa):
+    # Perder una emergencia por un dato faltante es peor que alertar sin placa.
+    payload = {"type": "Emergency"} if placa is None else {"type": "Emergency", "vehicle_plate": placa}
+    event = VehicleEvent.from_payload(payload)
+    assert event.is_emergency()
+    assert event.vehicle_plate == UNKNOWN_PLATE == "DESCONOCIDA"
+
+
+def test_placa_numerica_se_convierte_a_texto():
+    assert VehicleEvent.from_payload({"type": "Position", "vehicle_plate": 123}).vehicle_plate == "123"

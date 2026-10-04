@@ -88,8 +88,12 @@ def _leer_jsonl(paths: list[Path]) -> list[dict]:
     registros = []
     for path in paths:
         for linea in path.read_text(encoding="utf-8").splitlines():
-            if linea.strip():
+            if not linea.strip():
+                continue
+            try:
                 registros.append(json.loads(linea))
+            except json.JSONDecodeError:  # p. ej. la última línea a medio escribir
+                continue
     return registros
 
 

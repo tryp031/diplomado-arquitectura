@@ -38,6 +38,8 @@ services:
   notifier:
     build: .
     command: ["python", "-m", "alerta.main_notifier"]
+    # Al apagar, el worker espera los envíos en curso (hasta ~39 s en el peor caso con reintentos).
+    stop_grace_period: 30s
     env_file:
       - path: .env
         required: false

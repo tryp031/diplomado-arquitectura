@@ -32,3 +32,10 @@ def test_variables_de_entorno_sobrescriben():
 def test_concurrencia_menor_a_uno_es_error(valor):
     with pytest.raises(ValueError):
         load_settings({"NOTIFIER_CONCURRENCY": valor})
+
+
+@pytest.mark.parametrize("valor", ["0", "-2"])
+def test_max_attempts_menor_a_uno_es_error(valor):
+    # Con 0 intentos el worker no enviaría ni confirmaría nada, sin decirlo.
+    with pytest.raises(ValueError):
+        load_settings({"MAX_ATTEMPTS": valor})
