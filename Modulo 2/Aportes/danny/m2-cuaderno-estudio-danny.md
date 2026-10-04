@@ -3,11 +3,11 @@
 | Campo | Valor |
 |---|---|
 | **Autor** | Daniel Mazo Serna (Danny), con asistencia de IA |
-| **Fecha** | 2026-09-30 |
+| **Fecha** | 2026-09-30 · actualizado 2026-10-04 (gráficas; la autoevaluación pasó a su propia página) |
 | **Módulo** | 2 — Requerimientos y Tácticas de Arquitectura de Software |
 | **Tipo** | `apunte` — notas de estudio propias; **no es material oficial** |
 | **Fuentes** | Material oficial M2 (5 decks de tácticas, 4 Genially, enunciado del Reto 2) · Bass, Clements, Kazman, *Software Architecture in Practice* 4ª ed. (citado por los decks) |
-| **Límites** | Falta el video de Seguridad. La autoevaluación oficial no se abrió. Los Genially se leyeron como texto plano (sin imágenes ni orden de láminas). |
+| **Límites** | La autoevaluación oficial no se abrió. Los Genially se leyeron como texto plano (sin imágenes ni orden de láminas). |
 | **Estado** | vigente · ⬜ sin consolidar |
 
 > Cada afirmación lleva su etiqueta: **[Curso]** está en el material oficial · **[Complementario]** es
@@ -22,7 +22,7 @@
 
 1. **Entender.** Lee las secciones 2 a 4 sin memorizar. Meta: explicar con tus palabras qué es un ASR y cómo pasa de requisito a táctica.
 2. **Aplicar.** Haz la sección 11 (el Reto 2 como laboratorio) con lápiz. Meta: que cada concepto tenga un número del reto al lado.
-3. **Comprobar.** Responde la autoevaluación (sección 12) **sin mirar**, y marca lo que falló. Solo entonces abre la autoevaluación oficial.
+3. **Comprobar.** Responde la autoevaluación interactiva (`m2-autoevaluacion-danny.html`, ver sección 12) **sin mirar**. Solo entonces abre la autoevaluación oficial.
 
 ### Qué escribir a mano
 
@@ -214,21 +214,62 @@ Procesamiento y uso de recursos · bloqueo por contención de recursos · depend
 
 ### La cuenta que hay que saber hacer **[Complementario]**
 
-**Ley de Little:** `concurrencia ≈ llegadas por segundo × duración de cada una`. Con 35 req/s y 0,18 s por petición se necesitan ≈ 6 en paralelo. Con 0,5 s por petición son ≈ 18.
+**Ley de Little:** `concurrencia ≈ llegadas por segundo × duración de cada una`. Con 35,7 req/s (el k6 de referencia) y 0,176 s por petición se necesitan ≈ 6 en paralelo. Con 0,5 s por petición son ≈ 18.
 Esa aritmética decide si un límite de 10 instancias alcanza.
+
+![Ley de Little con 35,7 req/s: el límite de 10 instancias se cruza cuando cada petición dura más de 0,28 s. Modelo de cálculo, no medición.](graficas/ley-little.svg)
+
+| Duración por petición | Instancias simultáneas | ¿Cabe en 10? |
+|---|---|---|
+| 0,176 s (k6 de referencia) | ≈ 6,3 | Sí |
+| 0,28 s (corte) | 10 | Justo |
+| 0,5 s (si el handler espera el correo) | ≈ 17,8 | No |
+
+**Lectura:** el límite de 10 instancias no limita *cuántas* peticiones atiendes, sino *cuánto puede durar*
+cada una. Todo lo lento (el correo) tiene que salir del camino que responde al cliente.
 
 ---
 
 ## 7. Seguridad
 
-**El video de este tema no se capturó.** Lo de abajo sale del deck.
+Fuentes: el deck de Seguridad y el video obligatorio (`Material-Clase/Video-Seguridad.md`, capturado el 04/10).
 
 ### Definición y las tres características **[Curso]**
 
 Capacidad de proteger datos e información del acceso no autorizado, sin negarlo a quien sí está autorizado. Se caracteriza por
 **Confidencialidad, Integridad y Disponibilidad**. El módulo también cubre privacidad y regulaciones como GDPR para información de identificación personal (PII).
 
+Los tres pilares, con los ejemplos del video **[Curso]**:
+
+| Pilar | Qué protege | Ejemplo del video |
+|---|---|---|
+| **Confidencialidad** | Que nadie no autorizado **lea** la información | Un pirata no accede a tu declaración de impuestos |
+| **Integridad** | Que nadie no autorizado **altere** la información | La nota que puso el profesor no cambia hasta que la ves |
+| **Disponibilidad** | Que el usuario legítimo **pueda usar** el sistema | La tienda de libros no se cae por un ataque |
+
+**Privacidad [Curso]:** limitar quién accede a la **PII**, que según el NIST es cualquier dato que identifique a una
+persona (nombre, número de seguro social, fecha de nacimiento, información médica, educativa o financiera).
+
+### El escenario de seguridad del video **[Curso]**
+
+Es el único escenario de seguridad completo del material de M2. Desglosado en las 6 partes:
+
+| Parte | Valor |
+|---|---|
+| Fuente | Un empleado descontento, desde una ubicación remota |
+| Estímulo | Intenta modificar la tabla de tasas de pago |
+| Artefacto | Los datos del sistema (la tabla de tasas) |
+| Entorno | Operación normal |
+| Respuesta | Se detecta el intento y el sistema registra la actividad |
+| Medida de respuesta | Los datos correctos se restauran **en un día** |
+
+**[Recomendación]** Fíjate en la medida: no es «evitar el ataque», sino **cuánto tarda en recuperarse**. Un
+escenario de seguridad también puede medirse en tiempo.
+
 ### Tácticas **[Curso]** — la analogía del edificio físico
+
+Un edificio seguro limita el acceso (vallas, puntos de control), detecta intrusos (insignias), disuade (guardias),
+reacciona (cierre automático de puertas) y se recupera (copias fuera del sitio). Lo mismo aplica al software:
 
 | Familia | Tácticas |
 |---|---|
@@ -236,6 +277,8 @@ Capacidad de proteger datos e información del acceso no autorizado, sin negarlo
 | **Resistir ataques** | Identificar actores · Autenticar · Autorizar · Acceso limitado · Limitar la exposición · **Cifrar datos** · Entidades separadas · **Validar entrada** · Cambiar configuración de credenciales |
 | **Reaccionar** | Revocar acceso · Restringir inicio de sesión · Informar a los actores |
 | **Recuperarse** | Auditoría · No repudio |
+
+El video llama «**identificar**» a la primera familia; el deck la llama «**detectar**». Es la misma; en los entregables usar «detectar».
 
 **Patrones [Curso]:** Intercepting validator, Intrusion Prevention System (IPS). Lecturas: OWASP Top Ten 2021, CWE/SANS Top 25, SAST vs DAST.
 
@@ -309,6 +352,30 @@ están en `m2-analisis-apertura-danny.md` §5.
 5. **Elige el atributo más importante** y completa la frase: «Priorizamos ___, por ___, a costa de ___.»
 6. **Lista tres atributos no priorizados** y su justificación. Es lo que pide la regla del Genially P1.
 
+### Cuánto *burst* hace falta **[Complementario]**
+
+El API Gateway limita con un **token bucket**: el cubo empieza con *burst* fichas, cada petición gasta una
+y se recarga a *rate* fichas por segundo. Si el cubo se vacía, la petición recibe **429** y se pierde el
+«100 % procesadas».
+
+![Fichas en el cubo durante la prueba k6 (35,7 req/s de llegada, rate 15). Con burst 2000 sobra; con burst 500 se vacía hacia el segundo 24. Modelo de cálculo, no medición.](graficas/token-bucket.svg)
+
+| Burst | ¿Se vacía el cubo? | Resultado aproximado |
+|---|---|---|
+| 2000 (imagen del enunciado) | No: quedan ≈ 1420 fichas al terminar | 0 respuestas 429 |
+| 580 | Justo al final | Mínimo para 1000 peticiones |
+| 500 | Sí, a los ≈ 24,2 s | ≈ 80 respuestas 429 |
+
+**Cuenta:** fichas disponibles = burst + 15 × 28 s. Tienen que alcanzar para 1000 → burst ≥ **580**.
+
+**Límites del modelo, para no sobreinterpretarlo:**
+
+- Supone llegadas constantes. El k6 real manda ráfagas, así que el cubo se vacía antes de lo calculado.
+- El k6 espera cada respuesta antes de mandar la siguiente. Como un 429 responde rápido, una vez que
+  empiezan los rechazos el k6 **acelera**, y habría más 429 que los ≈ 80 del modelo.
+- El límite por defecto de una cuenta AWS suele ser mucho mayor (del orden de miles de burst). Es
+  **Probable**, no está verificado en nuestra cuenta: hay que leer el valor real del stage antes de diseñar.
+
 ### Lo que hay que verificar antes de diseñar **[Hipótesis]**
 
 - El valor real del *burst* del API Gateway en nuestra cuenta (el enunciado muestra 2000 pero dice «por defecto»).
@@ -317,61 +384,23 @@ están en `m2-analisis-apertura-danny.md` §5.
 
 ---
 
-## 12. Autoevaluación (responde sin mirar)
+## 12. Autoevaluación
 
-**Preguntas**
+La autoevaluación vive en su propia página interactiva: **`m2-autoevaluacion-danny.html`**, en esta misma carpeta.
 
-1. ¿Qué convierte a un requisito en un ASR?
-2. Nombra las 6 partes de un escenario de calidad.
-3. Diferencia defecto, error y falla con un ejemplo.
-4. ¿Por qué un ASR puede tener prioridad baja y aun así debe documentarse?
-5. ¿Cuántas horas al año de inactividad permite 99,9 %?
-6. ¿Cuáles son los tres propósitos de las tácticas de disponibilidad?
-7. ¿Por qué *retry* sin *circuit breaker* puede agravar una caída?
-8. Enuncia la ley de Little y úsala con 35 req/s y 0,5 s.
-9. Da dos tácticas de «controlar la demanda» y dos de «gestionar recursos».
-10. ¿Cuáles son las cuatro familias de tácticas de seguridad y qué es una táctica de «resistir ataques»?
-11. ¿Qué tres categorías tienen las tácticas de interoperabilidad?
-12. ¿Qué diferencia hay entre orquestación centralizada y descentralizada?
-13. ¿Qué pasa con la seguridad cuando priorizas desempeño extremo?
-14. ¿Por qué el promedio es una mala medida de respuesta?
-15. En el Reto 2, ¿por qué el camino que responde al cliente no debe esperar el envío del correo?
+<a class="boton" href="m2-autoevaluacion-danny.html">Abrir la autoevaluación (29 preguntas) →</a>
 
-**Respuestas**
+- **29 preguntas en 4 niveles:** recordar, comprender, aplicar y decidir.
+- **5 tipos de pregunta:** opción múltiple, verdadero o falso, cálculo, caso del Reto 2 y «encuentra el error».
+- Cada respuesta explica **por qué fallan las demás opciones** y enlaza la sección de este cuaderno que conviene releer.
+- Marcador por nivel, filtros (por nivel, sin responder, falladas) y respuestas guardadas en el navegador para el repaso espaciado.
 
-1. Es un requisito de calidad tan crítico que condiciona la estructura desde el inicio (P1). Se identifica con las preguntas guía: actor, evento, circunstancias, atributos y elementos afectados.
-2. Fuente, estímulo, artefacto, entorno, respuesta y medida de respuesta.
-3. Defecto = causa (un disco dañado); error = estado intermedio (lectura corrupta pero el sistema sigue); falla = desviación visible (el usuario no puede guardar).
-4. Porque el enunciado no lo especificó o no se consideró. La regla del curso exige documentarlo como no priorizado: «nunca deben quedar sin analizar».
-5. ≈ 8,8 horas (0,1 % de 8760 h).
-6. Detectar, recuperar y prevenir fallas.
-7. Cada cliente reintenta y multiplica la carga sobre un servicio ya debilitado. El *circuit breaker* corta los intentos hasta que se recupere.
-8. `concurrencia ≈ llegadas/s × duración`. 35 × 0,5 ≈ 17,5 simultáneas.
-9. Controlar demanda: priorizar eventos, tiempos de ejecución acotados. Gestionar recursos: introducir concurrencia, colas de tamaño limitado.
-10. Detectar, resistir, reaccionar y recuperarse de ataques. «Resistir» evita que el ataque prospere: identificar, autenticar y autorizar actores, limitar acceso y exposición, cifrar, separar entidades, validar entrada.
-11. Discover services, Orchestrate y Tailor interface.
-12. Centralizada: un componente (orquestador) controla la secuencia. Descentralizada: los propios servicios se coordinan con reglas predefinidas.
-13. Suele sacrificarse: cifrar cuesta tiempo y las fronteras de red (entidades separadas) añaden saltos. Es un trade-off a declarar, no a ocultar.
-14. Oculta la cola de la distribución. Un escenario debe pedir percentil y condiciones de carga.
-15. Porque cada segundo que espera consume una instancia de las 10 permitidas (ley de Little). Si se agotan, las peticiones se rechazan y se pierde el «100 % procesadas».
+**[Recomendación]** Hazla después de la sección 11, **sin mirar** el cuaderno. Abre la autoevaluación oficial de Brightspace
+solo cuando los niveles 1 y 2 te salgan sin fallos: en M1 fue de **un solo intento**.
 
 ---
 
-## 13. Errores y ambigüedades del material (resumen)
-
-El detalle está en `m2-analisis-apertura-danny.md` §3. Lo esencial **[Recomendación]**:
-
-- Hay **dos rúbricas oficiales** del Reto 2 que no coinciden (PDF y Brightspace).
-- El deck de Disponibilidad mezcla *safety* y *security* bajo la palabra «seguridad».
-- El Genially P5 (interoperabilidad) conserva el marcador «AQUí va la imagen» y un bloque de ADD pegado que no le pertenece.
-- El objetivo del reto dice «menos de 30 s» pero la rúbrica puntúa con cortes en 15 y 45 s.
-- El tiempo del correo incluye la entrega de Gmail, que no controlamos.
-
-**Lleva estas dudas al encuentro del 06/10 como preguntas, no como correcciones.**
-
----
-
-## 14. Glosario rápido
+## 13. Glosario rápido
 
 | Término | Definición breve |
 |---|---|
@@ -398,9 +427,10 @@ El detalle está en `m2-analisis-apertura-danny.md` §3. Lo esencial **[Recomend
 
 ---
 
-## 15. Qué falta por estudiar
+## 14. Qué falta por estudiar
 
-- El **video de Seguridad** (youtu.be/MbUXkPdKaGw).
-- Los **descriptores de la rúbrica de Brightspace**, que vienen vacíos.
-- La **autoevaluación oficial**: dejarla para después de las secciones 11 y 12.
-- Las lecturas complementarias: OWASP, AWS DR (×4), Fowler (×2), canary.
+| Falta | Por qué importa | Cómo conseguirlo |
+|---|---|---|
+| **Descriptores de la rúbrica de Brightspace** | Vienen vacíos; no sabemos qué separa un 5 de un 3 | Preguntarlo en el encuentro del **06/10** |
+| **Autoevaluación oficial** | Puede ser de un solo intento, como en M1 | Abrirla después de la §12 de este cuaderno, nunca antes |
+| **Lecturas complementarias** (OWASP, AWS DR ×4, Fowler ×2, canary) | Profundizan las tácticas; no son obligatorias | Son públicas: se pueden resumir desde los enlaces de `Material-Clase/Modulo2-Brightspace.md` |

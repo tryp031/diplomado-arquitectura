@@ -93,6 +93,20 @@ tbody tr:last-child td{border-bottom:none}
 .b-compl{background:var(--surface-2);color:var(--ink-2)}
 .b-recom{background:var(--signal-soft);color:var(--signal)}
 .b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+a.boton{display:inline-block;font-family:var(--sans);font-weight:600;font-size:.95rem;text-decoration:none;
+  color:#fff;background:var(--accent);border-radius:3px;padding:12px 20px;margin:4px 0 22px}
+a.boton:hover{filter:brightness(1.1)}
+@media (prefers-color-scheme:dark){a.boton{color:var(--ground)}}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
 footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
   font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
 @media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}

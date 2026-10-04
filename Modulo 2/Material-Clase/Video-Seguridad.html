@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Contenidos obligatorios M2 — P4: video «Módulo 2 - Seguridad Security» (transcripción)</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Contenidos obligatorios M2 — P4: video «Módulo 2 - Seguridad Security» (transcripción)</h1>
+  <p class="meta">Video-Seguridad.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#transcripción">Transcripción</a></li><li><a href="#anotación-danny-ia-2026-10-04-no-es-del-curso">Anotación (Danny + IA, 2026-10-04; no es del curso)</a></li></ol></nav>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Brightspace → Módulo 2 → «Contenidos obligatorios», presentación P4). <strong>Fuente:</strong> video de YouTube <code>MbUXkPdKaGw</code> (https://youtu.be/MbUXkPdKaGw), canal «Proyectos SB», 5 min 13 s, publicado el 9 jun 2026. Insertado en Brightspace como <code>youtube.com/embed/MbUXkPdKaGw</code>. <strong>Captura:</strong> 2026-10-04, panel «Mostrar transcripción» de YouTube abierto desde un navegador automatizado (41 segmentos). Es la <strong>transcripción automática</strong> de YouTube: puede tener errores de reconocimiento de voz. Se conservan las marcas de tiempo; el texto va tal cual, sin corregir. <strong>Este archivo no se edita.</strong> Las observaciones van al final, separadas y marcadas como anotación.</p></blockquote>
+<hr>
+<h2 id="transcripción">Transcripción</h2>
+<p><strong>0:05</strong> Hola, bienvenido y bienvenida a este nuevo video del diplomado en arquitectura de software. En este video vamos a explorar un atributo de calidad crítico en cualquier sistema, la seguridad, y lo haremos paso a paso con ejemplos y una metáfora que seguramente te ayudará a recordarlo con claridad.</p>
+<p><strong>0:27</strong> ¿Qué es la seguridad en sistemas? La seguridad es la capacidad que tiene un sistema para proteger los datos y la información contra accesos no autorizados al mismo tiempo que permite el acceso a quienes sí están autorizados.</p>
+<p><strong>0:42</strong> Pero, ¿qué pasa cuando alguien intenta vulnerar esa protección? A eso lo llamamos un ataque. Puede tener distintas formas, desde un intento de leer información sin permiso hasta querer modificarla o incluso bloquear el acceso a usuarios legítimos, como sucede en los ataques de denegación de servicio. Para entender mejor cómo proteger un sistema, es útil conocer los tres pilares fundamentales de la seguridad.</p>
+<p><strong>1:05</strong> Confidencialidad es la capacidad del sistema para mantener la información fuera del alcance de personas no autorizadas. Por ejemplo, un hacker o pirata informático no debería poder acceder a tu declaración de impuestos guardada en un sistema gubernamental.</p>
+<p><strong>1:29</strong> Integridad. Asegura que la información no sea alterada por personas no autorizadas. Imagina que la nota que te asignó tu profesor se mantiene igual hasta que tú la ves. Eso es integridad.</p>
+<p><strong>1:42</strong> Disponibilidad significa que el sistema estará activo y disponible para los usuarios legítimos cuando lo necesiten, como cuando compras un libro en línea y el sitio no se cae por un ataque.</p>
+<p><strong>1:51</strong> ¿Y qué hay de la privacidad? Muy relacionada con la seguridad está la privacidad que ha cobrado enorme importancia en los últimos años. Las leyes como el Reglamento General de Protección de Datos, GDPR en Europa y otras normativas similares en el mundo buscan proteger la información de identificación personal, también conocida como PI.</p>
+<p><strong>2:21</strong> Lograr la privacidad se trata de limitar el acceso a la información, lo que a su vez se trata de qué información se debe limitar el acceso y a quién se debe permitir el acceso. La información que debe mantenerse privada es la información de identificación personal PI.</p>
+<p><strong>2:39</strong> Pero, ¿qué es la PI exactamente? Según el Instituto Nacional de Estándares y Tecnología, se trata de cualquier información que pueda identificar a una persona como nombre, número de seguro social, fecha de nacimiento, información médica, educativa o financiera.</p>
+<p><strong>3:01</strong> Para ilustrarlo, veamos este escenario. Un empleado descontento, desde una ubicación remota, intenta modificar la tabla de tasas de pago del sistema durante operaciones normales. El intento es detectado a tiempo, el sistema registra la actividad y los datos correctos se restauran en un día. Este tipo de comportamiento muestra por qué la seguridad no es solo una opción, sino una necesidad.</p>
+<p><strong>3:29</strong> Una manera útil de visualizar la seguridad en sistemas es compararla con la seguridad física de un edificio. Las instalaciones seguras solo permiten un acceso limitado a ellas. Por ejemplo, mediante el uso de vallas y puntos de control de seguridad. tienen medios para detectar intrusos, exigiendo que los visitantes legítimos lleven insignias. Tienen mecanismos de disuasión como guardias armados, capacidad de reacción con cierre automático de puertas y mecanismos de recuperación como copia de seguridad fuera del sitio. Lo mismo debe aplicarse al software.</p>
+<p><strong>4:09</strong> Cuatro tácticas para lograr seguridad. A partir de esta analogía se desprenden cuatro grandes categorías de tácticas que puedes aplicar en tu arquitectura de software: Identificar comportamientos sospechosos o accesos indebidos. Resistir, proteger el sistema para que no pueda ser vulnerado fácilmente. Reaccionar, tomar medidas cuando ocurre una intrusión. recuperarse, restaurar el sistema a su estado seguro después de un ataque.</p>
+<p><strong>4:41</strong> ¿Quieres profundizar más? Para conocer en detalle cómo se aplica cada táctica de seguridad y explorar otras tácticas asociadas a atributos como portabilidad o usabilidad, te invitamos a consultar la siguiente referencia esencial. Además, puedes ampliar cada táctica desde cómo se aplica y su significado en la sección de recursos complementarios.</p>
+<p><strong>5:03</strong> La presentación Tácticas Seguridad.</p>
+<hr>
+<h2 id="anotación-danny-ia-2026-10-04-no-es-del-curso">Anotación (Danny + IA, 2026-10-04; no es del curso)</h2>
+<ol><li><strong>«PI» es PII</strong> (<em>Personally Identifiable Information</em>): el reconocimiento de voz se comió una letra. El deck y el resto del material usan PII. <em>(Seguro.)</em></li><li><strong>La primera familia de tácticas se llama distinto.</strong> El video dice «<strong>Identificar</strong> comportamientos sospechosos»; el deck <code>Tacticas-Seguridad.md</code> la llama «<strong>Detectar</strong> ataques». Es la misma familia. Usar «detectar» en los entregables, que es el término del deck y de Bass. <em>(Probable.)</em></li><li><strong>La analogía del edificio trae una quinta idea:</strong> «mecanismos de disuasión como guardias armados». No corresponde a ninguna de las cuatro familias que nombra el video a continuación; leerla como parte de <em>resistir</em>. <em>(Suposición.)</em></li><li><strong>El escenario del empleado descontento</strong> (3:01) es el único escenario de calidad de seguridad completo del material de M2. Sus 6 partes están desglosadas en el cuaderno de estudio, §7.</li><li>La «referencia esencial» que menciona (4:48) no se nombra en el audio; por el contexto, es el libro de Bass, Clements y Kazman que citan los decks. <em>(Suposición.)</em></li></ol></main>
+<footer><p>Generado desde <code>Video-Seguridad.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

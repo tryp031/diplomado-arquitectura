@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="es">
+<!-- Generado una vez desde m1-autoevaluacion-danny.html (estilo) + graficas/*.svg (insertadas en línea).
+     Este HTML es la fuente de la autoevaluación; si cambian las gráficas, reemplazar los <template> svg-ll y svg-tb. -->
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autoevaluación M2 — Requerimientos y tácticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+  :root{
+    color-scheme:light dark;
+    --ground:#F1F4F4; --surface:#FFFFFF; --surface-2:#E7EDED;
+    --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+    --rule:#CDDADC; --rule-2:#E1E9EA;
+    --accent:#0A6C7C; --accent-soft:#DBEDEF;
+    --signal:#A85B0C; --signal-soft:#F7E8D4;
+    --ok:#1B6B45; --ok-soft:#DCEFE4;
+    --bad:#9B2C2C; --bad-soft:#F7E0E0;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+      --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+      --rule:#233A3F; --rule-2:#1A2E32;
+      --accent:#5CB9C8; --accent-soft:#123338;
+      --signal:#E0A257; --signal-soft:#33240F;
+      --ok:#6FCB9B; --ok-soft:#10301F;
+      --bad:#E88C8C; --bad-soft:#331616;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#6FCB9B; --ok-soft:#10301F;
+    --bad:#E88C8C; --bad-soft:#331616;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1140px; margin:0 auto; padding:0 16px 96px;
+    display:grid; grid-template-columns:1fr; gap:0 56px;
+  }
+  @media (min-width:1020px){ .wrap{grid-template-columns:220px minmax(0,1fr); padding:0 24px 96px} }
+
+  /* ── masthead ─────────────────────────────────────────── */
+  .masthead{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 28px;margin-bottom:40px}
+  .kicker{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.95rem,4.6vw,3rem);line-height:1.05;letter-spacing:-.024em;text-wrap:balance;margin:0 0 18px}
+  .standfirst{font-size:1.16rem;line-height:1.6;color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+  .standfirst em{color:var(--ink);font-style:italic}
+  .facts{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--surface);margin:0}
+  .fact{flex:1 1 140px;padding:12px 18px;border-right:1px solid var(--rule-2)}
+  .fact:last-child{border-right:none}
+  .fact dt{font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin:0 0 5px}
+  .fact dd{margin:0;font-family:var(--sans);font-size:.92rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* ── rail ─────────────────────────────────────────────── */
+  .rail{display:none}
+  @media (min-width:1020px){
+    .rail{display:block;align-self:start;position:sticky;top:24px;font-family:var(--sans);font-size:.83rem;padding-bottom:40px;max-height:calc(100vh - 48px);overflow-y:auto}
+  }
+  .rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .rail ol{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:2px}
+  .rail a{display:flex;gap:9px;color:var(--ink-2);text-decoration:none;border:0;padding:3px 0;line-height:1.35}
+  .rail a:hover{color:var(--accent)}
+  .rail a .n{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);flex:0 0 16px;padding-top:1px}
+  .rail a.hit .n{color:var(--ok)}
+  .rail a.miss .n{color:var(--bad)}
+  .scorebox{border-top:1px solid var(--rule);padding-top:16px;margin-bottom:18px}
+  .scorebox .big{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+  .scorebox .cap{font-size:.76rem;color:var(--ink-3);line-height:1.4}
+  .railbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+
+  /* ── controles ────────────────────────────────────────── */
+  .btn{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);
+    border-radius:2px;padding:6px 10px;cursor:pointer;line-height:1.2;
+  }
+  .btn:hover{color:var(--accent);border-color:var(--accent)}
+  .topbar{
+    position:fixed;top:12px;right:12px;z-index:10;display:flex;gap:6px;
+  }
+  @media (max-width:1019px){.topbar{position:static;margin:16px 0 0;justify-content:flex-start;flex-wrap:wrap}}
+  @media (min-width:1020px){.topbar{display:none}}
+
+  /* ── tipografía general ───────────────────────────────── */
+  main{min-width:0}
+  section{padding-top:8px;margin-bottom:58px;scroll-margin-top:20px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.65rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h2.sec{font-family:var(--sans);font-weight:600;font-size:1.58rem;line-height:1.2;letter-spacing:-.017em;text-wrap:balance;margin:0 0 16px;max-width:34ch}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;letter-spacing:-.008em;margin:32px 0 10px;max-width:46ch}
+  p{margin:0 0 18px;max-width:66ch}
+  main ul,main ol{max-width:64ch;margin:0 0 18px;padding-left:22px}
+  main li{margin-bottom:7px}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:.1em .34em;border-radius:2px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{border-bottom-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;padding:.18em .48em;border-radius:2px;vertical-align:.14em;white-space:nowrap}
+  .p-curso{background:var(--accent-soft);color:var(--accent)}
+  .p-compl{background:var(--surface-2);color:var(--ink-2)}
+  .p-recom{background:var(--signal-soft);color:var(--signal)}
+
+  .note{border-left:2px solid var(--accent);background:var(--surface);padding:16px 20px;margin:24px 0;max-width:66ch;border-radius:0 3px 3px 0}
+  .note.risk{border-left-color:var(--signal)}
+  .note p:last-child{margin-bottom:0}
+  .note .lab{display:block;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+
+  blockquote{margin:22px 0;padding:0 0 0 18px;border-left:2px solid var(--rule);color:var(--ink-2);font-style:italic;max-width:62ch}
+
+  .tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.ok{color:var(--ok);font-weight:600}
+  .cat{font-family:var(--sans);font-weight:600}
+
+  /* ── bloque de pregunta ───────────────────────────────── */
+  .q{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px 22px 18px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .q.done{border-color:var(--rule-2)}
+  .qhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .qn{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .qhead h3{margin:0;font-size:1.08rem}
+  .stem{font-family:var(--sans);font-size:1rem;line-height:1.55;color:var(--ink);margin:0 0 16px;max-width:64ch}
+  .opts{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:7px;max-width:none}
+  .opts li{margin:0}
+  .opt{
+    width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;
+    font-family:var(--sans);font-size:.94rem;line-height:1.5;color:var(--ink);
+    background:var(--ground);border:1px solid var(--rule-2);border-radius:3px;
+    padding:11px 14px;cursor:pointer;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-2)}
+  .opt:disabled{cursor:default}
+  .opt .k{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--ink-3);flex:0 0 14px;padding-top:2px;text-transform:lowercase}
+  .opt.is-ok{background:var(--ok-soft);border-color:var(--ok)}
+  .opt.is-ok .k{color:var(--ok)}
+  .opt.is-bad{background:var(--bad-soft);border-color:var(--bad)}
+  .opt.is-bad .k{color:var(--bad)}
+  .opt.dim{opacity:.55}
+  .verdict{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin:12px 0 0;padding:7px 11px;border-radius:2px}
+  .verdict.ok{background:var(--ok-soft);color:var(--ok)}
+  .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+  details.why{margin-top:14px;border-top:1px solid var(--rule-2);padding-top:6px}
+  details.why summary{cursor:pointer;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 0;list-style:none;display:flex;gap:8px;align-items:center}
+  details.why summary::-webkit-details-marker{display:none}
+  details.why summary::before{content:"+";font-size:.85rem;color:var(--accent)}
+  details.why[open] summary::before{content:"\2212"}
+  details.why summary:hover{color:var(--accent)}
+  .why .body{font-size:1rem;line-height:1.66;color:var(--ink-2);padding-bottom:6px}
+  .why .body p{max-width:64ch}
+  .why .body strong{color:var(--ink)}
+  .key{
+    display:flex;gap:10px;align-items:flex-start;margin:18px 0 2px;padding:12px 15px;
+    background:var(--accent-soft);border-radius:3px;font-family:var(--sans);font-size:.93rem;
+    line-height:1.5;color:var(--ink);max-width:64ch;
+  }
+  .key .lab{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);flex:0 0 auto;padding-top:3px}
+
+  /* ── prompts ──────────────────────────────────────────── */
+  .prompt{position:relative;border:1px solid var(--rule);border-radius:3px;background:var(--surface);margin:14px 0}
+  .prompt pre{margin:0;padding:15px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;color:var(--ink-2);white-space:pre-wrap}
+  .prompt .copy{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .12s}
+  .prompt:hover .copy,.prompt .copy:focus-visible{opacity:1}
+  @media (hover:none){.prompt .copy{opacity:1}}
+
+  .hand{list-style:none;counter-reset:h;margin:22px 0;padding:0;display:grid;gap:1px;background:var(--rule-2);border:1px solid var(--rule);border-radius:3px;overflow:hidden;max-width:none}
+  .hand li{counter-increment:h;background:var(--surface);padding:13px 16px 13px 46px;position:relative;font-family:var(--sans);font-size:.94rem;margin:0;line-height:1.5}
+  .hand li::before{content:counter(h);position:absolute;left:17px;top:13px;font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+
+  footer.end{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:20px;padding-top:22px;font-family:var(--sans);font-size:.82rem;color:var(--ink-3);line-height:1.6}
+
+  @media print{
+    .topbar,.rail{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;box-shadow:none}
+  }
+
+  /* las gráficas SVG traen su propio modo oscuro por media query; el botón de tema debe ganarle */
+  :root[data-theme="light"] .v{--sf:#FFFFFF;--t1:#0E2226;--t2:#3F5A61;--t3:#6E868C;--grid:#E1E9EA;--ax:#CDDADC;--s1:#2a78d6;--s2:#eb6834}
+  :root[data-theme="dark"] .v{--sf:#101F22;--t1:#E3EBEC;--t2:#A5B9BE;--t3:#7C9399;--grid:#1A2E32;--ax:#233A3F;--s1:#3987e5;--s2:#d95926}
+  /* ── M2: filtros, niveles, tipos ──────────────────────── */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 26px}
+  .chip{font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;cursor:pointer;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--rule);border-radius:99px;padding:6px 13px}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--ground)}
+  .tipo{font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+    padding:.18em .5em;border-radius:2px;background:var(--surface-2);color:var(--ink-2)}
+  .tipo.t-calc{background:var(--accent-soft);color:var(--accent)}
+  .tipo.t-caso{background:var(--signal-soft);color:var(--signal)}
+  .tipo.t-error{background:var(--bad-soft);color:var(--bad)}
+  .tipo.t-vf{background:var(--ok-soft);color:var(--ok)}
+  .niv{font-family:var(--mono);font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+  .opts.vf{flex-direction:row;flex-wrap:wrap}
+  .opts.vf li{flex:1 1 160px}
+  .levels{display:grid;gap:8px;margin:14px 0 4px}
+  .lv{font-family:var(--sans);font-size:.74rem;color:var(--ink-2)}
+  .lv .row{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}
+  .lv .row b{font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex;gap:2px}
+  .bar i{display:block;height:100%}
+  .bar .h{background:var(--ok)} .bar .m{background:var(--bad)}
+  .gfx{margin:16px 0 6px}
+  .gfx svg{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+  .gfx figcaption{font-family:var(--sans);font-size:.8rem;color:var(--ink-3);margin-top:6px}
+  .back{font-family:var(--sans);font-size:.85rem;margin:14px 0 0}
+  .levelhead{font-family:var(--sans);font-weight:600;font-size:1.15rem;margin:40px 0 6px}
+  .levelhead span{font-family:var(--mono);font-size:.66rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:4px}
+  .leveldesc{color:var(--ink-2);margin:0 0 18px}
+  .empty{font-family:var(--sans);color:var(--ink-3);border:1px dashed var(--rule);border-radius:3px;padding:18px;margin:10px 0 30px}
+  #resultado .tw td a{border-bottom:none}
+  [hidden]{display:none!important}
+  /* el índice lateral es largo: el pie va solo en la columna del contenido para no taparlo */
+  @media (min-width:1020px){footer.end{grid-column:2}}
+  .score-m{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:6px 10px;line-height:1.2}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="score-m" id="score-m">0 / 0</span>
+  <button class="btn" data-act="theme" type="button">Tema</button>
+  <button class="btn" data-act="reset" type="button">Reiniciar</button>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Módulo 2 · Autoevaluación de estudio · Diplomado en Arquitectura de Software y Cloud Computing</p>
+    <h1>Requerimientos y tácticas: 29 preguntas para llegar preparado</h1>
+    <p class="standfirst">Banco de preguntas <em>propio</em> para repasar el Módulo 2 antes de abrir la autoevaluación oficial. Eliges una opción, ves si acertaste y por qué <em>cada distractora es incorrecta</em>. Las preguntas suben de nivel: recordar, comprender, aplicar y decidir.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Autor</dt><dd>Daniel Mazo (Danny), con IA</dd></div>
+      <div class="fact"><dt>Fecha</dt><dd>2026-10-04</dd></div>
+      <div class="fact"><dt>Preguntas</dt><dd>29 · 4 niveles</dd></div>
+      <div class="fact"><dt>Tipo</dt><dd>apunte de estudio</dd></div>
+      <div class="fact"><dt>Estado</dt><dd>vigente</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Índice">
+    <div class="scorebox">
+      <div class="big" id="score">0 / 0</div>
+      <div class="cap" id="scorecap">aún no has respondido</div>
+      <div class="levels" id="levels"></div>
+      <div class="railbtns">
+        <button class="btn" data-act="theme" type="button">Tema</button>
+        <button class="btn" data-act="reset" type="button">Reiniciar</button>
+      </div>
+    </div>
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#uso"><span class="n">§</span><span>Cómo usarla</span></a></li>
+      <li><a href="#preguntas"><span class="n">§</span><span>Las preguntas</span></a></li>
+      <li><a href="#resultado"><span class="n">§</span><span>Resultado y qué repasar</span></a></li>
+    </ol>
+    <h2>Preguntas</h2>
+    <ol id="railq"></ol>
+  </nav>
+
+  <main>
+
+    <section id="uso">
+      <p class="eyebrow">Antes de empezar</p>
+      <h2 class="sec">Cómo usarla</h2>
+      <div class="note risk">
+        <span class="lab">Importante</span>
+        <p>Estas preguntas <strong>no son las de Brightspace</strong>. La autoevaluación oficial sigue sin abrirse y no conocemos su formato; en M1 fue de <strong>un solo intento</strong>. Esto sirve para llegar preparado, no para adivinar la oficial.</p>
+      </div>
+      <ol class="hand">
+        <li>Responde <strong>sin mirar</strong> el cuaderno. Tienes una sola oportunidad por pregunta; si quieres repetir, usa «Reiniciar».</li>
+        <li>Lee el análisis aunque aciertes: el valor está en entender <strong>por qué fallan las otras opciones</strong>.</li>
+        <li>Al terminar, mira «Resultado y qué repasar»: te dice qué sección del cuaderno releer.</li>
+        <li><strong>Repaso espaciado:</strong> a los 2 días y a los 7 días, usa el filtro «Falladas» y repite solo esas.</li>
+        <li>Abre la autoevaluación oficial cuando los niveles 1 y 2 te salgan sin fallos.</li>
+      </ol>
+      <p>Tus respuestas se guardan en este navegador, así puedes cerrar la página y seguir después. Etiquetas de fuente: <span class="pill p-curso">Curso</span> material oficial · <span class="pill p-compl">Complementario</span> conocimiento externo · <span class="pill p-recom">Recomendación</span> criterio de arquitecto.</p>
+    </section>
+
+    <section id="preguntas">
+      <p class="eyebrow">Banco de preguntas</p>
+      <h2 class="sec">Las preguntas</h2>
+      <div class="chips" role="group" aria-label="Filtrar preguntas" id="chips">
+        <button class="chip" data-f="todas" aria-pressed="true" type="button">Todas</button>
+        <button class="chip" data-f="1" aria-pressed="false" type="button">Nivel 1 · Recordar</button>
+        <button class="chip" data-f="2" aria-pressed="false" type="button">Nivel 2 · Comprender</button>
+        <button class="chip" data-f="3" aria-pressed="false" type="button">Nivel 3 · Aplicar</button>
+        <button class="chip" data-f="4" aria-pressed="false" type="button">Nivel 4 · Decidir</button>
+        <button class="chip" data-f="pendientes" aria-pressed="false" type="button">Sin responder</button>
+        <button class="chip" data-f="falladas" aria-pressed="false" type="button">Falladas</button>
+      </div>
+      <div id="banco"></div>
+      <p class="empty" id="vacio" hidden>No hay preguntas con este filtro.</p>
+    </section>
+
+    <section id="resultado">
+      <p class="eyebrow">Cierre</p>
+      <h2 class="sec">Resultado y qué repasar</h2>
+      <div id="resumen"><p>Responde al menos una pregunta para ver tu resultado.</p></div>
+    </section>
+
+  </main>
+
+  <footer class="end">
+    <p>Autoevaluación de estudio del Módulo 2 · <code>m2-autoevaluacion-danny.html</code> · apunte elaborado con IA, <strong>no es material oficial</strong>. Fuentes: material oficial M2 (5 decks de tácticas, 4 Genially, video de Seguridad, enunciado del Reto 2) y Bass, Clements, Kazman, <em>Software Architecture in Practice</em> 4ª ed. Las gráficas son modelos de cálculo con los números del enunciado, no mediciones; salen de <code>graficas/generar_graficas.py</code>. Teclas: <code>T</code> tema · <code>R</code> reiniciar.</p>
+  </footer>
+</div>
+
+<template id="svg-ll"><svg xmlns="http://www.w3.org/2000/svg" class="v" viewBox="0 0 640 340" role="img" aria-labelledby="ll-t ll-d" style="max-width:100%;height:auto">
+<title id="ll-t">Ley de Little: instancias simultáneas según la duración de cada petición</title><desc id="ll-d">Con 35,7 req/s, la concurrencia es llegadas por duración. El límite de 10 instancias se cruza a los 0,28 s por petición.</desc>
+<style>
+.v{--sf:#FFFFFF;--t1:#0E2226;--t2:#3F5A61;--t3:#6E868C;--grid:#E1E9EA;--ax:#CDDADC;
+  --s1:#2a78d6;--s2:#eb6834;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){.v{--sf:#101F22;--t1:#E3EBEC;--t2:#A5B9BE;--t3:#7C9399;
+  --grid:#1A2E32;--ax:#233A3F;--s1:#3987e5;--s2:#d95926}}
+.v .bg{fill:var(--sf)}
+.v .grid{stroke:var(--grid);stroke-width:1}
+.v .ax{stroke:var(--ax);stroke-width:1}
+.v .tick{fill:var(--t3);font-size:11px}
+.v .lab{fill:var(--t2);font-size:12px}
+.v .ttl{fill:var(--t1);font-size:13px;font-weight:600}
+.v .note{fill:var(--t2);font-size:11.5px}
+.v .ref{stroke:var(--t3);stroke-width:1}
+.v .l1{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .l2{fill:none;stroke:var(--s2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .d1{fill:var(--s1);stroke:var(--sf);stroke-width:2}
+.v .d2{fill:var(--s2);stroke:var(--sf);stroke-width:2}
+.v .hit{fill:transparent}
+</style>
+<rect class="bg" width="640" height="340" rx="3"/>
+<line class="grid" x1="64" x2="490" y1="288.0" y2="288.0"/>
+<text class="tick" x="56" y="292.0" text-anchor="end">0</text>
+<line class="grid" x1="64" x2="490" y1="205.3" y2="205.3"/>
+<text class="tick" x="56" y="209.3" text-anchor="end">10</text>
+<line class="grid" x1="64" x2="490" y1="122.7" y2="122.7"/>
+<text class="tick" x="56" y="126.7" text-anchor="end">20</text>
+<line class="grid" x1="64" x2="490" y1="40.0" y2="40.0"/>
+<text class="tick" x="56" y="44.0" text-anchor="end">30</text>
+<text class="tick" x="64.0" y="306" text-anchor="middle">0,0 s</text>
+<text class="tick" x="170.5" y="306" text-anchor="middle">0,2 s</text>
+<text class="tick" x="277.0" y="306" text-anchor="middle">0,4 s</text>
+<text class="tick" x="383.5" y="306" text-anchor="middle">0,6 s</text>
+<text class="tick" x="490.0" y="306" text-anchor="middle">0,8 s</text>
+<line class="ax" x1="64" x2="490" y1="288" y2="288"/>
+<text class="lab" x="277.0" y="330" text-anchor="middle">duración de cada petición</text>
+<text class="lab" x="8" y="26">instancias simultáneas</text>
+<path class="l1" d="M64.0,288.0 L490.0,52.0"/>
+<line class="ref" x1="64" x2="490" y1="205.3" y2="205.3"/>
+<text class="lab" x="498.0" y="209.3" text-anchor="start">límite: 10 instancias</text>
+<g><title>k6 de referencia: 0,176 s × 35,7 req/s ≈ 6,3 instancias</title><circle class="hit" cx="157.7" cy="236.1" r="12"/><circle class="d1" cx="157.7" cy="236.1" r="5"/></g>
+<g><title>corte: 0,280 s × 35,7 req/s ≈ 10,0 instancias</title><circle class="hit" cx="213.2" cy="205.3" r="12"/><circle class="d1" cx="213.2" cy="205.3" r="5"/></g>
+<g><title>si el handler espera el correo: 0,500 s × 35,7 req/s ≈ 17,8 instancias</title><circle class="hit" cx="330.2" cy="140.5" r="12"/><circle class="d2" cx="330.2" cy="140.5" r="5"/></g>
+<text class="note" x="167.7" y="252.1" text-anchor="start">0,176 s → 6,3</text>
+<text class="note" x="203.2" y="195.3" text-anchor="end">0,28 s</text>
+<text class="note" x="340.2" y="156.5" text-anchor="start">0,5 s → 17,8 (no alcanza)</text>
+<text class="lab" x="498.0" y="56.0" text-anchor="start">35,7 req/s</text>
+</svg></template>
+<template id="svg-tb"><svg xmlns="http://www.w3.org/2000/svg" class="v" viewBox="0 0 640 340" role="img" aria-labelledby="tb-t tb-d" style="max-width:100%;height:auto">
+<title id="tb-t">Token bucket del API Gateway durante la prueba k6</title><desc id="tb-d">Fichas disponibles en el cubo con 35,7 req/s de llegada y rate 15. Con burst 2000 el cubo nunca se vacía. Con burst 500 se vacía a los 24,2 s y desde ahí las peticiones sobrantes reciben 429. El burst mínimo para 1000 peticiones es 580.</desc>
+<style>
+.v{--sf:#FFFFFF;--t1:#0E2226;--t2:#3F5A61;--t3:#6E868C;--grid:#E1E9EA;--ax:#CDDADC;
+  --s1:#2a78d6;--s2:#eb6834;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){.v{--sf:#101F22;--t1:#E3EBEC;--t2:#A5B9BE;--t3:#7C9399;
+  --grid:#1A2E32;--ax:#233A3F;--s1:#3987e5;--s2:#d95926}}
+.v .bg{fill:var(--sf)}
+.v .grid{stroke:var(--grid);stroke-width:1}
+.v .ax{stroke:var(--ax);stroke-width:1}
+.v .tick{fill:var(--t3);font-size:11px}
+.v .lab{fill:var(--t2);font-size:12px}
+.v .ttl{fill:var(--t1);font-size:13px;font-weight:600}
+.v .note{fill:var(--t2);font-size:11.5px}
+.v .ref{stroke:var(--t3);stroke-width:1}
+.v .l1{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .l2{fill:none;stroke:var(--s2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .d1{fill:var(--s1);stroke:var(--sf);stroke-width:2}
+.v .d2{fill:var(--s2);stroke:var(--sf);stroke-width:2}
+.v .hit{fill:transparent}
+</style>
+<rect class="bg" width="640" height="340" rx="3"/>
+<line class="grid" x1="64" x2="490" y1="288.0" y2="288.0"/>
+<text class="tick" x="56" y="292.0" text-anchor="end">0</text>
+<line class="grid" x1="64" x2="490" y1="226.0" y2="226.0"/>
+<text class="tick" x="56" y="230.0" text-anchor="end">500</text>
+<line class="grid" x1="64" x2="490" y1="164.0" y2="164.0"/>
+<text class="tick" x="56" y="168.0" text-anchor="end">1.000</text>
+<line class="grid" x1="64" x2="490" y1="102.0" y2="102.0"/>
+<text class="tick" x="56" y="106.0" text-anchor="end">1.500</text>
+<line class="grid" x1="64" x2="490" y1="40.0" y2="40.0"/>
+<text class="tick" x="56" y="44.0" text-anchor="end">2.000</text>
+<text class="tick" x="64.0" y="306" text-anchor="middle">0 s</text>
+<text class="tick" x="135.0" y="306" text-anchor="middle">5 s</text>
+<text class="tick" x="206.0" y="306" text-anchor="middle">10 s</text>
+<text class="tick" x="277.0" y="306" text-anchor="middle">15 s</text>
+<text class="tick" x="348.0" y="306" text-anchor="middle">20 s</text>
+<text class="tick" x="419.0" y="306" text-anchor="middle">25 s</text>
+<text class="tick" x="490.0" y="306" text-anchor="middle">30 s</text>
+<line class="ax" x1="64" x2="490" y1="288" y2="288"/>
+<text class="lab" x="277.0" y="330" text-anchor="middle">segundos desde el inicio del k6</text>
+<text class="lab" x="8" y="26">fichas en el cubo</text>
+<path class="l1" d="M64.0,40.0 L68.0,40.7 L72.0,41.4 L75.9,42.2 L79.9,42.9 L83.9,43.6 L87.9,44.3 L91.9,45.0 L95.8,45.8 L99.8,46.5 L103.8,47.2 L107.8,47.9 L111.7,48.6 L115.7,49.3 L119.7,50.1 L123.7,50.8 L127.7,51.5 L131.6,52.2 L135.6,52.9 L139.6,53.7 L143.6,54.4 L147.6,55.1 L151.5,55.8 L155.5,56.5 L159.5,57.3 L163.5,58.0 L167.4,58.7 L171.4,59.4 L175.4,60.1 L179.4,60.8 L183.4,61.6 L187.3,62.3 L191.3,63.0 L195.3,63.7 L199.3,64.4 L203.3,65.2 L207.2,65.9 L211.2,66.6 L215.2,67.3 L219.2,68.0 L223.1,68.8 L227.1,69.5 L231.1,70.2 L235.1,70.9 L239.1,71.6 L243.0,72.3 L247.0,73.1 L251.0,73.8 L255.0,74.5 L259.0,75.2 L262.9,75.9 L266.9,76.7 L270.9,77.4 L274.9,78.1 L278.9,78.8 L282.8,79.5 L286.8,80.3 L290.8,81.0 L294.8,81.7 L298.7,82.4 L302.7,83.1 L306.7,83.8 L310.7,84.6 L314.7,85.3 L318.6,86.0 L322.6,86.7 L326.6,87.4 L330.6,88.2 L334.6,88.9 L338.5,89.6 L342.5,90.3 L346.5,91.0 L350.5,91.8 L354.4,92.5 L358.4,93.2 L362.4,93.9 L366.4,94.6 L370.4,95.4 L374.3,96.1 L378.3,96.8 L382.3,97.5 L386.3,98.2 L390.3,98.9 L394.2,99.7 L398.2,100.4 L402.2,101.1 L406.2,101.8 L410.1,102.5 L414.1,103.3 L418.1,104.0 L422.1,104.7 L426.1,105.4 L430.0,106.1 L434.0,106.9 L438.0,107.6 L442.0,108.3 L446.0,109.0 L449.9,109.7 L453.9,110.4 L457.9,111.2 L461.9,111.9"/>
+<path class="l2" d="M64.0,226.0 L68.0,226.7 L72.0,227.4 L75.9,228.2 L79.9,228.9 L83.9,229.6 L87.9,230.3 L91.9,231.0 L95.8,231.8 L99.8,232.5 L103.8,233.2 L107.8,233.9 L111.7,234.6 L115.7,235.3 L119.7,236.1 L123.7,236.8 L127.7,237.5 L131.6,238.2 L135.6,238.9 L139.6,239.7 L143.6,240.4 L147.6,241.1 L151.5,241.8 L155.5,242.5 L159.5,243.3 L163.5,244.0 L167.4,244.7 L171.4,245.4 L175.4,246.1 L179.4,246.8 L183.4,247.6 L187.3,248.3 L191.3,249.0 L195.3,249.7 L199.3,250.4 L203.3,251.2 L207.2,251.9 L211.2,252.6 L215.2,253.3 L219.2,254.0 L223.1,254.8 L227.1,255.5 L231.1,256.2 L235.1,256.9 L239.1,257.6 L243.0,258.3 L247.0,259.1 L251.0,259.8 L255.0,260.5 L259.0,261.2 L262.9,261.9 L266.9,262.7 L270.9,263.4 L274.9,264.1 L278.9,264.8 L282.8,265.5 L286.8,266.3 L290.8,267.0 L294.8,267.7 L298.7,268.4 L302.7,269.1 L306.7,269.8 L310.7,270.6 L314.7,271.3 L318.6,272.0 L322.6,272.7 L326.6,273.4 L330.6,274.2 L334.6,274.9 L338.5,275.6 L342.5,276.3 L346.5,277.0 L350.5,277.8 L354.4,278.5 L358.4,279.2 L362.4,279.9 L366.4,280.6 L370.4,281.4 L374.3,282.1 L378.3,282.8 L382.3,283.5 L386.3,284.2 L390.3,284.9 L394.2,285.7 L398.2,286.4 L402.2,287.1 L406.2,287.8 L410.1,288.0 L414.1,288.0 L418.1,288.0 L422.1,288.0 L426.1,288.0 L430.0,288.0 L434.0,288.0 L438.0,288.0 L442.0,288.0 L446.0,288.0 L449.9,288.0 L453.9,288.0 L457.9,288.0 L461.9,288.0"/>
+<line class="ref" x1="64" x2="490" y1="216.1" y2="216.1"/>
+<text class="note" x="69.7" y="210.1" text-anchor="start">burst mínimo ≈ 580</text>
+<g><title>Burst 500: cubo vacío a los 24,2 s; ≈ 80 peticiones con 429</title><circle class="hit" cx="407.2" cy="288.0" r="12"/><circle class="d2" cx="407.2" cy="288.0" r="5"/></g>
+<text class="note" x="411.2" y="258.0" text-anchor="start">vacío a los 24,2 s;</text>
+<text class="note" x="411.2" y="274.0" text-anchor="start">después ≈ 80 respuestas 429</text>
+<g><title>Burst 2000: quedan 1.420 fichas al terminar (28,0 s)</title><circle class="hit" cx="461.9" cy="111.9" r="12"/><circle class="d1" cx="461.9" cy="111.9" r="5"/></g>
+<text class="lab" x="473.9" y="115.9" text-anchor="start">burst 2000</text>
+<text class="note" x="473.9" y="131.9" text-anchor="start">quedan 1.420</text>
+<text class="lab" x="473.9" y="292.0" text-anchor="start">burst 500</text>
+<g transform="translate(510,164)"><line class="l1" x1="0" x2="18" y1="0" y2="0"/><text class="tick" x="24" y="4">burst 2000</text><line class="l2" x1="0" x2="18" y1="18" y2="18"/><text class="tick" x="24" y="22">burst 500</text></g>
+</svg></template>
+
+<script>
+(function(){
+  "use strict";
+  var LS_THEME = "m2-autoeval-theme", LS_STATE = "m2-autoeval-estado";
+  var CUADERNO = "m2-cuaderno-estudio-danny.html";
+  var SECCION = {
+    "2": ["2-la-cadena-del-módulo", "§2 La cadena del módulo"],
+    "3": ["3-requerimientos-de-calidad-y-asr", "§3 Requerimientos de calidad y ASR"],
+    "4": ["4-el-escenario-de-calidad", "§4 El escenario de calidad"],
+    "5": ["5-disponibilidad", "§5 Disponibilidad"],
+    "6": ["6-desempeño", "§6 Desempeño"],
+    "7": ["7-seguridad", "§7 Seguridad"],
+    "8": ["8-interoperabilidad", "§8 Interoperabilidad"],
+    "10": ["10-cada-táctica-cuesta-algo-la-matriz-de-trade-offs", "§10 Matriz de trade-offs"],
+    "11": ["11-el-reto-2-como-laboratorio", "§11 El Reto 2 como laboratorio"]
+  };
+  var NIVELES = {
+    1: ["Recordar", "Definiciones y listas que hay que tener a mano."],
+    2: ["Comprender", "Distinguir conceptos parecidos y explicarlos con tus palabras."],
+    3: ["Aplicar", "Cuentas y escenarios con los números del Reto 2."],
+    4: ["Decidir", "Trade-offs y decisiones de diseño: lo que pesa en el reto y en la sustentación."]
+  };
+  var TIPOS = {mc:["Opción múltiple",""], vf:["Verdadero o falso","t-vf"], calc:["Cálculo","t-calc"],
+               caso:["Caso del Reto 2","t-caso"], error:["Encuentra el error","t-error"]};
+  var FUENTE = {curso:'<span class="pill p-curso">Curso</span>', compl:'<span class="pill p-compl">Complementario</span>',
+                recom:'<span class="pill p-recom">Recomendación</span>'};
+
+  /* ── banco de preguntas ──────────────────────────────
+     Cada una: nivel, tipo, título, enunciado, opciones, correcta, porqué,
+     distractoras (por qué falla cada una), concepto, sección del cuaderno, fuente. */
+  var Q = [
+  {n:1, t:"mc", h:"Qué es un ASR", s:"3", f:["curso"],
+   e:"¿Qué convierte a un requisito en un <strong>ASR</strong> (requisito arquitecturalmente significativo)?",
+   o:{a:"Que esté escrito en la sección de requisitos no funcionales del documento.",
+      b:"Que sea el requisito funcional con más prioridad para el negocio.",
+      c:"Que sea un requisito de calidad tan crítico que condiciona la estructura desde el inicio.",
+      d:"Que el cliente lo imponga como restricción tecnológica."},
+   k:"c",
+   w:"El curso define el ASR por su <strong>efecto en la estructura</strong>: es tan crítico que obliga a decidir la arquitectura desde el inicio. Se identifica con las preguntas guía del Genially P1: actor y evento, circunstancias, si la acción es crítica, y qué atributos y elementos afecta.",
+   d:{a:"No todos los requisitos de calidad pesan igual: el curso pide priorizarlos, y solo algunos condicionan la estructura.",
+      b:"Un requisito funcional es un <em>driver</em> del diseño en ADD, pero el ASR habla de calidad.",
+      d:"Las restricciones también son <em>drivers</em>, pero son otra categoría: no se eligen, se acatan."},
+   c:"ASR = requisito de calidad que condiciona la estructura desde el inicio."},
+
+  {n:1, t:"mc", h:"Las 6 partes del escenario", s:"4", f:["curso"],
+   e:"¿Cuál lista contiene, en orden, las 6 partes de un <strong>escenario de calidad</strong>?",
+   o:{a:"Requisito, ASR, escenario, táctica, patrón, trade-off.",
+      b:"Fuente, estímulo, táctica, patrón, respuesta, medida.",
+      c:"Actor, evento, componente, latencia, SLA, alerta.",
+      d:"Fuente, estímulo, artefacto, entorno, respuesta, medida de respuesta."},
+   k:"d",
+   w:"Fuente → estímulo → artefacto → entorno → respuesta → medida de respuesta. El Genially P1 usa otros nombres (actor, ambiente, respuesta esperada) y agrega unidad y prioridad, pero la estructura es la misma.",
+   d:{a:"Esa es la <strong>cadena del módulo</strong> (§2), no las partes de un escenario.",
+      b:"Mezcla el problema con la solución: táctica y patrón son la <em>respuesta de diseño</em> al escenario, no parte de él.",
+      c:"Parece técnica, pero no es el vocabulario del curso y no tiene «entorno» ni «medida»."},
+   c:"El escenario describe el problema medible; la táctica es la solución."},
+
+  {n:1, t:"mc", h:"Propósitos de disponibilidad", s:"5", f:["curso"],
+   e:"¿Cuál de estos <strong>no</strong> es uno de los tres propósitos de las tácticas de disponibilidad?",
+   o:{a:"Detectar fallas.", b:"Recuperarse de fallas.", c:"Escalar horizontalmente.", d:"Prevenir fallas."},
+   k:"c",
+   w:"Los tres propósitos son <strong>detectar, recuperar y prevenir</strong>. Escalar es una táctica de desempeño («aumentar recursos», «múltiples copias de cómputo»), aunque de paso ayude a la disponibilidad.",
+   d:{a:"Es un propósito: monitor, ping/echo, heartbeat, timestamp…",
+      b:"Es un propósito: redundant spare, rollback, retry, graceful degradation…",
+      d:"Es un propósito: removal from service, transactions, predictive model…"},
+   c:"Disponibilidad: detectar · recuperar · prevenir."},
+
+  {n:1, t:"mc", h:"Familias de desempeño", s:"6", f:["curso"],
+   e:"¿Cuáles son las dos grandes familias de tácticas de <strong>desempeño</strong>?",
+   o:{a:"Controlar la demanda y gestionar recursos.",
+      b:"Detectar fallas y recuperarse de fallas.",
+      c:"Detectar, resistir, reaccionar y recuperarse.",
+      d:"Discover services, Orchestrate y Tailor interface."},
+   k:"a",
+   w:"<strong>Controlar la demanda</strong> (priorizar eventos, tiempos de ejecución acotados, limitar la respuesta al evento…) y <strong>gestionar recursos</strong> (introducir concurrencia, colas de tamaño limitado, múltiples copias…).",
+   d:{b:"Son propósitos de <strong>disponibilidad</strong>.",
+      c:"Son las cuatro familias de <strong>seguridad</strong>.",
+      d:"Son las tres categorías de <strong>interoperabilidad</strong>."},
+   c:"Desempeño: o reduces lo que entra, o administras mejor con qué lo atiendes."},
+
+  {n:1, t:"mc", h:"Resistir ataques", s:"7", f:["curso"],
+   e:"¿Qué táctica pertenece a la familia <strong>resistir ataques</strong>?",
+   o:{a:"Revocar acceso.", b:"Validar entrada.", c:"Auditoría.", d:"Detectar intrusión."},
+   k:"b",
+   w:"Resistir es evitar que el ataque prospere: identificar, autenticar y autorizar actores, limitar acceso y exposición, cifrar datos, separar entidades, <strong>validar entrada</strong>, cambiar credenciales.",
+   d:{a:"Es de <strong>reaccionar</strong>: el ataque ya está ocurriendo.",
+      c:"Es de <strong>recuperarse</strong>, junto con no repudio.",
+      d:"Es de <strong>detectar</strong>."},
+   c:"Seguridad: detectar · resistir · reaccionar · recuperarse."},
+
+  {n:1, t:"mc", h:"El paso difícil de ADD", s:"3", f:["curso"],
+   e:"En el método <strong>ADD</strong>, ¿qué paso señala el curso como el más difícil?",
+   o:{a:"Paso 1: revisar las entradas.", b:"Paso 5: instanciar elementos y asignar responsabilidades.",
+      c:"Paso 7: analizar el diseño.", d:"Paso 4: elegir conceptos de diseño."},
+   k:"d",
+   w:"Elegir conceptos de diseño (tácticas, patrones, arquitecturas de referencia, componentes externos) es donde se toman las decisiones con trade-off. El criterio para dejar de iterar es <strong>«deje que el riesgo sea su guía»</strong>.",
+   d:{a:"Es recopilar lo que ya existe: propósito, requisitos, escenarios, restricciones.",
+      b:"Es concretar una decisión ya tomada en el paso 4.",
+      c:"Es importante (idealmente con otra persona), pero revisa lo decidido; no decide."},
+   c:"ADD: el paso 4 decide; los demás preparan, concretan o revisan."},
+
+  {n:1, t:"mc", h:"Tres réplicas que votan", s:"5", f:["curso"],
+   e:"¿Cómo se llama el patrón de disponibilidad con <strong>tres réplicas que votan</strong> el resultado?",
+   o:{a:"Hot spare.", b:"TMR (Triple Modular Redundancy).", c:"Circuit breaker.", d:"Load balancer."},
+   k:"b",
+   w:"<strong>TMR</strong>: tres componentes hacen el mismo cálculo y gana la mayoría. Enmascara una réplica defectuosa a costa de triplicar recursos.",
+   d:{a:"Es un repuesto activo que toma el relevo, pero no vota.",
+      c:"Corta las llamadas a un servicio fallido; no replica nada.",
+      d:"Es un patrón de <strong>desempeño</strong> en el curso: reparte carga."},
+   c:"Toda redundancia cuesta recursos duplicados (o triplicados)."},
+
+  {n:2, t:"mc", h:"Defecto, error o falla", s:"5", f:["curso"],
+   e:"En una app bancaria, una fórmula de redondeo mal escrita deja un saldo intermedio incorrecto en memoria y, al final, <strong>el cliente ve un saldo equivocado en la app</strong>. Lo que ve el cliente es…",
+   o:{a:"Un defecto.", b:"Un error.", c:"Un ataque.", d:"Una falla."},
+   k:"d",
+   w:"La <strong>falla</strong> es la desviación visible desde fuera. La fórmula mal escrita es el <strong>defecto</strong> (la causa) y el saldo intermedio en memoria es el <strong>error</strong> (el estado intermedio). La disponibilidad busca que el defecto y el error no lleguen a falla.",
+   d:{a:"El defecto es la causa: la fórmula mal escrita.",
+      b:"El error es el estado intermedio, todavía invisible para el usuario.",
+      c:"Nada indica un actor malicioso: es un fallo interno."},
+   c:"Defecto (causa) → error (estado) → falla (visible)."},
+
+  {n:2, t:"vf", h:"Atributos con prioridad baja", s:"3", f:["curso"],
+   e:"Verdadero o falso: «Si un atributo de calidad tiene prioridad baja, se puede omitir del documento de arquitectura».",
+   o:{a:"Verdadero", b:"Falso"},
+   k:"b",
+   w:"El curso dice que los ASR se descartan según el contexto, <strong>«pero nunca deben quedar sin analizar»</strong>. Un atributo no priorizado se documenta como no priorizado, con su razón.",
+   d:{a:"Omitirlo deja la duda de si se pensó o se olvidó. Documentarlo demuestra que fue una decisión."},
+   c:"No priorizar también es una decisión, y se escribe."},
+
+  {n:2, t:"mc", h:"Táctica o patrón", s:"2", f:["curso","compl"],
+   e:"Según el material del curso, ¿cuál es la clasificación correcta de <em>retry</em> y <em>circuit breaker</em>?",
+   o:{a:"Circuit breaker es una táctica; retry es un patrón.",
+      b:"Las dos son tácticas de disponibilidad.",
+      c:"Retry es una táctica; circuit breaker es un patrón.",
+      d:"Las dos son patrones de desempeño."},
+   k:"c",
+   w:"La <strong>táctica</strong> es una decisión de diseño puntual (<em>retry</em>). El <strong>patrón</strong> es un paquete probado de tácticas más una estructura: el <em>circuit breaker</em> combina detectar la falla, dejar de llamar y volver a probar más tarde.",
+   d:{a:"Está al revés.",
+      b:"El curso lista el circuit breaker entre los <strong>patrones</strong>, no entre las tácticas.",
+      d:"Los dos sirven a la <strong>disponibilidad</strong>, no al desempeño."},
+   c:"Patrón = varias tácticas empaquetadas con una estructura."},
+
+  {n:2, t:"error", h:"El escenario del deck", s:"4", f:["curso","compl"],
+   e:"El deck de Desempeño trae este escenario: <em>«500 usuarios · 2000 solicitudes en 30 s · el sistema completo · condiciones normales · procesa todas · latencia <strong>promedio</strong> de 2 s»</em>. ¿Cuál es su punto débil?",
+   o:{a:"Le falta la fuente del estímulo.",
+      b:"La medida usa el promedio, que esconde la cola de la distribución.",
+      c:"«Condiciones normales» no es un entorno válido.",
+      d:"Debería medir disponibilidad en lugar de latencia."},
+   k:"b",
+   w:"Unas pocas respuestas muy lentas casi no mueven el promedio, pero son las que sufre el usuario. Un escenario útil pide <strong>percentil y condiciones de carga</strong>: «p95 &lt; 2 s con 2000 solicitudes en 30 s». Es la lección medida en M1.",
+   d:{a:"La fuente está: «500 usuarios».",
+      c:"«Normal» es uno de los tres estados de operación del curso (normal, estrés, operación mínima).",
+      d:"El escenario es de desempeño a propósito; cambiar de atributo no corrige la medida."},
+   c:"Una medida de respuesta pide percentil, no promedio."},
+
+  {n:2, t:"mc", h:"Orquestación centralizada", s:"8", f:["curso"],
+   e:"En interoperabilidad, ¿qué describe la orquestación <strong>centralizada</strong>?",
+   o:{a:"Los servicios se coordinan entre sí con reglas predefinidas, sin un director.",
+      b:"Un componente (el orquestador) controla la secuencia de llamadas.",
+      c:"Los servicios se encuentran unos a otros en un registro.",
+      d:"Un adaptador transforma el formato de los datos entre sistemas."},
+   k:"b",
+   w:"Centralizada: <strong>un orquestador</strong> decide qué servicio se llama y en qué orden. Es fácil de seguir y de monitorear, pero el orquestador es un punto único que hay que cuidar.",
+   d:{a:"Es la orquestación <strong>descentralizada</strong>.",
+      c:"Es <strong>Discover services</strong>, otra categoría.",
+      d:"Es <strong>Tailor interface</strong>: transformación de datos y adaptadores."},
+   c:"Centralizada = un director; descentralizada = reglas compartidas."},
+
+  {n:2, t:"mc", h:"Caído o lento", s:"5", f:["curso","recom"],
+   e:"Desde fuera, un sistema caído y uno extremadamente lento se ven igual. ¿Qué decisión obliga a tomar esto?",
+   o:{a:"Fijar un tiempo límite (timeout) a partir del cual «lento» se trata como «caído».",
+      b:"Agregar una caché para que nunca sea lento.",
+      c:"Duplicar las instancias de todos los componentes.",
+      d:"Cifrar las comunicaciones."},
+   k:"a",
+   w:"El curso señala la relación disponibilidad–desempeño. La consecuencia práctica es <strong>definir un número</strong>: a partir de cuántos segundos dejo de esperar y disparo el reintento o la alerta. Sin ese número nadie puede decir si hubo falla.",
+   d:{b:"La caché mejora el desempeño en algunos casos, pero no resuelve cómo distinguir lento de caído.",
+      c:"Redundancia ayuda a recuperarse, pero primero hay que <em>detectar</em> la falla, y eso requiere el timeout.",
+      d:"Es una táctica de seguridad; no tiene relación con este problema."},
+   c:"Sin timeout no hay forma de detectar una falla por lentitud."},
+
+  {n:2, t:"mc", h:"Safety y security", s:"7", f:["recom"],
+   e:"En Bass, <em>safety</em> y <em>security</em> son atributos distintos. ¿Qué es <strong>safety</strong>?",
+   o:{a:"Proteger la información del acceso no autorizado.",
+      b:"Mantener el sistema disponible ante ataques de denegación de servicio.",
+      c:"Evitar que el sistema llegue a estados peligrosos o cause daño.",
+      d:"Cumplir regulaciones como GDPR."},
+   k:"c",
+   w:"<strong>Safety</strong> evita estados peligrosos (un freno, un dispositivo médico). <strong>Security</strong> protege la información. La traducción del deck de Disponibilidad pone los dos bajo «seguridad»: conviene aclararlo si sale en la sustentación.",
+   d:{a:"Eso es <strong>security</strong>.",
+      b:"Es la intersección entre seguridad (security) y disponibilidad.",
+      d:"Es privacidad y cumplimiento, parte de la conversación de security."},
+   c:"Safety = no causar daño · Security = proteger la información."},
+
+  {n:2, t:"vf", h:"Comunicarse no basta", s:"8", f:["curso"],
+   e:"Verdadero o falso: «Si dos sistemas logran intercambiar mensajes, ya son interoperables».",
+   o:{a:"Verdadero", b:"Falso"},
+   k:"b",
+   w:"El curso es explícito: no basta con comunicarse, <strong>el receptor debe entender y procesar</strong> la información. Por eso existen las tácticas de Tailor interface: transformar datos, adaptadores e interfaces estandarizadas (por ejemplo HL7 en el caso del hospital).",
+   d:{a:"Intercambiar bytes es conectividad; la interoperabilidad exige entender el significado."},
+   c:"Interoperar = intercambiar y entender."},
+
+  {n:3, t:"calc", h:"Un nueve más", s:"5", f:["compl"],
+   e:"¿Cuánto tiempo de inactividad al año permite una disponibilidad de <strong>99,9 %</strong>?",
+   o:{a:"≈ 3,65 días.", b:"≈ 52,6 minutos.", c:"≈ 8,8 horas.", d:"≈ 5,3 minutos."},
+   k:"c",
+   w:"0,1 % de 8760 h ≈ <strong>8,8 horas</strong>. Cada nueve adicional divide por 10 el tiempo permitido.",
+   d:{a:"Es 99 %.", b:"Es 99,99 %.", d:"Es 99,999 %, lo que el deck llama «alta disponibilidad»."},
+   c:"99 % ≈ 3,65 d · 99,9 % ≈ 8,8 h · 99,99 % ≈ 52,6 min · 99,999 % ≈ 5,3 min."},
+
+  {n:3, t:"calc", h:"Ley de Little con 0,5 s", s:"6", f:["compl"], g:"ll",
+   e:"El k6 envía <strong>35,7 req/s</strong>. Si cada petición tarda <strong>0,5 s</strong>, ¿cuántas instancias simultáneas hacen falta y alcanza el límite de 10?",
+   o:{a:"≈ 7; alcanza.", b:"≈ 71; no alcanza.", c:"≈ 7,5, porque el API Gateway deja pasar solo 15 req/s.", d:"≈ 17,8; no alcanza."},
+   k:"d",
+   w:"Ley de Little: <code>concurrencia ≈ llegadas/s × duración</code> = 35,7 × 0,5 ≈ <strong>17,8</strong>. Con un tope de 10, las que sobran se rechazan.",
+   d:{a:"No corresponde a ninguna cuenta correcta con estos datos.",
+      b:"Divide en vez de multiplicar: 35,7 ÷ 0,5.",
+      c:"Usa el <em>rate</em> en lugar de las llegadas reales. El burst deja pasar más de 15 req/s mientras el cubo tenga fichas."},
+   c:"Concurrencia = llegadas × duración."},
+
+  {n:3, t:"calc", h:"Duración máxima por petición", s:"6", f:["compl"], g:"ll",
+   e:"Con 35,7 req/s y un máximo de <strong>10 instancias</strong>, ¿cuánto puede durar como máximo cada petición?",
+   o:{a:"≈ 0,28 s.", b:"≈ 2,8 s.", c:"≈ 0,67 s.", d:"≈ 0,028 s."},
+   k:"a",
+   w:"Despejando: duración = 10 ÷ 35,7 ≈ <strong>0,28 s</strong>. El límite de instancias no limita <em>cuántas</em> peticiones atiendes, sino <em>cuánto puede durar</em> cada una.",
+   d:{b:"Error de un orden de magnitud.",
+      c:"Usa 15 req/s (10 ÷ 15): confunde el rate con las llegadas reales.",
+      d:"Error de un orden de magnitud."},
+   c:"Todo lo lento tiene que salir del camino que responde al cliente."},
+
+  {n:3, t:"calc", h:"Burst mínimo", s:"11", f:["compl"], g:"tb",
+   e:"El API Gateway tiene un rate de <strong>15 req/s</strong> y el k6 manda <strong>1000 peticiones en ≈ 28 s</strong>. ¿Qué <em>burst</em> mínimo evita los 429?",
+   o:{a:"≈ 450.", b:"≈ 580.", c:"1000.", d:"2000."},
+   k:"b",
+   w:"Fichas disponibles = burst + rate × tiempo. Tienen que alcanzar para 1000: burst ≥ 1000 − 15 × 28 ≈ <strong>580</strong>. Es un modelo simplificado: las ráfagas reales del k6 lo hacen más exigente.",
+   d:{a:"Son las fichas que <strong>recarga</strong> el rate en 30 s (15 × 30), no el burst necesario.",
+      c:"Ignora la recarga del rate durante la prueba.",
+      d:"Es el valor de la imagen del enunciado: alcanza con holgura, pero no es el mínimo."},
+   c:"Token bucket: el burst absorbe el pico y el rate recarga."},
+
+  {n:3, t:"error", h:"Un requisito mal escrito", s:"4", f:["recom"],
+   e:"El requisito dice: <em>«El sistema debe ser rápido y estar siempre disponible»</em>. ¿Cuál es la mejor reescritura como escenario de calidad?",
+   o:{a:"«El sistema responde en promedio en 1 segundo».",
+      b:"«Usar una cola y funciones serverless para que el sistema sea rápido».",
+      c:"«Con 1000 eventos enviados en 30 s por el k6, al llegar un Emergency el sistema envía el correo en menos de 15 s desde el último envío, en el p95 de 5 corridas».",
+      d:"«El sistema tiene 99,999 % de disponibilidad y baja latencia»."},
+   k:"c",
+   w:"Tiene fuente (k6), estímulo (Emergency entre 1000 eventos), entorno (carga de la prueba), respuesta (enviar el correo) y una <strong>medida verificable con percentil</strong>. «Siempre disponible» va en <em>otro</em> escenario: un escenario, un atributo.",
+   d:{a:"Usa el promedio y le faltan fuente, estímulo y entorno.",
+      b:"Describe una <strong>táctica</strong> (la solución), no el escenario (el problema).",
+      d:"Mezcla dos atributos, no tiene estímulo y «baja latencia» no se puede medir."},
+   c:"Un escenario, un atributo, una medida verificable."},
+
+  {n:3, t:"caso", h:"Clasificar la cola", s:"6", f:["curso"],
+   e:"En el Reto 2 decides poner una <strong>cola</strong> entre la ingesta de eventos y el envío del correo. ¿Qué táctica del curso es?",
+   o:{a:"Controlar la demanda: priorizar eventos.",
+      b:"Disponibilidad, detectar: heartbeat.",
+      c:"Gestionar recursos: colas de tamaño limitado.",
+      d:"Interoperabilidad: tailor interface."},
+   k:"c",
+   w:"Es una táctica de desempeño de <strong>gestionar recursos</strong>. De paso ayuda a la disponibilidad: si el envío falla, el evento sigue en la cola.",
+   d:{a:"Priorizar sería tratar los Emergency antes que los Position. Se puede combinar con la cola, pero es otra táctica.",
+      b:"Heartbeat detecta que un componente sigue vivo; no almacena trabajo.",
+      d:"La cola no adapta formatos entre sistemas."},
+   c:"La cola desacopla: la ingesta no espera al trabajo lento."},
+
+  {n:3, t:"caso", h:"El escenario del video", s:"7", f:["curso"],
+   e:"El video de Seguridad trae este escenario: <em>«Un empleado descontento, desde una ubicación remota, intenta modificar la tabla de tasas de pago durante operaciones normales. El intento se detecta, el sistema registra la actividad y los datos correctos se restauran en un día»</em>. ¿Cuál es la <strong>medida de respuesta</strong>?",
+   o:{a:"El intento se detecta y se registra la actividad.",
+      b:"Los datos correctos se restauran en un día.",
+      c:"Operaciones normales.",
+      d:"Un empleado descontento desde una ubicación remota."},
+   k:"b",
+   w:"La medida es lo <strong>verificable</strong>: el tiempo de recuperación, un día. Muestra que un escenario de seguridad no tiene que medir «evitar el ataque»; también puede medir cuánto tarda en recuperarse.",
+   d:{a:"Es la <strong>respuesta</strong>: lo que hace el sistema, pero sin un número.",
+      c:"Es el <strong>entorno</strong>.",
+      d:"Es la <strong>fuente</strong>."},
+   c:"Respuesta = qué hace el sistema · Medida = cómo se verifica, con un número."},
+  {n:3, t:"mc", h:"El costo de la caché", s:"10", f:["recom"],
+   e:"Una caché (múltiples copias de datos) mejora el desempeño. ¿Qué empeora típicamente?",
+   o:{a:"La consistencia de los datos.", b:"La seguridad.", c:"La disponibilidad.", d:"Nada: es gratis."},
+   k:"a",
+   w:"Con varias copias, alguna puede quedar <strong>desactualizada</strong>. Por eso toda caché necesita una política de invalidación o expiración.",
+   d:{b:"Puede tener efectos de seguridad si guarda datos sensibles, pero no es el costo típico.",
+      c:"Suele mejorarla: si el origen cae, la caché puede seguir respondiendo.",
+      d:"Ninguna táctica es gratis: es la idea de la matriz de trade-offs."},
+   c:"Toda táctica mejora algo y empeora otra cosa."},
+
+  {n:4, t:"caso", h:"El hilo conductor", s:"3", f:["recom"],
+   e:"¿Qué frase cumple mejor el entregable <strong>«atributo de calidad más importante»</strong> del Reto 2 (el hilo conductor que faltó en M1)?",
+   o:{a:"«Priorizamos desempeño, disponibilidad y seguridad, porque todos son importantes».",
+      b:"«Usamos Lambda, SQS y correo gestionado porque son serverless y escalan solos».",
+      c:"«Priorizamos la escalabilidad, porque AWS escala automáticamente».",
+      d:"«Priorizamos el desempeño (correo en menos de 15 s) porque la rúbrica lo puntúa de forma graduada, a costa de más piezas y de posibles correos duplicados. Seguridad e interoperabilidad no se priorizan porque el enunciado no las especifica»."},
+   k:"d",
+   w:"Nombra <strong>un</strong> atributo con una medida, el «por qué» sale de la rúbrica y no del gusto, el «a costa de» nombra un costo real, y declara los no priorizados. El atributo exacto lo decide el equipo; esta es la forma.",
+   d:{a:"Priorizar tres atributos es no priorizar ninguno.",
+      b:"Lista componentes, no atributos: es la conclusión sin el argumento.",
+      c:"No tiene medida ni costo, y «AWS escala solo» choca con el límite de 10 instancias."},
+   c:"«Priorizamos X, por Y, a costa de Z», y los demás se documentan."},
+
+  {n:4, t:"caso", h:"Esperar al correo", s:"6", f:["compl"], g:"ll",
+   e:"Un compañero propone que la función que recibe cada evento <strong>envíe el correo antes de responder</strong> al k6, «para que salga más rápido». ¿Qué es lo más probable?",
+   o:{a:"Funciona: la función escala sin límite.",
+      b:"Solo aumenta un poco la latencia del correo.",
+      c:"La duración por petición sube, la concurrencia pasa de 10 y se rechazan peticiones: se pierde el «100 % procesadas».",
+      d:"Mejora todo, porque el correo sale en la misma llamada."},
+   k:"c",
+   w:"Si la petición pasa de ≈ 0,18 s a ≈ 0,5 s, se necesitan ≈ 18 instancias. Con un tope de 10, las demás se rechazan. La salida es <strong>desacoplar</strong>: responder rápido y enviar el correo por otro camino.",
+   d:{a:"El enunciado limita a 10 instancias simultáneas.",
+      b:"El efecto principal no está en el correo, sino en la <strong>ingesta</strong>: se pierden eventos.",
+      d:"Puede adelantar el primer correo, pero rompe el requisito de no perder eventos."},
+   c:"El camino que responde al cliente no espera al trabajo lento."},
+
+  {n:4, t:"caso", h:"Reintentos que hunden", s:"5", f:["curso","compl"],
+   e:"El servicio de correo empieza a responder lento. Cada instancia <strong>reintenta 3 veces sin espera</strong>. ¿Cuál es la mejor respuesta de diseño?",
+   o:{a:"Subir a 10 reintentos para asegurar el envío.",
+      b:"Circuit breaker y reintentos con espera creciente (backoff).",
+      c:"Quitar los reintentos.",
+      d:"Agregar más instancias para reintentar en paralelo."},
+   k:"b",
+   w:"Reintentar sin espera multiplica por hasta 4 la carga sobre un servicio que ya está débil, y además ocupa instancias. El <strong>circuit breaker</strong> corta los intentos hasta que el servicio se recupere, y el <strong>backoff</strong> espacia los reintentos.",
+   d:{a:"Agrava el problema: más carga justo cuando menos la aguanta.",
+      c:"Sin reintentos, un fallo transitorio se convierte en un correo perdido.",
+      d:"Choca con el límite de 10 instancias y aumenta la presión sobre el servicio."},
+   c:"Retry sin circuit breaker puede empeorar una caída."},
+
+  {n:4, t:"caso", h:"¿Kafka?", s:"2", f:["recom"],
+   e:"Alguien propone usar <strong>Kafka</strong> en el Reto 2 «porque es lo que usa el profesor». ¿Qué respuesta es la más sólida?",
+   o:{a:"Adoptarlo: si el profesor lo usa, suma puntos.",
+      b:"Usar Kafka y también una cola gestionada, por redundancia.",
+      c:"Descartarlo y escribir por qué: ningún escenario del reto lo exige, y suma operación, costo y tiempo de arranque.",
+      d:"Adoptarlo porque escala más que cualquier alternativa."},
+   k:"c",
+   w:"Regla del módulo: <strong>cada decisión tiene que salir de un ASR</strong>. Para 1000 eventos en 30 s, una cola gestionada (o ninguna) basta. Descartar con argumento también es una decisión de arquitectura, y se documenta.",
+   d:{a:"Elegir por autoridad y no por un ASR es lo contrario de lo que pide el módulo.",
+      b:"Duplica complejidad sin un escenario que la justifique: sobreingeniería.",
+      d:"Escalar más de lo necesario no mejora ningún escenario del reto, y sí sube el costo."},
+   c:"Sin ASR que lo pida, un componente es sobreingeniería."},
+
+  {n:4, t:"caso", h:"Elegir entre B y C", s:"11", f:["recom"],
+   e:"Tienes dos diseños: <strong>B</strong> (todo pasa por una cola) y <strong>C</strong> (solo los Emergency van a la cola). ¿Cómo eliges?",
+   o:{a:"Una corrida de cada uno y te quedas con el menor promedio.",
+      b:"Eliges C porque tiene más componentes y se ve más profesional.",
+      c:"Eliges B porque las colas siempre son más lentas.",
+      d:"Al menos 5 corridas por diseño, comparando el p95 del tiempo hasta el correo; si los rangos se solapan, eliges el más simple."},
+   k:"d",
+   w:"Una decisión de desempeño se sostiene con <strong>medición repetida y percentiles</strong>. Si la diferencia cabe dentro del ruido, no hay diferencia demostrada, y gana la simplicidad.",
+   d:{a:"Una corrida no separa la señal del ruido, y el promedio esconde la cola (lección de M1).",
+      b:"Más componentes no es una virtud; es costo.",
+      c:"Es una afirmación sin medir; además se contradice al elegir la opción con más cola."},
+   c:"Medir varias veces, comparar percentiles y preferir lo simple ante el empate."},
+
+  {n:4, t:"mc", h:"Desempeño extremo", s:"10", f:["recom"],
+   e:"En el Reto M1, la variante de <strong>memoria compartida</strong> ganó latencia. ¿Qué atributo pagó el costo principal?",
+   o:{a:"Ninguno: fue una mejora pura.",
+      b:"El aislamiento y la seguridad: los procesos comparten memoria y se pierde la frontera entre ellos.",
+      c:"La usabilidad.",
+      d:"La interoperabilidad con otros lenguajes, únicamente."},
+   k:"b",
+   w:"Al quitar la frontera de red ganas microsegundos, pero pierdes <strong>aislamiento</strong>: un proceso puede leer o corromper la memoria del otro, y ambos quedan atados a la misma máquina (disponibilidad y desplegabilidad). Es un trade-off a declarar, no a esconder.",
+   d:{a:"Ninguna táctica es gratis.",
+      c:"No hay interfaz de usuario en juego.",
+      d:"Puede verse afectada, pero no es el costo principal ni el único."},
+   c:"Priorizar desempeño extremo suele cobrarse en seguridad y aislamiento."}
+  ];
+
+  /* ── estado (guardado en el navegador, opcional) ──── */
+  var state = {};
+  try{ state = JSON.parse(localStorage.getItem(LS_STATE) || "{}") || {}; }catch(e){ state = {}; }
+  function save(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+
+  try{
+    var saved = localStorage.getItem(LS_THEME);
+    if(saved === "dark" || saved === "light"){ document.documentElement.setAttribute("data-theme", saved); }
+  }catch(e){}
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    if(!cur){ cur = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem(LS_THEME, next); }catch(e){}
+  }
+
+  /* ── render ───────────────────────────────────────── */
+  function seccion(s){
+    var x = SECCION[s];
+    return x ? '<a href="' + CUADERNO + "#" + x[0] + '">' + x[1] + "</a>" : "";
+  }
+  function grafica(g){
+    var t = document.getElementById(g === "ll" ? "svg-ll" : "svg-tb");
+    var cap = g === "ll" ? "Ley de Little con 35,7 req/s. Modelo de cálculo, no medición."
+                         : "Token bucket del API Gateway durante el k6. Modelo de cálculo, no medición.";
+    return t ? '<figure class="gfx">' + t.innerHTML + "<figcaption>" + cap + "</figcaption></figure>" : "";
+  }
+
+  var banco = document.getElementById("banco"), rail = document.getElementById("railq");
+  var html = [], railHtml = [], nivelActual = 0;
+  Q.forEach(function(q, i){
+    var id = i + 1;
+    if(q.n !== nivelActual){
+      nivelActual = q.n;
+      html.push('<h3 class="levelhead" data-lv="' + q.n + '"><span>Nivel ' + q.n + "</span>" + NIVELES[q.n][0] +
+                '</h3><p class="leveldesc" data-lv="' + q.n + '">' + NIVELES[q.n][1] + "</p>");
+    }
+    var keys = Object.keys(q.o);
+    var opts = keys.map(function(k){
+      return '<li><button class="opt" data-k="' + k + '" type="button"><span class="k">' + k +
+             "</span><span>" + q.o[k] + "</span></button></li>";
+    }).join("");
+    var dis = keys.filter(function(k){ return k !== q.k; }).map(function(k){
+      return "<li><strong>" + k + ")</strong> " + q.d[k] + "</li>";
+    }).join("");
+    var fuentes = q.f.map(function(f){ return FUENTE[f]; }).join(" ");
+    html.push(
+      '<article class="q" id="p' + id + '" data-q="' + id + '" data-lv="' + q.n + '">' +
+      '<div class="qhead"><span class="qn">Pregunta ' + id + '</span><span class="tipo ' + TIPOS[q.t][1] + '">' +
+      TIPOS[q.t][0] + '</span><span class="niv">Nivel ' + q.n + " · " + NIVELES[q.n][0] + "</span>" +
+      "<h3>" + q.h + "</h3></div>" +
+      '<p class="stem">' + q.e + "</p>" +
+      '<ul class="opts' + (q.t === "vf" ? " vf" : "") + '">' + opts + "</ul>" +
+      '<p class="verdict" hidden></p>' +
+      '<details class="why"><summary>Análisis</summary><div class="body">' +
+      "<p><strong>Por qué es correcta.</strong> " + q.w + " " + fuentes + "</p>" +
+      (q.g ? grafica(q.g) : "") +
+      "<p><strong>Por qué fallan las demás:</strong></p><ul>" + dis + "</ul>" +
+      '<p class="key"><span class="lab">Concepto</span><span>' + q.c + "</span></p>" +
+      '<p class="back">Para repasar: ' + seccion(q.s) + " del cuaderno.</p>" +
+      "</div></details></article>");
+    railHtml.push('<li><a href="#p' + id + '" data-q="' + id + '"><span class="n">' + id + "</span><span>" + q.h + "</span></a></li>");
+  });
+  banco.innerHTML = html.join("");
+  rail.innerHTML = railHtml.join("");
+  var arts = Array.prototype.slice.call(banco.querySelectorAll(".q"));
+
+  /* ── responder ────────────────────────────────────── */
+  function marcar(art, key, abrir){
+    var i = +art.getAttribute("data-q") - 1, q = Q[i], good = key === q.k;
+    art.classList.add("done");
+    Array.prototype.forEach.call(art.querySelectorAll(".opt"), function(b){
+      var k = b.getAttribute("data-k");
+      b.disabled = true;
+      if(k === q.k){ b.classList.add("is-ok"); }
+      else if(k === key){ b.classList.add("is-bad"); }
+      else { b.classList.add("dim"); }
+    });
+    var v = art.querySelector(".verdict");
+    v.hidden = false;
+    v.className = "verdict " + (good ? "ok" : "bad");
+    v.textContent = good ? "Correcto: la respuesta es " + q.k + ")"
+                         : "Revisa: elegiste " + key + "), la correcta es " + q.k + ")";
+    if(abrir){ art.querySelector("details.why").open = true; }
+    var a = rail.querySelector('a[data-q="' + (i + 1) + '"]');
+    if(a){ a.classList.remove("hit", "miss"); a.classList.add(good ? "hit" : "miss"); }
+  }
+  arts.forEach(function(art){
+    var id = art.getAttribute("data-q");
+    if(state[id]){ marcar(art, state[id], false); }
+    Array.prototype.forEach.call(art.querySelectorAll(".opt"), function(b){
+      b.addEventListener("click", function(){
+        if(state[id]) return;                        // una sola oportunidad por pregunta
+        state[id] = b.getAttribute("data-k");
+        save(); marcar(art, state[id], true); pintar(); filtrar();
+      });
+    });
+  });
+
+  /* ── marcador, niveles y resultado ────────────────── */
+  function cuenta(){
+    var r = {total:{ok:0, resp:0, n:Q.length}};
+    [1, 2, 3, 4].forEach(function(n){ r[n] = {ok:0, resp:0, n:0}; });
+    Q.forEach(function(q, i){
+      var s = state[i + 1], lv = r[q.n];
+      lv.n++;
+      if(s){ lv.resp++; r.total.resp++; if(s === q.k){ lv.ok++; r.total.ok++; } }
+    });
+    return r;
+  }
+  function pintar(){
+    var r = cuenta();
+    document.getElementById("score").textContent = r.total.ok + " / " + r.total.resp;
+    document.getElementById("score-m").textContent = "Aciertos " + r.total.ok + " / " + r.total.resp;
+    document.getElementById("scorecap").textContent = r.total.resp === 0 ? "aún no has respondido"
+      : "aciertos sobre " + r.total.resp + " respondida" + (r.total.resp === 1 ? "" : "s") + " de " + Q.length;
+    document.getElementById("levels").innerHTML = [1, 2, 3, 4].map(function(n){
+      var lv = r[n], mal = lv.resp - lv.ok;
+      return '<div class="lv"><div class="row"><span>' + n + " · " + NIVELES[n][0] + "</span><b>" + lv.ok + " / " + lv.n +
+        '</b></div><div class="bar" role="img" aria-label="Nivel ' + n + ": " + lv.ok + " aciertos y " + mal + " fallos de " + lv.n + '">' +
+        '<i class="h" style="width:' + (lv.ok / lv.n * 100) + '%"></i><i class="m" style="width:' + (mal / lv.n * 100) + '%"></i></div></div>';
+    }).join("");
+
+    var res = document.getElementById("resumen");
+    if(r.total.resp === 0){ res.innerHTML = "<p>Responde al menos una pregunta para ver tu resultado.</p>"; return; }
+    var filas = [1, 2, 3, 4].map(function(n){
+      var lv = r[n], mal = lv.resp - lv.ok, accion;
+      if(lv.resp < lv.n){ accion = "Te faltan " + (lv.n - lv.resp) + " por responder."; }
+      else if(mal === 0){ accion = "Sin fallos. Repásalo solo en la fecha de los 7 días."; }
+      else if(mal === 1){ accion = "Un fallo: lee su análisis y repítela a los 2 días."; }
+      else { accion = n <= 2 ? "Relee las secciones de abajo antes de seguir: es la base."
+                             : n === 3 ? "Rehaz las cuentas con las gráficas, sin mirar la respuesta."
+                             : "Discútelo con el equipo: es el material de la sustentación."; }
+      return "<tr><td class=\"cat\">" + n + " · " + NIVELES[n][0] + "</td><td>" + lv.ok + " / " + lv.resp +
+             (lv.resp < lv.n ? " (de " + lv.n + ")" : "") + "</td><td>" + accion + "</td></tr>";
+    }).join("");
+    var secs = {};
+    Q.forEach(function(q, i){ var s = state[i + 1]; if(s && s !== q.k){ (secs[q.s] = secs[q.s] || []).push(i + 1); } });
+    var lista = Object.keys(secs).sort(function(a, b){ return a - b; }).map(function(s){
+      return "<li>" + seccion(s) + " — preguntas " + secs[s].map(function(n){ return '<a href="#p' + n + '">' + n + "</a>"; }).join(", ") + "</li>";
+    }).join("");
+    res.innerHTML = '<div class="tw"><table><thead><tr><th>Nivel</th><th>Aciertos</th><th>Qué hacer</th></tr></thead><tbody>' +
+      filas + "</tbody></table></div>" +
+      (lista ? "<h3>Secciones del cuaderno para releer</h3><ul>" + lista + "</ul>"
+             : "<p>No hay secciones pendientes de repaso con lo que llevas respondido.</p>") +
+      (r.total.resp === Q.length && r[1].ok === r[1].n && r[2].ok === r[2].n
+        ? '<div class="note"><span class="lab">Listo</span><p>Niveles 1 y 2 sin fallos: puedes abrir la autoevaluación oficial cuando el equipo lo acuerde.</p></div>' : "");
+  }
+
+  /* ── filtros ──────────────────────────────────────── */
+  var filtro = "todas";
+  function visible(art){
+    var id = art.getAttribute("data-q"), q = Q[id - 1], s = state[id];
+    if(filtro === "todas") return true;
+    if(filtro === "pendientes") return !s;
+    if(filtro === "falladas") return !!s && s !== q.k;
+    return String(q.n) === filtro;
+  }
+  function filtrar(){
+    var n = 0, porNivel = {};
+    arts.forEach(function(art){
+      var v = visible(art);
+      art.hidden = !v;
+      if(v){ n++; porNivel[art.getAttribute("data-lv")] = true; }
+    });
+    Array.prototype.forEach.call(banco.querySelectorAll(".levelhead,.leveldesc"), function(h){
+      h.hidden = !porNivel[h.getAttribute("data-lv")];
+    });
+    document.getElementById("vacio").hidden = n > 0;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#chips .chip"), function(c){
+    c.addEventListener("click", function(){
+      filtro = c.getAttribute("data-f");
+      Array.prototype.forEach.call(document.querySelectorAll("#chips .chip"), function(o){
+        o.setAttribute("aria-pressed", o === c ? "true" : "false");
+      });
+      filtrar();
+    });
+  });
+
+  /* ── reiniciar y botones ──────────────────────────── */
+  function reset(){
+    if(Object.keys(state).length && !confirm("¿Borrar todas tus respuestas?")) return;
+    state = {}; save();
+    arts.forEach(function(art){
+      art.classList.remove("done");
+      Array.prototype.forEach.call(art.querySelectorAll(".opt"), function(b){
+        b.disabled = false; b.classList.remove("is-ok", "is-bad", "dim");
+      });
+      var v = art.querySelector(".verdict"); v.hidden = true; v.textContent = ""; v.className = "verdict";
+      art.querySelector("details.why").open = false;
+    });
+    Array.prototype.forEach.call(rail.querySelectorAll("a"), function(a){ a.classList.remove("hit", "miss"); });
+    pintar(); filtrar();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function(b){
+    b.addEventListener("click", b.getAttribute("data-act") === "theme" ? toggleTheme : reset);
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if(k === "t"){ toggleTheme(); } else if(k === "r"){ reset(); }
+  });
+
+  pintar(); filtrar();
+})();
+</script>
+</body>
+</html>

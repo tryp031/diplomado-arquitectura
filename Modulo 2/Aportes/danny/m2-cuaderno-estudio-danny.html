@@ -83,6 +83,20 @@ tbody tr:last-child td{border-bottom:none}
 .b-compl{background:var(--surface-2);color:var(--ink-2)}
 .b-recom{background:var(--signal-soft);color:var(--signal)}
 .b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+a.boton{display:inline-block;font-family:var(--sans);font-weight:600;font-size:.95rem;text-decoration:none;
+  color:#fff;background:var(--accent);border-radius:3px;padding:12px 20px;margin:4px 0 22px}
+a.boton:hover{filter:brightness(1.1)}
+@media (prefers-color-scheme:dark){a.boton{color:var(--ground)}}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
 footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
   font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
 @media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
@@ -94,13 +108,13 @@ footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding
   <h1>Cuaderno de estudio — Módulo 2: Requerimientos y tácticas de arquitectura</h1>
   <p class="meta">m2-cuaderno-estudio-danny.md</p>
 </header>
-<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#1-cómo-usar-este-cuaderno">1. Cómo usar este cuaderno</a></li><li><a href="#2-la-cadena-del-módulo">2. La cadena del módulo</a></li><li><a href="#3-requerimientos-de-calidad-y-asr">3. Requerimientos de calidad y ASR</a></li><li><a href="#4-el-escenario-de-calidad">4. El escenario de calidad</a></li><li><a href="#5-disponibilidad">5. Disponibilidad</a></li><li><a href="#6-desempeño">6. Desempeño</a></li><li><a href="#7-seguridad">7. Seguridad</a></li><li><a href="#8-interoperabilidad">8. Interoperabilidad</a></li><li><a href="#9-desplegabilidad-y-usabilidad-complementarios">9. Desplegabilidad y usabilidad (complementarios)</a></li><li><a href="#10-cada-táctica-cuesta-algo-la-matriz-de-trade-offs">10. Cada táctica cuesta algo: la matriz de trade-offs</a></li><li><a href="#11-el-reto-2-como-laboratorio">11. El Reto 2 como laboratorio</a></li><li><a href="#12-autoevaluación-responde-sin-mirar">12. Autoevaluación (responde sin mirar)</a></li><li><a href="#13-errores-y-ambigüedades-del-material-resumen">13. Errores y ambigüedades del material (resumen)</a></li><li><a href="#14-glosario-rápido">14. Glosario rápido</a></li><li><a href="#15-qué-falta-por-estudiar">15. Qué falta por estudiar</a></li></ol></nav>
-<main><div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Autor</strong></td><td>Daniel Mazo Serna (Danny), con asistencia de IA</td></tr><tr><td><strong>Fecha</strong></td><td>2026-09-30</td></tr><tr><td><strong>Módulo</strong></td><td>2 — Requerimientos y Tácticas de Arquitectura de Software</td></tr><tr><td><strong>Tipo</strong></td><td><code>apunte</code> — notas de estudio propias; <strong>no es material oficial</strong></td></tr><tr><td><strong>Fuentes</strong></td><td>Material oficial M2 (5 decks de tácticas, 4 Genially, enunciado del Reto 2) · Bass, Clements, Kazman, <em>Software Architecture in Practice</em> 4ª ed. (citado por los decks)</td></tr><tr><td><strong>Límites</strong></td><td>Falta el video de Seguridad. La autoevaluación oficial no se abrió. Los Genially se leyeron como texto plano (sin imágenes ni orden de láminas).</td></tr><tr><td><strong>Estado</strong></td><td>vigente · ⬜ sin consolidar</td></tr></tbody></table></div>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#1-cómo-usar-este-cuaderno">1. Cómo usar este cuaderno</a></li><li><a href="#2-la-cadena-del-módulo">2. La cadena del módulo</a></li><li><a href="#3-requerimientos-de-calidad-y-asr">3. Requerimientos de calidad y ASR</a></li><li><a href="#4-el-escenario-de-calidad">4. El escenario de calidad</a></li><li><a href="#5-disponibilidad">5. Disponibilidad</a></li><li><a href="#6-desempeño">6. Desempeño</a></li><li><a href="#7-seguridad">7. Seguridad</a></li><li><a href="#8-interoperabilidad">8. Interoperabilidad</a></li><li><a href="#9-desplegabilidad-y-usabilidad-complementarios">9. Desplegabilidad y usabilidad (complementarios)</a></li><li><a href="#10-cada-táctica-cuesta-algo-la-matriz-de-trade-offs">10. Cada táctica cuesta algo: la matriz de trade-offs</a></li><li><a href="#11-el-reto-2-como-laboratorio">11. El Reto 2 como laboratorio</a></li><li><a href="#12-autoevaluación">12. Autoevaluación</a></li><li><a href="#13-glosario-rápido">13. Glosario rápido</a></li><li><a href="#14-qué-falta-por-estudiar">14. Qué falta por estudiar</a></li></ol></nav>
+<main><div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Autor</strong></td><td>Daniel Mazo Serna (Danny), con asistencia de IA</td></tr><tr><td><strong>Fecha</strong></td><td>2026-09-30 · actualizado 2026-10-04 (gráficas; la autoevaluación pasó a su propia página)</td></tr><tr><td><strong>Módulo</strong></td><td>2 — Requerimientos y Tácticas de Arquitectura de Software</td></tr><tr><td><strong>Tipo</strong></td><td><code>apunte</code> — notas de estudio propias; <strong>no es material oficial</strong></td></tr><tr><td><strong>Fuentes</strong></td><td>Material oficial M2 (5 decks de tácticas, 4 Genially, enunciado del Reto 2) · Bass, Clements, Kazman, <em>Software Architecture in Practice</em> 4ª ed. (citado por los decks)</td></tr><tr><td><strong>Límites</strong></td><td>La autoevaluación oficial no se abrió. Los Genially se leyeron como texto plano (sin imágenes ni orden de láminas).</td></tr><tr><td><strong>Estado</strong></td><td>vigente · ⬜ sin consolidar</td></tr></tbody></table></div>
 <blockquote><p>Cada afirmación lleva su etiqueta: <strong><span class="pill b-curso">Curso</span></strong> está en el material oficial · <strong><span class="pill b-compl">Complementario</span></strong> es conocimiento externo al curso · <strong><span class="pill b-recom">Recomendación</span></strong> es criterio de arquitecto · <strong><span class="pill b-hipo">Hipótesis</span></strong> es una propuesta sin validar.</p></blockquote>
 <hr>
 <h2 id="1-cómo-usar-este-cuaderno">1. Cómo usar este cuaderno</h2>
 <h3 id="tres-pasadas-no-una">Tres pasadas, no una</h3>
-<ol><li><strong>Entender.</strong> Lee las secciones 2 a 4 sin memorizar. Meta: explicar con tus palabras qué es un ASR y cómo pasa de requisito a táctica.</li><li><strong>Aplicar.</strong> Haz la sección 11 (el Reto 2 como laboratorio) con lápiz. Meta: que cada concepto tenga un número del reto al lado.</li><li><strong>Comprobar.</strong> Responde la autoevaluación (sección 12) <strong>sin mirar</strong>, y marca lo que falló. Solo entonces abre la autoevaluación oficial.</li></ol>
+<ol><li><strong>Entender.</strong> Lee las secciones 2 a 4 sin memorizar. Meta: explicar con tus palabras qué es un ASR y cómo pasa de requisito a táctica.</li><li><strong>Aplicar.</strong> Haz la sección 11 (el Reto 2 como laboratorio) con lápiz. Meta: que cada concepto tenga un número del reto al lado.</li><li><strong>Comprobar.</strong> Responde la autoevaluación interactiva (<code>m2-autoevaluacion-danny.html</code>, ver sección 12) <strong>sin mirar</strong>. Solo entonces abre la autoevaluación oficial.</li></ol>
 <h3 id="qué-escribir-a-mano">Qué escribir a mano</h3>
 <ul><li>La cadena <strong>ASR → escenario → táctica → patrón → trade-off</strong>, de memoria.</li><li>Las 6 partes del escenario de calidad.</li><li>La frase que el profesor echó de menos en M1: <strong>«Priorizamos X, por Y, a costa de Z.»</strong></li></ul>
 <p><strong><span class="pill b-recom">Recomendación</span></strong> El objetivo de M2 no es memorizar listas de tácticas (hay más de 60 en los decks). Es poder, ante un requisito, decir qué atributo pesa más, qué táctica lo logra y qué se sacrifica.</p>
@@ -162,14 +176,75 @@ Requisitos de calidad ──┘   (los que condicionan        (medible)     (dec
 <div class="tw"><table><thead><tr><th>Familia</th><th>Tácticas</th></tr></thead><tbody><tr><td><strong>Controlar la demanda</strong></td><td>Gestionar solicitudes de trabajo · Limitar la respuesta al evento · <strong>Priorizar eventos</strong> · Reducir la sobrecarga computacional · Tiempos de ejecución acotados · Aumentar la eficiencia de los recursos</td></tr><tr><td><strong>Gestionar recursos</strong></td><td>Aumentar recursos · <strong>Introducir concurrencia</strong> · Múltiples copias de cómputo · Múltiples copias de datos (caché) · <strong>Colas de tamaño limitado</strong> · Programar recursos</td></tr></tbody></table></div>
 <p><strong>Patrones <span class="pill b-curso">Curso</span>:</strong> Service mesh · Load balancer · Map-Reduce. El deck también trae una lámina de tipos de pruebas (sin texto en lo capturado).</p>
 <h3 id="la-cuenta-que-hay-que-saber-hacer-complementario">La cuenta que hay que saber hacer <strong><span class="pill b-compl">Complementario</span></strong></h3>
-<p><strong>Ley de Little:</strong> <code>concurrencia ≈ llegadas por segundo × duración de cada una</code>. Con 35 req/s y 0,18 s por petición se necesitan ≈ 6 en paralelo. Con 0,5 s por petición son ≈ 18. Esa aritmética decide si un límite de 10 instancias alcanza.</p>
+<p><strong>Ley de Little:</strong> <code>concurrencia ≈ llegadas por segundo × duración de cada una</code>. Con 35,7 req/s (el k6 de referencia) y 0,176 s por petición se necesitan ≈ 6 en paralelo. Con 0,5 s por petición son ≈ 18. Esa aritmética decide si un límite de 10 instancias alcanza.</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" class="v" viewBox="0 0 640 340" role="img" aria-labelledby="ll-t ll-d" style="max-width:100%;height:auto">
+<title id="ll-t">Ley de Little: instancias simultáneas según la duración de cada petición</title><desc id="ll-d">Con 35,7 req/s, la concurrencia es llegadas por duración. El límite de 10 instancias se cruza a los 0,28 s por petición.</desc>
+<style>
+.v{--sf:#FFFFFF;--t1:#0E2226;--t2:#3F5A61;--t3:#6E868C;--grid:#E1E9EA;--ax:#CDDADC;
+  --s1:#2a78d6;--s2:#eb6834;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){.v{--sf:#101F22;--t1:#E3EBEC;--t2:#A5B9BE;--t3:#7C9399;
+  --grid:#1A2E32;--ax:#233A3F;--s1:#3987e5;--s2:#d95926}}
+.v .bg{fill:var(--sf)}
+.v .grid{stroke:var(--grid);stroke-width:1}
+.v .ax{stroke:var(--ax);stroke-width:1}
+.v .tick{fill:var(--t3);font-size:11px}
+.v .lab{fill:var(--t2);font-size:12px}
+.v .ttl{fill:var(--t1);font-size:13px;font-weight:600}
+.v .note{fill:var(--t2);font-size:11.5px}
+.v .ref{stroke:var(--t3);stroke-width:1}
+.v .l1{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .l2{fill:none;stroke:var(--s2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .d1{fill:var(--s1);stroke:var(--sf);stroke-width:2}
+.v .d2{fill:var(--s2);stroke:var(--sf);stroke-width:2}
+.v .hit{fill:transparent}
+</style>
+<rect class="bg" width="640" height="340" rx="3"/>
+<line class="grid" x1="64" x2="490" y1="288.0" y2="288.0"/>
+<text class="tick" x="56" y="292.0" text-anchor="end">0</text>
+<line class="grid" x1="64" x2="490" y1="205.3" y2="205.3"/>
+<text class="tick" x="56" y="209.3" text-anchor="end">10</text>
+<line class="grid" x1="64" x2="490" y1="122.7" y2="122.7"/>
+<text class="tick" x="56" y="126.7" text-anchor="end">20</text>
+<line class="grid" x1="64" x2="490" y1="40.0" y2="40.0"/>
+<text class="tick" x="56" y="44.0" text-anchor="end">30</text>
+<text class="tick" x="64.0" y="306" text-anchor="middle">0,0 s</text>
+<text class="tick" x="170.5" y="306" text-anchor="middle">0,2 s</text>
+<text class="tick" x="277.0" y="306" text-anchor="middle">0,4 s</text>
+<text class="tick" x="383.5" y="306" text-anchor="middle">0,6 s</text>
+<text class="tick" x="490.0" y="306" text-anchor="middle">0,8 s</text>
+<line class="ax" x1="64" x2="490" y1="288" y2="288"/>
+<text class="lab" x="277.0" y="330" text-anchor="middle">duración de cada petición</text>
+<text class="lab" x="8" y="26">instancias simultáneas</text>
+<path class="l1" d="M64.0,288.0 L490.0,52.0"/>
+<line class="ref" x1="64" x2="490" y1="205.3" y2="205.3"/>
+<text class="lab" x="498.0" y="209.3" text-anchor="start">límite: 10 instancias</text>
+<g><title>k6 de referencia: 0,176 s × 35,7 req/s ≈ 6,3 instancias</title><circle class="hit" cx="157.7" cy="236.1" r="12"/><circle class="d1" cx="157.7" cy="236.1" r="5"/></g>
+<g><title>corte: 0,280 s × 35,7 req/s ≈ 10,0 instancias</title><circle class="hit" cx="213.2" cy="205.3" r="12"/><circle class="d1" cx="213.2" cy="205.3" r="5"/></g>
+<g><title>si el handler espera el correo: 0,500 s × 35,7 req/s ≈ 17,8 instancias</title><circle class="hit" cx="330.2" cy="140.5" r="12"/><circle class="d2" cx="330.2" cy="140.5" r="5"/></g>
+<text class="note" x="167.7" y="252.1" text-anchor="start">0,176 s → 6,3</text>
+<text class="note" x="203.2" y="195.3" text-anchor="end">0,28 s</text>
+<text class="note" x="340.2" y="156.5" text-anchor="start">0,5 s → 17,8 (no alcanza)</text>
+<text class="lab" x="498.0" y="56.0" text-anchor="start">35,7 req/s</text>
+</svg>
+<figcaption>Ley de Little con 35,7 req/s: el límite de 10 instancias se cruza cuando cada petición dura más de 0,28 s. Modelo de cálculo, no medición.</figcaption></figure>
+<div class="tw"><table><thead><tr><th>Duración por petición</th><th>Instancias simultáneas</th><th>¿Cabe en 10?</th></tr></thead><tbody><tr><td>0,176 s (k6 de referencia)</td><td>≈ 6,3</td><td>Sí</td></tr><tr><td>0,28 s (corte)</td><td>10</td><td>Justo</td></tr><tr><td>0,5 s (si el handler espera el correo)</td><td>≈ 17,8</td><td>No</td></tr></tbody></table></div>
+<p><strong>Lectura:</strong> el límite de 10 instancias no limita <em>cuántas</em> peticiones atiendes, sino <em>cuánto puede durar</em> cada una. Todo lo lento (el correo) tiene que salir del camino que responde al cliente.</p>
 <hr>
 <h2 id="7-seguridad">7. Seguridad</h2>
-<p><strong>El video de este tema no se capturó.</strong> Lo de abajo sale del deck.</p>
+<p>Fuentes: el deck de Seguridad y el video obligatorio (<code>Material-Clase/Video-Seguridad.md</code>, capturado el 04/10).</p>
 <h3 id="definición-y-las-tres-características-curso">Definición y las tres características <strong><span class="pill b-curso">Curso</span></strong></h3>
 <p>Capacidad de proteger datos e información del acceso no autorizado, sin negarlo a quien sí está autorizado. Se caracteriza por <strong>Confidencialidad, Integridad y Disponibilidad</strong>. El módulo también cubre privacidad y regulaciones como GDPR para información de identificación personal (PII).</p>
+<p>Los tres pilares, con los ejemplos del video <strong><span class="pill b-curso">Curso</span></strong>:</p>
+<div class="tw"><table><thead><tr><th>Pilar</th><th>Qué protege</th><th>Ejemplo del video</th></tr></thead><tbody><tr><td><strong>Confidencialidad</strong></td><td>Que nadie no autorizado <strong>lea</strong> la información</td><td>Un pirata no accede a tu declaración de impuestos</td></tr><tr><td><strong>Integridad</strong></td><td>Que nadie no autorizado <strong>altere</strong> la información</td><td>La nota que puso el profesor no cambia hasta que la ves</td></tr><tr><td><strong>Disponibilidad</strong></td><td>Que el usuario legítimo <strong>pueda usar</strong> el sistema</td><td>La tienda de libros no se cae por un ataque</td></tr></tbody></table></div>
+<p><strong>Privacidad <span class="pill b-curso">Curso</span>:</strong> limitar quién accede a la <strong>PII</strong>, que según el NIST es cualquier dato que identifique a una persona (nombre, número de seguro social, fecha de nacimiento, información médica, educativa o financiera).</p>
+<h3 id="el-escenario-de-seguridad-del-video-curso">El escenario de seguridad del video <strong><span class="pill b-curso">Curso</span></strong></h3>
+<p>Es el único escenario de seguridad completo del material de M2. Desglosado en las 6 partes:</p>
+<div class="tw"><table><thead><tr><th>Parte</th><th>Valor</th></tr></thead><tbody><tr><td>Fuente</td><td>Un empleado descontento, desde una ubicación remota</td></tr><tr><td>Estímulo</td><td>Intenta modificar la tabla de tasas de pago</td></tr><tr><td>Artefacto</td><td>Los datos del sistema (la tabla de tasas)</td></tr><tr><td>Entorno</td><td>Operación normal</td></tr><tr><td>Respuesta</td><td>Se detecta el intento y el sistema registra la actividad</td></tr><tr><td>Medida de respuesta</td><td>Los datos correctos se restauran <strong>en un día</strong></td></tr></tbody></table></div>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> Fíjate en la medida: no es «evitar el ataque», sino <strong>cuánto tarda en recuperarse</strong>. Un escenario de seguridad también puede medirse en tiempo.</p>
 <h3 id="tácticas-curso-la-analogía-del-edificio-físico">Tácticas <strong><span class="pill b-curso">Curso</span></strong> — la analogía del edificio físico</h3>
+<p>Un edificio seguro limita el acceso (vallas, puntos de control), detecta intrusos (insignias), disuade (guardias), reacciona (cierre automático de puertas) y se recupera (copias fuera del sitio). Lo mismo aplica al software:</p>
 <div class="tw"><table><thead><tr><th>Familia</th><th>Tácticas</th></tr></thead><tbody><tr><td><strong>Detectar ataques</strong></td><td>Detectar intrusión · Detectar denegación de servicio · Verificar integridad del mensaje · Detectar anomalías en la entrega de mensajes</td></tr><tr><td><strong>Resistir ataques</strong></td><td>Identificar actores · Autenticar · Autorizar · Acceso limitado · Limitar la exposición · <strong>Cifrar datos</strong> · Entidades separadas · <strong>Validar entrada</strong> · Cambiar configuración de credenciales</td></tr><tr><td><strong>Reaccionar</strong></td><td>Revocar acceso · Restringir inicio de sesión · Informar a los actores</td></tr><tr><td><strong>Recuperarse</strong></td><td>Auditoría · No repudio</td></tr></tbody></table></div>
+<p>El video llama «<strong>identificar</strong>» a la primera familia; el deck la llama «<strong>detectar</strong>». Es la misma; en los entregables usar «detectar».</p>
 <p><strong>Patrones <span class="pill b-curso">Curso</span>:</strong> Intercepting validator, Intrusion Prevention System (IPS). Lecturas: OWASP Top Ten 2021, CWE/SANS Top 25, SAST vs DAST.</p>
 <p><strong><span class="pill b-recom">Recomendación</span></strong> <em>Safety</em> (evitar estados peligrosos) y <em>security</em> (proteger información) son atributos distintos en Bass. La traducción al español del deck de Disponibilidad los mezcla bajo «seguridad».</p>
 <hr>
@@ -193,24 +268,81 @@ Requisitos de calidad ──┘   (los que condicionan        (medible)     (dec
 <p><strong><span class="pill b-curso">Curso</span></strong> Sistema de alerta temprana para una flota vehicular: recibir 1000 eventos en 30 s, detectar <code>Emergency</code> y mandar un correo a Gmail. Restricciones: API Gateway a 15 req/s, máximo 10 instancias simultáneas. El diseño completo y las opciones están en <code>m2-analisis-apertura-danny.md</code> §5.</p>
 <h3 id="ejercicios-para-estudiar-con-el-reto">Ejercicios para estudiar con el reto</h3>
 <ol><li><strong>Escribe el escenario de calidad</strong> de la latencia de la alerta con las 6 partes, y cuál es su medida.</li><li><strong>Escribe el escenario de «no perder ningún evento»</strong>. ¿Qué atributo es y por qué tiene prioridad alta según la regla del curso?</li><li><strong>Calcula</strong> el ritmo real del k6: 1000 peticiones en 30 s. ¿Cuánto es frente al límite de 15 req/s? ¿Qué parámetro del API Gateway lo hace posible?</li><li><strong>Aplica la ley de Little</strong> con dos duraciones por petición (0,2 s y 0,5 s). ¿Alcanzan 10 instancias?</li><li><strong>Elige el atributo más importante</strong> y completa la frase: «Priorizamos ___, por ___, a costa de ___.»</li><li><strong>Lista tres atributos no priorizados</strong> y su justificación. Es lo que pide la regla del Genially P1.</li></ol>
+<h3 id="cuánto-burst-hace-falta-complementario">Cuánto <em>burst</em> hace falta <strong><span class="pill b-compl">Complementario</span></strong></h3>
+<p>El API Gateway limita con un <strong>token bucket</strong>: el cubo empieza con <em>burst</em> fichas, cada petición gasta una y se recarga a <em>rate</em> fichas por segundo. Si el cubo se vacía, la petición recibe <strong>429</strong> y se pierde el «100 % procesadas».</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" class="v" viewBox="0 0 640 340" role="img" aria-labelledby="tb-t tb-d" style="max-width:100%;height:auto">
+<title id="tb-t">Token bucket del API Gateway durante la prueba k6</title><desc id="tb-d">Fichas disponibles en el cubo con 35,7 req/s de llegada y rate 15. Con burst 2000 el cubo nunca se vacía. Con burst 500 se vacía a los 24,2 s y desde ahí las peticiones sobrantes reciben 429. El burst mínimo para 1000 peticiones es 580.</desc>
+<style>
+.v{--sf:#FFFFFF;--t1:#0E2226;--t2:#3F5A61;--t3:#6E868C;--grid:#E1E9EA;--ax:#CDDADC;
+  --s1:#2a78d6;--s2:#eb6834;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){.v{--sf:#101F22;--t1:#E3EBEC;--t2:#A5B9BE;--t3:#7C9399;
+  --grid:#1A2E32;--ax:#233A3F;--s1:#3987e5;--s2:#d95926}}
+.v .bg{fill:var(--sf)}
+.v .grid{stroke:var(--grid);stroke-width:1}
+.v .ax{stroke:var(--ax);stroke-width:1}
+.v .tick{fill:var(--t3);font-size:11px}
+.v .lab{fill:var(--t2);font-size:12px}
+.v .ttl{fill:var(--t1);font-size:13px;font-weight:600}
+.v .note{fill:var(--t2);font-size:11.5px}
+.v .ref{stroke:var(--t3);stroke-width:1}
+.v .l1{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .l2{fill:none;stroke:var(--s2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.v .d1{fill:var(--s1);stroke:var(--sf);stroke-width:2}
+.v .d2{fill:var(--s2);stroke:var(--sf);stroke-width:2}
+.v .hit{fill:transparent}
+</style>
+<rect class="bg" width="640" height="340" rx="3"/>
+<line class="grid" x1="64" x2="490" y1="288.0" y2="288.0"/>
+<text class="tick" x="56" y="292.0" text-anchor="end">0</text>
+<line class="grid" x1="64" x2="490" y1="226.0" y2="226.0"/>
+<text class="tick" x="56" y="230.0" text-anchor="end">500</text>
+<line class="grid" x1="64" x2="490" y1="164.0" y2="164.0"/>
+<text class="tick" x="56" y="168.0" text-anchor="end">1.000</text>
+<line class="grid" x1="64" x2="490" y1="102.0" y2="102.0"/>
+<text class="tick" x="56" y="106.0" text-anchor="end">1.500</text>
+<line class="grid" x1="64" x2="490" y1="40.0" y2="40.0"/>
+<text class="tick" x="56" y="44.0" text-anchor="end">2.000</text>
+<text class="tick" x="64.0" y="306" text-anchor="middle">0 s</text>
+<text class="tick" x="135.0" y="306" text-anchor="middle">5 s</text>
+<text class="tick" x="206.0" y="306" text-anchor="middle">10 s</text>
+<text class="tick" x="277.0" y="306" text-anchor="middle">15 s</text>
+<text class="tick" x="348.0" y="306" text-anchor="middle">20 s</text>
+<text class="tick" x="419.0" y="306" text-anchor="middle">25 s</text>
+<text class="tick" x="490.0" y="306" text-anchor="middle">30 s</text>
+<line class="ax" x1="64" x2="490" y1="288" y2="288"/>
+<text class="lab" x="277.0" y="330" text-anchor="middle">segundos desde el inicio del k6</text>
+<text class="lab" x="8" y="26">fichas en el cubo</text>
+<path class="l1" d="M64.0,40.0 L68.0,40.7 L72.0,41.4 L75.9,42.2 L79.9,42.9 L83.9,43.6 L87.9,44.3 L91.9,45.0 L95.8,45.8 L99.8,46.5 L103.8,47.2 L107.8,47.9 L111.7,48.6 L115.7,49.3 L119.7,50.1 L123.7,50.8 L127.7,51.5 L131.6,52.2 L135.6,52.9 L139.6,53.7 L143.6,54.4 L147.6,55.1 L151.5,55.8 L155.5,56.5 L159.5,57.3 L163.5,58.0 L167.4,58.7 L171.4,59.4 L175.4,60.1 L179.4,60.8 L183.4,61.6 L187.3,62.3 L191.3,63.0 L195.3,63.7 L199.3,64.4 L203.3,65.2 L207.2,65.9 L211.2,66.6 L215.2,67.3 L219.2,68.0 L223.1,68.8 L227.1,69.5 L231.1,70.2 L235.1,70.9 L239.1,71.6 L243.0,72.3 L247.0,73.1 L251.0,73.8 L255.0,74.5 L259.0,75.2 L262.9,75.9 L266.9,76.7 L270.9,77.4 L274.9,78.1 L278.9,78.8 L282.8,79.5 L286.8,80.3 L290.8,81.0 L294.8,81.7 L298.7,82.4 L302.7,83.1 L306.7,83.8 L310.7,84.6 L314.7,85.3 L318.6,86.0 L322.6,86.7 L326.6,87.4 L330.6,88.2 L334.6,88.9 L338.5,89.6 L342.5,90.3 L346.5,91.0 L350.5,91.8 L354.4,92.5 L358.4,93.2 L362.4,93.9 L366.4,94.6 L370.4,95.4 L374.3,96.1 L378.3,96.8 L382.3,97.5 L386.3,98.2 L390.3,98.9 L394.2,99.7 L398.2,100.4 L402.2,101.1 L406.2,101.8 L410.1,102.5 L414.1,103.3 L418.1,104.0 L422.1,104.7 L426.1,105.4 L430.0,106.1 L434.0,106.9 L438.0,107.6 L442.0,108.3 L446.0,109.0 L449.9,109.7 L453.9,110.4 L457.9,111.2 L461.9,111.9"/>
+<path class="l2" d="M64.0,226.0 L68.0,226.7 L72.0,227.4 L75.9,228.2 L79.9,228.9 L83.9,229.6 L87.9,230.3 L91.9,231.0 L95.8,231.8 L99.8,232.5 L103.8,233.2 L107.8,233.9 L111.7,234.6 L115.7,235.3 L119.7,236.1 L123.7,236.8 L127.7,237.5 L131.6,238.2 L135.6,238.9 L139.6,239.7 L143.6,240.4 L147.6,241.1 L151.5,241.8 L155.5,242.5 L159.5,243.3 L163.5,244.0 L167.4,244.7 L171.4,245.4 L175.4,246.1 L179.4,246.8 L183.4,247.6 L187.3,248.3 L191.3,249.0 L195.3,249.7 L199.3,250.4 L203.3,251.2 L207.2,251.9 L211.2,252.6 L215.2,253.3 L219.2,254.0 L223.1,254.8 L227.1,255.5 L231.1,256.2 L235.1,256.9 L239.1,257.6 L243.0,258.3 L247.0,259.1 L251.0,259.8 L255.0,260.5 L259.0,261.2 L262.9,261.9 L266.9,262.7 L270.9,263.4 L274.9,264.1 L278.9,264.8 L282.8,265.5 L286.8,266.3 L290.8,267.0 L294.8,267.7 L298.7,268.4 L302.7,269.1 L306.7,269.8 L310.7,270.6 L314.7,271.3 L318.6,272.0 L322.6,272.7 L326.6,273.4 L330.6,274.2 L334.6,274.9 L338.5,275.6 L342.5,276.3 L346.5,277.0 L350.5,277.8 L354.4,278.5 L358.4,279.2 L362.4,279.9 L366.4,280.6 L370.4,281.4 L374.3,282.1 L378.3,282.8 L382.3,283.5 L386.3,284.2 L390.3,284.9 L394.2,285.7 L398.2,286.4 L402.2,287.1 L406.2,287.8 L410.1,288.0 L414.1,288.0 L418.1,288.0 L422.1,288.0 L426.1,288.0 L430.0,288.0 L434.0,288.0 L438.0,288.0 L442.0,288.0 L446.0,288.0 L449.9,288.0 L453.9,288.0 L457.9,288.0 L461.9,288.0"/>
+<line class="ref" x1="64" x2="490" y1="216.1" y2="216.1"/>
+<text class="note" x="69.7" y="210.1" text-anchor="start">burst mínimo ≈ 580</text>
+<g><title>Burst 500: cubo vacío a los 24,2 s; ≈ 80 peticiones con 429</title><circle class="hit" cx="407.2" cy="288.0" r="12"/><circle class="d2" cx="407.2" cy="288.0" r="5"/></g>
+<text class="note" x="411.2" y="258.0" text-anchor="start">vacío a los 24,2 s;</text>
+<text class="note" x="411.2" y="274.0" text-anchor="start">después ≈ 80 respuestas 429</text>
+<g><title>Burst 2000: quedan 1.420 fichas al terminar (28,0 s)</title><circle class="hit" cx="461.9" cy="111.9" r="12"/><circle class="d1" cx="461.9" cy="111.9" r="5"/></g>
+<text class="lab" x="473.9" y="115.9" text-anchor="start">burst 2000</text>
+<text class="note" x="473.9" y="131.9" text-anchor="start">quedan 1.420</text>
+<text class="lab" x="473.9" y="292.0" text-anchor="start">burst 500</text>
+<g transform="translate(510,164)"><line class="l1" x1="0" x2="18" y1="0" y2="0"/><text class="tick" x="24" y="4">burst 2000</text><line class="l2" x1="0" x2="18" y1="18" y2="18"/><text class="tick" x="24" y="22">burst 500</text></g>
+</svg>
+<figcaption>Fichas en el cubo durante la prueba k6 (35,7 req/s de llegada, rate 15). Con burst 2000 sobra; con burst 500 se vacía hacia el segundo 24. Modelo de cálculo, no medición.</figcaption></figure>
+<div class="tw"><table><thead><tr><th>Burst</th><th>¿Se vacía el cubo?</th><th>Resultado aproximado</th></tr></thead><tbody><tr><td>2000 (imagen del enunciado)</td><td>No: quedan ≈ 1420 fichas al terminar</td><td>0 respuestas 429</td></tr><tr><td>580</td><td>Justo al final</td><td>Mínimo para 1000 peticiones</td></tr><tr><td>500</td><td>Sí, a los ≈ 24,2 s</td><td>≈ 80 respuestas 429</td></tr></tbody></table></div>
+<p><strong>Cuenta:</strong> fichas disponibles = burst + 15 × 28 s. Tienen que alcanzar para 1000 → burst ≥ <strong>580</strong>.</p>
+<p><strong>Límites del modelo, para no sobreinterpretarlo:</strong></p>
+<ul><li>Supone llegadas constantes. El k6 real manda ráfagas, así que el cubo se vacía antes de lo calculado.</li><li>El k6 espera cada respuesta antes de mandar la siguiente. Como un 429 responde rápido, una vez que empiezan los rechazos el k6 <strong>acelera</strong>, y habría más 429 que los ≈ 80 del modelo.</li><li>El límite por defecto de una cuenta AWS suele ser mucho mayor (del orden de miles de burst). Es <strong>Probable</strong>, no está verificado en nuestra cuenta: hay que leer el valor real del stage antes de diseñar.</li></ul>
 <h3 id="lo-que-hay-que-verificar-antes-de-diseñar-hipótesis">Lo que hay que verificar antes de diseñar <strong><span class="pill b-hipo">Hipótesis</span></strong></h3>
 <ul><li>El valor real del <em>burst</em> del API Gateway en nuestra cuenta (el enunciado muestra 2000 pero dice «por defecto»).</li><li>Qué proporción de los eventos del k6 son <code>Emergency</code> (el script no está disponible).</li><li>Las cuotas de envío de correo y el tiempo de salida del <em>sandbox</em> del servicio de correo.</li></ul>
 <hr>
-<h2 id="12-autoevaluación-responde-sin-mirar">12. Autoevaluación (responde sin mirar)</h2>
-<p><strong>Preguntas</strong></p>
-<ol><li>¿Qué convierte a un requisito en un ASR?</li><li>Nombra las 6 partes de un escenario de calidad.</li><li>Diferencia defecto, error y falla con un ejemplo.</li><li>¿Por qué un ASR puede tener prioridad baja y aun así debe documentarse?</li><li>¿Cuántas horas al año de inactividad permite 99,9 %?</li><li>¿Cuáles son los tres propósitos de las tácticas de disponibilidad?</li><li>¿Por qué <em>retry</em> sin <em>circuit breaker</em> puede agravar una caída?</li><li>Enuncia la ley de Little y úsala con 35 req/s y 0,5 s.</li><li>Da dos tácticas de «controlar la demanda» y dos de «gestionar recursos».</li><li>¿Cuáles son las cuatro familias de tácticas de seguridad y qué es una táctica de «resistir ataques»?</li><li>¿Qué tres categorías tienen las tácticas de interoperabilidad?</li><li>¿Qué diferencia hay entre orquestación centralizada y descentralizada?</li><li>¿Qué pasa con la seguridad cuando priorizas desempeño extremo?</li><li>¿Por qué el promedio es una mala medida de respuesta?</li><li>En el Reto 2, ¿por qué el camino que responde al cliente no debe esperar el envío del correo?</li></ol>
-<p><strong>Respuestas</strong></p>
-<ol><li>Es un requisito de calidad tan crítico que condiciona la estructura desde el inicio (P1). Se identifica con las preguntas guía: actor, evento, circunstancias, atributos y elementos afectados.</li><li>Fuente, estímulo, artefacto, entorno, respuesta y medida de respuesta.</li><li>Defecto = causa (un disco dañado); error = estado intermedio (lectura corrupta pero el sistema sigue); falla = desviación visible (el usuario no puede guardar).</li><li>Porque el enunciado no lo especificó o no se consideró. La regla del curso exige documentarlo como no priorizado: «nunca deben quedar sin analizar».</li><li>≈ 8,8 horas (0,1 % de 8760 h).</li><li>Detectar, recuperar y prevenir fallas.</li><li>Cada cliente reintenta y multiplica la carga sobre un servicio ya debilitado. El <em>circuit breaker</em> corta los intentos hasta que se recupere.</li><li><code>concurrencia ≈ llegadas/s × duración</code>. 35 × 0,5 ≈ 17,5 simultáneas.</li><li>Controlar demanda: priorizar eventos, tiempos de ejecución acotados. Gestionar recursos: introducir concurrencia, colas de tamaño limitado.</li><li>Detectar, resistir, reaccionar y recuperarse de ataques. «Resistir» evita que el ataque prospere: identificar, autenticar y autorizar actores, limitar acceso y exposición, cifrar, separar entidades, validar entrada.</li><li>Discover services, Orchestrate y Tailor interface.</li><li>Centralizada: un componente (orquestador) controla la secuencia. Descentralizada: los propios servicios se coordinan con reglas predefinidas.</li><li>Suele sacrificarse: cifrar cuesta tiempo y las fronteras de red (entidades separadas) añaden saltos. Es un trade-off a declarar, no a ocultar.</li><li>Oculta la cola de la distribución. Un escenario debe pedir percentil y condiciones de carga.</li><li>Porque cada segundo que espera consume una instancia de las 10 permitidas (ley de Little). Si se agotan, las peticiones se rechazan y se pierde el «100 % procesadas».</li></ol>
+<h2 id="12-autoevaluación">12. Autoevaluación</h2>
+<p>La autoevaluación vive en su propia página interactiva: <strong><code>m2-autoevaluacion-danny.html</code></strong>, en esta misma carpeta.</p>
+<a class="boton" href="m2-autoevaluacion-danny.html">Abrir la autoevaluación (29 preguntas) →</a>
+<ul><li><strong>29 preguntas en 4 niveles:</strong> recordar, comprender, aplicar y decidir.</li><li><strong>5 tipos de pregunta:</strong> opción múltiple, verdadero o falso, cálculo, caso del Reto 2 y «encuentra el error».</li><li>Cada respuesta explica <strong>por qué fallan las demás opciones</strong> y enlaza la sección de este cuaderno que conviene releer.</li><li>Marcador por nivel, filtros (por nivel, sin responder, falladas) y respuestas guardadas en el navegador para el repaso espaciado.</li></ul>
+<p><strong><span class="pill b-recom">Recomendación</span></strong> Hazla después de la sección 11, <strong>sin mirar</strong> el cuaderno. Abre la autoevaluación oficial de Brightspace solo cuando los niveles 1 y 2 te salgan sin fallos: en M1 fue de <strong>un solo intento</strong>.</p>
 <hr>
-<h2 id="13-errores-y-ambigüedades-del-material-resumen">13. Errores y ambigüedades del material (resumen)</h2>
-<p>El detalle está en <code>m2-analisis-apertura-danny.md</code> §3. Lo esencial <strong><span class="pill b-recom">Recomendación</span></strong>:</p>
-<ul><li>Hay <strong>dos rúbricas oficiales</strong> del Reto 2 que no coinciden (PDF y Brightspace).</li><li>El deck de Disponibilidad mezcla <em>safety</em> y <em>security</em> bajo la palabra «seguridad».</li><li>El Genially P5 (interoperabilidad) conserva el marcador «AQUí va la imagen» y un bloque de ADD pegado que no le pertenece.</li><li>El objetivo del reto dice «menos de 30 s» pero la rúbrica puntúa con cortes en 15 y 45 s.</li><li>El tiempo del correo incluye la entrega de Gmail, que no controlamos.</li></ul>
-<p><strong>Lleva estas dudas al encuentro del 06/10 como preguntas, no como correcciones.</strong></p>
-<hr>
-<h2 id="14-glosario-rápido">14. Glosario rápido</h2>
+<h2 id="13-glosario-rápido">13. Glosario rápido</h2>
 <div class="tw"><table><thead><tr><th>Término</th><th>Definición breve</th></tr></thead><tbody><tr><td><strong>ASR</strong></td><td>Requisito arquitecturalmente significativo: condiciona la estructura desde el inicio</td></tr><tr><td><strong>Atributo de calidad</strong></td><td>Propiedad medible del sistema (latencia, disponibilidad, seguridad…)</td></tr><tr><td><strong>Escenario de calidad</strong></td><td>Forma medible de un requisito: fuente, estímulo, artefacto, entorno, respuesta, medida</td></tr><tr><td><strong>Táctica</strong></td><td>Decisión de diseño que influye en un atributo</td></tr><tr><td><strong>Patrón</strong></td><td>Paquete probado de tácticas y estructura</td></tr><tr><td><strong>Driver</strong></td><td>Entrada del diseño: ASR, funcionalidad, restricciones, preocupaciones, propósito</td></tr><tr><td><strong>ADD</strong></td><td>Attribute-Driven Design: método iterativo de 7 pasos</td></tr><tr><td><strong>Defecto / Error / Falla</strong></td><td>Causa / estado intermedio / desviación visible</td></tr><tr><td><strong>Hot / warm / cold spare</strong></td><td>Repuesto activo / pasivo / apagado</td></tr><tr><td><strong>TMR</strong></td><td>Triple Modular Redundancy: tres réplicas que votan el resultado</td></tr><tr><td><strong>Circuit breaker</strong></td><td>Corta las llamadas a un servicio fallido hasta que se recupere</td></tr><tr><td><strong>Throttling</strong></td><td>Limitar la tasa de peticiones aceptadas</td></tr><tr><td><strong>Burst</strong></td><td>Tamaño del cubo de tokens: cuántas peticiones seguidas se absorben por encima de la tasa</td></tr><tr><td><strong>Ley de Little</strong></td><td>Concurrencia ≈ tasa de llegada × duración</td></tr><tr><td><strong>Percentil (p95)</strong></td><td>Valor por debajo del cual cae el 95 % de las mediciones</td></tr><tr><td><strong>Orquestación</strong></td><td>Coordinación de servicios por un componente central</td></tr><tr><td><strong>HL7</strong></td><td>Formato de intercambio de datos de salud (ejemplo del curso)</td></tr><tr><td><strong>Safety / Security</strong></td><td>Evitar estados peligrosos / proteger la información</td></tr><tr><td><strong>PII</strong></td><td>Información de identificación personal</td></tr><tr><td><strong>k6</strong></td><td>Herramienta de pruebas de carga usada en el reto</td></tr></tbody></table></div>
 <hr>
-<h2 id="15-qué-falta-por-estudiar">15. Qué falta por estudiar</h2>
-<ul><li>El <strong>video de Seguridad</strong> (youtu.be/MbUXkPdKaGw).</li><li>Los <strong>descriptores de la rúbrica de Brightspace</strong>, que vienen vacíos.</li><li>La <strong>autoevaluación oficial</strong>: dejarla para después de las secciones 11 y 12.</li><li>Las lecturas complementarias: OWASP, AWS DR (×4), Fowler (×2), canary.</li></ul></main>
+<h2 id="14-qué-falta-por-estudiar">14. Qué falta por estudiar</h2>
+<div class="tw"><table><thead><tr><th>Falta</th><th>Por qué importa</th><th>Cómo conseguirlo</th></tr></thead><tbody><tr><td><strong>Descriptores de la rúbrica de Brightspace</strong></td><td>Vienen vacíos; no sabemos qué separa un 5 de un 3</td><td>Preguntarlo en el encuentro del <strong>06/10</strong></td></tr><tr><td><strong>Autoevaluación oficial</strong></td><td>Puede ser de un solo intento, como en M1</td><td>Abrirla después de la §12 de este cuaderno, nunca antes</td></tr><tr><td><strong>Lecturas complementarias</strong> (OWASP, AWS DR ×4, Fowler ×2, canary)</td><td>Profundizan las tácticas; no son obligatorias</td><td>Son públicas: se pueden resumir desde los enlaces de <code>Material-Clase/Modulo2-Brightspace.md</code></td></tr></tbody></table></div></main>
 <footer><p>Generado desde <code>m2-cuaderno-estudio-danny.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
 </div></body></html>

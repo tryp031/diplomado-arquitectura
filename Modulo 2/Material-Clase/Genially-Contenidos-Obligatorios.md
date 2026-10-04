@@ -8,7 +8,7 @@
 > **Las 4 presentaciones (tabla abajo).**
 >
 > **Falta P4:** *Seguridad* es un **video de YouTube** (`MbUXkPdKaGw`, «Módulo 2 - Seguridad Security», 5 min 13 s).
-> **No se capturó** (YouTube bloqueó la transcripción). El deck `Tacticas-Seguridad.md` cubre el tema en texto.
+> **Capturado aparte el 2026-10-04** en `Video-Seguridad.md` (transcripción automática de YouTube).
 >
 > **Límites de la extracción:** es una transcripción **plana**: el orden de las láminas, los pop-ups («Ver más»)
 > y la estructura visual **no se conservan** (p. ej. los 7 pasos de ADD aparecen desordenados). Las imágenes,

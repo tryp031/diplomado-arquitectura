@@ -14,7 +14,7 @@ de cuál.*
 
 | Sección | Estado |
 |---|---|
-| Contenidos obligatorios | ✅ 4 Genially capturados 30/09 (`Material-Clase/Genially-Contenidos-Obligatorios.md`) · ⬜ falta el **video de Seguridad** (YouTube, 5 min) |
+| Contenidos obligatorios | ✅ 4 Genially capturados 30/09 (`Material-Clase/Genially-Contenidos-Obligatorios.md`) · ✅ **video de Seguridad** capturado 04/10 (`Material-Clase/Video-Seguridad.md`) |
 | Autoevaluación M2 | ⬜ pendiente · reglas desconocidas |
 | **Actividad M2** | ✅ enunciado capturado 30/09 (`Material-Clase/Actividad-Reto2.md` + PDF) · **Reto de implementación en AWS, vale 5 pts** · cierre y modalidad grupal/individual sin confirmar |
 | Conclusiones · Recursos complementarios | ✅ capturados como texto |
@@ -23,14 +23,14 @@ de cuál.*
 
 - `Material-Clase/Modulo2-Brightspace.md` — páginas del módulo y lecturas.
 - `Material-Clase/Actividad-Reto2.md` (+ `.pdf` original) — enunciado, rúbrica y configuraciones del reto.
+- `Material-Clase/Video-Seguridad.md` — transcripción del video obligatorio de Seguridad (P4).
 - `Material-Clase/Genially-Contenidos-Obligatorios.md` — ASRs, ADD, Disponibilidad, Desempeño e Interoperabilidad (transcripción de los Genially).
 - `Material-Clase/Tacticas-{Disponibilidad,Desempeno,Seguridad,Desplegabilidad,Usabilidad}.md` — texto de los 5 decks.
 - Los `.pptx` originales están en la misma carpeta **solo en local** (no se versionan, ~23 MB).
 - `Temario/TEMARIO-M2.md` — temario y preguntas abiertas.
 
 > **Falta conseguir:** reglas de la autoevaluación (no se abre hasta decidirlo en equipo), el **script
-> de k6** que el enunciado dice que «se proporcionará», el **video de Seguridad** (youtu.be/MbUXkPdKaGw;
-> YouTube bloqueó la transcripción, basta que alguien la copie o lo resuma) y fecha de cierre / modalidad del reto.
+> de k6** que el enunciado dice que «se proporcionará» y fecha de cierre / modalidad del reto.
 
 >
 > **Lectura obligatoria antes de empezar:** hay **dos rúbricas oficiales que no coinciden** (PDF vs.
@@ -41,6 +41,7 @@ de cuál.*
 | Autor | Archivo | Tipo | Estado |
 |---|---|---|---|
 | **Danny** | `Aportes/danny/m2-cuaderno-estudio-danny.md` (+ `.html`) | cuaderno de estudio con autoevaluación y glosario (con IA) | vigente · 30/09 |
+| **Danny** | `Aportes/danny/m2-autoevaluacion-danny.html` | autoevaluación interactiva propia: 29 preguntas, 4 niveles (con IA) | vigente · 04/10 |
 | **Danny** | `Aportes/danny/m2-analisis-apertura-danny.md` (+ `.html`) | apunte (con IA) + propuesta de diseño del Reto 2 (§5) | vigente · reescrito 30/09 |
 | **Camilo** | — | — | sin aportes aún |
 | **Freddy** | — | — | sin aportes aún |
