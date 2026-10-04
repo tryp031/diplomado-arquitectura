@@ -1,0 +1,11 @@
+[project]
+name = "reto2-alerta-flota"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = [".", "scripts"]
+testpaths = ["tests"]
+markers = ["integration: requiere `docker compose --profile dev up` corriendo"]
+addopts = "-m 'not integration'"

@@ -1,0 +1,6 @@
+# Secretos: el repo es PÚBLICO. Nunca versionar .env
+.env
+logs/
+.venv/
+__pycache__/
+.pytest_cache/
