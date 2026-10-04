@@ -64,3 +64,30 @@ async def test_otro_consumidor_reclama_pendientes_sin_confirmar(client):
     await caido.fetch(count=1, block_ms=10)  # lo toma y "se cae" sin ack
     [delivery] = await nuevo.claim_stale(min_idle_ms=0, count=10)
     assert delivery.alert == ALERT
+
+
+async def test_si_redis_se_reinicio_fetch_recrea_el_grupo(client):
+    q = queue(client)
+    await q.ensure_group()
+    await client.flushall()  # Redis efímero reiniciado: ya no existen ni el stream ni el grupo
+    assert await q.fetch(count=1, block_ms=10) == []
+    await q.publish(ALERT)
+    [delivery] = await q.fetch(count=1, block_ms=10)
+    assert delivery.alert == ALERT
+
+
+async def test_si_redis_se_reinicio_claim_stale_recrea_el_grupo(client):
+    q = queue(client)
+    await q.ensure_group()
+    await client.flushall()
+    assert await q.claim_stale(min_idle_ms=0, count=10) == []
+
+
+async def test_claim_stale_recorre_el_cursor_hasta_count(client):
+    caido, nuevo = queue(client, "caido"), queue(client, "nuevo")
+    await caido.ensure_group()
+    for i in range(5):
+        await caido.publish(EmergencyAlert(f"ev-{i}", "VFH-600", "OK", ALERT.received_at))
+    await caido.fetch(count=5, block_ms=10)
+    claimed = await nuevo.claim_stale(min_idle_ms=0, count=5)
+    assert sorted(d.alert.event_id for d in claimed) == [f"ev-{i}" for i in range(5)]

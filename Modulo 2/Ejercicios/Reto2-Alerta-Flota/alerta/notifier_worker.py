@@ -25,7 +25,10 @@ class NotifierWorker:
         max_attempts: int = 4,
         backoff_s: Sequence[float] = (1, 2, 4),
         block_ms: int = 1000,
-        claim_idle_ms: int = 30_000,
+        send_timeout_s: float = 8.0,
+        claim_interval_s: float = 5.0,
+        claim_idle_ms: int = 60_000,
+        error_backoff_s: float = 0.5,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     ) -> None:
         if concurrency < 1:
@@ -39,7 +42,12 @@ class NotifierWorker:
         self._max_attempts = max_attempts
         self._backoff_s = backoff_s
         self._block_ms = block_ms
+        self._send_timeout_s = send_timeout_s
+        self._claim_interval_s = claim_interval_s
+        # Inactividad mínima para reclamar en caliente: debe superar el peor caso de handle()
+        # (4 intentos × 8 s + 7 s de espera ≈ 39 s); si no, reclamaría correos aún en curso.
         self._claim_idle_ms = claim_idle_ms
+        self._error_backoff_s = error_backoff_s
         self._sleep = sleep
         self._inflight: set[asyncio.Task[None]] = set()
 
@@ -48,7 +56,8 @@ class NotifierWorker:
         ids = {"event_id": alert.event_id, "plate": alert.vehicle_plate}
         for attempt in range(1, self._max_attempts + 1):
             try:
-                await self._notifier.send(alert)
+                # Timeout del envío completo: el de aiosmtplib es por operación de red.
+                await asyncio.wait_for(self._notifier.send(alert), self._send_timeout_s)
             except Exception as exc:  # no sabemos qué fallo es transitorio: se reintenta todo
                 error = f"{type(exc).__name__}: {exc}"
                 if attempt == self._max_attempts:
@@ -65,18 +74,31 @@ class NotifierWorker:
                 return
 
     async def run(self, stop: asyncio.Event) -> None:
-        backlog = deque(await self._consumer.claim_stale(self._claim_idle_ms, count=100))
-        if backlog:
-            self._log.log("PENDING_CLAIMED", count=len(backlog))
+        loop = asyncio.get_running_loop()
+        backlog: deque[Delivery] = deque()
+        # Al arrancar se reclama sin exigir inactividad: con una sola réplica, lo pendiente
+        # es de una instancia anterior que murió (Docker la reinicia en 1-2 s).
+        claim_idle_ms, next_claim = 0, loop.time()
         while not stop.is_set():
             free = self._concurrency - len(self._inflight)
             if free == 0:
                 await asyncio.wait(self._inflight, return_when=asyncio.FIRST_COMPLETED)
                 continue
-            if backlog:
-                batch = [backlog.popleft() for _ in range(min(free, len(backlog)))]
-            else:
-                batch = await self._consumer.fetch(count=free, block_ms=self._block_ms)
+            try:
+                if not backlog and loop.time() >= next_claim:
+                    claimed = await self._consumer.claim_stale(claim_idle_ms, count=100)
+                    if claimed:
+                        self._log.log("PENDING_CLAIMED", count=len(claimed), min_idle_ms=claim_idle_ms)
+                    backlog.extend(claimed)
+                    claim_idle_ms, next_claim = self._claim_idle_ms, loop.time() + self._claim_interval_s
+                if backlog:
+                    batch = [backlog.popleft() for _ in range(min(free, len(backlog)))]
+                else:
+                    batch = await self._consumer.fetch(count=free, block_ms=self._block_ms)
+            except Exception as exc:  # p. ej. Redis reiniciando: esperar y seguir, no morir
+                self._log.log("CONSUMER_ERROR", error=f"{type(exc).__name__}: {exc}")
+                await self._sleep(self._error_backoff_s)
+                continue
             for item in batch:
                 self._spawn(item)
         if self._inflight:

@@ -32,18 +32,46 @@ class RedisAlertQueue:
         await self._redis.xadd(self._stream, alert.to_fields())
 
     async def fetch(self, count: int, block_ms: int) -> list[Delivery]:
-        response = await self._redis.xreadgroup(
-            self._group, self._consumer, {self._stream: ">"}, count=count, block=block_ms
-        )
+        try:
+            response = await self._redis.xreadgroup(
+                self._group, self._consumer, {self._stream: ">"}, count=count, block=block_ms
+            )
+        except ResponseError as exc:
+            await self._recreate_group_if_missing(exc)
+            return []
         return [_delivery(mid, fields) for _, messages in (response or []) for mid, fields in messages]
 
     async def claim_stale(self, min_idle_ms: int, count: int) -> list[Delivery]:
-        response = await self._redis.xautoclaim(
-            self._stream, self._group, self._consumer,
-            min_idle_time=min_idle_ms, start_id="0-0", count=count,
-        )
-        messages = response[1]
-        return [_delivery(mid, fields) for mid, fields in messages if fields]
+        deliveries: list[Delivery] = []
+        start = "0-0"
+        while len(deliveries) < count:
+            try:
+                next_start, messages, *_ = await self._redis.xautoclaim(
+                    self._stream, self._group, self._consumer,
+                    min_idle_time=min_idle_ms, start_id=start, count=count - len(deliveries),
+                )
+            except ResponseError as exc:
+                await self._recreate_group_if_missing(exc)
+                return deliveries
+            deliveries += [_delivery(mid, fields) for mid, fields in messages if fields]
+            if next_start == "0-0":  # el cursor dio la vuelta: no quedan pendientes
+                break
+            start = next_start
+        return deliveries
+
+    async def _recreate_group_if_missing(self, exc: ResponseError) -> None:
+        # Redis es efímero: si se reinició, el stream y el grupo ya no existen.
+        # Se consulta el estado real en vez de leer el texto del error (varía entre versiones).
+        if await self._group_exists():
+            raise exc
+        await self.ensure_group()
+
+    async def _group_exists(self) -> bool:
+        try:
+            groups = await self._redis.xinfo_groups(self._stream)
+        except ResponseError:  # el stream no existe
+            return False
+        return any(group["name"] == self._group for group in groups)
 
     async def ack(self, message_id: str) -> None:
         await self._redis.xack(self._stream, self._group, message_id)

@@ -14,19 +14,26 @@ def delivery(i: int) -> Delivery:
 
 
 class FakeConsumer:
-    def __init__(self, deliveries=(), stale=()):
+    def __init__(self, deliveries=(), stale=(), fetch_failures=0):
         self.queue = deque(deliveries)
         self.stale = list(stale)
+        self.fetch_failures = fetch_failures
+        self.claim_idles: list[int] = []
         self.acked: list[str] = []
         self.dead: list[tuple[str, str]] = []
 
     async def fetch(self, count, block_ms):
+        if self.fetch_failures:
+            self.fetch_failures -= 1
+            raise ConnectionError("redis caído")
         items = [self.queue.popleft() for _ in range(min(count, len(self.queue)))]
         if not items:
             await asyncio.sleep(0.001)  # imita el BLOCK de Redis
         return items
 
     async def claim_stale(self, min_idle_ms, count):
+        self.claim_idles.append(min_idle_ms)
+        await asyncio.sleep(0)
         stale, self.stale = self.stale, []
         return stale
 
@@ -58,11 +65,12 @@ class FakeNotifier:
             self.in_flight -= 1
 
 
-def worker(consumer, notifier, log, sleeps, concurrency=5):
+def worker(consumer, notifier, log, sleeps, concurrency=5, **kwargs):
     async def fake_sleep(seconds):
         sleeps.append(seconds)
+        await asyncio.sleep(0)
 
-    return NotifierWorker(consumer, notifier, log, concurrency=concurrency, sleep=fake_sleep, block_ms=1)
+    return NotifierWorker(consumer, notifier, log, concurrency=concurrency, sleep=fake_sleep, block_ms=1, **kwargs)
 
 
 async def run_until(w, done, timeout=2.0):
@@ -125,3 +133,45 @@ async def test_run_procesa_primero_los_pendientes_reclamados(captured_log):
 def test_concurrencia_invalida(captured_log):
     with pytest.raises(ValueError):
         NotifierWorker(FakeConsumer(), FakeNotifier(), captured_log.logger, concurrency=0)
+
+
+async def test_al_arrancar_reclama_pendientes_sin_esperar_inactividad(captured_log):
+    # Docker reinicia el notifier en 1-2 s: esperar 30 s de inactividad los dejaría huérfanos.
+    consumer = FakeConsumer(stale=[delivery(9)])
+    notifier = FakeNotifier()
+    await run_until(worker(consumer, notifier, captured_log.logger, []), lambda: notifier.sent == ["ev-9"])
+    assert consumer.claim_idles[0] == 0
+
+
+async def test_reclama_pendientes_periodicamente_con_inactividad_minima(captured_log):
+    consumer, notifier = FakeConsumer(), FakeNotifier()
+    w = worker(consumer, notifier, captured_log.logger, [], claim_interval_s=0, claim_idle_ms=60_000)
+    stop = asyncio.Event()
+    task = asyncio.create_task(w.run(stop))
+    await asyncio.sleep(0.01)
+    consumer.stale = [delivery(7)]  # aparece un pendiente huérfano con el worker ya corriendo
+    await asyncio.wait_for(_until(lambda: notifier.sent == ["ev-7"]), 2)
+    stop.set()
+    await asyncio.wait_for(task, 2)
+    assert 60_000 in consumer.claim_idles
+
+
+async def test_error_de_la_cola_no_mata_al_worker(captured_log):
+    consumer = FakeConsumer(deliveries=[delivery(1)], fetch_failures=2)
+    notifier = FakeNotifier()
+    await run_until(worker(consumer, notifier, captured_log.logger, []), lambda: notifier.sent == ["ev-1"])
+    assert captured_log.names().count("CONSUMER_ERROR") == 2
+
+
+async def test_envio_colgado_se_corta_por_timeout_y_se_reintenta(captured_log):
+    consumer, sleeps = FakeConsumer(), []
+    notifier = FakeNotifier(delay_s=1.0)
+    w = worker(consumer, notifier, captured_log.logger, sleeps, send_timeout_s=0.01, max_attempts=2)
+    await w.handle(delivery(1))
+    assert captured_log.names() == ["EMAIL_RETRY", "EMAIL_DLQ"]
+    assert "TimeoutError" in captured_log.records()[0]["error"]
+
+
+async def _until(done):
+    while not done():
+        await asyncio.sleep(0.005)
