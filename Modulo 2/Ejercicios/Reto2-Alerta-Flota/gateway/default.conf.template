@@ -1,5 +1,8 @@
 # Token bucket global, como un stage de API Gateway: rate = recarga, burst = tamaño del cubo.
-limit_req_zone $server_name zone=api:1m rate=15r/s;
+# Clave constante = UN cubo para todo el tráfico. No usar $server_name: aquí está vacío y nginx
+# NO cuenta las peticiones con clave vacía (el límite quedaría configurado pero sin aplicar).
+map $request_method $limit_key { default "gateway"; }
+limit_req_zone $limit_key zone=api:1m rate=15r/s;
 limit_req_status 429;
 
 log_format reto2 escape=json '{"msec":$msec,"status":$status,"request_time":$request_time,"method":"$request_method","uri":"$request_uri"}';
