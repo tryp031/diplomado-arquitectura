@@ -36,9 +36,31 @@ plana: pierden el orden de las láminas, los pop-ups y las imágenes.
 
 **Qué contiene:** método de tres pasadas · la cadena ASR → escenario → táctica → patrón → trade-off ·
 regla de priorización del curso y método ADD · escenario de calidad con plantilla · disponibilidad,
-desempeño, seguridad e interoperabilidad · matriz de trade-offs · ejercicios del Reto 2 · autoevaluación de
-15 preguntas con respuesta · glosario.
+desempeño, seguridad e interoperabilidad · matriz de trade-offs · ejercicios del Reto 2 · enlace a la
+autoevaluación interactiva · dos gráficas de cálculo (ley de Little y token bucket del API Gateway) · glosario.
+
+**Actualización 2026-10-04:** la autoevaluación salió a `m2-autoevaluacion-danny.html`; gráficas generadas con
+`graficas/generar_graficas.py` (stdlib). Son **modelos de cálculo con los números del enunciado**, no
+mediciones; el valor por defecto del *burst* en la cuenta AWS sigue sin verificar.
 
 **Límites:** falta el video de Seguridad; la autoevaluación oficial no se abrió. Cada afirmación lleva
 etiqueta `Curso` / `Complementario` / `Recomendación` / `Hipótesis`. El `.md` es la fuente de verdad; el
 `.html` se regenera con `.claude/skills/consolidar-conocimiento/consolidar_html.py`.
+
+---
+
+## `m2-autoevaluacion-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-04 |
+| **Módulo** | 2 — Requerimientos y Tácticas de Arquitectura de Software |
+| **Tema** | Autoevaluación interactiva de estudio: 29 preguntas en 4 niveles (recordar, comprender, aplicar, decidir) |
+| **Tipo** | `apunte` — banco de preguntas propio, elaborado con IA; **no es material oficial ni la autoevaluación de Brightspace** |
+| **Fuentes** | Las mismas del cuaderno de estudio · las dos gráficas de `graficas/` (modelos de cálculo) |
+| **Estado** | vigente · ⬜ sin consolidar |
+
+**Límites:** la autoevaluación oficial sigue sin abrirse; no sabemos su formato, así que estas preguntas no
+pretenden imitarla. El HTML es la fuente (mismo diseño que `m1-autoevaluacion-danny.html`); las gráficas van
+insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, hay que reemplazarlas ahí.

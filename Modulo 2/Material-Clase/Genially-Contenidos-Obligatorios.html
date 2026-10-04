@@ -83,6 +83,16 @@ tbody tr:last-child td{border-bottom:none}
 .b-compl{background:var(--surface-2);color:var(--ink-2)}
 .b-recom{background:var(--signal-soft);color:var(--signal)}
 .b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
 footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
   font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
 @media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
@@ -95,7 +105,7 @@ footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding
   <p class="meta">Genially-Contenidos-Obligatorios.md</p>
 </header>
 <nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#p1-requerimientos-de-calidad-asrs-add-y-tácticas">P1 — Requerimientos de calidad, ASRs, ADD y tácticas</a></li><li><a href="#p2-disponibilidad">P2 — Disponibilidad</a></li><li><a href="#p3-desempeño">P3 — Desempeño</a></li><li><a href="#p5-interoperabilidad">P5 — Interoperabilidad</a></li><li><a href="#anotaciones-no-son-del-curso-conocimiento-complementario-o-hallazgo-de-la-extracción">Anotaciones (NO son del curso; conocimiento complementario o hallazgo de la extracción)</a></li></ol></nav>
-<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Brightspace → Módulo 2 → «Contenidos obligatorios», Unidad 3 de 5). <strong>Fuente:</strong> 4 presentaciones interactivas de Genially, públicas, extraídas el 2026-09-30 del campo de transcripción que Genially incrusta en cada presentación (<code>view.genially.com/&lt;id&gt;</code>):   <strong>Las 4 presentaciones (tabla abajo).</strong>  <strong>Falta P4:</strong> <em>Seguridad</em> es un <strong>video de YouTube</strong> (<code>MbUXkPdKaGw</code>, «Módulo 2 - Seguridad Security», 5 min 13 s). <strong>No se capturó</strong> (YouTube bloqueó la transcripción). El deck <code>Tacticas-Seguridad.md</code> cubre el tema en texto.  <strong>Límites de la extracción:</strong> es una transcripción <strong>plana</strong>: el orden de las láminas, los pop-ups («Ver más») y la estructura visual <strong>no se conservan</strong> (p. ej. los 7 pasos de ADD aparecen desordenados). Las imágenes, tablas de tácticas y la «mini trivia de validación» de P1 <strong>no están</strong>. Números de lámina y orden: ver Genially. <strong>Este archivo no se edita.</strong> Las notas van en <code>Aportes/</code> o en el bloque final, marcado como anotación.</p></blockquote>
+<main><blockquote><p><strong>Tipo:</strong> <code>material-oficial</code> (Brightspace → Módulo 2 → «Contenidos obligatorios», Unidad 3 de 5). <strong>Fuente:</strong> 4 presentaciones interactivas de Genially, públicas, extraídas el 2026-09-30 del campo de transcripción que Genially incrusta en cada presentación (<code>view.genially.com/&lt;id&gt;</code>):   <strong>Las 4 presentaciones (tabla abajo).</strong>  <strong>Falta P4:</strong> <em>Seguridad</em> es un <strong>video de YouTube</strong> (<code>MbUXkPdKaGw</code>, «Módulo 2 - Seguridad Security», 5 min 13 s). <strong>Capturado aparte el 2026-10-04</strong> en <code>Video-Seguridad.md</code> (transcripción automática de YouTube).  <strong>Límites de la extracción:</strong> es una transcripción <strong>plana</strong>: el orden de las láminas, los pop-ups («Ver más») y la estructura visual <strong>no se conservan</strong> (p. ej. los 7 pasos de ADD aparecen desordenados). Las imágenes, tablas de tácticas y la «mini trivia de validación» de P1 <strong>no están</strong>. Números de lámina y orden: ver Genially. <strong>Este archivo no se edita.</strong> Las notas van en <code>Aportes/</code> o en el bloque final, marcado como anotación.</p></blockquote>
 <div class="tw"><table><thead><tr><th>#</th><th>Título en Genially</th><th>Láminas</th><th>ID</th></tr></thead><tbody><tr><td>P1</td><td>M2P1 — Requerimientos y tácticas de Arquitectura de Software</td><td>12</td><td><code>683a05d4d217af363e6ff92b</code></td></tr><tr><td>P2</td><td>M2P2 — Disponibilidad (AVAILABILITY)</td><td>7</td><td><code>683a06874ebc16740206e856</code></td></tr><tr><td>P3</td><td>M2P3 — Desempeño (PERFORMANCE)</td><td>6</td><td><code>683a077a59f7371b934a61fa</code></td></tr><tr><td>P5</td><td>M2P5 — Interoperabilidad (INTEROPERABILITY)</td><td>10</td><td><code>683a085c06169c8e038d89f9</code></td></tr></tbody></table></div>
 <hr>
 <h2 id="p1-requerimientos-de-calidad-asrs-add-y-tácticas">P1 — Requerimientos de calidad, ASRs, ADD y tácticas</h2>

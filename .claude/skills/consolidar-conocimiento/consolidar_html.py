@@ -21,6 +21,11 @@ algo fuera de esta lista, saldrá como texto plano y hay que ampliar el script):
     ```lang           bloque de código
     ---                separador
     **negrita** *cursiva* `código` [texto](url)
+    ![texto](ruta.svg) en su propia línea → el SVG se inserta en línea (página
+                       autocontenida); otra extensión sale como <img>
+    <details> <summary>…</summary> </details>   en su propia línea → pasan tal cual
+                       (respuestas plegables; GitHub las muestra igual)
+    <a class="boton" href="ruta">texto</a>   en su propia línea → botón (en GitHub, enlace)
     [Curso] [Complementario] [Recomendación] [Hipótesis]   → se marcan como etiqueta
 """
 import argparse
@@ -88,7 +93,27 @@ def fila_tabla(linea):
     return [c.strip() for c in celdas]
 
 
-def render(md):
+# Líneas de HTML que pasan tal cual: solo las de un bloque plegable, nada más.
+HTML_PERMITIDO = re.compile(
+    r'^\s*(<details>|</details>|<summary>.*</summary>|<a class="boton" href="[^"<>]+">[^<]+</a>)\s*$')
+IMAGEN = re.compile(r"^\s*!\[([^\]]*)\]\(([^)\s]+)\)\s*$")
+
+
+def figura(alt, ruta, base):
+    """Una imagen sola en su línea. El SVG local se inserta en línea para que el
+    HTML siga siendo autocontenido (se puede mandar suelto o en un ZIP)."""
+    cap = f"<figcaption>{inline(alt)}</figcaption>" if alt else ""
+    archivo = (base / ruta) if base else pathlib.Path(ruta)
+    if ruta.lower().endswith(".svg") and archivo.is_file():
+        svg = re.sub(r"^<\?xml[^>]*>\s*", "", archivo.read_text(encoding="utf-8"))
+        return f'<figure class="fig">{svg}{cap}</figure>'
+    if ruta.lower().endswith(".svg"):
+        print(f"aviso: no existe {archivo}; se deja como <img>", file=sys.stderr)
+    return (f'<figure class="fig"><img src="{html.escape(ruta)}" alt="{html.escape(alt)}">'
+            f"{cap}</figure>")
+
+
+def render(md, base=None):
     lineas = md.split("\n")
     out, toc = [], []
     visto_h1 = False
@@ -114,6 +139,19 @@ def render(md):
             i += 1
             clase = f' class="lang-{html.escape(lang)}"' if lang else ""
             out.append(f"<pre{clase}><code>{html.escape(chr(10).join(cuerpo))}</code></pre>")
+            continue
+
+        # bloque plegable: las etiquetas pasan, el contenido se sigue procesando
+        if HTML_PERMITIDO.match(cruda):
+            out.append(cruda.strip())
+            i += 1
+            continue
+
+        # imagen sola en su línea
+        m = IMAGEN.match(cruda)
+        if m:
+            out.append(figura(m.group(1), m.group(2), base))
+            i += 1
             continue
 
         # separador
@@ -201,7 +239,8 @@ def render(md):
         # párrafo: líneas consecutivas hasta una vacía o el inicio de otro bloque
         cuerpo = []
         while i < n and lineas[i].strip() and not re.match(
-                r"^\s*(#{1,6}\s|\||>|```|-{3,}$|([-*]|\d+\.)\s)", lineas[i].rstrip()):
+                r"^\s*(#{1,6}\s|\||>|```|-{3,}$|([-*]|\d+\.)\s|<details>|</details>|<summary>|<a class=|!\[)",
+                lineas[i].rstrip()):
             cuerpo.append(lineas[i].strip())
             i += 1
         if cuerpo:
@@ -224,7 +263,7 @@ def main():
     dst = pathlib.Path(a.out) if a.out else src.with_suffix(".html")
 
     texto = src.read_text(encoding="utf-8")
-    cuerpo, toc = render(texto)
+    cuerpo, toc = render(texto, base=src.parent)
 
     m = re.search(r"^#\s+(.+)$", texto, flags=re.M)
     titulo = m.group(1).strip() if m else src.stem
