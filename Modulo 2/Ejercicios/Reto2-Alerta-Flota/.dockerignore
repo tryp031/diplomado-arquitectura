@@ -1,0 +1,9 @@
+.venv
+logs
+tests
+docs
+k6
+scripts
+.env
+**/__pycache__
+.pytest_cache
