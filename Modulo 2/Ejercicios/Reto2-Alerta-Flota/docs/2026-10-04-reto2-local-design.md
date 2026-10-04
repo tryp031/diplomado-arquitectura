@@ -133,3 +133,19 @@ Autenticación, HTTPS, persistencia de `Position`, dashboard, IMAP, idempotencia
 ## 11. Cronograma
 
 04–05/10 núcleo con Mailpit · 06/10 encuentro · 07–11/10 Gmail, k6 oficial, ADRs · 12/10 medición formal · 13/10 encuentro 2 · 14–18/10 documento y presentación · 19/10 entrega.
+
+## 12. Panel de control (agregado el 04/10/2026)
+
+Pedido por Danny como respaldo visual y para la demo en vivo. Decisiones:
+
+| Decisión | Por qué | A costa de |
+|---|---|---|
+| Plano de **control** separado (`panel/`, perfil `panel`, puerto 8090 solo local) | Lección del M1: lo que observa no puede estar en el camino de lo que se mide | Un servicio más que mantener |
+| Lee logs JSON (incremental), log de nginx, Redis (`XLEN`, `XPENDING`) y Docker; sin escribir en el plano de datos | Observar sin alterar la latencia calificada | El panel ve lo que el sistema registra, no más |
+| Consulta cada 1 s desde la página (sin hilos de fondo) | Simple y determinista | ~1 s de retraso en la vista |
+| Acciones: Emergency por el gateway, k6 en su contenedor, fallas vía socket de Docker con lista blanca | Demo en vivo sin alternar con la terminal | El socket equivale a root sobre Docker: aceptable solo en local |
+| Gráfica en SVG propio con paleta validada (azul aceptadas / naranja 429, rate 15 punteado) | Sin dependencias; colores verificados para daltonismo en claro y oscuro | Código de gráfica propio |
+
+Hallazgo al construirlo: tras `docker compose up --build`, nginx seguía con las IP viejas de `ingest`
+y respondía **502** a toda la carga. Corregido con `resolver 127.0.0.11` + `server ingest:8000 resolve`
+(nginx ≥ 1.27.3): la ingesta puede recrearse sin reiniciar el gateway.

@@ -15,6 +15,25 @@ k6 → nginx :8080 (15 r/s, burst 2000) → ingest ×2 → Redis Streams → not
 | SES / correo | SMTP: Mailpit en desarrollo, Gmail en la demo |
 | ≤ 10 instancias (Lambda/ECS) | 3 procesadores: 2 ingest + 1 notifier |
 
+## Panel de control (respaldo visual y demo)
+
+```bash
+docker compose --profile dev --profile panel up -d --build
+```
+
+Abrir http://localhost:8090. Muestra la arquitectura en vivo, la medida de la rúbrica con semáforo
+(< 15 s / 15–45 s / > 45 s), peticiones por segundo contra la línea de 15 r/s, el recorrido de cada
+emergencia y los eventos del sistema. Desde la página se puede enviar una Emergency, lanzar la carga
+k6 (ráfaga o ritmo de referencia) e inyectar fallas (apagar SMTP, Redis o el notifier).
+
+- Es **plano de control**: solo lee los logs, Redis y Docker. No escribe en el camino de los eventos,
+  así que observar no altera la latencia medida. Va en un perfil aparte y no cuenta como procesador.
+- Para apagar contenedores monta el **socket de Docker** (equivale a root sobre Docker). Por eso
+  publica el puerto solo en `127.0.0.1` y limita las acciones a `mailpit`, `redis` y `notifier`.
+- Lanzar una carga reinicia la «ventana»: los contadores muestran solo esa corrida.
+- El k6 lanzado desde el panel corre en su contenedor contra `http://gateway/events` (red interna).
+  Para mediciones formales sigue valiendo correr k6 desde el equipo + `scripts/medir.py`.
+
 ## Requisitos
 
 Docker Desktop corriendo · [k6](https://k6.io) (`brew install k6` / `winget install k6`) · Python 3.12+ solo para tests y `medir.py`.
@@ -83,9 +102,6 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 ```
 
 ## Antes de medir
-
-nginx resuelve las IP de `ingest` al arrancar. Si se recrea `ingest` (por ejemplo, con
-`docker compose up -d --build`), reiniciar también el gateway: `docker compose restart gateway`.
 
 Comparar el reloj del contenedor y el del equipo: `docker run --rm alpine date` vs `date`.
 Si difieren, reiniciar Docker Desktop.

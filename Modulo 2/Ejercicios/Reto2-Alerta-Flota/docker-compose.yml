@@ -67,6 +67,32 @@ services:
       ingest:
         condition: service_healthy
 
+  # Plano de CONTROL (perfil aparte): observa logs/Redis/Docker y lanza pruebas por el gateway.
+  # No es un procesador de eventos: la composición medida sigue siendo 2 ingest + 1 notifier.
+  panel:
+    build:
+      context: .
+      dockerfile: panel/Dockerfile
+    profiles: ["panel"]
+    command: ["uvicorn", "--factory", "panel.app:build_app", "--host", "0.0.0.0", "--port", "8090", "--no-access-log"]
+    ports:
+      - "127.0.0.1:8090:8090"   # solo local: el panel puede apagar contenedores
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      LOG_DIR: /logs
+      GATEWAY_URL: http://gateway/events
+      K6_SCRIPT: /app/k6/carga.js
+      COMPOSE_PROJECT: reto2-alerta-flota
+    volumes:
+      - ./logs:/logs
+      - ./k6:/app/k6:ro
+      # Acceso al socket de Docker = root sobre Docker en esta máquina. Aceptable en una demo
+      # local; las acciones están limitadas por lista blanca (panel/infra.py).
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      redis:
+        condition: service_healthy
+
   mailpit:
     image: axllent/mailpit:latest
     profiles: ["dev"]
