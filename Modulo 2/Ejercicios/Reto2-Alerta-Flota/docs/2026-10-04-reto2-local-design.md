@@ -12,7 +12,7 @@
 | D2 | **Opción C** del análisis: la ingesta responde 200 de inmediato; solo los `Emergency` pasan por cola al notificador | El envío de correo no consume la concurrencia de la ingesta (ley de Little, §5.3b del análisis) | Una pieza más (cola) y entrega al-menos-una-vez |
 | D3 | **Python + FastAPI** | Mismo stack del reto M1; el equipo lo corre en Mac y Windows | No es el stack diario de Danny (Java) |
 | D4 | **Redis Streams** con consumer group | Mensaje pendiente hasta `XACK` ≈ visibilidad de SQS: permite reintento y no pérdida, con latencia de ms | Hay que explicar XACK/pendientes |
-| D5 | **Puertos y adaptadores** (`EventQueue`, `Notifier`) | Portabilidad a SQS/SES = cambiar un adaptador; permite probar el worker sin red | Una capa de indirección pequeña |
+| D5 | **Puertos y adaptadores** (`AlertPublisher`, `AlertConsumer`, `Notifier`) | Portabilidad a SQS/SES = cambiar un adaptador; permite probar el worker sin red | Una capa de indirección pequeña |
 | D6 | **LocalStack fuera del camino crítico** | No aplica throttling de API GW ni envía correo real; mediríamos el emulador | Se pierde la "foto AWS"; queda como extra opcional (adaptador SQS) |
 | D7 | Atributo priorizado (propuesta): **desempeño — latencia de la alerta**, con no pérdida de eventos como restricción dura | Es lo que la rúbrica gradúa (2.5 / 1.5 / 0.5) | Costo y simplicidad; correos duplicados posibles |
 
@@ -57,8 +57,8 @@ Un solo paquete Python (`alerta/`), una imagen, dos comandos (ingest y notifier)
 
 | Módulo | Responsabilidad | Depende de |
 |---|---|---|
-| `domain.py` | Modelo `VehicleEvent`; validación **tolerante**: obligatorios `type` y `vehicle_plate`, el resto opcional, campos extra ignorados; `is_emergency()` (`type == "Emergency"`, comparación exacta) | nada |
-| `ports.py` | `EventQueue` y `Notifier` como `typing.Protocol` | `domain` |
+| `domain.py` | Modelo `VehicleEvent`; validación **tolerante**: obligatorios `type` y `vehicle_plate`, el resto opcional, campos extra ignorados; `is_emergency()` (`type` igual a `Emergency` **sin distinguir mayúsculas**: perder una emergencia es el peor fallo) | nada |
+| `ports.py` | `AlertPublisher` (lado ingesta), `AlertConsumer` (lado notifier) y `Notifier` como `typing.Protocol`; `Delivery` | `domain` |
 | `adapters/redis_queue.py` | `XADD`, `XREADGROUP`, `XACK`, `XAUTOCLAIM`, DLQ | `redis` (asyncio) |
 | `adapters/smtp_notifier.py` | Construye el correo (formato del enunciado) y lo envía | `aiosmtplib` |
 | `ingest_app.py` | FastAPI: `POST /events`, `GET /health` | `domain`, `ports` |
@@ -76,7 +76,9 @@ Un solo paquete Python (`alerta/`), una imagen, dos comandos (ingest y notifier)
 
 JSON por línea a stdout y a `logs/<servicio>.log` (volumen). Campos: `ts`, `service`, `event`, `event_id`, `plate`, y según el evento `ms_since_received`, `attempt`, `error`.
 
-Eventos: `EVENT_RECEIVED`, `EMERGENCY_RECEIVED`, `EMERGENCY_ENQUEUED`, `EMAIL_SENT`, `EMAIL_RETRY`, `EMAIL_DLQ`.
+Eventos: `EVENT_RECEIVED`, `EMERGENCY_RECEIVED`, `EMERGENCY_ENQUEUED`, `EMERGENCY_ENQUEUE_FAILED`, `EMAIL_SENT`, `EMAIL_RETRY`, `EMAIL_DLQ`, `NOTIFIER_STARTED`, `PENDING_CLAIMED`, `WORKER_ERROR`.
+
+Un archivo por réplica (`<servicio>-<hostname>.log`) para que dos contenedores no escriban el mismo archivo. nginx escribe `logs/nginx/gateway-access.log` (JSON con `msec` y `status`).
 
 Riesgo: reloj de la VM de Docker Desktop desfasado tras suspender el Mac → comparar `docker run --rm alpine date` con `date` antes de medir.
 
@@ -90,6 +92,9 @@ Riesgo: reloj de la VM de Docker Desktop desfasado tras suspender el Mac → com
 | Notifier cae a mitad de un envío | Mensaje queda pendiente → `XAUTOCLAIM` al reiniciar | No pérdida; costo: duplicados |
 | Duplicados | **Tolerados y documentados** | Sin idempotencia: ningún ASR la exige |
 | Límite de Gmail (~500/día, Probable) | Vigilar en días de muchas corridas | — |
+| Redis o el notifier caen | `restart: unless-stopped` en compose; healthcheck en Redis e ingest (el notifier no expone HTTP) | Recuperación automática |
+
+**Redis es efímero** (`--save ""`): cada `docker compose up` arranca limpio. Trade-off aceptado: si Redis cae a mitad de la prueba se pierden los pendientes; para una prueba de 30 s pesa más la reproducibilidad de cada corrida.
 
 ## 6. Medición
 
