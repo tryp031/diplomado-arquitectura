@@ -1,0 +1,100 @@
+name: reto2-alerta-flota
+
+x-app-env: &app-env
+  REDIS_URL: redis://redis:6379/0
+  LOG_DIR: /logs
+
+services:
+  redis:
+    image: redis:7-alpine
+    # Efímero a propósito: cada demo arranca limpia (trade-off documentado en el spec §5).
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 10
+
+  ingest:
+    build: .
+    command: ["uvicorn", "--factory", "alerta.main_ingest:build_app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - ./logs:/logs
+    deploy:
+      replicas: 2
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      retries: 15
+
+  notifier:
+    build: .
+    command: ["python", "-m", "alerta.main_notifier"]
+    # Al apagar, el worker espera los envíos en curso (hasta ~39 s en el peor caso con reintentos).
+    stop_grace_period: 30s
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    volumes:
+      - ./logs:/logs
+    deploy:
+      replicas: 1
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    environment:
+      RATE_BURST: ${RATE_BURST:-2000}
+    volumes:
+      - ./gateway/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./logs/nginx:/var/log/nginx
+    restart: unless-stopped
+    depends_on:
+      ingest:
+        condition: service_healthy
+
+  # Plano de CONTROL (perfil aparte): observa logs/Redis/Docker y lanza pruebas por el gateway.
+  # No es un procesador de eventos: la composición medida sigue siendo 2 ingest + 1 notifier.
+  panel:
+    build:
+      context: .
+      dockerfile: panel/Dockerfile
+    profiles: ["panel"]
+    command: ["uvicorn", "--factory", "panel.app:build_app", "--host", "0.0.0.0", "--port", "8090", "--no-access-log"]
+    ports:
+      - "127.0.0.1:8090:8090"   # solo local: el panel puede apagar contenedores
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      LOG_DIR: /logs
+      GATEWAY_URL: http://gateway/events
+      K6_SCRIPT: /app/k6/carga.js
+      COMPOSE_PROJECT: reto2-alerta-flota
+    volumes:
+      - ./logs:/logs
+      - ./k6:/app/k6:ro
+      # Acceso al socket de Docker = root sobre Docker en esta máquina. Aceptable en una demo
+      # local; las acciones están limitadas por lista blanca (panel/infra.py).
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ["dev"]
+    ports:
+      - "8025:8025"

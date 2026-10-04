@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Reto 2</title>
+  <meta name="description" content="Panel de control del Reto 2: observa y prueba el sistema de alerta temprana de flota vehicular.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Z' fill='%232a78d6'/%3E%3Cpath d='M12 7v6m0 3.5v.5' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <svg class="marca-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 7v6m0 3.5v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <div>
+        <h1>Alerta temprana de flota</h1>
+        <p class="sub">Reto 2 · Módulo 2 · Panel de control — observa el sistema sin intervenir en lo que se mide</p>
+      </div>
+    </div>
+    <div class="barra-derecha">
+      <span id="salud" class="pildora" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="salud-texto">Conectando…</span></span>
+      <span id="ventana" class="meta">Ventana: todo el historial</span>
+      <button id="btn-ventana" class="btn btn-fantasma" type="button">Reiniciar ventana</button>
+      <button id="btn-tema" class="btn btn-icono" type="button" aria-label="Cambiar tema">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="aviso-conexion" class="aviso" hidden role="alert">El panel perdió la conexión con su API. Reintentando…</div>
+
+  <main class="contenido">
+    <!-- Fila 1: la medida que se califica y los indicadores -->
+    <section class="fila fila-kpi" aria-label="Indicadores principales">
+      <article class="tarjeta hero">
+        <header class="tarjeta-cabeza">
+          <h2>Última petición → último correo enviado</h2>
+          <span class="etiqueta-info" title="Se mide desde la última petición vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT. No incluye la entrega de Gmail.">Medida de la rúbrica</span>
+        </header>
+        <div class="hero-cuerpo">
+          <p class="hero-numero"><span id="medida-valor">—</span><span class="hero-unidad">s</span></p>
+          <p id="medida-estado" class="estado" data-nivel="neutral"><span class="estado-icono" aria-hidden="true">•</span><span id="medida-texto">Sin correos en esta ventana</span></p>
+        </div>
+        <div class="escala" aria-hidden="true">
+          <div class="escala-pista">
+            <span class="tramo tramo-good"></span><span class="tramo tramo-warning"></span><span class="tramo tramo-critical"></span>
+            <span id="escala-marca" class="escala-marca" hidden></span>
+          </div>
+          <div class="escala-etiquetas"><span>0 s</span><span style="left:25%">15 s · 2,5 pts</span><span style="left:75%">45 s · 1,5 pts</span><span class="fin">60 s+</span></div>
+        </div>
+      </article>
+
+      <article class="tarjeta kpi">
+        <h2>Peticiones aceptadas</h2>
+        <p class="kpi-numero" id="kpi-aceptadas">—</p>
+        <p class="kpi-pie" id="kpi-aceptadas-pie">de — recibidas por el gateway</p>
+      </article>
+      <article class="tarjeta kpi">
+        <h2>Rechazadas por el limitador</h2>
+        <p class="kpi-numero" id="kpi-429">—</p>
+        <p class="kpi-pie">HTTP 429 · rate 15 r/s, burst 2000</p>
+      </article>
+      <article class="tarjeta kpi">
+        <h2>Emergencias</h2>
+        <p class="kpi-numero"><span id="kpi-enviadas">—</span><span class="kpi-de"> / <span id="kpi-emergencias">—</span></span></p>
+        <p class="kpi-pie" id="kpi-emergencias-pie">correos enviados / detectadas</p>
+      </article>
+      <article class="tarjeta kpi">
+        <h2>Cola de emergencias</h2>
+        <p class="kpi-numero" id="kpi-pendientes">—</p>
+        <p class="kpi-pie" id="kpi-cola-pie">pendientes sin ACK · DLQ —</p>
+      </article>
+    </section>
+
+    <!-- Fila 2: arquitectura viva + acciones -->
+    <section class="fila fila-arquitectura">
+      <div class="columna">
+      <article class="tarjeta">
+        <header class="tarjeta-cabeza">
+          <h2>Arquitectura en vivo</h2>
+          <span class="meta">Se ilumina cada componente que registró actividad en los últimos 2 s</span>
+        </header>
+        <ol class="flujo" id="flujo">
+          <li class="nodo" data-nodo="k6"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">k6</p><p class="nodo-rol">Vehículos simulados</p><p class="nodo-dato" data-dato="k6">—</p></li>
+          <li class="nodo" data-nodo="gateway"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Gateway · nginx</p><p class="nodo-rol">Token bucket 15 r/s · burst 2000</p><p class="nodo-dato" data-dato="gateway">—</p></li>
+          <li class="nodo" data-nodo="ingest"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Ingesta · FastAPI ×2</p><p class="nodo-rol">Responde sin esperar el correo</p><ul class="replicas" data-dato="replicas"></ul></li>
+          <li class="nodo" data-nodo="redis"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Redis Streams</p><p class="nodo-rol">Cola durable · ACK · DLQ</p><p class="nodo-dato" data-dato="redis">—</p></li>
+          <li class="nodo" data-nodo="notifier"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Notifier · asyncio</p><p class="nodo-rol">Concurrencia 5 · reintentos 1/2/4 s</p><p class="nodo-dato" data-dato="notifier">—</p></li>
+          <li class="nodo" data-nodo="mailpit"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">SMTP</p><p class="nodo-rol">Mailpit (dev) · Gmail (demo)</p><p class="nodo-dato" data-dato="smtp">—</p></li>
+        </ol>
+        <p class="nota">Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.</p>
+      </article>
+      <article class="tarjeta">
+        <header class="tarjeta-cabeza">
+          <h2>Peticiones por segundo · últimos 60 s</h2>
+          <ul class="leyenda" aria-label="Leyenda">
+            <li><span class="clave clave-1"></span>Aceptadas</li>
+            <li><span class="clave clave-2"></span>Rechazadas (429)</li>
+            <li><span class="clave clave-rate"></span>Rate 15 r/s</li>
+          </ul>
+        </header>
+        <div class="grafica" id="grafica">
+          <svg id="grafica-svg" role="img" aria-label="Peticiones por segundo en los últimos 60 segundos"></svg>
+          <div id="grafica-tooltip" class="tooltip" hidden></div>
+        </div>
+        <details class="tabla-detalle">
+          <summary>Ver como tabla</summary>
+          <table class="tabla"><thead><tr><th>Segundo</th><th class="num">Aceptadas</th><th class="num">Rechazadas</th></tr></thead><tbody id="grafica-tabla"></tbody></table>
+        </details>
+      </article>
+      </div>
+
+      <article class="tarjeta acciones">
+        <header class="tarjeta-cabeza"><h2>Probar el sistema</h2></header>
+
+        <div class="bloque">
+          <h3>Prueba puntual</h3>
+          <button id="btn-emergencia" class="btn btn-primario" type="button">Enviar 1 Emergency</button>
+          <p class="ayuda">Entra por el gateway, igual que un vehículo.</p>
+        </div>
+
+        <div class="bloque">
+          <h3>Carga k6 (1000 eventos)</h3>
+          <div class="segmentado" role="radiogroup" aria-label="Modo de carga">
+            <label><input type="radio" name="modo" value="rafaga" checked><span>Ráfaga</span></label>
+            <label><input type="radio" name="modo" value="ritmo"><span>Ritmo de referencia (~28 s)</span></label>
+          </div>
+          <div class="fila-campo">
+            <label for="emergencias">Emergency en la carga</label>
+            <input id="emergencias" type="number" min="0" max="100" value="5" inputmode="numeric">
+          </div>
+          <button id="btn-carga" class="btn btn-primario" type="button">Lanzar carga</button>
+          <div class="k6-estado"><span id="k6-estado" class="pildora pequena" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="k6-estado-texto">Inactivo</span></span></div>
+          <pre id="k6-salida" class="consola" aria-label="Salida de k6"></pre>
+        </div>
+
+        <div class="bloque">
+          <h3>Inyectar fallas</h3>
+          <ul class="fallas" id="fallas">
+            <li data-servicio="mailpit"><span><strong>SMTP</strong> (Mailpit)</span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+            <li data-servicio="redis"><span><strong>Redis</strong></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+            <li data-servicio="notifier"><span><strong>Notifier</strong></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          </ul>
+          <p class="ayuda">Apaga un componente para ver los reintentos, la DLQ o el 503.</p>
+        </div>
+        <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
+      </article>
+    </section>
+
+    <!-- Fila 4: emergencias y eventos -->
+    <section class="fila fila-detalle">
+      <article class="tarjeta">
+        <header class="tarjeta-cabeza"><h2>Recorrido de cada emergencia</h2><span class="meta">recibida → encolada → correo enviado</span></header>
+        <div class="tabla-envoltura">
+          <table class="tabla">
+            <thead><tr><th>Placa</th><th>Recibida</th><th class="num">Encolada</th><th class="num">Correo</th><th class="num">Intentos</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-emergencias"></tbody>
+          </table>
+          <p id="emergencias-vacio" class="vacio">Aún no hay emergencias en esta ventana. Envía una o lanza una carga.</p>
+        </div>
+      </article>
+      <article class="tarjeta">
+        <header class="tarjeta-cabeza"><h2>Eventos del sistema</h2><span class="meta">de los logs JSON</span></header>
+        <ol id="feed" class="feed"></ol>
+        <p id="feed-vacio" class="vacio">Sin eventos notables todavía.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <span>Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.</span>
+    <span id="actualizado">—</span>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
