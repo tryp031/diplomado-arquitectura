@@ -7,8 +7,13 @@ limit_req_status 429;
 
 log_format reto2 escape=json '{"msec":$msec,"status":$status,"request_time":$request_time,"method":"$request_method","uri":"$request_uri"}';
 
+# DNS interno de Docker, re-consultado cada 5 s: si una réplica de ingest se recrea con otra IP
+# (p. ej. tras `docker compose up --build`), nginx la sigue en vez de responder 502.
+resolver 127.0.0.11 valid=5s ipv6=off;
+
 upstream ingest {
-    server ingest:8000;   # Docker DNS devuelve las IP de todas las réplicas
+    zone ingest 64k;
+    server ingest:8000 resolve;   # todas las réplicas; requiere nginx >= 1.27.3
     keepalive 32;
 }
 
