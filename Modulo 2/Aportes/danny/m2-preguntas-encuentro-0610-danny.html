@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Preguntas para el encuentro del martes 06/10 — Reto 2</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+a.boton{display:inline-block;font-family:var(--sans);font-weight:600;font-size:.95rem;text-decoration:none;
+  color:#fff;background:var(--accent);border-radius:3px;padding:12px 20px;margin:4px 0 22px}
+a.boton:hover{filter:brightness(1.1)}
+@media (prefers-color-scheme:dark){a.boton{color:var(--ground)}}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Preguntas para el encuentro del martes 06/10 — Reto 2</h1>
+  <p class="meta">m2-preguntas-encuentro-0610-danny.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#1-podemos-hacer-el-reto-en-local-sin-aws-la-más-importante">1. ¿Podemos hacer el reto en local, sin AWS? (la más importante)</a></li><li><a href="#2-el-script-k6">2. El script k6</a></li><li><a href="#3-un-correo-por-cada-emergency-o-uno-solo">3. ¿Un correo por cada Emergency o uno solo?</a></li><li><a href="#4-cómo-se-mide-el-tiempo-del-correo">4. ¿Cómo se mide el tiempo del correo?</a></li><li><a href="#5-qué-rúbrica-califica">5. ¿Qué rúbrica califica?</a></li><li><a href="#6-el-valor-del-burst">6. El valor del burst</a></li><li><a href="#7-entrega-individual-o-grupal">7. Entrega individual o grupal</a></li><li><a href="#8-fecha-y-hora-de-cierre">8. Fecha y hora de cierre</a></li><li><a href="#9-evidencia-del-límite-de-10-instancias-opcional">9. Evidencia del límite de 10 instancias (opcional)</a></li></ol></nav>
+<main><div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Autor</strong></td><td>Daniel Mazo Serna (Danny), con asistencia de IA</td></tr><tr><td><strong>Fecha</strong></td><td>2026-10-04</td></tr><tr><td><strong>Para</strong></td><td>Encuentro sincrónico M2, martes 06/10/2026, 6:00 pm</td></tr><tr><td><strong>Tipo</strong></td><td><code>apunte</code> — preguntas propias; <strong>no es material oficial</strong></td></tr><tr><td><strong>Fuente de las dudas</strong></td><td><code>Material-Clase/Actividad-Reto2.md</code> (enunciado y dos rúbricas) · cuaderno de estudio §11 (gráfica del token bucket)</td></tr></tbody></table></div>
+<blockquote><p><strong>Cómo abrir:</strong> «Estamos en el diseño del Reto 2 y tenemos unas dudas del enunciado para no asumir.» <strong>Si hay poco tiempo:</strong> las preguntas <strong>1, 2 y 3</strong> desbloquean el diseño; la <strong>8</strong> toma 10 segundos. <strong>Después:</strong> anotar la respuesta tal cual, sin interpretarla, y pegarla en Claude empezando con «Respuestas del encuentro 06/10».</p></blockquote>
+<hr>
+<h2 id="1-podemos-hacer-el-reto-en-local-sin-aws-la-más-importante">1. ¿Podemos hacer el reto en local, sin AWS? (la más importante)</h2>
+<p><strong>Pregunta:</strong> «¿Es válido implementar el reto en nuestra máquina con Docker, respetando las restricciones con equivalentes locales (un límite de 15 peticiones por segundo en un proxy y máximo 10 contenedores)? ¿O es obligatorio desplegar en AWS?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> el enunciado es condicional («<strong>si se usa</strong> API Gateway… <strong>si se usan</strong> procesadores como Docker, Lambda, EC2…»), pero la imagen de configuración es la consola de AWS y el diplomado es de <em>Cloud Computing</em>.</li><li><strong>Qué cambia:</strong> si dice que sí, seguimos en local. Si dice que no, hace falta una cuenta AWS personal esta misma semana.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="2-el-script-k6">2. El script k6</h2>
+<p><strong>Pregunta:</strong> «¿Cuándo y dónde publicarán el script k6? ¿Lo ejecutamos nosotros desde nuestra máquina durante la demo, o usted lo corre contra nuestro endpoint? ¿Cuántos eventos <code>Emergency</code> trae y en qué momento de la prueba?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> el enunciado dice que «<strong>se proporcionará</strong>» y aún no está. El tiempo del correo vale la mitad de la nota (2.5 de 5) y sin el script no podemos medirlo.</li><li><strong>Qué cambia:</strong> si lo corre él, el sistema local necesita una URL pública (un túnel). La cantidad de <code>Emergency</code> define cuántos correos salen y si cumplimos el tiempo.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="3-un-correo-por-cada-emergency-o-uno-solo">3. ¿Un correo por cada <code>Emergency</code> o uno solo?</h2>
+<p><strong>Pregunta:</strong> «Si en la prueba llegan varios eventos <code>Emergency</code>, ¿espera un correo por cada uno o basta con uno?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> el enunciado dice «enviar un correo <strong>en el momento en que se reciba</strong> un evento <code>Emergency</code>». Con muchos eventos, Gmail puede frenar los envíos y el tiempo crece.</li><li><strong>Qué cambia:</strong> el diseño del envío. Uno por evento exige una cola que procese en paralelo; uno solo es mucho más simple.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="4-cómo-se-mide-el-tiempo-del-correo">4. ¿Cómo se mide el tiempo del correo?</h2>
+<p><strong>Pregunta:</strong> «El tiempo se mide desde el último envío de k6 hasta el correo. ¿Toma la hora en que llega a Gmail o la de nuestros logs? Y el objetivo dice menos de 30 segundos, pero la rúbrica corta en 15 y 45: ¿cuál es la meta?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> el enunciado dice «entre el último envío realizado en k6 y la hora de envío del correo <strong>y recepción</strong> del mismo». Eso incluye la entrega de Gmail, que no controlamos. La rúbrica puntúa: &lt; 15 s = 2.5 · 15–45 s = 1.5 · &gt; 45 s = 0.5.</li><li><strong>Qué cambia:</strong> qué evidencia mostramos en la demo (log, bandeja de Gmail o ambos). Apuntamos a &lt; 15 s.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="5-qué-rúbrica-califica">5. ¿Qué rúbrica califica?</h2>
+<p><strong>Pregunta:</strong> «Hay dos rúbricas: la del PDF (2.5 de documentación + 2.5 de tiempo del correo) y la de Brightspace, con 5 criterios, entre ellos “Pruebas y análisis de resultados”. ¿Cuál se usa? ¿Qué espera en pruebas y análisis?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> las dos son oficiales y no coinciden; los descriptores de la de Brightspace vienen vacíos.</li><li><strong>Qué cambia:</strong> poco, porque cubriremos las dos. Nos dice cuánto profundizar en las mediciones.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="6-el-valor-del-burst">6. El valor del <em>burst</em></h2>
+<p><strong>Pregunta:</strong> «Con 1000 peticiones en 30 segundos llegan unas 35 por segundo, más del doble del límite de 15. El enunciado dice que el burst queda “por defecto”, pero la imagen muestra 2000. ¿Qué valor debemos usar?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> con un burst menor a ≈ 580 aparecen respuestas 429 y se incumple el «100 % de solicitudes procesadas» (gráfica del token bucket, cuaderno §11). En local nosotros elegimos ese número.</li><li><strong>Qué cambia:</strong> la configuración del proxy. Además, muestra que entendimos la restricción.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="7-entrega-individual-o-grupal">7. Entrega individual o grupal</h2>
+<p><strong>Pregunta:</strong> «En Brightspace la entrega aparece como individual. ¿Cada integrante sube la misma solución del grupo, o cada uno necesita su propia implementación? ¿La demo en vivo sería en el encuentro del 13/10?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> la asignación está configurada individual (<code>grpid=0</code>). El enunciado pide demo en vivo a quienes asisten y video a quienes no.</li><li><strong>Qué cambia:</strong> cómo repartimos el trabajo con Camilo y Freddy, y si hay que preparar video.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="8-fecha-y-hora-de-cierre">8. Fecha y hora de cierre</h2>
+<p><strong>Pregunta:</strong> «¿Cuál es la fecha y hora exacta de cierre de la actividad M2? En la página no aparece.»</p>
+<ul><li><strong>Por qué la hacemos:</strong> después del cierre no se califica, sin excepciones.</li><li><strong>Qué cambia:</strong> el calendario. Hoy asumimos el 20/10, con margen hasta el 19/10.</li></ul>
+<p><strong>Respuesta:</strong></p>
+<hr>
+<h2 id="9-evidencia-del-límite-de-10-instancias-opcional">9. Evidencia del límite de 10 instancias (opcional)</h2>
+<p><strong>Pregunta:</strong> «Para demostrar que no pasamos de 10 instancias simultáneas, ¿basta con mostrar la configuración, o quiere ver una métrica durante la prueba?»</p>
+<ul><li><strong>Por qué la hacemos:</strong> es una restricción dura del enunciado; en local hay que probarla, no solo afirmarla.</li><li><strong>Qué cambia:</strong> si agregamos un registro de instancias activas durante la corrida.</li></ul>
+<p><strong>Respuesta:</strong></p></main>
+<footer><p>Generado desde <code>m2-preguntas-encuentro-0610-danny.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

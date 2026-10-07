@@ -96,7 +96,7 @@ services:
         condition: service_healthy
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.31.4   # fijada: latest podía cambiar entre la prueba y la demo
     profiles: ["dev"]
     ports:
       - "8025:8025"

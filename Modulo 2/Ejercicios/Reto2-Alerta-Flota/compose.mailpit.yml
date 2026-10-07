@@ -1,0 +1,15 @@
+# Fuerza Mailpit aunque .env esté en modo Gmail: `environment` tiene prioridad sobre `env_file`.
+# Uso: docker compose -f docker-compose.yml -f compose.mailpit.yml --profile dev up -d --build
+services:
+  notifier:
+    environment:
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_STARTTLS: "false"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      MAIL_FROM: alertas@reto2.local
+      MAIL_TO: danny@reto2.local
+  panel:
+    environment:
+      SMTP_HOST: mailpit

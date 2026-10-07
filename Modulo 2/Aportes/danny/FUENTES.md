@@ -64,3 +64,34 @@ etiqueta `Curso` / `Complementario` / `Recomendación` / `Hipótesis`. El `.md` 
 **Límites:** la autoevaluación oficial sigue sin abrirse; no sabemos su formato, así que estas preguntas no
 pretenden imitarla. El HTML es la fuente (mismo diseño que `m1-autoevaluacion-danny.html`); las gráficas van
 insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, hay que reemplazarlas ahí.
+
+---
+
+## `m2-preguntas-encuentro-0610-danny.md` (+ `.html` generado)
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-04 |
+| **Módulo** | 2 — Reto 2 |
+| **Tema** | 9 preguntas para el profesor en el encuentro del 06/10, cada una con su fundamento y qué decisión cambia |
+| **Tipo** | `apunte` — elaborado con IA; **no es material oficial** |
+| **Fuentes** | `Material-Clase/Actividad-Reto2.md` · cuaderno de estudio §11 |
+| **Estado** | vigente · respuestas pendientes (se llenan tras el encuentro) |
+
+---
+
+## `m2-panel-v2-propuesta-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-07 |
+| **Módulo** | 2 — Reto 2 |
+| **Tema** | Maqueta estática de una v2 del panel del Reto 2 (tarea de la reunión del 06/10): qué cambia, por qué y a qué costo |
+| **Tipo** | `propuesta` — elaborada con IA; **no es material oficial** ni decisión del equipo |
+| **Fuentes** | Panel actual (`Ejercicios/Reto2-Alerta-Flota/panel/`), captura del 07/10 · feedback del profesor sobre M1 (hilo conductor) |
+| **Estado** | vigente · para discutir el 09/10 |
+
+**Límites:** los datos son de ejemplo (la fila 16,4 s está inspirada en el 06/10, no es un registro).
+No hay código detrás: el costo de cada cambio es una estimación.

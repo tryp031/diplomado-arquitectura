@@ -85,6 +85,32 @@ async def test_k6_arma_el_comando_segun_el_modo(tmp_path):
     estado = k6.resumen()
     assert estado["estado"] == "terminado"
     assert estado["salida"] == ["running (0m01.0s)"]  # sin códigos de color
+    assert estado["fin"] is not None
+
+
+async def test_k6_ventana_solo_existe_cuando_la_carga_termino(tmp_path):
+    procesos = [ProcesoFalso([], codigo=0), ProcesoFalso([], codigo=99)]
+    lanzados = []
+
+    async def lanzar(*args, **kwargs):
+        lanzados.append(procesos.pop(0))
+        return lanzados[-1]
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    assert k6.ventana() is None  # nunca se lanzó una carga
+    await k6.iniciar("rafaga", emergencias=1)
+    assert k6.ventana() is None  # corriendo
+    lanzados[0].liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    inicio, fin = k6.ventana()
+    assert inicio <= fin
+    # Una carga nueva reemplaza a la anterior; si falla, sus logs también se pueden bajar.
+    await k6.iniciar("rafaga", emergencias=1)
+    assert k6.ventana() is None
+    lanzados[1].liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    assert k6.resumen()["estado"] == "fallido"
+    assert k6.ventana()[0] >= fin
 
 
 async def test_k6_del_profesor_corre_su_script_sin_parametros_propios(tmp_path):

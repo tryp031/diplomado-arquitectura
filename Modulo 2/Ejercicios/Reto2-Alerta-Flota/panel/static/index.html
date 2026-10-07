@@ -134,6 +134,11 @@
           <button id="btn-carga" class="btn btn-primario" type="button">Lanzar carga</button>
           <div class="k6-estado"><span id="k6-estado" class="pildora pequena" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="k6-estado-texto">Inactivo</span></span></div>
           <pre id="k6-salida" class="consola" aria-label="Salida de k6"></pre>
+          <div class="descargas" role="group" aria-labelledby="descarga-titulo">
+            <p id="descarga-titulo" class="ayuda">Logs de la última carga (ingest, notifier y gateway)</p>
+            <button class="btn btn-secundario" type="button" data-formato="log" disabled>Descargar .log</button>
+            <button class="btn btn-secundario" type="button" data-formato="csv" disabled>Descargar .csv</button>
+          </div>
         </div>
 
         <div class="bloque">
