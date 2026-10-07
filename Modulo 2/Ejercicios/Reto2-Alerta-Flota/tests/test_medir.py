@@ -48,3 +48,15 @@ def test_sin_correos_la_medida_queda_vacia():
     assert r.fin_k6_a_ultimo_correo_s is None
     assert r.ultima_peticion_a_ultimo_correo_s is None
     assert r.recepcion_a_envio_max_ms is None
+
+
+def test_cuenta_las_peticiones_que_llegan_antes_del_inicio_calculado_por_k6():
+    # k6 reconstruye su inicio como «fin − duración» y el fin lo toma en handleSummary, unos ms
+    # tarde: el inicio queda corrido hacia adelante y las primeras peticiones caían fuera.
+    # Caso real del 06/10: 1000 enviadas y nginx_total 989/995.
+    nginx = [{"msec": 1791864000.0 + s, "status": 200} for s in (-0.05, -0.006, 1)]
+    servicio = [reg("22:59:59.950", "EVENT_RECEIVED", event_id="p0"),
+                reg("23:00:01.000", "EVENT_RECEIVED", event_id="p1")]
+    r = analizar(servicio, nginx, K6)
+    assert r.nginx_total == 3
+    assert r.eventos_recibidos == 2

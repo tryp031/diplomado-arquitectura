@@ -15,6 +15,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 MARGEN_DESPUES_DEL_FIN = timedelta(minutes=2)
+# k6 reconstruye su inicio como «fin − duración», y el fin lo toma en handleSummary unos ms tarde:
+# el inicio queda corrido hacia adelante y las primeras peticiones caían fuera de la ventana
+# (06/10: 1000 enviadas, nginx_total 989). Dos segundos cubren ese desfase sin alcanzar a otra corrida.
+MARGEN_ANTES_DEL_INICIO = timedelta(seconds=2)
 
 
 @dataclass(frozen=True)
@@ -45,8 +49,8 @@ def _fecha(texto: str) -> datetime:
 
 def analizar(servicio: list[dict], nginx: list[dict], k6: dict) -> Reporte:
     inicio, fin = _fecha(k6["started_at"]), _fecha(k6["ended_at"])
-    limite = fin + MARGEN_DESPUES_DEL_FIN
-    regs = [r for r in servicio if inicio <= _fecha(r["ts"]) <= limite]
+    desde, limite = inicio - MARGEN_ANTES_DEL_INICIO, fin + MARGEN_DESPUES_DEL_FIN
+    regs = [r for r in servicio if desde <= _fecha(r["ts"]) <= limite]
 
     def eventos(nombre: str) -> list[dict]:
         return [r for r in regs if r["event"] == nombre]
@@ -54,7 +58,7 @@ def analizar(servicio: list[dict], nginx: list[dict], k6: dict) -> Reporte:
     emergencias = {r["event_id"] for r in eventos("EMERGENCY_RECEIVED")}
     enviados = [r for r in eventos("EMAIL_SENT") if r["event_id"] in emergencias]
     peticiones = [n for n in nginx
-                  if inicio <= datetime.fromtimestamp(n["msec"], tz=timezone.utc) <= limite]
+                  if desde <= datetime.fromtimestamp(n["msec"], tz=timezone.utc) <= limite]
     metricas = k6["metrics"]
     ultimo_correo = max((_fecha(r["ts"]) for r in enviados), default=None)
     ultima_peticion = max((datetime.fromtimestamp(n["msec"], tz=timezone.utc) for n in peticiones), default=None)
