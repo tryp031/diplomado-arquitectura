@@ -86,7 +86,7 @@
           <li class="nodo" data-nodo="ingest"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Ingesta · FastAPI ×2</p><p class="nodo-rol">Responde sin esperar el correo</p><ul class="replicas" data-dato="replicas"></ul></li>
           <li class="nodo" data-nodo="redis"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Redis Streams</p><p class="nodo-rol">Cola durable · ACK · DLQ</p><p class="nodo-dato" data-dato="redis">—</p></li>
           <li class="nodo" data-nodo="notifier"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Notifier · asyncio</p><p class="nodo-rol">Concurrencia 5 · reintentos 1/2/4 s</p><p class="nodo-dato" data-dato="notifier">—</p></li>
-          <li class="nodo" data-nodo="mailpit"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">SMTP</p><p class="nodo-rol">Mailpit (dev) · Gmail (demo)</p><p class="nodo-dato" data-dato="smtp">—</p></li>
+          <li class="nodo" data-nodo="mailpit"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">SMTP</p><p class="nodo-rol" id="smtp-rol">Mailpit (dev) · Gmail (demo)</p><p class="nodo-dato" data-dato="smtp">—</p></li>
         </ol>
         <p class="nota">Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.</p>
       </article>
@@ -122,12 +122,14 @@
         <div class="bloque">
           <h3>Carga k6 (1000 eventos)</h3>
           <div class="segmentado" role="radiogroup" aria-label="Modo de carga">
-            <label><input type="radio" name="modo" value="rafaga" checked><span>Ráfaga</span></label>
-            <label><input type="radio" name="modo" value="ritmo"><span>Ritmo de referencia (~28 s)</span></label>
+            <label><input type="radio" name="modo" value="profesor" checked><span>k6 del profesor</span></label>
+            <label><input type="radio" name="modo" value="rafaga"><span>Ráfaga</span></label>
+            <label><input type="radio" name="modo" value="ritmo"><span>Ritmo (~28 s)</span></label>
           </div>
-          <div class="fila-campo">
+          <p id="modo-ayuda" class="ayuda"></p>
+          <div class="fila-campo" id="campo-emergencias">
             <label for="emergencias">Emergency en la carga</label>
-            <input id="emergencias" type="number" min="0" max="100" value="5" inputmode="numeric">
+            <input id="emergencias" type="number" min="0" max="100" value="1" inputmode="numeric">
           </div>
           <button id="btn-carga" class="btn btn-primario" type="button">Lanzar carga</button>
           <div class="k6-estado"><span id="k6-estado" class="pildora pequena" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="k6-estado-texto">Inactivo</span></span></div>
@@ -137,7 +139,7 @@
         <div class="bloque">
           <h3>Inyectar fallas</h3>
           <ul class="fallas" id="fallas">
-            <li data-servicio="mailpit"><span><strong>SMTP</strong> (Mailpit)</span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+            <li data-servicio="mailpit"><span><strong>SMTP</strong> <span id="smtp-nombre">(Mailpit)</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
             <li data-servicio="redis"><span><strong>Redis</strong></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
             <li data-servicio="notifier"><span><strong>Notifier</strong></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
           </ul>

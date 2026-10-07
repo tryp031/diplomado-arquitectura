@@ -43,7 +43,7 @@ Docker Desktop corriendo · [k6](https://k6.io) (`brew install k6` / `winget ins
 ```bash
 cp .env.example .env                       # Windows: copy .env.example .env
 docker compose --profile dev up -d --build
-k6 run k6/carga.js                         # 1000 eventos, 5 Emergency
+k6 run k6/carga.js                         # 1000 eventos, 1 Emergency (la última iteración)
 python3 scripts/medir.py                   # reporte de la corrida
 ```
 
@@ -56,7 +56,19 @@ Correos: http://localhost:8025 · Logs: `logs/` (JSON, hora Colombia, un archivo
 | Ráfaga | `k6 run k6/carga.js` | El k6 sin pausas. En local cada petición tarda ~2 ms, así que las 1000 llegan en < 1 s y solo pasan porque el burst (2000) es mayor que 1000 |
 | Ritmo de referencia | `k6 run -e SLEEP_S=0.28 k6/carga.js` | La salida de referencia del enunciado: ~35 req/s durante ~28 s (en AWS el ritmo lo impone la latencia de ~176 ms) |
 
-`-e EMERGENCIES=N` cambia cuántos `Emergency` se envían (por defecto 5; el último siempre es la iteración final, el peor caso).
+`-e EMERGENCIES=N` cambia cuántos `Emergency` se envían (por defecto 1: el enunciado pide un correo; el último siempre es la iteración final, el peor caso).
+
+## k6 del profesor (oficial)
+
+`k6/profesor.js` es el script que entregó el profesor el 06/10/2026 (original intacto en
+`Modulo 2/Material-Clase/k6-script-profesor.js`). Solo cambian la URL (apuntaba a su API Gateway en
+AWS) y el `handleSummary` que necesitan `medir.py` y el panel. Se lanza con `k6 run k6/profesor.js`
+o con el botón **«Lanzar k6 del profesor»** del panel.
+
+Ojo: el script calcula el índice como `(__VU - 1) * 100 + __ITER`, pero k6 reparte las 1000
+iteraciones entre los VUs sin garantizar 100 por VU. El Emergency sale cuando el VU 10 pasa de
+99 iteraciones, así que hay **0, 1 o varios** Emergency por corrida (medido el 06/10: 1, 2 y 1 en
+tres corridas), y no necesariamente es la última petición.
 
 ## Correr contra Gmail (demo / mediciones)
 

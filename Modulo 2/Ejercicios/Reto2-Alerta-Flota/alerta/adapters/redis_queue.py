@@ -5,11 +5,27 @@ si el notifier cae a mitad del envío, otro consumidor lo reclama con XAUTOCLAIM
 """
 from __future__ import annotations
 
+import redis.asyncio as redis
 from redis.asyncio import Redis
-from redis.exceptions import ResponseError
+from redis.asyncio.retry import Retry
+from redis.backoff import ExponentialBackoff
+from redis.exceptions import ConnectionError, ResponseError, TimeoutError
 
 from alerta.domain import EmergencyAlert
 from alerta.ports import Delivery
+
+
+def conectar(url: str) -> Redis:
+    """Cliente que sobrevive a un reinicio de Redis.
+
+    Por defecto, la primera orden tras el reinicio usa la conexión muerta del pool y falla:
+    el ingest respondía 503 y el Emergency se perdía. Con 3 reintentos (≈ 50, 100, 200 ms)
+    abre una conexión nueva. Trade-off: XADD no es idempotente; si un timeout llega después
+    de escribir, la alerta se duplica. Para emergencias, un correo de más es mejor que uno perdido.
+    """
+    return redis.from_url(url, decode_responses=True,
+                          retry=Retry(ExponentialBackoff(cap=0.5, base=0.05), 3),
+                          retry_on_error=[ConnectionError, TimeoutError])
 
 
 class RedisAlertQueue:

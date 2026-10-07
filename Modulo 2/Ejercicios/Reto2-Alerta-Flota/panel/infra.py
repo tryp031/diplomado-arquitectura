@@ -19,6 +19,8 @@ import httpx
 SERVICIOS_CONTROLABLES = {"mailpit", "redis", "notifier"}
 ACCIONES_DOCKER = {"apagar": "stop", "encender": "start"}
 MODOS_K6 = {"rafaga": None, "ritmo": "0.28"}  # SLEEP_S: el ritmo imita la salida de referencia
+# El k6 del profesor decide solo cuántos Emergency manda y a qué ritmo: no recibe parámetros.
+MODO_PROFESOR = "profesor"
 MAX_EMERGENCIAS = 100
 _COLOR_ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
@@ -76,9 +78,10 @@ Lanzador = Callable[..., Awaitable[Any]]
 class EjecutorK6:
     """Corre una carga k6 a la vez y guarda las últimas líneas de su salida."""
 
-    def __init__(self, script: str, url: str, resumen_path: Path, *, binario: str = "k6",
-                 lanzar: Lanzador | None = asyncio.create_subprocess_exec) -> None:
+    def __init__(self, script: str, url: str, resumen_path: Path, *, script_profesor: str | None = None,
+                 binario: str = "k6", lanzar: Lanzador | None = asyncio.create_subprocess_exec) -> None:
         self._script = script
+        self._script_profesor = script_profesor
         self._url = url
         self._resumen_path = Path(resumen_path)
         self._binario = binario
@@ -94,20 +97,25 @@ class EjecutorK6:
     def ocupado(self) -> bool:
         return self.estado == "corriendo"
 
-    async def iniciar(self, modo: str, *, emergencias: int) -> None:
-        if modo not in MODOS_K6:
-            raise ValueError(f"modo desconocido: {modo}")
-        if not 0 <= emergencias <= MAX_EMERGENCIAS:
-            raise ValueError(f"emergencias debe estar entre 0 y {MAX_EMERGENCIAS}")
-        if self.ocupado:
-            raise RuntimeError("ya hay una carga en curso")
+    async def iniciar(self, modo: str, *, emergencias: int | None = None) -> None:
         argumentos = [self._binario, "run", "--no-color",
                       "-e", f"TARGET_URL={self._url}",
-                      "-e", f"SUMMARY_PATH={self._resumen_path}",
-                      "-e", f"EMERGENCIES={emergencias}"]
-        if MODOS_K6[modo]:
-            argumentos += ["-e", f"SLEEP_S={MODOS_K6[modo]}"]
-        argumentos.append(self._script)
+                      "-e", f"SUMMARY_PATH={self._resumen_path}"]
+        if modo == MODO_PROFESOR:
+            if not self._script_profesor:
+                raise ValueError("el k6 del profesor no está configurado")
+            argumentos.append(self._script_profesor)
+        elif modo in MODOS_K6:
+            if emergencias is None or not 0 <= emergencias <= MAX_EMERGENCIAS:
+                raise ValueError(f"emergencias debe estar entre 0 y {MAX_EMERGENCIAS}")
+            argumentos += ["-e", f"EMERGENCIES={emergencias}"]
+            if MODOS_K6[modo]:
+                argumentos += ["-e", f"SLEEP_S={MODOS_K6[modo]}"]
+            argumentos.append(self._script)
+        else:
+            raise ValueError(f"modo desconocido: {modo}")
+        if self.ocupado:
+            raise RuntimeError("ya hay una carga en curso")
         self.estado, self.modo, self.codigo = "corriendo", modo, None
         self.inicio = datetime.now(timezone.utc)
         self.salida.clear()

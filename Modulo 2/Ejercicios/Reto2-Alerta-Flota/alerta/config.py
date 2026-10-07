@@ -23,6 +23,7 @@ class Settings:
     mail_to: str
     notifier_concurrency: int
     max_attempts: int
+    smtp_timeout_s: float
     log_dir: str | None
 
 
@@ -38,6 +39,11 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     max_attempts = int(env.get("MAX_ATTEMPTS", "4"))
     if max_attempts < 1:
         raise ValueError("MAX_ATTEMPTS debe ser >= 1")
+    # Por operación de red (conectar, TLS, AUTH, DATA). Corto a propósito: una conexión colgada
+    # debe cortarla aiosmtplib y reintentarse, no consumir los 15 s que da la rúbrica.
+    smtp_timeout_s = float(env.get("SMTP_TIMEOUT_S", "4"))
+    if smtp_timeout_s <= 0:
+        raise ValueError("SMTP_TIMEOUT_S debe ser > 0")
     return Settings(
         redis_url=env.get("REDIS_URL", "redis://localhost:6379/0"),
         stream=env.get("STREAM", "emergencies"),
@@ -53,5 +59,6 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         mail_to=env.get("MAIL_TO", "danny@reto2.local"),
         notifier_concurrency=concurrency,
         max_attempts=max_attempts,
+        smtp_timeout_s=smtp_timeout_s,
         log_dir=env.get("LOG_DIR") or None,
     )

@@ -32,7 +32,7 @@ def build_message(alert: EmergencyAlert, mail_from: str, mail_to: str) -> EmailM
 
 class SmtpNotifier:
     def __init__(self, *, host: str, port: int, username: str, password: str, starttls: bool,
-                 mail_from: str, mail_to: str, timeout_s: float = 10.0) -> None:
+                 mail_from: str, mail_to: str, timeout_s: float = 4.0) -> None:
         self._host = host
         self._port = port
         self._username = username

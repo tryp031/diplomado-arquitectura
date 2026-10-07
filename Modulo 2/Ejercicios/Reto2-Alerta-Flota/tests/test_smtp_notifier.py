@@ -36,4 +36,4 @@ async def test_send_usa_la_configuracion_smtp(monkeypatch):
     [(message, kwargs)] = llamadas
     assert message["To"] == "b@x.co"
     assert kwargs == {"hostname": "smtp.gmail.com", "port": 587, "username": "u",
-                      "password": "p", "start_tls": True, "timeout": 10.0}
+                      "password": "p", "start_tls": True, "timeout": 4.0}

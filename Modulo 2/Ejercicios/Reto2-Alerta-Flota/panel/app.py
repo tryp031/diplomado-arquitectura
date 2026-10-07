@@ -20,18 +20,19 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from panel.agregador import Agregador, LectorIncremental
+from panel.infra import MODO_PROFESOR
 
 ESTATICOS = Path(__file__).parent / "static"
 
 
 class PedidoCarga(BaseModel):
     modo: str
-    emergencias: int = 5
+    emergencias: int | None = 1  # se ignora en modo «profesor»: ese script decide
 
 
 def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lector_nginx: LectorIncremental,
                redis_info: Callable[[], Awaitable[dict]], docker: Any, k6: Any,
-               gateway: httpx.AsyncClient, gateway_url: str) -> FastAPI:
+               gateway: httpx.AsyncClient, gateway_url: str, smtp_host: str = "mailpit") -> FastAPI:
     app = FastAPI(title="Reto 2 — panel de control")
 
     @app.get("/api/estado")
@@ -42,6 +43,8 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         resultado = agregador.resumen(datetime.now(timezone.utc))
         resultado["redis"] = await redis_info()
         resultado["k6"] = k6.resumen()
+        # Solo Mailpit corre dentro de Docker; Gmail es externo y el panel no puede apagarlo.
+        resultado["smtp"] = {"host": smtp_host, "local": smtp_host == "mailpit"}
         try:
             resultado["contenedores"], resultado["docker_error"] = await docker.contenedores(), None
         except Exception as exc:  # sin socket de Docker el panel sigue sirviendo los datos
@@ -74,7 +77,8 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         except RuntimeError as exc:
             return JSONResponse({"error": str(exc)}, status_code=409)
         agregador.reiniciar(inicio)  # cada carga se observa en su propia ventana
-        return {"modo": pedido.modo, "emergencias": pedido.emergencias}
+        emergencias = None if pedido.modo == MODO_PROFESOR else pedido.emergencias
+        return {"modo": pedido.modo, "emergencias": emergencias}
 
     @app.post("/api/servicios/{servicio}/{accion}")
     async def servicio(servicio: str, accion: str):
@@ -115,7 +119,9 @@ def build_app() -> FastAPI:
         redis_info=lambda: estado_redis(client, stream, dlq_stream, group),
         docker=Docker(os.environ.get("COMPOSE_PROJECT", "reto2-alerta-flota")),
         k6=EjecutorK6(os.environ.get("K6_SCRIPT", "/app/k6/carga.js"), gateway_url,
-                      logs / "k6-summary.json"),
+                      logs / "k6-summary.json",
+                      script_profesor=os.environ.get("K6_SCRIPT_PROFESOR", "/app/k6/profesor.js")),
         gateway=httpx.AsyncClient(),
         gateway_url=gateway_url,
+        smtp_host=os.environ.get("SMTP_HOST", "mailpit"),
     )

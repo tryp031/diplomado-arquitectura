@@ -14,6 +14,15 @@ const fmtHora = new Intl.DateTimeFormat("es-CO", {
 });
 const fmtHoraCorta = new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
+// Nombre visible de cada modo de carga: el panel debe dejar claro qué k6 está corriendo.
+const NOMBRE_MODO = { rafaga: "ráfaga", ritmo: "ritmo de referencia", profesor: "k6 del profesor" };
+const AYUDA_MODO = {
+  profesor: "Script oficial del profesor (k6/profesor.js), solo con la URL hacia nuestro gateway. "
+    + "10 VUs · 1000 iteraciones · pausa 0,1 s. Él decide cuántos Emergency manda: normalmente 1, a veces 0 o 2.",
+  rafaga: "Script propio (k6/carga.js) sin pausas: las 1000 peticiones llegan en menos de 1 s.",
+  ritmo: "Script propio (k6/carga.js) a ~35 req/s durante ~28 s, como la salida de referencia del enunciado.",
+};
+
 function el(tag, props = {}, ...hijos) {
   const nodo = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -134,7 +143,7 @@ function saludDe(e, ...contenedores) {
 function pintarFlujo(e, ahora) {
   const nodos = {
     k6: { activo: e.k6.estado === "corriendo", salud: e.k6.estado === "fallido" ? "critical" : "neutral",
-          dato: e.k6.estado === "corriendo" ? `Corriendo · ${e.k6.modo === "ritmo" ? "ritmo" : "ráfaga"}` : e.k6.estado === "terminado" ? "Última carga terminada" : "En espera" },
+          dato: e.k6.estado === "corriendo" ? `Corriendo · ${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo}` : e.k6.estado === "terminado" ? "Última carga terminada" : "En espera" },
     gateway: { activo: reciente(e.ultimo_visto.gateway, ahora), salud: saludDe(e, "gateway-1"),
                dato: `${num(e.http.total)} peticiones · ${num(e.http.rechazadas_429)} × 429` },
     ingest: { activo: reciente(e.ultimo_visto.ingest, ahora), salud: saludDe(e, "ingest-1", "ingest-2") },
@@ -142,8 +151,9 @@ function pintarFlujo(e, ahora) {
              dato: e.redis.ok ? `Pend. ${num(e.redis.pendientes)} · DLQ ${num(e.redis.dlq)}` : "No responde" },
     notifier: { activo: reciente(e.ultimo_visto.notifier, ahora), salud: saludDe(e, "notifier-1"),
                 dato: `${num(e.eventos.enviadas)} enviados · ${num(e.eventos.reintentos)} reintentos` },
-    mailpit: { activo: reciente(e.ultimo_visto.notifier, ahora) && e.eventos.enviadas > 0, salud: saludDe(e, "mailpit-1"),
-               dato: e.contenedores["mailpit-1"] ? `${num(e.eventos.enviadas)} correos` : "Gmail / externo" },
+    mailpit: { activo: reciente(e.ultimo_visto.notifier, ahora) && e.eventos.enviadas > 0,
+               salud: e.smtp.local ? saludDe(e, "mailpit-1") : "neutral",
+               dato: `${num(e.eventos.enviadas)} correos` },
   };
   for (const [clave, n] of Object.entries(nodos)) {
     const nodo = document.querySelector(`[data-nodo="${clave}"]`);
@@ -153,6 +163,7 @@ function pintarFlujo(e, ahora) {
     const dato = nodo.querySelector(".nodo-dato");
     if (dato) dato.textContent = n.dato;
   }
+  $("#smtp-rol").textContent = e.smtp.local ? "Mailpit (desarrollo)" : `${nombreSmtp(e.smtp.host)} (externo)`;
   const replicas = $('[data-dato="replicas"]');
   const filas = Object.entries(e.por_replica).sort();
   replicas.replaceChildren(...(filas.length
@@ -164,9 +175,9 @@ function pintarFlujo(e, ahora) {
 function pintarAcciones(e) {
   const corriendo = e.k6.estado === "corriendo";
   $("#btn-carga").disabled = corriendo;
-  $("#btn-carga").textContent = corriendo ? "Carga en curso…" : "Lanzar carga";
+  $("#btn-carga").textContent = corriendo ? "Carga en curso…" : textoBotonCarga();
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";
-  const textoK6 = { corriendo: `Corriendo (${e.k6.modo})`, terminado: "Terminada", fallido: `Falló (código ${e.k6.codigo})` }[e.k6.estado] ?? "Inactivo";
+  const textoK6 = { corriendo: `Corriendo (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, terminado: `Terminada (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, fallido: `Falló (código ${e.k6.codigo})` }[e.k6.estado] ?? "Inactivo";
   fijarPildora($("#k6-estado"), nivelK6, textoK6);
   const consola = $("#k6-salida");
   const texto = e.k6.salida.join("\n");
@@ -178,6 +189,20 @@ function pintarAcciones(e) {
     const contenedor = e.contenedores[`${fila.dataset.servicio}-1`];
     const estado = fila.querySelector(".falla-estado");
     const boton = fila.querySelector("button");
+    if (fila.dataset.servicio === "mailpit" && !e.smtp.local) {
+      // En modo Gmail el SMTP es externo: Mailpit no participa y apagarlo no simularía nada.
+      $("#smtp-nombre").textContent = `(${nombreSmtp(e.smtp.host)})`;
+      estado.textContent = "Externo";
+      estado.dataset.nivel = "neutral";
+      boton.textContent = "—";
+      boton.disabled = true;
+      boton.title = "Es un servicio externo: no se puede apagar desde el panel. Para probar la caída del SMTP, use el modo dev (Mailpit).";
+      continue;
+    }
+    if (fila.dataset.servicio === "mailpit") {
+      $("#smtp-nombre").textContent = "(Mailpit)";
+      boton.title = "";
+    }
     if (!contenedor) {
       estado.textContent = e.docker_error ? "sin Docker" : "no levantado";
       estado.dataset.nivel = "neutral";
@@ -225,11 +250,13 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
 });
 
 $("#btn-carga").addEventListener("click", async () => {
-  const modo = document.querySelector('input[name="modo"]:checked').value;
+  const modo = modoElegido();
+  const profesor = modo === "profesor";
   const emergencias = Number($("#emergencias").value);
   try {
-    await post("/api/carga", { modo, emergencias });
-    avisar(`Carga lanzada (${modo === "ritmo" ? "ritmo de referencia" : "ráfaga"}, ${emergencias} Emergency). La ventana se reinició para observar solo esta corrida.`);
+    await post("/api/carga", profesor ? { modo } : { modo, emergencias });
+    const detalle = profesor ? "k6/profesor.js decide los Emergency" : `${emergencias} Emergency`;
+    avisar(`Carga lanzada con ${NOMBRE_MODO[modo]} (${detalle}). La ventana se reinició para observar solo esta corrida.`);
   } catch (err) {
     avisar(`No se pudo lanzar la carga: ${err.message}`);
   }
@@ -428,3 +455,26 @@ function pintarFeed(feed) {
 
 addEventListener("resize", () => ultimoEstado && pintarGrafica(ultimoEstado.serie));
 ciclo();
+
+// ------------------------------------------------------------------ modo de carga
+function modoElegido() {
+  return document.querySelector('input[name="modo"]:checked').value;
+}
+
+function textoBotonCarga() {
+  return modoElegido() === "profesor" ? "Lanzar carga · k6 del profesor" : "Lanzar carga · k6 propio";
+}
+
+function nombreSmtp(host) {
+  return host === "smtp.gmail.com" ? "Gmail" : host;
+}
+
+function pintarModo() {
+  const modo = modoElegido();
+  $("#modo-ayuda").textContent = AYUDA_MODO[modo];
+  $("#campo-emergencias").hidden = modo === "profesor"; // ese script decide cuántos manda
+  if (!$("#btn-carga").disabled) $("#btn-carga").textContent = textoBotonCarga();
+}
+
+for (const radio of document.querySelectorAll('input[name="modo"]')) radio.addEventListener("change", pintarModo);
+pintarModo();

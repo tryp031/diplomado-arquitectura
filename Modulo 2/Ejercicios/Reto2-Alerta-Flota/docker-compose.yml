@@ -82,6 +82,8 @@ services:
       LOG_DIR: /logs
       GATEWAY_URL: http://gateway/events
       K6_SCRIPT: /app/k6/carga.js
+      K6_SCRIPT_PROFESOR: /app/k6/profesor.js   # el k6 oficial, solo con la URL cambiada
+      SMTP_HOST: ${SMTP_HOST:-mailpit}          # solo el host (sin credenciales): para rotular el SMTP
       COMPOSE_PROJECT: reto2-alerta-flota
     volumes:
       - ./logs:/logs
