@@ -15,7 +15,7 @@ const TOTAL = 1000;
 // Pausa por iteración. La salida de referencia (35.69 req/s, ~28 s) refleja la latencia de AWS
 // (~176 ms); en local cada petición tarda ~2 ms, así que sin pausa todo llega como ráfaga.
 const SLEEP_S = Number(__ENV.SLEEP_S || 0);
-const EMERGENCIES = __ENV.EMERGENCIES !== undefined ? Number(__ENV.EMERGENCIES) : 5;
+const EMERGENCIES = __ENV.EMERGENCIES !== undefined ? Number(__ENV.EMERGENCIES) : 1;
 // La última iteración siempre es Emergency: es el peor caso para la medida de la rúbrica.
 const EVERY = EMERGENCIES > 0 ? Math.floor(TOTAL / EMERGENCIES) : 0;
 

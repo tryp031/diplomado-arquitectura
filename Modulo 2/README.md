@@ -23,14 +23,17 @@ de cuál.*
 
 - `Material-Clase/Modulo2-Brightspace.md` — páginas del módulo y lecturas.
 - `Material-Clase/Actividad-Reto2.md` (+ `.pdf` original) — enunciado, rúbrica y configuraciones del reto.
+- `Material-Clase/k6-script-profesor.js` — **script de k6 oficial** entregado por el profesor el 06/10/2026, sin
+  modificar. La copia que corre contra nuestro sistema es `Ejercicios/Reto2-Alerta-Flota/k6/profesor.js`
+  (solo cambia la URL y el resumen). Tiene un defecto: no garantiza un único `Emergency` por corrida.
 - `Material-Clase/Video-Seguridad.md` — transcripción del video obligatorio de Seguridad (P4).
 - `Material-Clase/Genially-Contenidos-Obligatorios.md` — ASRs, ADD, Disponibilidad, Desempeño e Interoperabilidad (transcripción de los Genially).
 - `Material-Clase/Tacticas-{Disponibilidad,Desempeno,Seguridad,Desplegabilidad,Usabilidad}.md` — texto de los 5 decks.
 - Los `.pptx` originales están en la misma carpeta **solo en local** (no se versionan, ~23 MB).
 - `Temario/TEMARIO-M2.md` — temario y preguntas abiertas.
 
-> **Falta conseguir:** reglas de la autoevaluación (no se abre hasta decidirlo en equipo), el **script
-> de k6** que el enunciado dice que «se proporcionará» y fecha de cierre / modalidad del reto.
+> **Falta conseguir:** reglas de la autoevaluación (no se abre hasta decidirlo en equipo) y fecha de
+> cierre / modalidad del reto. (El script de k6 llegó el 06/10.)
 
 >
 > **Lectura obligatoria antes de empezar:** hay **dos rúbricas oficiales que no coinciden** (PDF vs.

@@ -30,7 +30,7 @@ class K6Falso:
         self.ocupado = False
 
     async def iniciar(self, modo, *, emergencias):
-        if modo not in {"rafaga", "ritmo"}:
+        if modo not in {"rafaga", "ritmo", "profesor"}:
             raise ValueError("modo")
         if self.ocupado:
             raise RuntimeError("ocupado")
@@ -77,6 +77,23 @@ async def test_estado_lee_los_logs_y_reune_todo(entorno):
     assert estado["redis"]["ok"] is True
     assert estado["contenedores"]["ingest-1"]["estado"] == "running"
     assert estado["k6"]["estado"] == "inactivo"
+    assert estado["smtp"] == {"host": "mailpit", "local": True}  # por defecto, modo dev
+
+
+async def test_estado_marca_gmail_como_smtp_externo(tmp_path):
+    app = create_app(
+        agregador=Agregador(), lector_servicio=LectorIncremental(tmp_path, ()),
+        lector_nginx=LectorIncremental(tmp_path, ()), redis_info=_redis_ok, docker=DockerFalso(),
+        k6=K6Falso(), gateway=httpx.AsyncClient(), gateway_url="http://gateway/events",
+        smtp_host="smtp.gmail.com",
+    )
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://panel") as cliente:
+        estado = (await cliente.get("/api/estado")).json()
+    assert estado["smtp"] == {"host": "smtp.gmail.com", "local": False}
+
+
+async def _redis_ok():
+    return {"ok": True, "stream": 0, "pendientes": 0, "dlq": 0}
 
 
 async def test_estado_sobrevive_sin_socket_de_docker(entorno, tmp_path):
@@ -109,6 +126,16 @@ async def test_carga_reinicia_la_ventana_y_no_permite_dos_a_la_vez(entorno):
     assert k6.iniciados == [("ritmo", 5)]
     assert segunda.status_code == 409
     assert invalida.status_code == 400
+
+
+async def test_carga_del_profesor_no_promete_cuantos_emergency_manda(entorno):
+    cliente, agregador, _, k6, _ = entorno
+    async with cliente:
+        respuesta = await cliente.post("/api/carga", json={"modo": "profesor"})
+    assert respuesta.status_code == 202
+    assert respuesta.json() == {"modo": "profesor", "emergencias": None}  # lo decide su script
+    assert k6.iniciados[0][0] == "profesor"
+    assert agregador.desde is not None
 
 
 async def test_servicios_respeta_la_lista_blanca(entorno):

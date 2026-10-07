@@ -87,7 +87,31 @@ async def test_k6_arma_el_comando_segun_el_modo(tmp_path):
     assert estado["salida"] == ["running (0m01.0s)"]  # sin códigos de color
 
 
-@pytest.mark.parametrize("modo, emergencias", [("otro", 1), ("rafaga", -1), ("rafaga", 101)])
+async def test_k6_del_profesor_corre_su_script_sin_parametros_propios(tmp_path):
+    lanzados = []
+
+    async def lanzar(*args, **kwargs):
+        lanzados.append(args)
+        return ProcesoFalso([])
+
+    k6 = EjecutorK6("/app/k6/carga.js", "http://gateway/events", tmp_path / "k6.json",
+                    script_profesor="/app/k6/profesor.js", lanzar=lanzar)
+    await k6.iniciar("profesor", emergencias=7)  # se ignora: el script del profesor decide
+    comando = lanzados[0]
+    assert comando[-1] == "/app/k6/profesor.js"
+    assert "TARGET_URL=http://gateway/events" in comando
+    assert f"SUMMARY_PATH={tmp_path / 'k6.json'}" in comando
+    assert not any(a.startswith(("EMERGENCIES=", "SLEEP_S=")) for a in comando)
+    assert k6.resumen()["modo"] == "profesor"
+
+
+async def test_k6_del_profesor_sin_configurar_es_un_error_de_validacion(tmp_path):
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=None)
+    with pytest.raises(ValueError):
+        await k6.iniciar("profesor")
+
+
+@pytest.mark.parametrize("modo, emergencias", [("otro", 1), ("rafaga", -1), ("rafaga", 101), ("rafaga", None)])
 async def test_k6_valida_los_parametros(tmp_path, modo, emergencias):
     k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=None)
     with pytest.raises(ValueError):
