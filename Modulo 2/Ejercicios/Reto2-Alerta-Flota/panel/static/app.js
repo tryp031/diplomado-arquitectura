@@ -179,6 +179,11 @@ function pintarAcciones(e) {
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";
   const textoK6 = { corriendo: `Corriendo (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, terminado: `Terminada (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, fallido: `Falló (código ${e.k6.codigo})` }[e.k6.estado] ?? "Inactivo";
   fijarPildora($("#k6-estado"), nivelK6, textoK6);
+  // Solo se descarga una carga terminada (bien o mal); una carga nueva reemplaza a la anterior.
+  const descargable = e.k6.estado === "terminado" || e.k6.estado === "fallido";
+  for (const boton of document.querySelectorAll(".descargas button")) {
+    if (!boton.dataset.ocupado) boton.disabled = !descargable;
+  }
   const consola = $("#k6-salida");
   const texto = e.k6.salida.join("\n");
   if (consola.textContent !== texto) {
@@ -248,6 +253,26 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
     boton.disabled = false;
   }
 });
+
+for (const boton of document.querySelectorAll(".descargas button")) {
+  boton.addEventListener("click", async () => {
+    boton.dataset.ocupado = "1";
+    boton.disabled = true;
+    try {
+      const r = await fetch(`/api/carga/logs?formato=${boton.dataset.formato}`);
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+      const nombre = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") ?? "")?.[1] ?? `carga.${boton.dataset.formato}`;
+      const url = URL.createObjectURL(await r.blob());
+      el("a", { href: url, download: nombre }).click();
+      URL.revokeObjectURL(url);
+      avisar(`Descargado ${nombre}.`);
+    } catch (err) {
+      avisar(`No se pudieron descargar los logs: ${err.message}`);
+    } finally {
+      delete boton.dataset.ocupado;
+    }
+  });
+}
 
 $("#btn-carga").addEventListener("click", async () => {
   const modo = modoElegido();

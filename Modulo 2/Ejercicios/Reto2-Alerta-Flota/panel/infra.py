@@ -90,6 +90,7 @@ class EjecutorK6:
         self.estado = "inactivo"
         self.modo: str | None = None
         self.inicio: datetime | None = None
+        self.fin: datetime | None = None
         self.codigo: int | None = None
         self.salida: deque[str] = deque(maxlen=30)
 
@@ -117,13 +118,13 @@ class EjecutorK6:
         if self.ocupado:
             raise RuntimeError("ya hay una carga en curso")
         self.estado, self.modo, self.codigo = "corriendo", modo, None
-        self.inicio = datetime.now(timezone.utc)
+        self.inicio, self.fin = datetime.now(timezone.utc), None
         self.salida.clear()
         try:
             proceso = await self._lanzar(*argumentos, stdout=asyncio.subprocess.PIPE,
                                          stderr=asyncio.subprocess.STDOUT)
         except Exception:
-            self.estado = "fallido"
+            self.estado, self.fin = "fallido", datetime.now(timezone.utc)
             raise
         self._tarea = asyncio.create_task(self._seguir(proceso))
 
@@ -133,7 +134,14 @@ class EjecutorK6:
             if texto:
                 self.salida.append(texto)
         self.codigo = await proceso.wait()
+        self.fin = datetime.now(timezone.utc)
         self.estado = "terminado" if self.codigo == 0 else "fallido"
+
+    def ventana(self) -> tuple[datetime, datetime] | None:
+        """(inicio, fin) de la última carga, solo si ya terminó (bien o mal)."""
+        if self.ocupado or self.inicio is None or self.fin is None:
+            return None
+        return self.inicio, self.fin
 
     async def esperar(self) -> None:
         if self._tarea:
@@ -150,6 +158,7 @@ class EjecutorK6:
             "estado": self.estado,
             "modo": self.modo,
             "inicio": self.inicio.isoformat() if self.inicio else None,
+            "fin": self.fin.isoformat() if self.fin else None,
             "codigo": self.codigo,
             "salida": list(self.salida)[-12:],
             "ultimo_resumen": ultimo,

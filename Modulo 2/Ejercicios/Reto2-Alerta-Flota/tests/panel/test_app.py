@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
@@ -28,6 +29,8 @@ class K6Falso:
     def __init__(self):
         self.iniciados = []
         self.ocupado = False
+        self.modo = None
+        self.ultima = None  # (inicio, fin) de la última carga terminada
 
     async def iniciar(self, modo, *, emergencias):
         if modo not in {"rafaga", "ritmo", "profesor"}:
@@ -39,6 +42,9 @@ class K6Falso:
 
     def resumen(self):
         return {"estado": "corriendo" if self.ocupado else "inactivo"}
+
+    def ventana(self):
+        return None if self.ocupado else self.ultima
 
 
 @pytest.fixture
@@ -63,7 +69,7 @@ def entorno(tmp_path):
         lector_nginx=LectorIncremental(tmp_path / "nginx", ("gateway-access.log",)),
         redis_info=redis_info, docker=docker, k6=k6,
         gateway=httpx.AsyncClient(transport=httpx.MockTransport(gateway)),
-        gateway_url="http://gateway/events",
+        gateway_url="http://gateway/events", log_dir=tmp_path,
     )
     cliente = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://panel")
     return cliente, agregador, docker, k6, enviados
@@ -177,3 +183,41 @@ async def test_emergencia_tolera_respuestas_html_del_gateway():
     assert respuesta.status_code == 200
     assert respuesta.json()["status_gateway"] == 429
     assert "Too Many Requests" in respuesta.json()["respuesta"]
+
+
+# --- descarga de logs de la última carga ----------------------------------------------------
+
+COL = timezone(timedelta(hours=-5))
+
+
+async def test_descargar_logs_sin_carga_terminada_es_409(entorno):
+    cliente, *_ = entorno
+    async with cliente:
+        respuesta = await cliente.get("/api/carga/logs")
+    assert respuesta.status_code == 409
+
+
+async def test_descargar_logs_de_la_ultima_carga_en_log_y_csv(entorno):
+    cliente, _, _, k6, _ = entorno
+    k6.modo = "profesor"
+    k6.ultima = (datetime(2026, 10, 12, 23, 0, 0, tzinfo=COL), datetime(2026, 10, 12, 23, 0, 30, tzinfo=COL))
+    async with cliente:
+        log = await cliente.get("/api/carga/logs")
+        tabla = await cliente.get("/api/carga/logs", params={"formato": "csv"})
+        invalido = await cliente.get("/api/carga/logs", params={"formato": "xml"})
+    assert log.status_code == 200
+    assert log.headers["content-disposition"] == 'attachment; filename="carga-profesor-20261012-230000.log"'
+    assert json.loads(log.text.splitlines()[0])["event_id"] == "p1"
+    assert tabla.headers["content-disposition"].endswith('.csv"')
+    assert "text/csv" in tabla.headers["content-type"]
+    assert tabla.text.splitlines()[0] == "ts,service,replica,event,event_id,plate,detalle"
+    assert invalido.status_code == 422
+
+
+async def test_mientras_corre_una_carga_nueva_no_se_descarga_la_anterior(entorno):
+    cliente, _, _, k6, _ = entorno
+    k6.ultima = (datetime(2026, 10, 12, 23, 0, 0, tzinfo=COL), datetime(2026, 10, 12, 23, 0, 30, tzinfo=COL))
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        respuesta = await cliente.get("/api/carga/logs")
+    assert respuesta.status_code == 409

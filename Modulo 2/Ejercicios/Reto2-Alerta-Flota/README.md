@@ -49,6 +49,17 @@ python3 scripts/medir.py                   # reporte de la corrida
 
 Correos: http://localhost:8025 · Logs: `logs/` (JSON, hora Colombia, un archivo por réplica).
 
+Si tu `.env` ya está en modo Gmail, no hace falta editarlo para volver a Mailpit:
+
+```bash
+docker compose -f docker-compose.yml -f compose.mailpit.yml --profile dev --profile panel up -d --build
+```
+
+**Por qué se conserva Mailpit** (decisión del 07/10/2026): es lo único que permite (1) que el test
+de integración verifique la llegada del correo por API, (2) que el panel apague el SMTP para
+demostrar reintentos y DLQ (Gmail es externo y no se puede apagar) y (3) desarrollar sin gastar
+cuota de Gmail ni exponer la App Password. Las mediciones y la demo siguen siendo con Gmail.
+
 ### Dos modos de carga
 
 | Modo | Comando | Qué simula |
@@ -86,6 +97,30 @@ La medida de la rúbrica es `ultima_peticion_a_ultimo_correo_s`: desde la últim
 nginx hasta el último `EMAIL_SENT`. Se toma de nginx y no del fin de k6 porque (a) el fin de k6
 incluye la pausa final del modo ritmo y (b) nginx usa el mismo reloj que los servicios. La llegada
 a Gmail no la controlamos: se anota a mano.
+
+## Descargar los logs de la última carga (panel)
+
+Cuando una carga lanzada desde el panel termina, se habilitan **Descargar .log** (una línea JSON
+por evento) y **Descargar .csv** (columnas fijas + `detalle` en JSON, para abrir en una hoja de
+cálculo). También por API: `GET /api/carga/logs?formato=log|csv` (409 si no hay carga terminada).
+
+- **Qué incluye:** `ingest`, `notifier` y el access log de nginx (`service=gateway`), ordenados
+  por hora Colombia, con la columna `replica` (qué contenedor lo registró).
+- **Ventana:** del arranque de k6 a su fin **+ 60 s**, para que un correo reintentado tarde
+  (la cadena más larga dura ~39 s) cuente para su carga y un Emergency manual posterior no.
+- Una carga nueva reemplaza la anterior. El panel guarda la ventana en memoria: si se reinicia,
+  no hay nada que descargar hasta la próxima carga (los archivos en `logs/` siguen ahí).
+
+## Qué horas muestra el correo
+
+- **Hora de recepción del evento:** cuando `ingest` aceptó el `Emergency` (`received_at`).
+- **Hora de envío de la notificación:** cuando el notifier arma el correo y empieza a entregarlo
+  al SMTP. Si hay reintento, cada intento lleva su propia hora.
+- **Tiempo de procesamiento:** la diferencia entre las dos.
+
+La hora de envío del correo es un poco **anterior** al `EMAIL_SENT` del log, que se escribe
+cuando el SMTP ya aceptó el mensaje. La diferencia entre las dos es lo que tarda el diálogo SMTP.
+La hora en que el correo llega al buzón la pone Gmail, no el sistema.
 
 ## Prueba del limitador (evidencia de la restricción de 15 r/s)
 

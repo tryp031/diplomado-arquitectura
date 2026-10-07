@@ -11,15 +11,16 @@ import random
 import string
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Literal
 
 import httpx
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from panel.agregador import Agregador, LectorIncremental
+from panel.exportar import COLOMBIA, como_csv, como_log, registros_de_carga
 from panel.infra import MODO_PROFESOR
 
 ESTATICOS = Path(__file__).parent / "static"
@@ -32,7 +33,8 @@ class PedidoCarga(BaseModel):
 
 def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lector_nginx: LectorIncremental,
                redis_info: Callable[[], Awaitable[dict]], docker: Any, k6: Any,
-               gateway: httpx.AsyncClient, gateway_url: str, smtp_host: str = "mailpit") -> FastAPI:
+               gateway: httpx.AsyncClient, gateway_url: str, smtp_host: str = "mailpit",
+               log_dir: Path = Path("logs")) -> FastAPI:
     app = FastAPI(title="Reto 2 — panel de control")
 
     @app.get("/api/estado")
@@ -80,6 +82,19 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         emergencias = None if pedido.modo == MODO_PROFESOR else pedido.emergencias
         return {"modo": pedido.modo, "emergencias": emergencias}
 
+    @app.get("/api/carga/logs")
+    def logs_de_la_carga(formato: Literal["log", "csv"] = "log"):
+        # Síncrona a propósito: FastAPI la corre en un hilo y leer los logs no frena /api/estado.
+        ventana = k6.ventana()
+        if ventana is None:
+            return JSONResponse({"error": "no hay una carga terminada para descargar"}, status_code=409)
+        inicio, fin = ventana
+        registros = registros_de_carga(log_dir, inicio, fin)
+        cuerpo, tipo = (como_csv(registros), "text/csv") if formato == "csv" else (como_log(registros), "text/plain")
+        nombre = f"carga-{k6.modo}-{inicio.astimezone(COLOMBIA):%Y%m%d-%H%M%S}.{formato}"
+        return Response(cuerpo, media_type=f"{tipo}; charset=utf-8",
+                        headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
+
     @app.post("/api/servicios/{servicio}/{accion}")
     async def servicio(servicio: str, accion: str):
         try:
@@ -124,4 +139,5 @@ def build_app() -> FastAPI:
         gateway=httpx.AsyncClient(),
         gateway_url=gateway_url,
         smtp_host=os.environ.get("SMTP_HOST", "mailpit"),
+        log_dir=logs,
     )
