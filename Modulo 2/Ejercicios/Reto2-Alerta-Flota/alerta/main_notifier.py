@@ -4,9 +4,7 @@ from __future__ import annotations
 import asyncio
 import signal
 
-import redis.asyncio as redis
-
-from alerta.adapters.redis_queue import RedisAlertQueue
+from alerta.adapters.redis_queue import RedisAlertQueue, conectar
 from alerta.adapters.smtp_notifier import SmtpNotifier
 from alerta.config import load_settings
 from alerta.logjson import JsonLogger
@@ -16,14 +14,14 @@ from alerta.notifier_worker import NotifierWorker
 async def main() -> None:
     settings = load_settings()
     log = JsonLogger("notifier", settings.log_dir)
-    client = redis.from_url(settings.redis_url, decode_responses=True)
+    client = conectar(settings.redis_url)
     queue = RedisAlertQueue(client, stream=settings.stream, group=settings.group,
                             consumer=settings.consumer, dlq_stream=settings.dlq_stream)
     await queue.ensure_group()  # si Redis no está listo, el proceso falla y compose lo reinicia
     notifier = SmtpNotifier(
         host=settings.smtp_host, port=settings.smtp_port, username=settings.smtp_user,
         password=settings.smtp_password, starttls=settings.smtp_starttls,
-        mail_from=settings.mail_from, mail_to=settings.mail_to,
+        mail_from=settings.mail_from, mail_to=settings.mail_to, timeout_s=settings.smtp_timeout_s,
     )
     worker = NotifierWorker(queue, notifier, log, concurrency=settings.notifier_concurrency,
                             max_attempts=settings.max_attempts)

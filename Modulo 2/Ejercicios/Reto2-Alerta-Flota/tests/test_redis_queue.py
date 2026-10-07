@@ -91,3 +91,16 @@ async def test_claim_stale_recorre_el_cursor_hasta_count(client):
     await caido.fetch(count=5, block_ms=10)
     claimed = await nuevo.claim_stale(min_idle_ms=0, count=5)
     assert sorted(d.alert.event_id for d in claimed) == [f"ev-{i}" for i in range(5)]
+
+
+def test_el_cliente_reintenta_si_redis_se_reinicio():
+    # Sin esto, tras reiniciar Redis la primera escritura de cada réplica fallaba con
+    # «Connection closed by server» y el Emergency se perdía (medido el 06/10/2026).
+    from redis.exceptions import ConnectionError, TimeoutError
+
+    from alerta.adapters.redis_queue import conectar
+
+    kwargs = conectar("redis://redis:6379/0").connection_pool.connection_kwargs
+    assert kwargs["retry"].get_retries() >= 3
+    assert {ConnectionError, TimeoutError} <= set(kwargs["retry_on_error"])
+    assert kwargs["decode_responses"] is True
