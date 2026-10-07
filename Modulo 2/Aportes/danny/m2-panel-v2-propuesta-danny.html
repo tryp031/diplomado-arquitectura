@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel v2 propuesta</title>
+<meta name="description" content="Maqueta estática de una v2 del panel del Reto 2: solo para discutir en el equipo. Datos de ejemplo.">
+<style>
+:root {
+  color-scheme: light;
+  --pagina: #f9f9f7; --superficie: #fcfcfb; --superficie-2: #f3f2ee;
+  --tinta: #0b0b0b; --tinta-2: #52514e; --tenue: #898781;
+  --rejilla: #e1e0d9; --borde: rgba(11,11,11,.10);
+  --serie-1: #2a78d6; --serie-2: #eb6834; --acento: #2a78d6; --acento-tinta: #fff;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --nota-fondo: #fff6dc; --nota-borde: #e9c766;
+  --sombra: 0 1px 2px rgba(11,11,11,.04), 0 4px 16px rgba(11,11,11,.04);
+  --radio: 14px; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --pagina: #0d0d0d; --superficie: #1a1a19; --superficie-2: #232321;
+    --tinta: #fff; --tinta-2: #c3c2b7; --tenue: #898781; --rejilla: #2c2c2a; --borde: rgba(255,255,255,.10);
+    --serie-1: #3987e5; --serie-2: #d95926; --acento: #3987e5;
+    --nota-fondo: #2b2510; --nota-borde: #6b5a1c; --sombra: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --pagina: #0d0d0d; --superficie: #1a1a19; --superficie-2: #232321;
+  --tinta: #fff; --tinta-2: #c3c2b7; --tenue: #898781; --rejilla: #2c2c2a; --borde: rgba(255,255,255,.10);
+  --serie-1: #3987e5; --serie-2: #d95926; --acento: #3987e5;
+  --nota-fondo: #2b2510; --nota-borde: #6b5a1c; --sombra: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--pagina); color: var(--tinta); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1, h2, h3, p { margin: 0; }
+.maqueta { background: var(--nota-fondo); border-bottom: 1px solid var(--nota-borde); padding: 10px 24px; font-size: 13px; }
+.maqueta strong { font-weight: 650; }
+.barra { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--borde); background: var(--superficie); }
+.barra h1 { font-size: 19px; }
+.asr { font-size: 13px; color: var(--tinta-2); margin-top: 3px; max-width: 760px; }
+.asr b { color: var(--tinta); }
+main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 40px; display: grid; gap: 16px; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); padding: 18px; min-width: 0; }
+.cabeza { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+.cabeza h2 { font-size: 15px; font-weight: 650; }
+.meta { font-size: 12px; color: var(--tenue); }
+.n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--warning); color: #0b0b0b; font-size: 11px; font-weight: 700; margin-right: 6px; vertical-align: 1px; flex: none; }
+.btn { font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 9px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta); cursor: pointer; }
+.btn-primario { background: var(--acento); color: var(--acento-tinta); border-color: transparent; }
+.btn-chico { padding: 4px 9px; font-size: 12px; }
+.segmentado { display: inline-flex; border: 1px solid var(--borde); border-radius: 10px; padding: 3px; background: var(--superficie-2); }
+.segmentado span { padding: 6px 12px; border-radius: 7px; font-size: 13px; color: var(--tinta-2); }
+.segmentado .activo { background: var(--superficie); color: var(--tinta); font-weight: 600; box-shadow: var(--sombra); }
+.control { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.control .sep { flex: 1; }
+.campo { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--tinta-2); }
+.campo input { width: 56px; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta); }
+.aparte { font-size: 12px; color: var(--tenue); }
+.pildora { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--superficie-2); font-size: 12px; font-weight: 600; }
+.punto { width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
+.rejilla-corrida { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: 16px; }
+.numero { font-size: 52px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.numero small { font-size: 20px; color: var(--tenue); margin-left: 4px; }
+.escala { margin-top: 14px; height: 8px; border-radius: 4px; display: flex; overflow: hidden; }
+.escala span:nth-child(1) { flex: 15; background: var(--good); }
+.escala span:nth-child(2) { flex: 30; background: var(--warning); }
+.escala span:nth-child(3) { flex: 15; background: var(--critical); }
+.escala-etq { display: flex; justify-content: space-between; font-size: 11px; color: var(--tenue); margin-top: 4px; }
+.mini { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+.mini div { background: var(--superficie-2); border-radius: 10px; padding: 9px 11px; }
+.mini b { display: block; font-size: 20px; }
+.mini span { font-size: 12px; color: var(--tinta-2); }
+.linea svg { width: 100%; height: auto; display: block; }
+.linea text { font: 11px system-ui, sans-serif; fill: var(--tinta-2); }
+.linea .eje { stroke: var(--rejilla); }
+.linea .carga { fill: var(--serie-1); opacity: .22; }
+.linea .tramo-medida { stroke: var(--tinta); stroke-width: 2; }
+.linea .hito { fill: var(--superficie); stroke-width: 2.5; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--tinta-2); margin-top: 8px; }
+.leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 2.5px solid; }
+.dos { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+.tabla-env { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 12px; font-weight: 600; color: var(--tenue); padding: 6px 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.actual td { background: color-mix(in srgb, var(--acento) 8%, transparent); }
+.nivel { display: inline-flex; align-items: center; gap: 6px; }
+.nivel::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
+.nivel.warning::before { background: var(--warning); }
+.falla { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+.falla:last-child { border-bottom: 0; }
+.falla p { font-size: 12px; color: var(--tinta-2); grid-column: 1; }
+.flujo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
+.flujo span { padding: 6px 10px; border-radius: 8px; background: var(--superficie-2); border: 1px solid var(--borde); }
+.flujo em { color: var(--tenue); font-style: normal; }
+.manual { border-style: dashed; }
+.razones h2 { font-size: 17px; margin-bottom: 4px; }
+.razones td { white-space: normal; vertical-align: top; }
+.razones td:first-child { white-space: nowrap; font-weight: 600; }
+.razones ul { margin: 8px 0 0; padding-left: 18px; color: var(--tinta-2); }
+.razones li { margin: 4px 0; }
+@media (max-width: 900px) {
+  .rejilla-corrida, .dos { grid-template-columns: 1fr; }
+  .barra, main, .maqueta { padding-left: 16px; padding-right: 16px; }
+  .numero { font-size: 42px; }
+}
+</style>
+</head>
+<body>
+
+<p class="maqueta"><strong>Maqueta estática · propuesta de Danny (07/10/2026), elaborada con IA.</strong>
+Datos de ejemplo, botones sin función. No reemplaza el panel actual: es para discutir el viernes 09/10.
+Los círculos <span class="n">1</span> remiten a la tabla «Qué cambia y por qué», al final.</p>
+
+<header class="barra">
+  <div>
+    <h1>Alerta temprana de flota</h1>
+    <p class="asr"><span class="n">1</span>Priorizamos <b>desempeño</b>: un <b>Emergency</b> se convierte en correo en
+      <b>&lt; 15 s</b> con 1000 eventos en 30 s, 15 r/s y ≤ 10 instancias, a costa de un posible
+      <b>correo duplicado</b> (entrega al-menos-una-vez).</p>
+  </div>
+  <span class="pildora"><span class="punto"></span>Sistema operativo · SMTP Gmail</span>
+</header>
+
+<main>
+  <!-- Barra de control -->
+  <section class="tarjeta" aria-label="Lanzar una corrida">
+    <div class="control">
+      <span class="n">2</span>
+      <div class="segmentado" aria-label="Modo de carga"><span class="activo">k6 del profesor</span><span>Ráfaga</span><span>Ritmo (~28 s)</span></div>
+      <label class="campo">Emergency <input value="1" disabled aria-label="Emergency en la carga"></label>
+      <button class="btn btn-primario" type="button">Lanzar corrida #4</button>
+      <span class="sep"></span>
+      <button class="btn manual" type="button">Enviar 1 Emergency manual</button>
+      <span class="aparte">no cuenta en ninguna corrida</span>
+    </div>
+  </section>
+
+  <!-- Corrida actual -->
+  <section class="rejilla-corrida">
+    <article class="tarjeta">
+      <div class="cabeza"><h2><span class="n">3</span>Corrida #3 · k6 del profesor</h2><span class="meta">10:42:05 → 10:42:34</span></div>
+      <p class="meta">Última petición → último correo</p>
+      <p class="numero">1,33<small>s</small></p>
+      <p style="margin-top:6px"><span class="pildora"><span class="punto"></span>&lt; 15 s · 2,5 pts</span></p>
+      <div class="escala" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="escala-etq"><span>0 s</span><span>15 s</span><span>45 s</span><span>60 s+</span></div>
+      <div class="mini">
+        <div><b>1000</b><span>aceptadas de 1000</span></div>
+        <div><b>0</b><span>rechazadas (429)</span></div>
+        <div><b>1 / 1</b><span>correos / Emergency</span></div>
+        <div><b>0</b><span>pendientes · DLQ 0</span></div>
+      </div>
+    </article>
+
+    <article class="tarjeta linea">
+      <div class="cabeza"><h2><span class="n">4</span>Línea de tiempo de la corrida</h2><span class="meta">lo que explica el 1,33 s</span></div>
+      <svg viewBox="0 0 640 170" role="img" aria-label="Carga de 10:42:05 a 10:42:33,6; Emergency recibido 10:42:33,58, encolado +3 ms, correo enviado a 10:42:34,93">
+        <line class="eje" x1="20" y1="120" x2="620" y2="120"/>
+        <rect class="carga" x="20" y="60" width="520" height="40" rx="6"/>
+        <text x="28" y="54">k6 envía 1000 eventos (~28,6 s)</text>
+        <line class="tramo-medida" x1="540" y1="80" x2="590" y2="80"/>
+        <circle class="hito" cx="540" cy="80" r="6" style="stroke:var(--serie-1)"/>
+        <circle class="hito" cx="590" cy="80" r="6" style="stroke:var(--good)"/>
+        <text x="500" y="145">última petición</text>
+        <text x="576" y="108">correo</text>
+        <text x="548" y="72">1,33 s</text>
+        <text x="20" y="140">10:42:05</text>
+        <text x="300" y="140">10:42:19</text>
+        <circle class="hito" cx="532" cy="80" r="4" style="stroke:var(--serie-2)"/>
+        <text x="300" y="30">Emergency recibido → encolado (+3 ms)</text>
+        <line class="eje" x1="532" y1="36" x2="532" y2="74"/>
+      </svg>
+      <div class="leyenda">
+        <span><i style="border-color:var(--serie-2)"></i>Emergency recibido</span>
+        <span><i style="border-color:var(--serie-1)"></i>Última petición (nginx)</span>
+        <span><i style="border-color:var(--good)"></i>Correo enviado (EMAIL_SENT)</span>
+      </div>
+      <p class="meta" style="margin-top:10px">Reemplaza la gráfica «peticiones por segundo · 60 s», que en ráfaga se reduce a dos barras.
+        La gráfica por segundo pasaría a un desplegable.</p>
+    </article>
+  </section>
+
+  <section class="dos">
+    <!-- Historial -->
+    <article class="tarjeta">
+      <div class="cabeza"><h2><span class="n">5</span>Historial de corridas</h2><span class="meta">evidencia para el informe · se exporta completo</span></div>
+      <div class="tabla-env">
+        <table>
+          <thead><tr><th>#</th><th>Hora</th><th>Modo</th><th>SMTP</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th>Rúbrica</th><th>Logs</th></tr></thead>
+          <tbody>
+            <tr class="actual"><td>3</td><td>10:42</td><td>profesor</td><td>Gmail</td><td class="num">1</td><td class="num">0</td><td class="num">1,33 s</td><td><span class="nivel">2,5</span></td><td><button class="btn btn-chico" type="button">.log</button> <button class="btn btn-chico" type="button">.csv</button></td></tr>
+            <tr><td>2</td><td>10:35</td><td>profesor</td><td>Gmail</td><td class="num">2</td><td class="num">0</td><td class="num">16,4 s</td><td><span class="nivel warning">1,5</span></td><td><button class="btn btn-chico" type="button">.log</button> <button class="btn btn-chico" type="button">.csv</button></td></tr>
+            <tr><td>1</td><td>10:20</td><td>ráfaga</td><td>Mailpit</td><td class="num">1</td><td class="num">0</td><td class="num">0,02 s</td><td><span class="nivel">2,5</span></td><td><button class="btn btn-chico" type="button">.log</button> <button class="btn btn-chico" type="button">.csv</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="meta" style="margin-top:10px">Ejemplo inspirado en el 06/10, cuando un intento SMTP colgado dio 16,4 s: con historial, el
+        antes y el después del timeout de 4 s queda a la vista en vez de perderse con la carga siguiente.</p>
+    </article>
+
+    <!-- Fallas -->
+    <article class="tarjeta">
+      <div class="cabeza"><h2><span class="n">6</span>Inyectar fallas</h2><span class="meta">cada una dice qué debería verse</span></div>
+      <div class="falla"><strong>SMTP (Mailpit)</strong><button class="btn btn-chico" type="button">Apagar</button>
+        <p>Esperado: <code>EMAIL_RETRY</code> a 1, 2 y 4 s y, si sigue caído, <code>EMAIL_DLQ</code>. Táctica: reintento + cola de fallidos.</p></div>
+      <div class="falla"><strong>Redis</strong><button class="btn btn-chico" type="button">Apagar</button>
+        <p>Esperado: el Emergency responde 503 (no se acepta lo que no se puede encolar). Táctica: fallar rápido.</p></div>
+      <div class="falla"><strong>Notifier</strong><button class="btn btn-chico" type="button">Apagar</button>
+        <p>Esperado: los Emergency se acumulan en la cola y salen al volver. Táctica: cola durable + reclamo de pendientes.</p></div>
+    </article>
+  </section>
+
+  <!-- Arquitectura compacta -->
+  <section class="tarjeta">
+    <div class="cabeza"><h2>Arquitectura en vivo</h2><span class="meta">se conserva, en una sola línea · 3 de 10 instancias</span></div>
+    <div class="flujo">
+      <span>k6</span><em>→</em><span>nginx · 15 r/s · burst 2000</span><em>→</em><span>ingest ×2 · 501 / 499</span><em>→</em><span>Redis Streams · pend. 0</span><em>→</em><span>notifier ×1 · conc. 5</span><em>→</em><span>Gmail SMTP</span>
+    </div>
+  </section>
+
+  <!-- Justificación -->
+  <section class="tarjeta razones">
+    <h2>Qué cambia y por qué</h2>
+    <p class="meta">Propuesta, no decisión. Orden = prioridad sugerida si se implementa algo antes de la entrega.</p>
+    <div class="tabla-env" style="margin-top:12px">
+      <table>
+        <thead><tr><th>#</th><th>Cambio</th><th>Problema del panel actual</th><th>Costo</th></tr></thead>
+        <tbody>
+          <tr><td><span class="n">3</span>Corrida</td><td>La medida y los KPI pertenecen a <b>una corrida</b>, no a una ventana de tiempo.</td><td>Un Emergency manual enviado después de la carga entra en la medida de la rúbrica y en «2/2»: el número que se presenta puede no ser el de la carga. Visto el 07/10.</td><td>Bajo: el backend ya conoce inicio/fin de k6 (se agregó para la descarga de logs).</td></tr>
+          <tr><td><span class="n">5</span>Historial</td><td>Lista de corridas con medida, rúbrica y logs por fila.</td><td>Cada carga borra la anterior; las 3 corridas del 06/10 hubo que anotarlas a mano.</td><td>Medio: persistir un resumen por corrida (un JSON en <code>logs/</code>) y generalizar el endpoint de descarga a <code>/api/corridas/{n}/logs</code>.</td></tr>
+          <tr><td><span class="n">1</span>Atributo priorizado</td><td>El encabezado dice qué se priorizó y a costa de qué.</td><td>Feedback del profesor en M1: faltó el hilo conductor. El panel es lo que se proyecta en la sustentación.</td><td>Mínimo: texto. Debe coincidir con lo que el equipo decida en el informe.</td></tr>
+          <tr><td><span class="n">4</span>Línea de tiempo</td><td>Hitos de la corrida: carga, Emergency, última petición, correo.</td><td>La gráfica por segundo no explica la medida y en ráfaga son dos barras.</td><td>Medio: SVG a mano con datos que el agregador ya tiene.</td></tr>
+          <tr><td><span class="n">6</span>Fallas con resultado esperado</td><td>Cada falla dice qué debería verse y qué táctica demuestra.</td><td>Hoy el botón apaga, pero quien mira no sabe qué buscar.</td><td>Mínimo: texto.</td></tr>
+          <tr><td><span class="n">2</span>Barra de control</td><td>Lanzar arriba; el Emergency manual separado y rotulado «no cuenta».</td><td>Las acciones ocupan una columna larga que mezcla configuración, consola, descargas y fallas.</td><td>Bajo: reacomodo de HTML/CSS.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><b>Qué no cambiaría:</b> los tokens de color y el modo oscuro, la escala de la rúbrica, que el panel sea plano de control (solo lee logs) y la tabla «recorrido de cada emergencia», que pasaría a mostrarse al hacer clic en una corrida.</li>
+      <li><b>Qué saldría:</b> la consola de k6 visible (pasa a un desplegable; en la presentación es ruido) y la gráfica por segundo como protagonista.</li>
+      <li><b>Riesgo:</b> rediseñar a 12 días de la entrega (19/10) compite con el informe y la medición formal. Si se hace algo, que sean 3 y 1 (bajo costo, alto impacto en lo que se califica); el resto puede quedar como propuesta.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
