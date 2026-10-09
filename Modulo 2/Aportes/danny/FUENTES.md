@@ -71,13 +71,13 @@ insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, h
 
 | Campo | Valor |
 |---|---|
-| **Autor** | Daniel Mazo Serna (Danny) |
-| **Fecha** | 2026-10-04 |
+| **Autor** | Daniel Mazo Serna (Danny) · §10–12: Freddy Aparicio (PR #30, excepción a la convención autorizada por Danny) |
+| **Fecha** | 2026-10-04 · §10–12: 2026-10-09 |
 | **Módulo** | 2 — Reto 2 |
-| **Tema** | 9 preguntas para el profesor en el encuentro del 06/10, cada una con su fundamento y qué decisión cambia |
-| **Tipo** | `apunte` — elaborado con IA; **no es material oficial** |
-| **Fuentes** | `Material-Clase/Actividad-Reto2.md` · cuaderno de estudio §11 |
-| **Estado** | vigente · respuestas pendientes (se llenan tras el encuentro) |
+| **Tema** | 9 preguntas para el profesor en el encuentro del 06/10, cada una con su fundamento y qué decisión cambia · §10 indicaciones del docente reportadas por Freddy · §11 decisión pendiente del `200 OK` · §12 guía para la exposición |
+| **Tipo** | `apunte` — elaborado con IA; **no es material oficial** · §10 `apunte` (reporte de Freddy, no transcripción) · §11–12 `investigacion` |
+| **Fuentes** | `Material-Clase/Actividad-Reto2.md` · cuaderno de estudio §11 · notas de Freddy del encuentro 06/10 |
+| **Estado** | vigente · preguntas 1–9 sin respuesta escrita · §10.4 reporta < 16 s frente a < 15 s de la rúbrica: **contradicción abierta**, se resuelve en el consolidado |
 
 ---
 
