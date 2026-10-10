@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Revisión de la opción B del Reto 2 (AWS) — aporte de Camilo</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.83rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:3px 0;line-height:1.35}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.1rem;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-family:var(--sans);font-weight:600;font-size:.98rem;margin:24px 0 6px}
+p{margin:0 0 16px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:22px}
+li{margin-bottom:7px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+pre{font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--surface);
+  border:1px solid var(--rule);border-radius:3px;padding:16px 18px;overflow-x:auto;margin:0 0 20px}
+pre code{background:none;padding:0;font-size:1em}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:22px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  vertical-align:.12em;white-space:nowrap}
+.b-curso{background:var(--accent-soft);color:var(--accent)}
+.b-compl{background:var(--surface-2);color:var(--ink-2)}
+.b-recom{background:var(--signal-soft);color:var(--signal)}
+.b-hipo{background:var(--ok-soft);color:var(--ok)}
+.fig{margin:26px 0;max-width:72ch}
+.fig svg,.fig img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:3px}
+.fig figcaption{font-family:var(--sans);font-size:.82rem;color:var(--ink-3);margin-top:8px;line-height:1.5}
+a.boton{display:inline-block;font-family:var(--sans);font-weight:600;font-size:.95rem;text-decoration:none;
+  color:#fff;background:var(--accent);border-radius:3px;padding:12px 20px;margin:4px 0 22px}
+a.boton:hover{filter:brightness(1.1)}
+@media (prefers-color-scheme:dark){a.boton{color:var(--ground)}}
+main details{border:1px solid var(--rule-2);border-radius:3px;background:var(--surface);
+  margin:-6px 0 18px;max-width:72ch}
+main details>summary{cursor:pointer;font-family:var(--sans);font-size:.85rem;font-weight:600;
+  color:var(--accent);padding:8px 14px}
+main details[open]>summary{border-bottom:1px solid var(--rule-2)}
+main details>*:not(summary){margin-left:14px;margin-right:14px}
+main details>*:nth-child(2){margin-top:12px}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Revisión de la opción B del Reto 2 (AWS) — aporte de Camilo</h1>
+  <p class="meta">m2-revision-aws-opcion-b-danny.md</p>
+</header>
+<nav class="rail" aria-label="Contenido"><h2>Contenido</h2><ol><li><a href="#1-veredicto">1. Veredicto</a></li><li><a href="#2-bloqueantes-para-entregar-la-opción-b">2. Bloqueantes para entregar la opción B</a></li><li><a href="#3-importantes">3. Importantes</a></li><li><a href="#4-mejoras-recomendadas-y-nitpicks">4. Mejoras recomendadas y nitpicks</a></li><li><a href="#5-pedidos-a-camilo-antes-del-domingo">5. Pedidos a Camilo antes del domingo</a></li><li><a href="#6-agenda-propuesta-para-el-domingo-1110">6. Agenda propuesta para el domingo 11/10</a></li></ol></nav>
+<main><div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Autor</strong></td><td>Daniel Mazo Serna (Danny)</td></tr><tr><td><strong>Fecha</strong></td><td>2026-10-09</td></tr><tr><td><strong>Módulo</strong></td><td>2 — Reto 2: alerta de flota vehicular</td></tr><tr><td><strong>Tema</strong></td><td>Revisión técnica del despliegue en AWS de Camilo, ajustes propuestos y agenda para la reunión del domingo 11/10</td></tr><tr><td><strong>Tipo</strong></td><td><code>investigacion</code> — elaborada con IA; <strong>no es material oficial</strong> ni decisión del equipo</td></tr><tr><td><strong>Fuentes</strong></td><td><code>../camilo/m2-aws-opcion-b-camilo/</code> (código y diagrama) · <code>Material-Clase/Actividad-Reto2.md</code> · <code>Ejercicios/Reto2-Alerta-Flota/alerta/{domain,ports}.py</code> · notas de Freddy del 06/10 (§10 de <code>m2-preguntas-encuentro-0610-danny.md</code>)</td></tr><tr><td><strong>Estado</strong></td><td>borrador · para discutir el 11/10</td></tr></tbody></table></div>
+<blockquote><p><strong>Lo que esta revisión NO cambia:</strong> el aporte de Camilo queda intacto (regla del equipo). Los ajustes son <strong>propuestas</strong>: Camilo decide qué aplica en su código y el equipo decide en el consolidado.  Etiquetas: <strong>Curso</strong> = lo dice el material · <strong>Complementario</strong> = conocimiento externo · <strong>Recomendación</strong> = criterio de arquitecto. Confianza: <strong>Seguro</strong> / <strong>Probable</strong> / <strong>Suposición</strong>.</p></blockquote>
+<hr>
+<h2 id="1-veredicto">1. Veredicto</h2>
+<p><strong>Sirve, y probablemente es la mejor candidata para la demo medida.</strong> Pero hoy <strong>no se puede entregar tal como está</strong>: lo que el reto evalúa (límite de 15 r/s con burst 2000, DLQ, concurrencia ≤ 10) vive en clics de consola dentro de una sola cuenta, no en el repo.</p>
+<div class="tw"><table><thead><tr><th>Tema</th><th>Opción A (local, Docker)</th><th>Opción B (AWS, Camilo)</th></tr></thead><tbody><tr><td>Parecido con el enunciado</td><td>Imita API Gateway con nginx <code>limit_req</code></td><td><strong>Es lo que nombra el enunciado</strong>. «rate / burst» son términos de API Gateway (<em>Curso</em>)</td></tr><tr><td>HTTPS (brecha del 06/10)</td><td>Sin TLS</td><td><strong>Viene incluido</strong> con API Gateway (<em>Seguro</em>)</td></tr><tr><td>≤ 10 instancias</td><td>Lo controlamos con las réplicas</td><td>Lo impone la cuota de la cuenta (§3.4)</td></tr><tr><td><code>200 OK</code> en las 1.000 peticiones</td><td>Responde <code>429</code> por encima del límite</td><td><strong>Igual</strong>: API Gateway también responde <code>429</code> (<em>Seguro</em>). Sigue abierta</td></tr><tr><td>Reproducible desde el repo</td><td>Sí (<code>docker compose up</code>)</td><td><strong>No</strong> (§2.2)</td></tr><tr><td>Medido con el k6 del profesor</td><td>Sí (06/10, 1,33 s)</td><td><strong>No todavía</strong> (paso 5)</td></tr></tbody></table></div>
+<p><strong>El valor académico está en tener las dos.</strong> Es la misma arquitectura (ingesta → cola → notifier → DLQ) desplegada de dos formas. Eso demuestra que las decisiones salen de los atributos de calidad y no de la tecnología, que es el hilo conductor que el profesor echó de menos en M1 (<em>Recomendación</em>).</p>
+<hr>
+<h2 id="2-bloqueantes-para-entregar-la-opción-b">2. Bloqueantes para entregar la opción B</h2>
+<h3 id="21-ses-sin-verificar-no-sale-ningún-correo">2.1 SES sin verificar → no sale ningún correo</h3>
+<p>Lo único que falta para cerrar el camino. <strong>Acción de Camilo:</strong> hacer clic en el enlace de verificación que SES envió a <code>notificadoremergenciaflotas@gmail.com</code>. En el sandbox de SES hay que verificar también el destinatario, pero aquí remitente y destinatario son la misma dirección (<em>Seguro</em>).</p>
+<h3 id="22-la-configuración-no-está-en-el-repo">2.2 La configuración no está en el repo</h3>
+<p>El enunciado pide como entregable «toda la implementación» (<em>Curso</em>). En la opción B la implementación <strong>es</strong> la configuración: el throttling del stage, la visibilidad de 90 s, el redrive a los 3 intentos, la concurrencia máxima del trigger, los permisos IAM y el scheduler. Opciones, de menor a mayor costo:</p>
+<div class="tw"><table><thead><tr><th>Opción</th><th>Esfuerzo</th><th>Qué gana</th><th>Qué no resuelve</th></tr></thead><tbody><tr><td><strong>a. Exportar la configuración real</strong> a JSON y versionarla</td><td>~30 min</td><td>Evidencia verificable de lo que se configuró</td><td>No permite volver a crear el entorno</td></tr><tr><td><strong>b. Template SAM/CloudFormation</strong> (recomendada)</td><td>2–4 h</td><td>Reproducible, revisable en un PR, se borra con un comando</td><td>Hay que probarlo en una cuenta limpia</td></tr><tr><td>c. Runbook con capturas</td><td>~1 h</td><td>Lo entiende cualquiera</td><td>Se desactualiza en silencio</td></tr></tbody></table></div>
+<p>Comandos para la opción <strong>a</strong> (<em>Seguro</em>: son de la AWS CLI v2. Los nombres salen del diagrama):</p>
+<pre class="lang-bash"><code>aws apigateway get-stage --rest-api-id ofuhehmw59 --stage-name prod        # throttling del stage
+aws lambda get-function-configuration --function-name reto2-ingesta
+aws lambda get-function-configuration --function-name reto2-notifier
+aws lambda list-event-source-mappings --function-name reto2-notifier       # batch size y concurrencia máxima
+aws lambda get-account-settings                                            # cuota real de concurrencia
+aws sqs get-queue-attributes --attribute-names All --queue-url &quot;$(aws sqs get-queue-url --queue-name reto2-emergencias --query QueueUrl --output text)&quot;
+aws sqs get-queue-attributes --attribute-names All --queue-url &quot;$(aws sqs get-queue-url --queue-name reto2-emergencias-dlq --query QueueUrl --output text)&quot;
+aws scheduler get-schedule --name reto2-calentador-notifier</code></pre>
+<p>Antes de versionar las salidas hay que revisarlas: pueden traer ARNs con el ID de la cuenta.</p>
+<h3 id="23-falta-la-medición-de-punta-a-punta">2.3 Falta la medición de punta a punta</h3>
+<p>El diagrama marca el paso 5 (k6 completo) como pendiente. Sin esa corrida no sabemos si la opción B cumple el corte de 15 s. Para sacar la cifra de los logs, una consulta de CloudWatch Logs Insights sobre el grupo de la notifier (<em>Probable</em>: Insights detecta solo los campos de los logs que son JSON):</p>
+<pre class="lang-text"><code>fields @timestamp, event_id, plate, attempt, ms_since_received
+| filter event = &quot;EMAIL_SENT&quot;
+| stats count() as correos, avg(ms_since_received) as prom_ms, max(ms_since_received) as max_ms</code></pre>
+<p>Ojo: <code>ms_since_received</code> mide <strong>recepción → envío por SES</strong>. La rúbrica mide <strong>último envío de k6 → correo recibido</strong> (<em>Curso</em>). La diferencia (tiempo de Gmail y lo que quede de k6) hay que medirla aparte, igual que en la opción local.</p>
+<hr>
+<h2 id="3-importantes">3. Importantes</h2>
+<h3 id="31-el-presupuesto-de-reintentos-se-come-la-rúbrica-seguro-es-aritmética">3.1 El presupuesto de reintentos se come la rúbrica (<em>Seguro</em>, es aritmética)</h3>
+<p>Peor caso con éxito en el segundo intento: 5 s (el primero agota el timeout) + 1 s de espera + hasta 5 s del segundo = <strong>~11 s dentro de la Lambda</strong>, más la espera de SQS hasta la Lambda, un posible arranque en frío y la entrega de Gmail. Frente a 15 s queda muy poco margen.</p>
+<p><strong>Ajuste propuesto (Camilo decide):</strong> como SES suele responder en menos de un segundo (<em>Probable</em>), bajar a <code>connect_timeout=1, read_timeout=2</code> deja el peor caso cerca de 7 s y conserva los dos intentos. <strong>Trade-off:</strong> un timeout más corto corta con más frecuencia un envío que era solo lento, y eso manda más alertas a la DLQ. Hay que decidirlo con datos de la corrida del §2.3, no a ojo.</p>
+<h3 id="32-remitente-gmailcom-enviado-por-ses-riesgo-de-spam-o-rechazo-probable">3.2 Remitente <code>@gmail.com</code> enviado por SES → riesgo de spam o rechazo (<em>Probable</em>)</h3>
+<p>SES firma con su propio dominio, así que el <code>From: @gmail.com</code> no pasa la alineación DMARC de gmail.com. Gmail puede mandar el correo a spam o rechazarlo, y eso arruina la demo aunque el sistema funcione. <strong>Prueba:</strong> enviar uno y revisar en Gmail «Mostrar original» qué dicen SPF, DKIM y DMARC. <strong>Alternativa:</strong> si alguien tiene un dominio propio, verificarlo en SES con DKIM y usarlo como remitente.</p>
+<h3 id="33-la-lógica-de-dominio-ya-está-duplicada-y-diverge">3.3 La lógica de dominio ya está duplicada y diverge</h3>
+<p><code>ingesta.py</code> vuelve a escribir lo que hace <code>alerta/domain.py</code>, y ya hay diferencias:</p>
+<div class="tw"><table><thead><tr><th>Entrada</th><th>Local (<code>domain.py</code>)</th><th>AWS (<code>ingesta.py</code>)</th></tr></thead><tbody><tr><td><code>"vehicle_plate": 123</code></td><td><code>"123"</code></td><td><code>"DESCONOCIDA"</code></td></tr><tr><td><code>"vehicle_plate": " ABC123 "</code></td><td><code>"ABC123"</code> (aplica <code>strip</code>)</td><td><code>" ABC123 "</code></td></tr><tr><td><code>"status": 5</code></td><td><code>None</code>, y el correo dice <code>—</code></td><td><code>5</code>, y el correo dice <code>5</code></td></tr></tbody></table></div>
+<p>Con el k6 del profesor probablemente no se note (<em>Suposición</em>), pero si se presentan como «la misma lógica en dos despliegues», hoy no lo son.</p>
+<p><strong>Ajuste propuesto:</strong> <code>domain.py</code> solo usa la librería estándar, así que puede ir dentro del zip de las dos Lambdas tal cual. Así <code>ingesta.py</code> llamaría a <code>VehicleEvent.from_payload(...)</code> y <code>EmergencyAlert.to_fields()</code>. <code>ports.py</code> ya lo anticipaba: <em>«Redis/SMTP hoy, SQS/SES mañana»</em>. Es el argumento más fuerte de la arquitectura hexagonal en la exposición. Si no se hace, queda como <strong>deuda media</strong>: cada cambio de regla hay que hacerlo dos veces.</p>
+<h3 id="34-concurrencia-reservada-8-bloqueada-es-cumplimiento-no-un-problema">3.4 «Concurrencia reservada 8 bloqueada» es cumplimiento, no un problema</h3>
+<p>Las cuentas nuevas traen una cuota baja de ejecuciones concurrentes, y Lambda exige dejar un mínimo sin reservar. Por eso no se puede reservar nada (<em>Probable</em>. Confirmar con <code>get-account-settings</code>). Si la cuota es 10, la cuenta <strong>impone</strong> el «máximo 10 instancias activas» del enunciado entre todas las Lambdas. Hay que presentarlo como cumplimiento de la restricción. Detalles:</p>
+<ul><li>la concurrencia máxima 2 del trigger de SQS es el mínimo que AWS permite (<em>Seguro</em>);</li><li>el calentador ocupa un espacio de concurrencia cada 5 min.</li></ul>
+<h3 id="35-200-vs-429-sigue-abierta-en-las-dos-opciones">3.5 <code>200</code> vs <code>429</code>: sigue abierta en las dos opciones</h3>
+<p>Por encima de 15 r/s y con el burst agotado, API Gateway responde <code>429</code> igual que nginx. La decisión que dejó abierta la reunión del 06/10 aplica a las dos opciones, no se resuelve cambiando de opción.</p>
+<hr>
+<h2 id="4-mejoras-recomendadas-y-nitpicks">4. Mejoras recomendadas y nitpicks</h2>
+<ul><li><strong>Mejora — duplicados.</strong> SQS estándar entrega al menos una vez. Si la notifier envía el correo y muere antes de terminar, el mensaje vuelve y sale un correo duplicado. Con un timeout de 15 s y un presupuesto de 12 s es poco probable, y un duplicado es mejor que una alerta perdida. <strong>Documentarlo como decisión</strong> (<em>Recomendación</em>).</li><li><strong>Mejora — endpoint público.</strong> Acepta POST sin autenticación y su URL está en el diagrama. Recomendado: alarma de presupuesto en AWS, apagar el calentador fuera de las mediciones y borrar los recursos después de la entrega.</li><li><strong>Mejora — evidencia.</strong> Las dos Lambdas registran <code>event_id</code>, así que se puede cruzar recepción con envío. Hay que guardar la salida de la consulta del §2.3 como evidencia de la entrega.</li><li><strong>Nitpick.</strong> <code>return {"batchItemFailures": []}</code> solo tiene efecto si el trigger tiene activado <code>ReportBatchItemFailures</code>. Con batch size 1 no cambia nada.</li><li><strong>Nitpick.</strong> Verificar que el runtime Python 3.14 está disponible en us-east-2 (<em>Suposición</em>: no lo comprobé).</li><li><strong>Bien hecho.</strong> Responde <code>503</code> si no pudo encolar y nunca confirma una alerta perdida. Los reintentos los controla el código y no botocore (<code>max_attempts=1</code>). Manda a la DLQ de forma explícita sin esperar al redrive, y el calentador no rompe nada porque <code>event.get("Records", [])</code> queda vacío.</li></ul>
+<hr>
+<h2 id="5-pedidos-a-camilo-antes-del-domingo">5. Pedidos a Camilo antes del domingo</h2>
+<ol><li>Verificar la identidad de SES (§2.1).</li><li>Compartir <code>arquitectura-aws-opcion-b.md</code>: el diagrama dice que sale de ahí y tiene las decisiones (la región, el presupuesto de reintentos).</li><li>Si alcanza: una corrida con <code>k6/profesor.js</code> contra el endpoint + la consulta del §2.3 + revisar si el correo llegó a la bandeja o a spam (§3.2).</li><li>Exportar la configuración (§2.2 opción a). Es lo mínimo para que el repo refleje lo que existe.</li></ol>
+<h2 id="6-agenda-propuesta-para-el-domingo-1110">6. Agenda propuesta para el domingo 11/10</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Decisión</th><th>Opciones</th><th>Mi recomendación</th></tr></thead><tbody><tr><td>1</td><td>¿Cuál opción se mide en la demo?</td><td>A · B · las dos</td><td><strong>B como demo, A como entorno de desarrollo y plan B</strong>, y la comparación como argumento en el documento</td></tr><tr><td>2</td><td>¿Cómo se vuelve reproducible B?</td><td>exportar · SAM · runbook</td><td>Exportar ya, SAM si alcanza el tiempo</td></tr><tr><td>3</td><td>¿Dominio compartido?</td><td>reutilizar <code>domain.py</code> · aceptar la divergencia</td><td>Reutilizar: cuesta poco y refuerza la exposición</td></tr><tr><td>4</td><td>¿<code>200</code> o <code>429</code>?</td><td>mantener 429 · subir el límite</td><td>Preguntar al profesor antes de tocar el limitador</td></tr><tr><td>5</td><td>¿Timeouts de SES?</td><td>2+3 s · 1+2 s</td><td>Decidir con los datos de la primera corrida</td></tr><tr><td>6</td><td>¿Quién entrega qué?</td><td>—</td><td>El envío es <strong>individual</strong> (<em>Curso</em>): acordar que los tres suban el mismo consolidado</td></tr><tr><td>7</td><td>¿Se acepta la opción local?</td><td>—</td><td>Confirmar con el profesor: el enunciado da por hecho AWS (<em>Curso</em>) y no dice nada sobre otras opciones</td></tr></tbody></table></div></main>
+<footer><p>Generado desde <code>m2-revision-aws-opcion-b-danny.md</code> con <code>consolidar_html.py</code>. No editar este HTML: se regenera. La fuente de verdad es el Markdown.</p></footer>
+</div></body></html>

@@ -95,3 +95,21 @@ insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, h
 
 **Límites:** los datos son de ejemplo (la fila 16,4 s está inspirada en el 06/10, no es un registro).
 No hay código detrás: el costo de cada cambio es una estimación.
+
+---
+
+## `m2-revision-aws-opcion-b-danny.md`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-09 |
+| **Módulo** | 2 — Reto 2 |
+| **Tema** | Revisión técnica de la opción B en AWS de Camilo: bloqueantes, ajustes propuestos, pedidos a Camilo y agenda del domingo 11/10 |
+| **Tipo** | `investigacion` — elaborada con IA; **no es material oficial** ni decisión del equipo |
+| **Fuentes** | `../camilo/m2-aws-opcion-b-camilo/` · `Material-Clase/Actividad-Reto2.md` · `Ejercicios/Reto2-Alerta-Flota/alerta/{domain,ports}.py` |
+| **Estado** | borrador · para discutir el 11/10 |
+
+**Límites:** revisión **estática**: no se ejecutó nada contra la cuenta AWS de Camilo. Lo marcado
+«✓ validado» en su diagrama se toma como reporte suyo. Los ajustes son propuestas: el aporte de Camilo
+no se modificó.
