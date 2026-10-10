@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reto 2 — Diagrama de contenedores (camino B, AWS)</title>
+<style>
+  :root {
+    --ink: #1a202c;
+    --muted: #4a5568;
+    --bg: #ffffff;
+    --panel: #f7f8fa;
+    --border: #d9dee3;
+    --done-border: #1f7a3d;
+    --done-text: #155c2a;
+    --pending-border: #c17d11;
+    --pending-text: #7a4e0c;
+    --neutral-border: #64748b;
+    --neutral-text: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 36px 28px 72px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1260px; margin: 0 auto; }
+  h1 { font-size: 25px; margin: 0 0 6px; }
+  .subtitle { color: var(--muted); font-size: 15px; margin: 0 0 24px; }
+  h2 { font-size: 19px; margin: 44px 0 8px; }
+  .section-note { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .callout {
+    background: #fff6e0;
+    border: 1.5px solid var(--pending-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 0 0 24px;
+    font-size: 14.5px;
+  }
+  .callout strong { color: var(--pending-text); }
+  .callout code {
+    background: #fffaf0;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 13.5px;
+  }
+  .diagram-frame {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  svg { display: block; margin: 0 auto; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .legend span.swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    margin-right: 7px;
+    vertical-align: -2px;
+  }
+  .sw-done { background: #dcf3e2; border: 2px solid var(--done-border); }
+  .sw-pending { background: #fdedc8; border: 2px solid var(--pending-border); }
+  .sw-neutral { background: #e9ecf0; border: 2px solid var(--neutral-border); }
+  table.facts {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14.5px;
+    margin-top: 12px;
+  }
+  table.facts th, table.facts td {
+    border: 1px solid var(--border);
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.facts th { background: var(--panel); }
+  footer {
+    margin-top: 52px;
+    font-size: 12.5px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reto 2 — Alerta de flota vehicular, camino B en AWS</h1>
+  <p class="subtitle">Diagrama de contenedores (C4, nivel 2) y estado de construcción al 09/10/2026 · región us-east-2 · documento de trabajo, acompaña a <code>arquitectura-aws-opcion-b.md</code></p>
+
+  <div class="callout">
+    <strong>Se puede probar ya mismo:</strong> cualquiera puede apuntar a
+    <code>https://ofuhehmw59.execute-api.us-east-2.amazonaws.com/prod/event-notification</code>
+    con un <code>POST</code> igual al del enunciado, y va a responder correctamente (200 a <code>Position</code>,
+    200 a <code>Emergency</code> si ya se encoló). Lo único que <strong>todavía no pasa</strong> es el envío real
+    del correo: SES rechaza el envío porque la identidad del remitente no está verificada — eso es lo único
+    que falta para cerrar el camino completo.
+  </div>
+
+  <h2>Diagrama de contenedores</h2>
+  <p class="section-note">El color indica el estado real en la cuenta de AWS: verde = creado y validado con una prueba real; ámbar = creado pero bloqueado por algo externo; gris = actor o sistema externo. El "qué hace" de cada pieza va debajo de su caja, no adentro.</p>
+
+  <div class="diagram-frame">
+<svg viewBox="0 0 1760 710" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="gradDone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1fbf4"/><stop offset="1" stop-color="#dcf3e2"/>
+    </linearGradient>
+    <linearGradient id="gradPending" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#fdedc8"/>
+    </linearGradient>
+    <linearGradient id="gradNeutral" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f9fb"/><stop offset="1" stop-color="#e9ecf0"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.15"/>
+    </filter>
+    <marker id="arrowSolid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrowFail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c17d11"/>
+    </marker>
+    <marker id="arrowDim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowOk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f7a3d"/>
+    </marker>
+  </defs>
+
+  <text x="880" y="34" text-anchor="middle" font-size="19" font-weight="700" fill="#1a202c">Camino B — API Gateway → Lambda → SQS → Lambda → SES</text>
+
+  <!-- AWS boundary -->
+  <rect x="230" y="115" width="1250" height="575" rx="16" fill="none" stroke="#8b94a0" stroke-width="1.8" stroke-dasharray="8 6"/>
+  <text x="252" y="140" font-size="14.5" font-weight="700" fill="#4a5568">AWS — us-east-2</text>
+
+  <!-- ===== k6 (externo) ===== -->
+  <rect x="20" y="170" width="200" height="130" rx="12" fill="url(#gradNeutral)" stroke="#64748b" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="120" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">k6</text>
+  <text x="120" y="228" text-anchor="middle" font-size="12" fill="#4a5568">equipo de prueba</text>
+  <text x="120" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: genera la carga de</text>
+  <text x="120" y="332.5" text-anchor="middle" font-size="12" fill="#374151">prueba — 1000 eventos en unos</text>
+  <text x="120" y="347" text-anchor="middle" font-size="12" fill="#374151">30 segundos, con 10 VUs.</text>
+
+  <!-- ===== API Gateway ===== -->
+  <rect x="250" y="170" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="360" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">API Gateway REST</text>
+  <text x="360" y="224" text-anchor="middle" font-size="12" fill="#4a5568">reto2-alerta-flota · stage prod</text>
+  <text x="360" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a3d">✓ validado: 1000/1000, 0 fallos</text>
+  <text x="360" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: expone la URL HTTPS</text>
+  <text x="360" y="332.5" text-anchor="middle" font-size="12" fill="#374151">que ataca k6 y aplica el límite</text>
+  <text x="360" y="347" text-anchor="middle" font-size="12" fill="#374151">de 15 req/s con burst 2000.</text>
+  <text x="360" y="363" text-anchor="middle" font-size="9.5" font-family="Consolas, monospace" fill="#2f6b43">https://ofuhehmw59.execute-api.us-east-2</text>
+  <text x="360" y="376" text-anchor="middle" font-size="9.5" font-family="Consolas, monospace" fill="#2f6b43">.amazonaws.com/prod/event-notification</text>
+
+  <!-- ===== Lambda ingesta ===== -->
+  <rect x="500" y="170" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="610" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">Lambda: reto2-ingesta</text>
+  <text x="610" y="224" text-anchor="middle" font-size="12" fill="#4a5568">Python 3.14 · proxy Lambda</text>
+  <text x="610" y="262" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ validado (log + SQS)</text>
+  <text x="610" y="282" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b7791f">⚠ reservada 8: bloqueada (cuota)</text>
+  <text x="610" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: responde 200 ya</text>
+  <text x="610" y="332.5" text-anchor="middle" font-size="12" fill="#374151">mismo a Position; a Emergency</text>
+  <text x="610" y="347" text-anchor="middle" font-size="12" fill="#374151">le registra la hora y la</text>
+  <text x="610" y="361.5" text-anchor="middle" font-size="12" fill="#374151">publica en la cola.</text>
+
+  <!-- ===== SQS emergencias ===== -->
+  <rect x="750" y="170" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="860" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">SQS: reto2-emergencias</text>
+  <text x="860" y="224" text-anchor="middle" font-size="12" fill="#4a5568">Estándar · visibilidad 90s</text>
+  <text x="860" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a3d">✓ validado</text>
+  <text x="860" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: guarda cada</text>
+  <text x="860" y="332.5" text-anchor="middle" font-size="12" fill="#374151">Emergency hasta que la</text>
+  <text x="860" y="347" text-anchor="middle" font-size="12" fill="#374151">notifier la procesa —</text>
+  <text x="860" y="361.5" text-anchor="middle" font-size="12" fill="#374151">amortigua los picos de carga.</text>
+
+  <!-- ===== Lambda notifier ===== -->
+  <rect x="1000" y="170" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1110" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">Lambda: reto2-notifier</text>
+  <text x="1110" y="224" text-anchor="middle" font-size="12" fill="#4a5568">Python 3.14 · timeout 15s</text>
+  <text x="1110" y="258" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ reintento→DLQ en 2.05s</text>
+  <text x="1110" y="277" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ concurrencia del trigger: 2</text>
+  <text x="1110" y="295" text-anchor="middle" font-size="10.5" fill="#4a5568">(envío real: ver SES →)</text>
+  <text x="1110" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: arma el correo y</text>
+  <text x="1110" y="332.5" text-anchor="middle" font-size="12" fill="#374151">lo envía por SES con 2</text>
+  <text x="1110" y="347" text-anchor="middle" font-size="12" fill="#374151">intentos (≤12s); si falla,</text>
+  <text x="1110" y="361.5" text-anchor="middle" font-size="12" fill="#374151">lo manda a la DLQ.</text>
+
+  <!-- ===== SES ===== -->
+  <rect x="1250" y="170" width="210" height="130" rx="12" fill="url(#gradPending)" stroke="#c17d11" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1355" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#7a4e0c">Amazon SES</text>
+  <text x="1355" y="224" text-anchor="middle" font-size="12" fill="#4a5568">servicio de envío de correo</text>
+  <text x="1355" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#c17d11">✗ sin verificar (bloqueado)</text>
+  <text x="1355" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: envía el correo</text>
+  <text x="1355" y="332.5" text-anchor="middle" font-size="12" fill="#374151">final a Gmail. Necesita la</text>
+  <text x="1355" y="347" text-anchor="middle" font-size="12" fill="#374151">identidad del remitente</text>
+  <text x="1355" y="361.5" text-anchor="middle" font-size="12" fill="#374151">verificada antes de enviar.</text>
+  <text x="1355" y="377" text-anchor="middle" font-size="9.5" font-family="Consolas, monospace" fill="#7a4e0c">notificadoremergenciaflotas@gmail.com</text>
+
+  <!-- ===== Gmail (externo) ===== -->
+  <rect x="1500" y="170" width="200" height="130" rx="12" fill="url(#gradNeutral)" stroke="#64748b" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1600" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">Gmail</text>
+  <text x="1600" y="228" text-anchor="middle" font-size="12" fill="#4a5568">bandeja personal</text>
+  <text x="1600" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: bandeja personal</text>
+  <text x="1600" y="332.5" text-anchor="middle" font-size="12" fill="#374151">que recibe la alerta.</text>
+  <text x="1600" y="347" text-anchor="middle" font-size="12" fill="#374151">(remitente = destinatario)</text>
+
+  <!-- ===== Row 2 (desplazada 50px más abajo para dar espacio a las flechas) ===== -->
+  <rect x="750" y="460" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="860" y="494" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">CloudWatch Logs</text>
+  <text x="860" y="514" text-anchor="middle" font-size="12" fill="#4a5568">un grupo por Lambda</text>
+  <text x="860" y="558" text-anchor="middle" font-size="11" font-weight="700" fill="#1f7a3d">✓ evidencia confirmada (ambas Lambdas)</text>
+  <text x="860" y="608" text-anchor="middle" font-size="12" fill="#374151">Qué hace: guarda la hora</text>
+  <text x="860" y="622.5" text-anchor="middle" font-size="12" fill="#374151">de recepción y la de envío</text>
+  <text x="860" y="637" text-anchor="middle" font-size="12" fill="#374151">del correo — la evidencia</text>
+  <text x="860" y="651.5" text-anchor="middle" font-size="12" fill="#374151">que pide la rúbrica.</text>
+
+  <rect x="1000" y="460" width="220" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1110" y="491" text-anchor="middle" font-size="14.5" font-weight="700" fill="#155c2a">SQS: reto2-emergencias-dlq</text>
+  <text x="1110" y="511" text-anchor="middle" font-size="12" fill="#4a5568">Estándar</text>
+  <text x="1110" y="555" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ recibió el 1er intento fallido</text>
+  <text x="1110" y="608" text-anchor="middle" font-size="12" fill="#374151">Qué hace: guarda las</text>
+  <text x="1110" y="622.5" text-anchor="middle" font-size="12" fill="#374151">alertas que no se pudieron</text>
+  <text x="1110" y="637" text-anchor="middle" font-size="12" fill="#374151">enviar, para revisarlas</text>
+  <text x="1110" y="651.5" text-anchor="middle" font-size="12" fill="#374151">después.</text>
+
+  <rect x="1250" y="460" width="210" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1355" y="491" text-anchor="middle" font-size="14.5" font-weight="700" fill="#155c2a">EventBridge Scheduler</text>
+  <text x="1355" y="511" text-anchor="middle" font-size="11.5" fill="#4a5568">reto2-calentador-notifier</text>
+  <text x="1355" y="555" text-anchor="middle" font-size="11" font-weight="700" fill="#1f7a3d">✓ creado — apagar si no se mide</text>
+  <text x="1355" y="608" text-anchor="middle" font-size="12" fill="#374151">Qué hace: despierta la</text>
+  <text x="1355" y="622.5" text-anchor="middle" font-size="12" fill="#374151">notifier cada 5 min para</text>
+  <text x="1355" y="637" text-anchor="middle" font-size="12" fill="#374151">que no pague el arranque</text>
+  <text x="1355" y="651.5" text-anchor="middle" font-size="12" fill="#374151">en frío en la alerta real.</text>
+
+  <!-- ===== Arrows: main flow ===== -->
+  <line x1="220" y1="235" x2="248" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="234" y="221" text-anchor="middle" font-size="11" fill="#4a5568">HTTPS POST</text>
+
+  <line x1="470" y1="235" x2="498" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="484" y="221" text-anchor="middle" font-size="10" fill="#4a5568">proxy</text>
+
+  <line x1="720" y1="235" x2="748" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="734" y="221" text-anchor="middle" font-size="10" fill="#4a5568">Emergency</text>
+
+  <line x1="970" y1="235" x2="998" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="984" y="221" text-anchor="middle" font-size="10" fill="#4a5568">trigger</text>
+
+  <line x1="1220" y1="235" x2="1248" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="1234" y="221" text-anchor="middle" font-size="10" fill="#4a5568">SES</text>
+
+  <line x1="1460" y1="235" x2="1498" y2="235" stroke="#c17d11" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#arrowFail)"/>
+  <text x="1479" y="221" text-anchor="middle" font-size="9.5" fill="#7a4e0c">bloqueado</text>
+
+  <!-- ===== Connecting arrows, row1 -> row2 (banda ancha 300-460, sin cruzar los pies de foto) ===== -->
+  <!-- Failure: notifier -> DLQ -->
+  <line x1="1210" y1="300" x2="1210" y2="458" stroke="#c17d11" stroke-width="2.4" marker-end="url(#arrowFail)"/>
+  <text x="1270" y="420" text-anchor="middle" font-size="10.5" fill="#7a4e0c">2 intentos</text>
+  <text x="1270" y="435" text-anchor="middle" font-size="10.5" fill="#7a4e0c">fallidos</text>
+
+  <!-- Redrive backup: SQS emergencias -> DLQ -->
+  <line x1="860" y1="300" x2="1030" y2="458" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4 4" marker-end="url(#arrowDim)"/>
+  <text x="930" y="420" text-anchor="middle" font-size="10" fill="#6b7280">redrive ≥3</text>
+  <text x="930" y="434" text-anchor="middle" font-size="10" fill="#6b7280">(respaldo)</text>
+
+  <!-- EventBridge warmer -->
+  <line x1="1355" y1="458" x2="1150" y2="302" stroke="#1f7a3d" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arrowOk)"/>
+  <text x="1280" y="395" text-anchor="middle" font-size="10" fill="#155c2a">ping 5 min</text>
+  <text x="1280" y="409" text-anchor="middle" font-size="10" fill="#155c2a">(calienta)</text>
+</svg>
+  </div>
+
+  <div class="legend">
+    <span><span class="swatch sw-done"></span>Creado y validado con una prueba real</span>
+    <span><span class="swatch sw-pending"></span>Creado, bloqueado por algo externo</span>
+    <span><span class="swatch sw-neutral"></span>Actor / sistema externo (no se construyó)</span>
+  </div>
+
+  <h2>Equivalencia con la opción local (Docker Compose)</h2>
+  <p class="section-note">Lo que ya corría como opción local en Docker Compose (<code>Reto2-Alerta-Flota</code>) tiene una pieza equivalente en AWS, salvo tres casos que se anotan abajo porque no aplican en un sentido o en el otro.</p>
+  <table class="facts">
+    <tr><th>AWS (lo que construimos)</th><th>Opción local (Docker Compose)</th><th>Qué hace, en los dos</th></tr>
+    <tr>
+      <td>API Gateway<br><span style="color:var(--muted);font-size:12.5px">reto2-alerta-flota</span></td>
+      <td>nginx<br><span style="color:var(--muted);font-size:12.5px"><code>limit_req</code></span></td>
+      <td>Recibe la petición de k6, aplica el límite de 15 r/s con burst, y la reenvía al procesador de ingesta.</td>
+    </tr>
+    <tr>
+      <td>Lambda: reto2-ingesta</td>
+      <td>ingest<br><span style="color:var(--muted);font-size:12.5px">FastAPI, 2 réplicas</span></td>
+      <td>Valida el evento. Responde 200 a <code>Position</code> de inmediato. A <code>Emergency</code> le registra la hora de recepción y lo encola.</td>
+    </tr>
+    <tr>
+      <td>SQS: reto2-emergencias</td>
+      <td>Redis Streams<br><span style="color:var(--muted);font-size:12.5px">stream "emergencies", grupo "notifiers"</span></td>
+      <td>Guarda cada <code>Emergency</code> hasta que el notifier la procesa; amortigua los picos sin bloquear la ingesta.</td>
+    </tr>
+    <tr>
+      <td>Lambda: reto2-notifier</td>
+      <td>notifier<br><span style="color:var(--muted);font-size:12.5px">worker asyncio</span></td>
+      <td>Consume la cola, arma el correo y lo envía con reintentos acotados; si falla, lo manda a la cola de fallidos.</td>
+    </tr>
+    <tr>
+      <td>Amazon SES</td>
+      <td>SMTP<br><span style="color:var(--muted);font-size:12.5px">Mailpit en dev, Gmail en demo</span></td>
+      <td>Hace la entrega real del correo a la bandeja configurada.</td>
+    </tr>
+    <tr>
+      <td>SQS: reto2-emergencias-dlq</td>
+      <td>Redis Streams<br><span style="color:var(--muted);font-size:12.5px">stream "emergencies-dlq"</span></td>
+      <td>Guarda las alertas que agotaron los reintentos, para revisarlas después sin perderlas.</td>
+    </tr>
+    <tr>
+      <td>CloudWatch Logs</td>
+      <td>Archivos JSON<br><span style="color:var(--muted);font-size:12.5px"><code>./logs/</code>, uno por réplica</span></td>
+      <td>Guarda la hora de recepción del <code>Emergency</code> y la hora de envío del correo — la evidencia que pide la rúbrica.</td>
+    </tr>
+    <tr>
+      <td>k6</td>
+      <td>k6</td>
+      <td>El mismo script y la misma herramienta en los dos — no cambia nada.</td>
+    </tr>
+    <tr>
+      <td style="color:var(--muted)"><em>EventBridge Scheduler (calentador)</em></td>
+      <td style="color:var(--muted)"><em>— sin equivalente —</em></td>
+      <td>Docker no apaga los contenedores entre peticiones, así que no existe el "arranque en frío" que este calentador resuelve en Lambda. Es un problema propio de serverless, no de contenedores.</td>
+    </tr>
+    <tr>
+      <td style="color:var(--muted)"><em>— sin equivalente, por ahora —</em></td>
+      <td style="color:var(--muted)"><em>panel</em><br><span style="color:var(--muted);font-size:12.5px">plano de control, puerto 8090</span></td>
+      <td>Observa logs, cola y Docker para una interfaz en vivo. No se llevó a AWS porque no es parte del camino que se mide (sección 7 del <code>.md</code>).</td>
+    </tr>
+    <tr>
+      <td style="color:var(--muted)"><em>— sin equivalente —</em></td>
+      <td style="color:var(--muted)"><em>Mailpit</em><br><span style="color:var(--muted);font-size:12.5px">perfil dev</span></td>
+      <td>SMTP de pruebas para no gastar cuota de Gmail en desarrollo local. En AWS no hace falta: SES ya es el servicio de correo real.</td>
+    </tr>
+  </table>
+
+  <h2>Estado de construcción (pasos de despliegue)</h2>
+  <p class="section-note">Mismo orden que la sección 9 de <code>arquitectura-aws-opcion-b.md</code>.</p>
+
+  <div class="diagram-frame">
+<svg viewBox="0 0 1320 180" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <line x1="110" y1="62" x2="1210" y2="62" stroke="#d9dee3" stroke-width="4"/>
+
+  <circle cx="110" cy="62" r="32" fill="#dcf3e2" stroke="#1f7a3d" stroke-width="3"/>
+  <text x="110" y="71" text-anchor="middle" font-size="19" fill="#155c2a">✓</text>
+  <text x="110" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 1</text>
+  <text x="110" y="133" text-anchor="middle" font-size="12" fill="#4a5568">API Gateway</text>
+  <text x="110" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado</text>
+
+  <circle cx="385" cy="62" r="32" fill="#dcf3e2" stroke="#1f7a3d" stroke-width="3"/>
+  <text x="385" y="71" text-anchor="middle" font-size="19" fill="#155c2a">✓</text>
+  <text x="385" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 2</text>
+  <text x="385" y="133" text-anchor="middle" font-size="12" fill="#4a5568">Lambda ingesta</text>
+  <text x="385" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado</text>
+
+  <circle cx="660" cy="62" r="32" fill="#dcf3e2" stroke="#1f7a3d" stroke-width="3"/>
+  <text x="660" y="71" text-anchor="middle" font-size="19" fill="#155c2a">✓</text>
+  <text x="660" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 3</text>
+  <text x="660" y="133" text-anchor="middle" font-size="12" fill="#4a5568">SQS + DLQ</text>
+  <text x="660" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado</text>
+
+  <circle cx="935" cy="62" r="32" fill="#fdedc8" stroke="#c17d11" stroke-width="3"/>
+  <text x="935" y="69" text-anchor="middle" font-size="16" fill="#7a4e0c">●</text>
+  <text x="935" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 4</text>
+  <text x="935" y="133" text-anchor="middle" font-size="12" fill="#4a5568">Notifier + SES</text>
+  <text x="935" y="150" text-anchor="middle" font-size="11" fill="#7a4e0c">en curso (SES bloqueado)</text>
+
+  <circle cx="1210" cy="62" r="32" fill="#e9ecf0" stroke="#64748b" stroke-width="3"/>
+  <text x="1210" y="69" text-anchor="middle" font-size="16" fill="#334155">○</text>
+  <text x="1210" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 5</text>
+  <text x="1210" y="133" text-anchor="middle" font-size="12" fill="#4a5568">k6 completo</text>
+  <text x="1210" y="150" text-anchor="middle" font-size="11" fill="#334155">pendiente</text>
+</svg>
+  </div>
+
+  <h2>Datos de referencia rápida</h2>
+  <table class="facts">
+    <tr><th style="width:230px">Región</th><td>us-east-2 (Ohio) — decidida con evidencia de latencia, sección 8 del <code>.md</code></td></tr>
+    <tr><th>API Gateway</th><td>reto2-alerta-flota (id <code>ofuhehmw59</code>) · stage <code>prod</code> · rate 15 / burst 2000</td></tr>
+    <tr><th>Endpoint</th><td><code>https://ofuhehmw59.execute-api.us-east-2.amazonaws.com/prod/event-notification</code> — responde ya; el correo real todavía no sale (SES sin verificar)</td></tr>
+    <tr><th>Lambda ingesta</th><td>reto2-ingesta · Python 3.14 · concurrencia reservada 8 (bloqueada por cuota de cuenta)</td></tr>
+    <tr><th>Cola principal</th><td>reto2-emergencias · visibilidad 90s · redrive a los 3 intentos</td></tr>
+    <tr><th>DLQ</th><td>reto2-emergencias-dlq</td></tr>
+    <tr><th>Lambda notifier</th><td>reto2-notifier · timeout 15s · 2 intentos (≤12s) · concurrencia del trigger: 2</td></tr>
+    <tr><th>SES</th><td>identidad notificadoremergenciaflotas@gmail.com — pendiente de verificar</td></tr>
+    <tr><th>Calentador</th><td>reto2-calentador-notifier (EventBridge Scheduler) · rate(5 min) · recordar apagarlo si no se está midiendo</td></tr>
+  </table>
+
+  <footer>
+    Documento de trabajo, fuera del repositorio del equipo. Generado a partir de <code>arquitectura-aws-opcion-b.md</code> el 09/10/2026. No es material oficial del curso.
+  </footer>
+</div>
+</body>
+</html>
