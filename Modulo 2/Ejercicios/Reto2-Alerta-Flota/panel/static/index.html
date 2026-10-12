@@ -15,8 +15,8 @@
       <div>
         <h1>Alerta temprana de flota</h1>
         <!-- Atributo priorizado: debe decir lo mismo que el informe del equipo. -->
-        <p class="asr">Priorizamos <b>desempeño</b>: un <b>Emergency</b> se convierte en correo en <b>&lt; 15 s</b>
-          con 1000 eventos, 15 r/s y ≤ 10 instancias, a costa de un posible <b>correo duplicado</b> (entrega al-menos-una-vez).</p>
+        <p class="asr">Priorizamos <b>desempeño</b>: Emergency → correo en <b>&lt; 15 s</b> (1000 eventos · 15 r/s · ≤ 10 instancias).
+          Costo aceptado: un posible <b>correo duplicado</b>.</p>
       </div>
     </div>
     <div class="barra-derecha">
@@ -94,9 +94,8 @@
 
       <article class="tarjeta linea">
         <header class="tarjeta-cabeza">
-          <h2>Línea de tiempo de la corrida</h2>
-          <span class="meta">qué pasó y cuándo</span>
-        </header>
+          <h2>Línea de tiempo</h2>
+                  </header>
         <div id="linea-cuerpo" hidden>
           <svg id="linea-svg" role="img" aria-label="Línea de tiempo de la corrida"></svg>
           <div class="medida-tramo" aria-label="Tramo que mide la rúbrica">
@@ -118,20 +117,20 @@
       <article class="tarjeta kpi"><h2 title="event_id únicos. Un evento normal termina al validarse y registrarse; un Emergency, cuando sale su correo.">Procesados (únicos)</h2><p class="kpi-numero" id="kpi-procesados">—</p><p class="kpi-pie">validados o con correo enviado</p></article>
       <article class="tarjeta kpi"><h2>Rechazadas (429)</h2><p class="kpi-numero" id="kpi-429">—</p><p class="kpi-pie" id="kpi-429-pie">rate 15 r/s · burst 2000</p></article>
       <article class="tarjeta kpi"><h2>Correos / Emergency</h2><p class="kpi-numero"><span id="kpi-enviadas">—</span><span class="kpi-de"> / <span id="kpi-emergencias">—</span></span></p><p class="kpi-pie" id="kpi-emergencias-pie">— reintentos</p></article>
-      <article class="tarjeta kpi"><h2 title="Criterio reportado del profesor (notas de Freddy, 06/10): del envío del Emergency en k6 a la llegada del correo, menos de 16 s. El panel ve desde la recepción en ingest hasta la entrega al SMTP (EMAIL_SENT).">Emergency → correo</h2><p class="kpi-numero" id="e2c-valor">—</p><p class="kpi-pie" id="e2c-detalle">peor caso · criterio reportado &lt; 16 s</p></article>
+      <article class="tarjeta kpi"><h2 title="Criterio reportado del profesor (notas de Freddy, 06/10): del envío del Emergency en k6 a la llegada del correo, menos de 16 s. El panel ve desde la recepción en ingest hasta la entrega al SMTP (EMAIL_SENT).">Emergency → correo</h2><p class="kpi-numero" id="e2c-valor">—</p><p class="kpi-pie" id="e2c-detalle">peor caso · meta &lt; 16 s</p></article>
       <article class="tarjeta kpi"><h2>Cola de emergencias</h2><p class="kpi-numero" id="kpi-pendientes">—</p><p class="kpi-pie" id="kpi-cola-pie">pendientes · DLQ —</p></article>
     </section>
 
     <!-- Historial de corridas + peticiones por segundo -->
     <section class="fila fila-historial">
       <article class="tarjeta">
-        <header class="tarjeta-cabeza"><h2>Historial de corridas</h2><span class="meta">evidencia para el informe · logs por corrida</span></header>
+        <header class="tarjeta-cabeza"><h2>Historial de corridas</h2></header>
         <div class="tabla-envoltura">
           <table class="tabla">
             <thead><tr><th>#</th><th>Fecha</th><th>Entorno</th><th>Modo</th><th>Correo</th><th class="num">Duración</th><th class="num">Procesados</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th class="num" title="Emergency → correo, peor caso">E → correo</th><th>Rúbrica</th><th>Logs</th></tr></thead>
             <tbody id="historial"></tbody>
           </table>
-          <p id="historial-vacio" class="vacio">Todavía no hay corridas. Cada carga queda registrada aquí, aunque se reinicie el panel.</p>
+          <p id="historial-vacio" class="vacio">Todavía no hay corridas.</p>
         </div>
       </article>
 
@@ -159,33 +158,33 @@
     <article class="tarjeta" id="arquitectura">
       <header class="tarjeta-cabeza">
         <h2>Arquitectura en vivo</h2>
-        <span class="meta" id="flujo-meta">Se ilumina cada componente que registró actividad en los últimos 2 s</span>
+        <span class="meta" id="flujo-meta">activo = actividad en los últimos 2 s</span>
       </header>
       <ol class="flujo" id="flujo">
         <li class="nodo" data-nodo="k6"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">k6</p><p class="nodo-rol">Vehículos simulados</p><p class="nodo-dato" data-dato="k6">—</p></li>
         <li class="nodo" data-nodo="gateway"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Gateway · nginx</p><p class="nodo-rol">Token bucket 15 r/s · burst 2000</p><p class="nodo-dato" data-dato="gateway">—</p></li>
         <li class="nodo" data-nodo="ingest"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Ingesta · FastAPI ×2</p><p class="nodo-rol">Responde sin esperar el correo</p><ul class="replicas" data-dato="replicas"></ul></li>
         <li class="nodo" data-nodo="redis"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Redis Streams</p><p class="nodo-rol">Cola durable · ACK · DLQ</p><p class="nodo-dato" data-dato="redis">—</p></li>
-        <li class="nodo" data-nodo="notifier"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Notifier · asyncio</p><p class="nodo-rol">Concurrencia 5 · reintentos 1/2/4 s</p><p class="nodo-dato" data-dato="notifier">—</p></li>
+        <li class="nodo" data-nodo="notifier"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Notifier · asyncio</p><p class="nodo-rol">5 a la vez · reintentos 1/2/4 s</p><p class="nodo-dato" data-dato="notifier">—</p></li>
         <li class="nodo" data-nodo="mailpit"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">SMTP</p><p class="nodo-rol" id="smtp-rol">Mailpit (dev) · Gmail (demo)</p><p class="nodo-dato" data-dato="smtp">—</p></li>
       </ol>
-      <p class="nota" id="flujo-nota">Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.</p>
+      <p class="nota" id="flujo-nota">Instancias: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel no cuenta.</p>
     </article>
 
     <!-- Detalle: emergencias y eventos -->
     <section class="fila fila-detalle">
       <article class="tarjeta">
-        <header class="tarjeta-cabeza"><h2>Recorrido de cada emergencia</h2><span class="meta">recibida → encolada → correo enviado</span></header>
+        <header class="tarjeta-cabeza"><h2>Recorrido de cada emergencia</h2></header>
         <div class="tabla-envoltura">
           <table class="tabla">
             <thead><tr><th>Placa</th><th>Recibida</th><th class="num">Encolada</th><th class="num">Correo</th><th class="num">Intentos</th><th>Estado</th></tr></thead>
             <tbody id="tabla-emergencias"></tbody>
           </table>
-          <p id="emergencias-vacio" class="vacio">Aún no hay emergencias. Envía una o lanza una corrida.</p>
+          <p id="emergencias-vacio" class="vacio">Aún no hay emergencias.</p>
         </div>
       </article>
       <article class="tarjeta">
-        <header class="tarjeta-cabeza"><h2>Eventos del sistema</h2><span class="meta">de los logs JSON</span></header>
+        <header class="tarjeta-cabeza"><h2>Eventos del sistema</h2></header>
         <ol id="feed" class="feed"></ol>
         <p id="feed-vacio" class="vacio">Sin eventos notables todavía.</p>
       </article>
@@ -208,11 +207,11 @@
     <!-- Herramientas plegadas: no son lo que se proyecta, pero siguen a mano -->
     <section class="tarjeta herramientas" id="herramientas" aria-label="Herramientas">
       <details>
-        <summary>Inyectar fallas (demostración de disponibilidad)</summary>
+        <summary>Inyectar fallas</summary>
         <ul class="fallas" id="fallas">
-          <li data-servicio="mailpit"><span><strong>SMTP</strong> <span id="smtp-nombre">(Mailpit)</span><span class="esperado">Esperado: <code>EMAIL_RETRY</code> a 1, 2 y 4 s y, si sigue caído, <code>EMAIL_DLQ</code>. Al encenderlo, el notifier lo devuelve de la DLQ (cada 15 s, hasta 10 min) y el correo sale. Táctica: reintento + cola de fallidos + reintento diferido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
-          <li data-servicio="redis"><span><strong>Redis</strong><span class="esperado">Esperado: el Emergency responde 503 y no se guarda (no se confirma lo que no se puede encolar): quien lo envía debe reintentar. Al encenderlo, el notifier se reconecta solo. Táctica: fallar rápido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
-          <li data-servicio="notifier"><span><strong>Notifier</strong><span class="esperado">Esperado: los Emergency se acumulan en la cola y salen al volver. Táctica: cola durable + reclamo de pendientes.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          <li data-servicio="mailpit"><span><strong>SMTP</strong> <span id="smtp-nombre">(Mailpit)</span><span class="esperado">Esperado: <code>EMAIL_RETRY</code> (1, 2, 4 s) → <code>EMAIL_DLQ</code>. Al encenderlo, el correo sale desde la DLQ (cada 15 s, hasta 10 min). Táctica: reintento + DLQ.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          <li data-servicio="redis"><span><strong>Redis</strong><span class="esperado">Esperado: el Emergency responde 503 y no se guarda; quien lo envía reintenta. Táctica: fallar rápido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          <li data-servicio="notifier"><span><strong>Notifier</strong><span class="esperado">Esperado: los Emergency esperan en la cola y salen al volver. Táctica: cola durable.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
         </ul>
       </details>
     </section>
@@ -221,8 +220,7 @@
   <dialog id="dialogo-limpiar" class="dialogo" aria-labelledby="dialogo-titulo">
     <form method="dialog">
       <h2 id="dialogo-titulo">¿Borrar todos los datos de las pruebas?</h2>
-      <p id="dialogo-texto">Se borran las corridas de Local y de Cloud del historial, se vacían los logs de ingest, notifier y gateway, y se vacían
-        las colas de Redis.</p>
+      <p id="dialogo-texto"></p>
       <p class="aviso-dialogo">No se puede deshacer. Si alguna corrida es evidencia para el informe, descargue antes sus logs desde el historial.</p>
       <div class="dialogo-botones">
         <button class="btn" value="cancelar" type="submit" autofocus>Cancelar</button>
@@ -232,7 +230,7 @@
   </dialog>
 
   <footer class="pie">
-    <span id="pie-texto">Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.</span>
+    <span id="pie-texto">Plano de control de solo lectura: no toca el camino de los eventos.</span>
     <span id="actualizado">—</span>
   </footer>
 
