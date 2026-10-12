@@ -316,3 +316,27 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .insignia-entorno[data-entorno="aws"] { border-color: var(--acento); color: var(--acento); }
 /* `hidden` debe ganarle al display de .tarjeta (en AWS se oculta la inyección de fallas) */
 .tarjeta[hidden] { display: none; }
+
+/* Resumen del proceso en una línea (arriba). Mismos estados que los nodos de «Arquitectura en vivo». */
+.mini-flujo { display: flex; align-items: center; gap: 14px; padding: 10px 16px; }
+.mini-titulo { font-size: 12px; font-weight: 650; color: var(--tinta-2); white-space: nowrap; }
+.mini-pasos { display: flex; flex: 1; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 0; min-width: 0; }
+.mini { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; padding: 5px 9px; border-radius: 8px;
+  border: 1px solid var(--borde); background: var(--superficie-2); font-size: 12px; transition: border-color .2s, box-shadow .2s; }
+.mini:not(:last-child)::after { content: "›"; margin-left: auto; padding-left: 4px; color: var(--tenue); }
+.mini-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--tenue); flex: none; }
+.mini[data-salud="good"] .mini-punto { background: var(--good); }
+.mini[data-salud="critical"] .mini-punto { background: var(--critical); }
+.mini.activo { border-color: var(--acento); box-shadow: 0 0 0 2px color-mix(in srgb, var(--acento) 16%, transparent); }
+.mini.activo .mini-punto { background: var(--acento); animation: latido 1.2s ease-in-out infinite; }
+.mini.caido, .mini[data-salud="critical"] { border-color: var(--critical); }
+.mini-nombre { font-weight: 650; color: var(--tinta); white-space: nowrap; }
+.mini-dato { color: var(--tinta-2); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-enlace { font-size: 12px; color: var(--acento); text-decoration: none; white-space: nowrap; }
+.mini-enlace:hover { text-decoration: underline; }
+@media (max-width: 1100px) {
+  .mini-flujo { flex-wrap: wrap; }
+  .mini-pasos { flex-wrap: wrap; flex-basis: 100%; order: 3; }
+  .mini { flex: 1 1 30%; }
+  .mini::after { display: none; }
+}

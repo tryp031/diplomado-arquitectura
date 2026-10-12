@@ -57,6 +57,20 @@
       <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
     </section>
 
+    <!-- Resumen del proceso en una línea: lo mismo que «Arquitectura en vivo», para verlo sin bajar -->
+    <nav class="tarjeta mini-flujo" aria-label="Proceso en vivo (resumen)">
+      <span class="mini-titulo">Proceso en vivo</span>
+      <ol class="mini-pasos">
+        <li class="mini" data-mini="k6"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">k6</span><span class="mini-dato">—</span></li>
+        <li class="mini" data-mini="gateway"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">Gateway</span><span class="mini-dato">—</span></li>
+        <li class="mini" data-mini="ingest"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">Ingesta</span><span class="mini-dato">—</span></li>
+        <li class="mini" data-mini="redis"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">Cola</span><span class="mini-dato">—</span></li>
+        <li class="mini" data-mini="notifier"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">Notifier</span><span class="mini-dato">—</span></li>
+        <li class="mini" data-mini="mailpit"><span class="mini-punto" aria-hidden="true"></span><span class="mini-nombre">Correo</span><span class="mini-dato">—</span></li>
+      </ol>
+      <a class="mini-enlace" href="#arquitectura">Detalle ↓</a>
+    </nav>
+
     <!-- La corrida: la medida que se califica y su línea de tiempo -->
     <section class="fila fila-corrida">
       <article class="tarjeta hero">
@@ -142,7 +156,7 @@
     </section>
 
     <!-- Arquitectura viva -->
-    <article class="tarjeta">
+    <article class="tarjeta" id="arquitectura">
       <header class="tarjeta-cabeza">
         <h2>Arquitectura en vivo</h2>
         <span class="meta" id="flujo-meta">Se ilumina cada componente que registró actividad en los últimos 2 s</span>

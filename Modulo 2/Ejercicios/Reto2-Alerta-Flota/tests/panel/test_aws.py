@@ -41,7 +41,7 @@ GRUPOS = {"ingest": "/aws/lambda/reto2-ingesta", "notifier": "/aws/lambda/reto2-
 
 def lector(logs, ahora_s, **opciones):
     reloj = {"t": (T0 + timedelta(seconds=ahora_s)).timestamp()}
-    return LectorCloudWatch(logs, GRUPOS, reloj=lambda: reloj["t"], **opciones), reloj
+    return LectorCloudWatch(logs, GRUPOS, reloj=lambda: reloj["t"], segundo_plano=False, **opciones), reloj
 
 
 def test_lee_ambos_grupos_ordenado_por_hora_y_con_los_roles_del_panel():
@@ -203,7 +203,7 @@ def test_dos_consultas_simultaneas_no_entregan_dos_veces_la_misma_linea():
             time.sleep(0.05)  # ambas consultas quedan en vuelo a la vez
             return super().filter_log_events(**pedido)
 
-    lec = LectorCloudWatch(LogsLento(eventos), GRUPOS, intervalo_s=0,
+    lec = LectorCloudWatch(LogsLento(eventos), GRUPOS, intervalo_s=0, segundo_plano=False,
                            reloj=lambda: (T0 + timedelta(seconds=60)).timestamp())
     entregados = []
     hilos = [threading.Thread(target=lambda: entregados.extend(lec.leer())) for _ in range(2)]
@@ -212,3 +212,21 @@ def test_dos_consultas_simultaneas_no_entregan_dos_veces_la_misma_linea():
     for h in hilos:
         h.join()
     assert len(entregados) == 1
+
+
+def test_en_segundo_plano_leer_no_espera_a_cloudwatch():
+    # Regresión 12/10: /api/estado tardaba 5-6 s porque esperaba la paginación de CloudWatch.
+    eventos = {GRUPOS["ingest"]: [linea(1, "EVENT_RECEIVED", event_id="p1")]}
+
+    class LogsLento(LogsFalso):
+        def filter_log_events(self, **pedido):
+            time.sleep(0.3)
+            return super().filter_log_events(**pedido)
+
+    lec = LectorCloudWatch(LogsLento(eventos), GRUPOS, intervalo_s=0,
+                           reloj=lambda: (T0 + timedelta(seconds=60)).timestamp())
+    inicio = time.perf_counter()
+    assert lec.leer() == []  # vuelve de inmediato: la consulta sigue en su hilo
+    assert time.perf_counter() - inicio < 0.1
+    time.sleep(0.8)
+    assert [r["event_id"] for _, r in lec.leer()] == ["p1"]  # y lo entrega en la siguiente lectura

@@ -69,7 +69,7 @@ class LectorCloudWatch:
 
     def __init__(self, cliente: Any, grupos: dict[str, str], *, intervalo_s: float = 2.0,
                  retencion_s: float = 5.0, solape_s: float = 30.0, mirar_atras_s: float = 600.0,
-                 reloj: Callable[[], float] = time.time) -> None:
+                 reloj: Callable[[], float] = time.time, segundo_plano: bool = True) -> None:
         self._cliente = cliente
         self._grupos = grupos
         self._intervalo = intervalo_s
@@ -77,53 +77,75 @@ class LectorCloudWatch:
         self._solape_ms = int(solape_s * 1000)
         self._mirar_atras_ms = int(mirar_atras_s * 1000)
         self._reloj = reloj
+        # CloudWatch puede tardar varios segundos (pagina por log stream). En segundo plano,
+        # /api/estado nunca lo espera: entrega lo que ya llegó y la consulta sigue en su hilo.
+        self._segundo_plano = segundo_plano
         self.error: str | None = None
-        # Dos pestañas del panel consultan a la vez y /api/estado lee en un hilo: sin el candado,
-        # dos lecturas simultáneas podrían entregar la misma línea dos veces.
+        # Protege el estado compartido: dos pestañas consultan a la vez y /api/estado lee en un hilo.
         self._candado = threading.Lock()
         self.reiniciar()
 
     def reiniciar(self) -> None:
         """Vuelve a leer desde `mirar_atras_s` antes de ahora (al cambiar de entorno)."""
-        self._ultima_consulta: float | None = None
-        self._cursor_ms: int | None = None  # hora (ms) de la última línea entregada
-        self._entregados: dict[str, int] = {}  # eventId → timestamp, para no repetir
+        with self._candado:
+            self._generacion = getattr(self, "_generacion", 0) + 1  # descarta consultas en vuelo
+            self._en_vuelo = False
+            self._ultima_consulta: float | None = None
+            self._cursor_ms: int | None = None  # hora (ms) de la última línea entregada
+            self._entregados: dict[str, int] = {}  # eventId → timestamp, para no repetir
+            self._listos: list[tuple[str, dict]] = []  # leídas y todavía no entregadas
 
     def leer(self) -> list[tuple[str, dict]]:
+        """Entrega lo que ya llegó y, si toca, lanza la próxima consulta. Nunca espera a la red
+        en segundo plano; sin él (tests), consulta en línea y entrega el resultado."""
         with self._candado:
-            return self._leer()
+            ahora = self._reloj()
+            lanzar = not self._en_vuelo and (
+                self._ultima_consulta is None or ahora - self._ultima_consulta >= self._intervalo)
+            if lanzar:
+                self._en_vuelo, self._ultima_consulta = True, ahora
+                generacion = self._generacion
+        if lanzar:
+            if self._segundo_plano:
+                threading.Thread(target=self._consultar, args=(ahora, generacion), daemon=True).start()
+            else:
+                self._consultar(ahora, generacion)
+        with self._candado:
+            listos, self._listos = self._listos, []
+        return listos
 
-    def _leer(self) -> list[tuple[str, dict]]:
-        ahora = self._reloj()
-        if self._ultima_consulta is not None and ahora - self._ultima_consulta < self._intervalo:
-            return []
-        self._ultima_consulta = ahora
+    def _consultar(self, ahora: float, generacion: int) -> None:
+        with self._candado:
+            cursor = self._cursor_ms
         ahora_ms = int(ahora * 1000)
-        desde = (self._cursor_ms - self._solape_ms) if self._cursor_ms else ahora_ms - self._mirar_atras_ms
+        desde = (cursor - self._solape_ms) if cursor else ahora_ms - self._mirar_atras_ms
         limite = ahora_ms - self._retencion_ms  # lo más nuevo espera: puede faltar su pareja del otro grupo
-        try:
+        try:  # la red va FUERA del candado
             crudos = [(rol, e) for rol, grupo in self._grupos.items()
                       for e in _paginas(self._cliente, grupo, desde, None)]
+            error = None
         except Exception as exc:  # credenciales, red, cuota: el panel sigue y muestra el error
-            self.error = f"{type(exc).__name__}: {exc}"
-            return []
-        self.error = None
-        nuevos = []
-        for rol, evento in crudos:
-            marca, eid = int(evento.get("timestamp", 0)), evento.get("eventId")
-            if marca > limite or not eid or eid in self._entregados:
-                continue
-            self._entregados[eid] = marca
-            par = _registro(evento, rol)
-            if par:
-                nuevos.append((marca, par))
-        if nuevos:
-            self._cursor_ms = max(self._cursor_ms or 0, max(m for m, _ in nuevos))
-        if self._cursor_ms:  # lo anterior al solape ya no puede volver a llegar en una consulta
-            piso = self._cursor_ms - self._solape_ms
-            self._entregados = {k: v for k, v in self._entregados.items() if v >= piso}
-        nuevos.sort(key=lambda par: par[0])
-        return [par for _, par in nuevos]
+            crudos, error = [], f"{type(exc).__name__}: {exc}"
+        with self._candado:
+            if generacion != self._generacion:
+                return  # se cambió de entorno mientras tanto: el resultado ya no aplica
+            self._en_vuelo, self.error = False, error
+            nuevos = []
+            for rol, evento in crudos:
+                marca, eid = int(evento.get("timestamp", 0)), evento.get("eventId")
+                if marca > limite or not eid or eid in self._entregados:
+                    continue
+                self._entregados[eid] = marca
+                par = _registro(evento, rol)
+                if par:
+                    nuevos.append((marca, par))
+            if nuevos:
+                self._cursor_ms = max(self._cursor_ms or 0, max(m for m, _ in nuevos))
+            if self._cursor_ms:  # lo anterior al solape ya no puede volver a llegar en una consulta
+                piso = self._cursor_ms - self._solape_ms
+                self._entregados = {k: v for k, v in self._entregados.items() if v >= piso}
+            nuevos.sort(key=lambda par: par[0])
+            self._listos += [par for _, par in nuevos]
 
 
 def leer_ventana(cliente: Any, grupos: dict[str, str], inicio: datetime, fin: datetime) -> list[tuple[str, dict]]:

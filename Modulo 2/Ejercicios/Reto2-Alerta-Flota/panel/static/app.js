@@ -36,6 +36,7 @@ const ROTULOS = {
       notifier: ["Notifier · asyncio", "Concurrencia 5 · reintentos 1/2/4 s"],
       mailpit: ["SMTP", null],
     },
+    mini: { k6: "k6", gateway: "nginx", ingest: "Ingesta ×2", redis: "Redis", notifier: "Notifier", mailpit: "SMTP" },
     flujoMeta: "Se ilumina cada componente que registró actividad en los últimos 2 s",
     nota: "Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.",
     medidaInfo: "Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.",
@@ -53,6 +54,7 @@ const ROTULOS = {
       notifier: ["Lambda reto2-notifier", "Reservada 2 · 2 intentos ≤ 12 s"],
       mailpit: ["Amazon SES", "Identidad verificada (cae en spam)"],
     },
+    mini: { k6: "k6", gateway: "API Gateway", ingest: "λ ingesta", redis: "SQS", notifier: "λ notifier", mailpit: "SES" },
     flujoMeta: "Se ilumina lo que registró actividad en CloudWatch (llega con ~5 s de retraso)",
     nota: "Concurrencia reservada: <strong>10 + 2 = 12</strong> (ingesta + notifier), por encima del límite de 10 del enunciado: decisión abierta del equipo. Las filas de la ingesta son instancias (log streams) que atendieron tráfico.",
     medidaInfo: "En AWS: desde la última petición registrada por la Lambda de ingesta (unos ms después del envío de k6) hasta el último EMAIL_SENT del notifier, según CloudWatch. No incluye la entrega de Gmail.",
@@ -391,7 +393,20 @@ function pintarFlujo(e, ahora) {
                salud: e.smtp.local ? saludDe(e, "mailpit-1") : "neutral",
                dato: `${num(e.eventos.enviadas)} correos` },
   };
+  const instancias = Object.keys(e.por_replica).length;
+  const corto = {
+    k6: { corriendo: "corriendo", terminado: "terminada", fallido: "falló" }[e.k6.estado] ?? "en espera",
+    gateway: `${num(e.http.total)} pet.`,
+    ingest: instancias ? `${num(e.eventos.recibidos)} · ${instancias} inst.` : num(e.eventos.recibidos),
+    redis: e.redis.ok ? `${num(e.redis.pendientes)} · DLQ ${num(e.redis.dlq)}` : "no responde",
+    notifier: e.eventos.reintentos ? `${num(e.eventos.enviadas)} · ${num(e.eventos.reintentos)} reint.` : `${num(e.eventos.enviadas)} env.`,
+    mailpit: `${num(e.eventos.enviadas)}/${num(e.eventos.emergencias)} correos`,
+  };
   for (const [clave, n] of Object.entries(nodos)) {
+    const mini = document.querySelector(`[data-mini="${clave}"]`);
+    mini.classList.toggle("activo", Boolean(n.activo));
+    mini.dataset.salud = n.salud;
+    mini.querySelector(".mini-dato").textContent = corto[clave];
     const nodo = document.querySelector(`[data-nodo="${clave}"]`);
     nodo.classList.toggle("activo", Boolean(n.activo));
     nodo.classList.toggle("caido", n.salud === "critical");
@@ -756,6 +771,7 @@ function pintarEntorno(e) {
     nodo.querySelector(".nodo-titulo").textContent = titulo;
     if (rol !== null) nodo.querySelector(".nodo-rol").textContent = rol;
   }
+  for (const [clave, nombre] of Object.entries(r.mini)) document.querySelector(`[data-mini="${clave}"] .mini-nombre`).textContent = nombre;
   $("#flujo-meta").textContent = r.flujoMeta;
   $("#flujo-nota").innerHTML = r.nota;  // texto fijo de este archivo, no viene de los eventos
   $("#medida-info").title = r.medidaInfo;
