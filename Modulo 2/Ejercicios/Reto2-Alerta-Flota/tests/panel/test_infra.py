@@ -84,8 +84,24 @@ async def test_k6_arma_el_comando_segun_el_modo(tmp_path):
     await asyncio.wait_for(k6.esperar(), 1)
     estado = k6.resumen()
     assert estado["estado"] == "terminado"
-    assert estado["salida"] == ["running (0m01.0s)"]  # sin códigos de color
+    assert estado["lineas"] == 1
+    assert k6.salida_completa() == ["running (0m01.0s)"]  # sin códigos de color
     assert estado["fin"] is not None
+
+
+async def test_k6_guarda_la_salida_de_inicio_a_fin(tmp_path):
+    # Antes se guardaban 30 líneas y se mostraban 12: el resumen final de k6 llegaba cortado.
+    lineas = [f"linea {i}" for i in range(500)]
+    proceso = ProcesoFalso(lineas)
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    assert k6.salida_completa() == lineas
 
 
 async def test_k6_ventana_solo_existe_cuando_la_carga_termino(tmp_path):
@@ -168,3 +184,33 @@ async def test_estado_redis_caido():
             raise ConnectionError("no hay redis")
     estado = await estado_redis(Caido(), "em", "em-dlq", "g")
     assert estado["ok"] is False and "no hay redis" in estado["error"]
+
+
+async def test_k6_olvidar_deja_el_ejecutor_como_recien_creado(tmp_path):
+    proceso = ProcesoFalso(["linea"])
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    k6.olvidar()
+    assert k6.resumen()["estado"] == "inactivo" and k6.salida_completa() == []
+    assert k6.ventana() is None
+
+
+async def test_k6_conserva_la_sangria_y_las_lineas_en_blanco(tmp_path):
+    # El logo de k6 y su tabla de métricas se alinean con espacios iniciales: no se recortan.
+    lineas = ["          /\\      Grafana   /‾‾/  ", "     /\\  /  \\     |\\  __   /  /", "", "  execution: local"]
+    proceso = ProcesoFalso(lineas)
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    assert k6.salida_completa() == ["          /\\      Grafana   /‾‾/", "     /\\  /  \\     |\\  __   /  /", "", "  execution: local"]

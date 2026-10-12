@@ -92,9 +92,20 @@ tr.actual td { background: color-mix(in srgb, var(--acento) 8%, transparent); }
 .nivel { display: inline-flex; align-items: center; gap: 6px; }
 .nivel::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
 .nivel.warning::before { background: var(--warning); }
-.falla { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--borde); }
-.falla:last-child { border-bottom: 0; }
-.falla p { font-size: 12px; color: var(--tinta-2); grid-column: 1; }
+.grafica svg { width: 100%; height: 220px; display: block; }
+.grafica .rejilla { stroke: var(--rejilla); stroke-width: 1; }
+.grafica .base { stroke: var(--tenue); stroke-width: 1; }
+.grafica .tick { fill: var(--tenue); font-size: 11px; font-variant-numeric: tabular-nums; }
+.grafica .barra-1 { fill: var(--serie-1); }
+.grafica .barra-2 { fill: var(--serie-2); }
+.grafica .rate { stroke: var(--tenue); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.grafica .rate-etiqueta { fill: var(--tinta-2); font-size: 11px; font-weight: 600; }
+.leyenda-serie { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--tinta-2); }
+.leyenda-serie i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.leyenda-serie .rate-muestra { width: 16px; height: 0; border-radius: 0; border-top: 2px dashed var(--tenue); vertical-align: 3px; }
+details { margin-top: 8px; font-size: 13px; color: var(--tinta-2); }
+details summary { cursor: pointer; }
+details table { margin-top: 8px; }
 .flujo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
 .flujo span { padding: 6px 10px; border-radius: 8px; background: var(--superficie-2); border: 1px solid var(--borde); }
 .flujo em { color: var(--tenue); font-style: normal; }
@@ -114,7 +125,8 @@ tr.actual td { background: color-mix(in srgb, var(--acento) 8%, transparent); }
 <body>
 
 <p class="maqueta"><strong>Maqueta estática · propuesta de Danny (07/10/2026), elaborada con IA.</strong>
-Datos de ejemplo, botones sin función. No reemplaza el panel actual: es para discutir el viernes 09/10.
+Datos de ejemplo, botones sin función. No reemplaza el panel actual: es para discutir en el equipo.
+Ajuste del 11/10: sale «Inyectar fallas» y entra la gráfica de peticiones por segundo del panel actual.
 Los círculos <span class="n">1</span> remiten a la tabla «Qué cambia y por qué», al final.</p>
 
 <header class="barra">
@@ -181,8 +193,8 @@ Los círculos <span class="n">1</span> remiten a la tabla «Qué cambia y por qu
         <span><i style="border-color:var(--serie-1)"></i>Última petición (nginx)</span>
         <span><i style="border-color:var(--good)"></i>Correo enviado (EMAIL_SENT)</span>
       </div>
-      <p class="meta" style="margin-top:10px">Reemplaza la gráfica «peticiones por segundo · 60 s», que en ráfaga se reduce a dos barras.
-        La gráfica por segundo pasaría a un desplegable.</p>
+      <p class="meta" style="margin-top:10px">Complementa la gráfica «peticiones por segundo» <span class="n">6</span>:
+        esta explica la medida; aquella, el ritmo de entrada contra el límite de 15 r/s.</p>
     </article>
   </section>
 
@@ -204,15 +216,25 @@ Los círculos <span class="n">1</span> remiten a la tabla «Qué cambia y por qu
         antes y el después del timeout de 4 s queda a la vista en vez de perderse con la carga siguiente.</p>
     </article>
 
-    <!-- Fallas -->
-    <article class="tarjeta">
-      <div class="cabeza"><h2><span class="n">6</span>Inyectar fallas</h2><span class="meta">cada una dice qué debería verse</span></div>
-      <div class="falla"><strong>SMTP (Mailpit)</strong><button class="btn btn-chico" type="button">Apagar</button>
-        <p>Esperado: <code>EMAIL_RETRY</code> a 1, 2 y 4 s y, si sigue caído, <code>EMAIL_DLQ</code>. Táctica: reintento + cola de fallidos.</p></div>
-      <div class="falla"><strong>Redis</strong><button class="btn btn-chico" type="button">Apagar</button>
-        <p>Esperado: el Emergency responde 503 (no se acepta lo que no se puede encolar). Táctica: fallar rápido.</p></div>
-      <div class="falla"><strong>Notifier</strong><button class="btn btn-chico" type="button">Apagar</button>
-        <p>Esperado: los Emergency se acumulan en la cola y salen al volver. Táctica: cola durable + reclamo de pendientes.</p></div>
+    <!-- Peticiones por segundo (se conserva del panel actual) -->
+    <article class="tarjeta grafica">
+      <div class="cabeza">
+        <h2><span class="n">6</span>Peticiones por segundo · últimos 60 s</h2>
+        <div class="leyenda-serie">
+          <span><i style="background:var(--serie-1)"></i>Aceptadas</span>
+          <span><i style="background:var(--serie-2)"></i>Rechazadas (429)</span>
+          <span><i class="rate-muestra"></i>Rate 15 r/s</span>
+        </div>
+      </div>
+      <svg id="grafica-svg" role="img" aria-label="Corrida #3: unas 35 peticiones aceptadas por segundo durante 29 segundos, por encima de la línea de 15 r/s, sin rechazos"></svg>
+      <details>
+        <summary>Ver como tabla</summary>
+        <div class="tabla-env">
+          <table><thead><tr><th>Segundo</th><th class="num">Aceptadas</th><th class="num">Rechazadas</th></tr></thead><tbody id="grafica-tabla"></tbody></table>
+        </div>
+      </details>
+      <p class="meta" style="margin-top:10px">Se conserva del panel actual. Las barras pasan la línea de 15 r/s sin un solo 429
+        porque el <b>burst 2000</b> absorbe la carga: es la evidencia visual de la táctica de limitación.</p>
     </article>
   </section>
 
@@ -235,18 +257,91 @@ Los círculos <span class="n">1</span> remiten a la tabla «Qué cambia y por qu
           <tr><td><span class="n">3</span>Corrida</td><td>La medida y los KPI pertenecen a <b>una corrida</b>, no a una ventana de tiempo.</td><td>Un Emergency manual enviado después de la carga entra en la medida de la rúbrica y en «2/2»: el número que se presenta puede no ser el de la carga. Visto el 07/10.</td><td>Bajo: el backend ya conoce inicio/fin de k6 (se agregó para la descarga de logs).</td></tr>
           <tr><td><span class="n">5</span>Historial</td><td>Lista de corridas con medida, rúbrica y logs por fila.</td><td>Cada carga borra la anterior; las 3 corridas del 06/10 hubo que anotarlas a mano.</td><td>Medio: persistir un resumen por corrida (un JSON en <code>logs/</code>) y generalizar el endpoint de descarga a <code>/api/corridas/{n}/logs</code>.</td></tr>
           <tr><td><span class="n">1</span>Atributo priorizado</td><td>El encabezado dice qué se priorizó y a costa de qué.</td><td>Feedback del profesor en M1: faltó el hilo conductor. El panel es lo que se proyecta en la sustentación.</td><td>Mínimo: texto. Debe coincidir con lo que el equipo decida en el informe.</td></tr>
-          <tr><td><span class="n">4</span>Línea de tiempo</td><td>Hitos de la corrida: carga, Emergency, última petición, correo.</td><td>La gráfica por segundo no explica la medida y en ráfaga son dos barras.</td><td>Medio: SVG a mano con datos que el agregador ya tiene.</td></tr>
-          <tr><td><span class="n">6</span>Fallas con resultado esperado</td><td>Cada falla dice qué debería verse y qué táctica demuestra.</td><td>Hoy el botón apaga, pero quien mira no sabe qué buscar.</td><td>Mínimo: texto.</td></tr>
+          <tr><td><span class="n">4</span>Línea de tiempo</td><td>Hitos de la corrida: carga, Emergency, última petición, correo.</td><td>La gráfica por segundo no explica la medida.</td><td>Medio: SVG a mano con datos que el agregador ya tiene.</td></tr>
+          <tr><td><span class="n">6</span>Peticiones por segundo</td><td>Se conserva la gráfica del panel actual, junto al historial.</td><td>Ninguno: decisión del 11/10. Muestra la entrada contra el límite de 15 r/s y que el burst evita los 429.</td><td>Nulo: ya existe (<code>pintarGrafica</code> en <code>panel/static/app.js</code>).</td></tr>
           <tr><td><span class="n">2</span>Barra de control</td><td>Lanzar arriba; el Emergency manual separado y rotulado «no cuenta».</td><td>Las acciones ocupan una columna larga que mezcla configuración, consola, descargas y fallas.</td><td>Bajo: reacomodo de HTML/CSS.</td></tr>
         </tbody>
       </table>
     </div>
     <ul>
       <li><b>Qué no cambiaría:</b> los tokens de color y el modo oscuro, la escala de la rúbrica, que el panel sea plano de control (solo lee logs) y la tabla «recorrido de cada emergencia», que pasaría a mostrarse al hacer clic en una corrida.</li>
-      <li><b>Qué saldría:</b> la consola de k6 visible (pasa a un desplegable; en la presentación es ruido) y la gráfica por segundo como protagonista.</li>
+      <li><b>Qué saldría:</b> la consola de k6 visible (pasa a un desplegable; en la presentación es ruido) y la tarjeta «Inyectar fallas» (retirada de la propuesta el 11/10; el panel actual la conserva).</li>
       <li><b>Riesgo:</b> rediseñar a 12 días de la entrega (19/10) compite con el informe y la medición formal. Si se hace algo, que sean 3 y 1 (bajo costo, alto impacto en lo que se califica); el resto puede quedar como propuesta.</li>
     </ul>
   </section>
 </main>
+<script>
+// Datos de ejemplo de la corrida #3: k6 del profesor, 1000 eventos en ~29 s, ninguno rechazado.
+// El dibujo replica pintarGrafica() de panel/static/app.js, sin tooltip ni refresco.
+const RATE = 15;
+const CARGA = [18, 36, 35, 35, 36, 35, 34, 35, 36, 35, 35, 34, 35, 36, 35, 35, 34, 35, 36, 35, 35, 34, 35, 36, 35, 35, 34, 35, 36];
+const serie = [...Array(25).fill(0), ...CARGA, ...Array(6).fill(0)].map((aceptadas) => ({ aceptadas, rechazadas: 0 }));
+const svgEl = (tag, attrs) => {
+  const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  return n;
+};
+
+function maximoRedondo(v) {
+  const paso = 10 ** Math.floor(Math.log10(v));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * paso >= v) return m * paso;
+  return 10 * paso;
+}
+
+function barraRedondeada(x, y, w, h, r) {
+  if (h <= 0) return "";
+  r = Math.min(r, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+
+function pintarGrafica() {
+  const svg = document.getElementById("grafica-svg");
+  const ancho = svg.clientWidth || 600;
+  const alto = svg.clientHeight || 220;
+  const m = { izq: 36, der: 52, arr: 10, aba: 24 };
+  const w = ancho - m.izq - m.der;
+  const h = alto - m.arr - m.aba;
+  const yMax = maximoRedondo(Math.max(RATE * 1.6, ...serie.map((p) => p.aceptadas + p.rechazadas)));
+  const y = (v) => m.arr + h - (v / yMax) * h;
+  const paso = w / serie.length;
+  const anchoBarra = Math.max(paso - 2, 1);
+
+  svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
+  svg.replaceChildren();
+  for (let i = 0; i <= 4; i++) {
+    const v = (yMax / 4) * i;
+    svg.append(svgEl("line", { class: i === 0 ? "base" : "rejilla", x1: m.izq, x2: m.izq + w, y1: y(v), y2: y(v) }));
+    const t = svgEl("text", { class: "tick", x: m.izq - 8, y: y(v) + 4, "text-anchor": "end" });
+    t.textContent = v.toLocaleString("es-CO");
+    svg.append(t);
+  }
+  serie.forEach((p, i) => {
+    const desde = serie.length - 1 - i;
+    if (desde % 10 === 0) {
+      const t = svgEl("text", { class: "tick", x: m.izq + i * paso + paso / 2, y: alto - 6, "text-anchor": "middle" });
+      t.textContent = desde === 0 ? "ahora" : `−${desde} s`;
+      svg.append(t);
+    }
+    if (p.aceptadas) {
+      const x = m.izq + i * paso + (paso - anchoBarra) / 2;
+      svg.append(svgEl("path", { class: "barra-1", d: barraRedondeada(x, y(p.aceptadas), anchoBarra, h * (p.aceptadas / yMax), 3) }));
+    }
+  });
+  svg.append(svgEl("line", { class: "rate", x1: m.izq, x2: m.izq + w, y1: y(RATE), y2: y(RATE) }));
+  const etiqueta = svgEl("text", { class: "rate-etiqueta", x: m.izq + w + 6, y: y(RATE) + 4 });
+  etiqueta.textContent = "15 r/s";
+  svg.append(etiqueta);
+}
+
+const inicio = new Date(2026, 9, 6, 10, 42, 5);
+document.getElementById("grafica-tabla").replaceChildren(...CARGA.map((n, i) => {
+  const fila = document.createElement("tr");
+  const hora = new Date(inicio.getTime() + i * 1000).toLocaleTimeString("es-CO", { hour12: false });
+  fila.innerHTML = `<td>${hora}</td><td class="num">${n}</td><td class="num">0</td>`;
+  return fila;
+}));
+pintarGrafica();
+new ResizeObserver(pintarGrafica).observe(document.getElementById("grafica-svg"));
+</script>
 </body>
 </html>

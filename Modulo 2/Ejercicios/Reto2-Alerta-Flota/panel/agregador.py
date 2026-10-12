@@ -101,6 +101,7 @@ class Agregador:
     def reiniciar(self, desde: datetime | None) -> None:
         """Abre una ventana nueva: lo anterior a `desde` deja de contarse."""
         self.desde = desde
+        self.hasta: datetime | None = None
         self._http: Counter[int] = Counter()
         self._por_segundo: dict[int, Counter[str]] = {}
         self._ultima_peticion: datetime | None = None
@@ -108,7 +109,17 @@ class Agregador:
         self._por_replica: Counter[str] = Counter()
         self._ultimo_visto: dict[str, datetime] = {}
         self._emergencias: dict[str, Emergencia] = {}
+        self._normales: set[str] = set()  # event_id de eventos normales validados y registrados
         self._feed: deque[dict[str, Any]] = deque(maxlen=60)
+
+    def cerrar(self, hasta: datetime) -> None:
+        """Cierra la corrida cuando k6 termina: lo que ENTRA después (p. ej. un Emergency manual)
+        se sigue mostrando, pero ya no cuenta en la medida ni en los KPI. Los correos de las
+        emergencias de la carga sí cuentan aunque salgan después (un reintento puede tardar)."""
+        self.hasta = hasta
+
+    def _en_corrida(self, momento: datetime) -> bool:
+        return self.hasta is None or momento <= self.hasta
 
     def ingerir_nginx(self, registros: list[dict]) -> None:
         for registro in registros:
@@ -118,11 +129,12 @@ class Agregador:
             if self.desde and momento < self.desde:
                 continue
             status = int(registro["status"])
-            self._http[status] += 1
             clase = "aceptadas" if status < 400 else "rechazadas"
-            self._por_segundo.setdefault(int(registro["msec"]), Counter())[clase] += 1
-            self._ultima_peticion = max(filter(None, (self._ultima_peticion, momento)))
-            self._ultimo_visto["gateway"] = self._ultima_peticion
+            self._por_segundo.setdefault(int(registro["msec"]), Counter())[clase] += 1  # la serie es en vivo
+            self._ultimo_visto["gateway"] = max(filter(None, (self._ultimo_visto.get("gateway"), momento)))
+            if self._en_corrida(momento):
+                self._http[status] += 1
+                self._ultima_peticion = max(filter(None, (self._ultima_peticion, momento)))
 
     def ingerir_servicio(self, registros: list[tuple[str, dict]]) -> None:
         for archivo, registro in registros:
@@ -130,11 +142,14 @@ class Agregador:
             if self.desde and momento < self.desde:
                 continue
             evento, servicio = registro["event"], registro.get("service", "?")
-            self._eventos[evento] += 1
             self._ultimo_visto[servicio] = momento
-            if evento in ("EVENT_RECEIVED", "EMERGENCY_RECEIVED"):
-                self._por_replica[archivo] += 1
             self._seguir_emergencia(evento, registro, momento)
+            if self._cuenta(registro, momento):
+                self._eventos[evento] += 1
+                if evento in ("EVENT_RECEIVED", "EMERGENCY_RECEIVED"):
+                    self._por_replica[archivo] += 1
+                if evento == "EVENT_RECEIVED" and registro.get("event_id"):
+                    self._normales.add(registro["event_id"])
             if evento in EVENTOS_FEED:
                 self._feed.appendleft({
                     "ts": momento.isoformat(timespec="milliseconds"),
@@ -144,6 +159,13 @@ class Agregador:
                     "placa": registro.get("plate"),
                     "detalle": registro.get("error") or _detalle(registro),
                 })
+
+    def _cuenta(self, registro: dict, momento: datetime) -> bool:
+        """Si el registro es de la corrida: entró antes del cierre o es de una emergencia que entró antes."""
+        if self._en_corrida(momento):
+            return True
+        emergencia = self._emergencias.get(registro.get("event_id") or "")
+        return emergencia is not None and self._en_corrida(emergencia.recibida)
 
     def _seguir_emergencia(self, evento: str, registro: dict, momento: datetime) -> None:
         event_id = registro.get("event_id")
@@ -166,14 +188,18 @@ class Agregador:
             emergencia.intentos, emergencia.estado = registro.get("attempts", 0), "dlq"
 
     def resumen(self, ahora: datetime) -> dict[str, Any]:
-        emergencias = sorted(self._emergencias.values(), key=lambda e: e.recibida, reverse=True)
+        todas = sorted(self._emergencias.values(), key=lambda e: e.recibida, reverse=True)
+        emergencias = [e for e in todas if self._en_corrida(e.recibida)]
         ultimo_correo = max((e.enviada for e in emergencias if e.enviada), default=None)
         medida = None
         if ultimo_correo and self._ultima_peticion:
             medida = round((ultimo_correo - self._ultima_peticion).total_seconds(), 3)
         estados = Counter(e.estado for e in emergencias)
+        peor = max((e for e in emergencias if e.enviada), key=lambda e: e.enviada - e.recibida, default=None)
         return {
             "ventana_desde": self.desde.isoformat() if self.desde else None,
+            "ventana_hasta": self.hasta.isoformat() if self.hasta else None,
+            "ultima_peticion": self._ultima_peticion.isoformat(timespec="milliseconds") if self._ultima_peticion else None,
             "http": {
                 "total": sum(self._http.values()),
                 "aceptadas": sum(n for s, n in self._http.items() if s < 400),
@@ -188,11 +214,20 @@ class Agregador:
                 "dlq": estados["dlq"],
                 "fallidas": estados["fallida"],
                 "reintentos": self._eventos["EMAIL_RETRY"],
+                # Un evento normal termina al validarse y registrarse (no tiene más pasos);
+                # un Emergency, cuando su correo sale. Se cuentan event_id únicos.
+                "procesados": len(self._normales) + estados["enviada"],
             },
             "por_replica": dict(self._por_replica),
             "medida_rubrica": calificar(medida),
+            # Criterio reportado del profesor: del envío del Emergency a la llegada del correo.
+            # El panel ve de la recepción en ingest a la entrega al SMTP: es una aproximación.
+            "emergencia_a_correo": {
+                "segundos": round((peor.enviada - peor.recibida).total_seconds(), 3) if peor else None,
+                "placa": peor.placa if peor else None,
+            },
             "serie": self._serie(ahora),
-            "emergencias": [e.como_dict() for e in emergencias[:25]],
+            "emergencias": [{**e.como_dict(), "en_corrida": self._en_corrida(e.recibida)} for e in todas[:25]],
             "feed": sorted(self._feed, key=lambda f: _fecha(f["ts"]), reverse=True)[:40],
             "ultimo_visto": {k: v.isoformat(timespec="milliseconds") for k, v in self._ultimo_visto.items()},
         }

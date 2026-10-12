@@ -7,6 +7,7 @@ import pytest
 
 from panel.agregador import Agregador, LectorIncremental
 from panel.app import create_app
+from panel.corridas import Historial
 
 
 class DockerFalso:
@@ -43,6 +44,12 @@ class K6Falso:
     def resumen(self):
         return {"estado": "corriendo" if self.ocupado else "inactivo"}
 
+    def salida_completa(self):
+        return ["running (0m01.0s)", "http_reqs: 1000"]
+
+    def olvidar(self):
+        self.ultima, self.olvidado = None, True
+
     def ventana(self):
         return None if self.ocupado else self.ultima
 
@@ -62,6 +69,9 @@ def entorno(tmp_path):
     async def redis_info():
         return {"ok": True, "stream": 0, "pendientes": 0, "dlq": 0}
 
+    async def redis_vaciar():
+        enviados.append("redis vaciado")
+
     agregador, docker, k6 = Agregador(), DockerFalso(), K6Falso()
     app = create_app(
         agregador=agregador,
@@ -70,6 +80,7 @@ def entorno(tmp_path):
         redis_info=redis_info, docker=docker, k6=k6,
         gateway=httpx.AsyncClient(transport=httpx.MockTransport(gateway)),
         gateway_url="http://gateway/events", log_dir=tmp_path,
+        historial=Historial(tmp_path / "corridas.json"), redis_vaciar=redis_vaciar,
     )
     cliente = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://panel")
     return cliente, agregador, docker, k6, enviados
@@ -139,7 +150,7 @@ async def test_carga_del_profesor_no_promete_cuantos_emergency_manda(entorno):
     async with cliente:
         respuesta = await cliente.post("/api/carga", json={"modo": "profesor"})
     assert respuesta.status_code == 202
-    assert respuesta.json() == {"modo": "profesor", "emergencias": None}  # lo decide su script
+    assert respuesta.json() == {"modo": "profesor", "emergencias": None, "corrida": 1}  # lo decide su script
     assert k6.iniciados[0][0] == "profesor"
     assert agregador.desde is not None
 
@@ -152,14 +163,6 @@ async def test_servicios_respeta_la_lista_blanca(entorno):
     assert ok.status_code == 200
     assert docker.cambios == [("mailpit", "apagar")]
     assert prohibido.status_code == 400
-
-
-async def test_reiniciar_ventana(entorno):
-    cliente, agregador, *_ = entorno
-    async with cliente:
-        respuesta = await cliente.post("/api/ventana/reiniciar")
-    assert respuesta.status_code == 200
-    assert agregador.desde is not None
 
 
 async def test_sirve_la_pagina(entorno):
@@ -185,39 +188,101 @@ async def test_emergencia_tolera_respuestas_html_del_gateway():
     assert "Too Many Requests" in respuesta.json()["respuesta"]
 
 
-# --- descarga de logs de la última carga ----------------------------------------------------
-
 COL = timezone(timedelta(hours=-5))
 
 
-async def test_descargar_logs_sin_carga_terminada_es_409(entorno):
-    cliente, *_ = entorno
-    async with cliente:
-        respuesta = await cliente.get("/api/carga/logs")
-    assert respuesta.status_code == 409
+# --- corridas: numeración, cierre e historial ------------------------------------------------
 
-
-async def test_descargar_logs_de_la_ultima_carga_en_log_y_csv(entorno):
+async def test_cada_carga_abre_una_corrida_numerada(entorno):
     cliente, _, _, k6, _ = entorno
-    k6.modo = "profesor"
-    k6.ultima = (datetime(2026, 10, 12, 23, 0, 0, tzinfo=COL), datetime(2026, 10, 12, 23, 0, 30, tzinfo=COL))
     async with cliente:
-        log = await cliente.get("/api/carga/logs")
-        tabla = await cliente.get("/api/carga/logs", params={"formato": "csv"})
-        invalido = await cliente.get("/api/carga/logs", params={"formato": "xml"})
-    assert log.status_code == 200
-    assert log.headers["content-disposition"] == 'attachment; filename="carga-profesor-20261012-230000.log"'
-    assert json.loads(log.text.splitlines()[0])["event_id"] == "p1"
-    assert tabla.headers["content-disposition"].endswith('.csv"')
-    assert "text/csv" in tabla.headers["content-type"]
-    assert tabla.text.splitlines()[0] == "ts,service,replica,event,event_id,plate,detalle"
-    assert invalido.status_code == 422
+        respuesta = await cliente.post("/api/carga", json={"modo": "profesor"})
+        estado = (await cliente.get("/api/estado")).json()
+    assert respuesta.json()["corrida"] == 1
+    assert estado["corrida"]["n"] == 1 and estado["corrida"]["fin"] is None
+    assert [c["n"] for c in estado["historial"]] == [1]
 
 
-async def test_mientras_corre_una_carga_nueva_no_se_descarga_la_anterior(entorno):
-    cliente, _, _, k6, _ = entorno
-    k6.ultima = (datetime(2026, 10, 12, 23, 0, 0, tzinfo=COL), datetime(2026, 10, 12, 23, 0, 30, tzinfo=COL))
+async def test_al_terminar_k6_la_corrida_se_cierra_y_queda_en_el_historial(entorno):
+    cliente, agregador, _, k6, _ = entorno
     async with cliente:
         await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
-        respuesta = await cliente.get("/api/carga/logs")
+        k6.ocupado = False
+        fin = datetime.now(timezone.utc)
+        k6.ultima = (agregador.desde, fin)
+        estado = (await cliente.get("/api/estado")).json()
+    assert agregador.hasta == fin
+    [corrida] = estado["historial"]
+    assert corrida["fin"] == fin.isoformat()
+    assert {"medida", "emergencias", "enviadas", "aceptadas", "total", "rechazadas_429",
+            "procesados", "emergencia_a_correo"} <= corrida.keys()
+
+
+async def test_una_carga_que_no_arranca_no_abre_corrida(entorno):
+    cliente, *_ = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "otro", "emergencias": 1})
+        estado = (await cliente.get("/api/estado")).json()
+    assert estado["corrida"] is None and estado["historial"] == []
+
+
+async def test_descargar_logs_de_una_corrida_del_historial(entorno, tmp_path):
+    cliente, *_ = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        abierta = await cliente.get("/api/corridas/1/logs")
+        inexistente = await cliente.get("/api/corridas/9/logs")
+    assert abierta.status_code == 409  # k6 sigue corriendo: la corrida no tiene fin
+    assert inexistente.status_code == 404
+
+    # Una corrida cerrada, leída de disco como tras reiniciar el panel.
+    historial = Historial(tmp_path / "otro.json")
+    inicio = datetime(2026, 10, 12, 23, 0, 0, tzinfo=COL)
+    historial.abrir(inicio, "profesor", "mailpit")
+    historial.actualizar(1, fin=(inicio + timedelta(seconds=30)).isoformat())
+    app = create_app(
+        agregador=Agregador(), lector_servicio=LectorIncremental(tmp_path, ()),
+        lector_nginx=LectorIncremental(tmp_path, ()), redis_info=_redis_ok, docker=DockerFalso(),
+        k6=K6Falso(), gateway=httpx.AsyncClient(), gateway_url="http://gateway/events",
+        log_dir=tmp_path, historial=Historial(tmp_path / "otro.json"),
+    )
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://panel") as c:
+        log = await c.get("/api/corridas/1/logs")
+        tabla = await c.get("/api/corridas/1/logs", params={"formato": "csv"})
+    assert log.status_code == 200
+    assert log.headers["content-disposition"] == 'attachment; filename="corrida-1-profesor-20261012-230000.log"'
+    assert json.loads(log.text.splitlines()[0])["event_id"] == "p1"
+    assert tabla.text.splitlines()[0] == "ts,service,replica,event,event_id,plate,detalle"
+
+
+async def test_salida_de_k6_completa_por_su_propio_endpoint(entorno):
+    cliente, *_ = entorno
+    async with cliente:
+        respuesta = await cliente.get("/api/k6/salida")
+    assert respuesta.json()["lineas"] == ["running (0m01.0s)", "http_reqs: 1000"]
+
+
+# --- borrar datos y empezar de cero -----------------------------------------------------------
+
+async def test_limpiar_borra_historial_logs_y_colas(entorno, tmp_path):
+    cliente, agregador, _, k6, enviados = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        k6.ocupado = False
+        respuesta = await cliente.post("/api/datos/limpiar")
+        estado = (await cliente.get("/api/estado")).json()
+    assert respuesta.status_code == 200
+    assert (tmp_path / "ingest-a.log").stat().st_size == 0
+    assert "redis vaciado" in enviados
+    assert k6.olvidado is True
+    assert estado["historial"] == [] and estado["corrida"] is None
+    assert estado["eventos"]["recibidos"] == 0
+
+
+async def test_no_se_limpia_con_una_carga_en_curso(entorno, tmp_path):
+    cliente, *_ = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        respuesta = await cliente.post("/api/datos/limpiar")
     assert respuesta.status_code == 409
+    assert (tmp_path / "ingest-a.log").stat().st_size > 0

@@ -21,16 +21,36 @@ k6 → nginx :8080 (15 r/s, burst 2000) → ingest ×2 → Redis Streams → not
 docker compose --profile dev --profile panel up -d --build
 ```
 
-Abrir http://localhost:8090. Muestra la arquitectura en vivo, la medida de la rúbrica con semáforo
-(< 15 s / 15–45 s / > 45 s), peticiones por segundo contra la línea de 15 r/s, el recorrido de cada
-emergencia y los eventos del sistema. Desde la página se puede enviar una Emergency, lanzar la carga
-k6 (ráfaga o ritmo de referencia) e inyectar fallas (apagar SMTP, Redis o el notifier).
+Abrir http://localhost:8090. Versión 2 (11/10/2026), a partir de la maqueta
+`Modulo 2/Aportes/danny/m2-panel-v2-propuesta-danny.html` acordada por el equipo:
+
+- **Encabezado con el atributo priorizado** (desempeño, a costa de un posible correo duplicado).
+  Debe decir lo mismo que el informe.
+- **Barra de control:** modo de carga, «Lanzar corrida #N» y, aparte, el Emergency manual, que
+  **no cuenta en ninguna corrida**.
+- **Corrida:** la medida de la rúbrica con semáforo (< 15 s / 15–45 s / > 45 s) y una fila de
+  indicadores (aceptadas, procesados, 429, correos, Emergency → correo, cola) pertenecen a la
+  corrida, no a una ventana de tiempo. Al terminar k6 la corrida se cierra: lo que
+  entra después (p. ej. un Emergency manual) se ve marcado «fuera de corrida» y no altera la medida.
+  Los correos de las emergencias de la carga sí cuentan aunque salgan después (reintentos).
+- **Línea de tiempo** de la corrida en tres filas rotuladas (peticiones k6, Emergency recibido,
+  correo enviado) y, debajo, el tramo que mide la rúbrica en números.
+- **Historial de corridas** con medida, rúbrica y descarga de logs por fila. Se guarda en
+  `logs/panel-corridas.json`, así que sobrevive a reiniciar el panel.
+- **Peticiones por segundo** contra la línea de 15 r/s, la arquitectura en vivo, el recorrido de
+  cada emergencia y los eventos del sistema.
+- **Emergency → correo (peor caso)**: aproxima el criterio reportado del
+  profesor (< 16 s del envío del Emergency a la llegada del correo). El panel ve de la recepción
+  en ingest a la entrega al SMTP; la llegada al buzón de Gmail no la ve.
+- **Procesados (únicos):** eventos normales validados y registrados + Emergency con correo enviado.
+- La salida **completa** de k6, de inicio a fin (copiar / descargar .txt).
+- Plegada al final: la **inyección de fallas** (apagar SMTP, Redis o el
+  notifier), cada una con lo que debería verse y la táctica que demuestra.
 
 - Es **plano de control**: solo lee los logs, Redis y Docker. No escribe en el camino de los eventos,
   así que observar no altera la latencia medida. Va en un perfil aparte y no cuenta como procesador.
 - Para apagar contenedores monta el **socket de Docker** (equivale a root sobre Docker). Por eso
   publica el puerto solo en `127.0.0.1` y limita las acciones a `mailpit`, `redis` y `notifier`.
-- Lanzar una carga reinicia la «ventana»: los contadores muestran solo esa corrida.
 - El k6 lanzado desde el panel corre en su contenedor contra `http://gateway/events` (red interna).
   Para mediciones formales sigue valiendo correr k6 desde el equipo + `scripts/medir.py`.
 
@@ -98,18 +118,31 @@ nginx hasta el último `EMAIL_SENT`. Se toma de nginx y no del fin de k6 porque 
 incluye la pausa final del modo ritmo y (b) nginx usa el mismo reloj que los servicios. La llegada
 a Gmail no la controlamos: se anota a mano.
 
-## Descargar los logs de la última carga (panel)
+## Borrar los datos y empezar de cero (panel)
 
-Cuando una carga lanzada desde el panel termina, se habilitan **Descargar .log** (una línea JSON
-por evento) y **Descargar .csv** (columnas fijas + `detalle` en JSON, para abrir en una hoja de
-cálculo). También por API: `GET /api/carga/logs?formato=log|csv` (409 si no hay carga terminada).
+El botón **Borrar datos** del encabezado (con confirmación, deshabilitado mientras corre k6) deja
+el sistema como recién levantado: borra el historial de corridas (la próxima vuelve a ser la #1),
+**vacía** los logs de ingest, notifier y gateway y vacía las colas de Redis. Por API:
+`POST /api/datos/limpiar` (409 con una carga en curso).
+
+- Los logs se truncan, no se eliminan: cada servicio tiene su archivo abierto en modo append y,
+  si se borrara, seguiría escribiendo en un archivo fantasma.
+- El stream se vacía con `XTRIM` y no con `DEL`, para no llevarse el consumer group del notifier.
+- **No se puede deshacer.** Si una corrida es evidencia para el informe, descargue antes sus logs.
+
+## Descargar los logs de una corrida (panel)
+
+Cada fila del historial tiene **.log** (una línea JSON por evento) y **.csv** (columnas fijas +
+`detalle` en JSON, para abrir en una hoja de cálculo), habilitados cuando la corrida terminó.
+También por API: `GET /api/corridas/{n}/logs?formato=log|csv` (404 si no existe, 409 si sigue en curso).
 
 - **Qué incluye:** `ingest`, `notifier` y el access log de nginx (`service=gateway`), ordenados
   por hora Colombia, con la columna `replica` (qué contenedor lo registró).
 - **Ventana:** del arranque de k6 a su fin **+ 60 s**, para que un correo reintentado tarde
-  (la cadena más larga dura ~39 s) cuente para su carga y un Emergency manual posterior no.
-- Una carga nueva reemplaza la anterior. El panel guarda la ventana en memoria: si se reinicia,
-  no hay nada que descargar hasta la próxima carga (los archivos en `logs/` siguen ahí).
+  (la cadena más larga dura ~39 s) cuente para su carga.
+- **Límite conocido:** un Emergency manual enviado dentro de esos 60 s aparece en la descarga,
+  aunque el panel no lo cuente en la medida. Para evidencia limpia, no enviar manuales justo
+  después de una corrida.
 
 ## Qué horas muestra el correo
 
