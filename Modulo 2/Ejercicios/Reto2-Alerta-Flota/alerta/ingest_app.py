@@ -29,7 +29,7 @@ def create_app(publisher: AlertPublisher, log: JsonLogger) -> FastAPI:
             log.log("EVENT_RECEIVED", **ids, type=event.type)
             return {"event_id": event_id, "status": "accepted"}
 
-        log.log("EMERGENCY_RECEIVED", **ids)
+        log.log("EMERGENCY_RECEIVED", **ids, type=event.type)
         alert = EmergencyAlert(event_id, event.vehicle_plate, event.status or "", format_ts(received_at))
         try:
             await publisher.publish(alert)

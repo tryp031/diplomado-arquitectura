@@ -28,6 +28,8 @@ class NotifierWorker:
         send_timeout_s: float = 8.0,
         claim_interval_s: float = 5.0,
         claim_idle_ms: int = 60_000,
+        redrive_interval_s: float = 15.0,
+        redrive_max_age_s: float = 600.0,
         error_backoff_s: float = 0.5,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     ) -> None:
@@ -47,6 +49,10 @@ class NotifierWorker:
         # Inactividad mínima para reclamar en caliente: debe superar el peor caso de handle()
         # (4 intentos × 8 s + 7 s de espera ≈ 39 s); si no, reclamaría correos aún en curso.
         self._claim_idle_ms = claim_idle_ms
+        # Reintento diferido: lo que agotó los reintentos (p. ej. SMTP caído más de ~7 s) vuelve
+        # a la cola cada `redrive_interval_s` mientras tenga menos de `redrive_max_age_s`.
+        self._redrive_interval_s = redrive_interval_s
+        self._redrive_max_age_s = redrive_max_age_s
         self._error_backoff_s = error_backoff_s
         self._sleep = sleep
         self._inflight: set[asyncio.Task[None]] = set()
@@ -79,6 +85,7 @@ class NotifierWorker:
         # Al arrancar se reclama sin exigir inactividad: con una sola réplica, lo pendiente
         # es de una instancia anterior que murió (Docker la reinicia en 1-2 s).
         claim_idle_ms, next_claim = 0, loop.time()
+        next_redrive = loop.time() + self._redrive_interval_s
         while not stop.is_set():
             free = self._concurrency - len(self._inflight)
             if free == 0:
@@ -91,6 +98,11 @@ class NotifierWorker:
                         self._log.log("PENDING_CLAIMED", count=len(claimed), min_idle_ms=claim_idle_ms)
                     backlog.extend(claimed)
                     claim_idle_ms, next_claim = self._claim_idle_ms, loop.time() + self._claim_interval_s
+                if loop.time() >= next_redrive:
+                    next_redrive = loop.time() + self._redrive_interval_s
+                    movidas = await self._consumer.redrive(self._redrive_max_age_s, count=100)
+                    if movidas:
+                        self._log.log("EMAIL_REDRIVEN", count=movidas, max_age_s=self._redrive_max_age_s)
                 if backlog:
                     batch = [backlog.popleft() for _ in range(min(free, len(backlog)))]
                 else:

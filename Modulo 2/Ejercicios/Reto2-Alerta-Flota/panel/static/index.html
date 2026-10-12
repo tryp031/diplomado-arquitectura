@@ -191,8 +191,8 @@
       <details>
         <summary>Inyectar fallas (demostración de disponibilidad)</summary>
         <ul class="fallas" id="fallas">
-          <li data-servicio="mailpit"><span><strong>SMTP</strong> <span id="smtp-nombre">(Mailpit)</span><span class="esperado">Esperado: <code>EMAIL_RETRY</code> a 1, 2 y 4 s y, si sigue caído, <code>EMAIL_DLQ</code>. Táctica: reintento + cola de fallidos.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
-          <li data-servicio="redis"><span><strong>Redis</strong><span class="esperado">Esperado: el Emergency responde 503 (no se acepta lo que no se puede encolar). Táctica: fallar rápido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          <li data-servicio="mailpit"><span><strong>SMTP</strong> <span id="smtp-nombre">(Mailpit)</span><span class="esperado">Esperado: <code>EMAIL_RETRY</code> a 1, 2 y 4 s y, si sigue caído, <code>EMAIL_DLQ</code>. Al encenderlo, el notifier lo devuelve de la DLQ (cada 15 s, hasta 10 min) y el correo sale. Táctica: reintento + cola de fallidos + reintento diferido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
+          <li data-servicio="redis"><span><strong>Redis</strong><span class="esperado">Esperado: el Emergency responde 503 y no se guarda (no se confirma lo que no se puede encolar): quien lo envía debe reintentar. Al encenderlo, el notifier se reconecta solo. Táctica: fallar rápido.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
           <li data-servicio="notifier"><span><strong>Notifier</strong><span class="esperado">Esperado: los Emergency se acumulan en la cola y salen al volver. Táctica: cola durable + reclamo de pendientes.</span></span><span class="falla-estado">—</span><button class="btn btn-secundario" type="button">—</button></li>
         </ul>
       </details>

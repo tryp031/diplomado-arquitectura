@@ -43,6 +43,10 @@ class FakeConsumer:
     async def dead_letter(self, d, error):
         self.dead.append((d.message_id, error))
 
+    async def redrive(self, max_age_s, count):
+        self.redrives = getattr(self, "redrives", []) + [max_age_s]
+        return getattr(self, "redrive_devuelve", 0)
+
 
 class FakeNotifier:
     def __init__(self, failures=0, always_fail=False, delay_s=0.0):
@@ -175,3 +179,20 @@ async def test_envio_colgado_se_corta_por_timeout_y_se_reintenta(captured_log):
 async def _until(done):
     while not done():
         await asyncio.sleep(0.005)
+
+
+async def test_reintenta_la_dlq_periodicamente_y_lo_registra(captured_log):
+    consumer, sleeps = FakeConsumer(), []
+    consumer.redrive_devuelve = 2
+    w = worker(consumer, FakeNotifier(), captured_log.logger, sleeps, redrive_interval_s=0.01, redrive_max_age_s=600)
+    await run_until(w, lambda: len(getattr(consumer, "redrives", [])) >= 2)
+    assert consumer.redrives[:2] == [600, 600]
+    redrives = [r for r in captured_log.records() if r["event"] == "EMAIL_REDRIVEN"]
+    assert redrives and redrives[0]["count"] == 2
+
+
+async def test_el_redrive_no_se_registra_si_no_habia_nada(captured_log):
+    consumer, sleeps = FakeConsumer(), []
+    w = worker(consumer, FakeNotifier(), captured_log.logger, sleeps, redrive_interval_s=0.01)
+    await run_until(w, lambda: len(getattr(consumer, "redrives", [])) >= 2)
+    assert "EMAIL_REDRIVEN" not in captured_log.names()

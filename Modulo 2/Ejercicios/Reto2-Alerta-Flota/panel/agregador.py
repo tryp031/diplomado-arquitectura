@@ -15,7 +15,7 @@ from typing import Any
 
 EVENTOS_FEED = {
     "EMERGENCY_RECEIVED", "EMERGENCY_ENQUEUE_FAILED", "EMAIL_SENT", "EMAIL_RETRY", "EMAIL_DLQ",
-    "CONSUMER_ERROR", "WORKER_ERROR", "NOTIFIER_STARTED", "PENDING_CLAIMED",
+    "CONSUMER_ERROR", "WORKER_ERROR", "NOTIFIER_STARTED", "PENDING_CLAIMED", "EMAIL_REDRIVEN",
 }
 SEGUNDOS_SERIE = 60
 # Cortes de la rúbrica del enunciado: < 15 s → 2.5 · 15-45 s → 1.5 · > 45 s → 0.5
@@ -252,6 +252,8 @@ def _ms(desde: datetime, hasta: datetime | None) -> int | None:
 def _detalle(registro: dict) -> str | None:
     if "ms_since_received" in registro:
         return f"{registro['ms_since_received']} ms desde la recepción"
+    if registro.get("event") == "EMAIL_REDRIVEN":
+        return f"{registro['count']} devuelta(s) de la DLQ a la cola"
     if "count" in registro:
         return f"{registro['count']} pendientes"
     return None

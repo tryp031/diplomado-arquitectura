@@ -48,6 +48,7 @@ async def test_emergency_se_encola_con_el_mismo_event_id(client_for, captured_lo
     assert (alert.vehicle_plate, alert.status) == ("VFH-600", "OK")
     assert alert.received_at.endswith("-05:00")
     assert captured_log.names() == ["EMERGENCY_RECEIVED", "EMERGENCY_ENQUEUED"]
+    assert captured_log.records()[0]["type"] == "Emergency"  # como EVENT_RECEIVED: el CSV lo muestra
 
 
 async def test_emergency_con_cola_caida_responde_503(client_for, captured_log):
