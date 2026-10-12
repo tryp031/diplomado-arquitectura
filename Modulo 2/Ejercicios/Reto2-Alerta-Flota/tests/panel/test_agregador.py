@@ -137,3 +137,41 @@ def test_feed_ordena_por_hora_aunque_lleguen_en_lotes_por_archivo():
     feed = a.resumen(T0 + timedelta(seconds=10))["feed"]
     assert [(f["evento"], f["event_id"]) for f in feed] == [
         ("EMERGENCY_RECEIVED", "e2"), ("EMAIL_SENT", "e1"), ("EMERGENCY_RECEIVED", "e1")]
+
+
+# --- corrida: la medida pertenece a la carga, no a la ventana ---------------------------
+
+def test_cerrar_la_corrida_excluye_un_emergency_manual_posterior():
+    # Bug visto el 07/10: un Emergency manual tras la carga entraba en la medida y en «2/2».
+    a = corrida()
+    a.cerrar(T0 + timedelta(seconds=28))  # k6 terminó a los 28 s
+    a.ingerir_nginx([nginx(40)])
+    a.ingerir_servicio([
+        ("ingest-a", svc(40, "EMERGENCY_RECEIVED", event_id="manual", plate="PNL-001")),
+        ("notifier-x", svc(40.5, "EMAIL_SENT", service="notifier", event_id="manual", attempt=1)),
+    ])
+    r = a.resumen(T0 + timedelta(seconds=41))
+    assert r["medida_rubrica"]["segundos"] == 2.6  # sigue siendo la de la carga
+    assert r["eventos"]["emergencias"] == 1 and r["eventos"]["enviadas"] == 1
+    assert r["http"]["total"] == 5
+    assert r["ultima_peticion"] == (T0 + timedelta(seconds=27.9)).isoformat(timespec="milliseconds")
+    fuera = next(e for e in r["emergencias"] if e["event_id"] == "manual")
+    assert fuera["en_corrida"] is False
+    assert next(e for e in r["emergencias"] if e["event_id"] == "e1")["en_corrida"] is True
+
+
+def test_un_correo_de_la_carga_que_sale_despues_del_cierre_si_cuenta():
+    # Un reintento puede terminar después de que k6 acabó: el correo sigue siendo de la carga.
+    a = Agregador()
+    a.ingerir_nginx([nginx(10)])
+    a.ingerir_servicio([("ingest-a", svc(10, "EMERGENCY_RECEIVED", event_id="e1"))])
+    a.cerrar(T0 + timedelta(seconds=11))
+    a.ingerir_servicio([("notifier-x", svc(25, "EMAIL_SENT", service="notifier", event_id="e1", attempt=3))])
+    assert a.resumen(T0 + timedelta(seconds=26))["medida_rubrica"]["segundos"] == 15.0
+
+
+def test_reiniciar_reabre_la_corrida():
+    a = corrida()
+    a.cerrar(T0 + timedelta(seconds=28))
+    a.reiniciar(T0 + timedelta(seconds=40))
+    assert a.hasta is None

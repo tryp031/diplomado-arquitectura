@@ -20,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from panel.agregador import Agregador, LectorIncremental
+from panel.corridas import Historial
 from panel.exportar import COLOMBIA, como_csv, como_log, registros_de_carga
 from panel.infra import MODO_PROFESOR
 
@@ -34,15 +35,41 @@ class PedidoCarga(BaseModel):
 def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lector_nginx: LectorIncremental,
                redis_info: Callable[[], Awaitable[dict]], docker: Any, k6: Any,
                gateway: httpx.AsyncClient, gateway_url: str, smtp_host: str = "mailpit",
-               log_dir: Path = Path("logs")) -> FastAPI:
+               log_dir: Path = Path("logs"), historial: Historial | None = None) -> FastAPI:
     app = FastAPI(title="Reto 2 — panel de control")
+    historial = historial or Historial(log_dir / "panel-corridas.json")
+    # Corrida que el agregador está observando. Tras reiniciar el panel no hay ninguna: las del
+    # historial quedan como se guardaron.
+    actual: dict[str, Any] = {"n": None}
+
+    def cerrar_si_termino() -> None:
+        ventana = k6.ventana()
+        if actual["n"] is None or ventana is None or agregador.hasta is not None:
+            return
+        agregador.cerrar(ventana[1])
+        historial.actualizar(actual["n"], fin=ventana[1].isoformat())
+
+    def guardar_resumen(resumen: dict[str, Any]) -> None:
+        # Solo con la corrida cerrada: mientras k6 envía, la medida todavía no es válida.
+        if actual["n"] is None or agregador.hasta is None:
+            return
+        historial.actualizar(
+            actual["n"], medida=resumen["medida_rubrica"], total=resumen["http"]["total"],
+            aceptadas=resumen["http"]["aceptadas"], rechazadas_429=resumen["http"]["rechazadas_429"],
+            emergencias=resumen["eventos"]["emergencias"], enviadas=resumen["eventos"]["enviadas"],
+            dlq=resumen["eventos"]["dlq"],
+        )
 
     @app.get("/api/estado")
     async def estado() -> dict[str, Any]:
+        cerrar_si_termino()  # antes de leer: lo que entre después del cierre ya no es de la corrida
         # El orden importa: el ingest escribe antes que el notifier, así que se lee primero.
         agregador.ingerir_servicio(lector_servicio.leer())
         agregador.ingerir_nginx([registro for _, registro in lector_nginx.leer()])
         resultado = agregador.resumen(datetime.now(timezone.utc))
+        guardar_resumen(resultado)
+        resultado["corrida"] = historial.buscar(actual["n"]) if actual["n"] else None
+        resultado["historial"] = historial.listar()
         resultado["redis"] = await redis_info()
         resultado["k6"] = k6.resumen()
         # Solo Mailpit corre dentro de Docker; Gmail es externo y el panel no puede apagarlo.
@@ -79,21 +106,20 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         except RuntimeError as exc:
             return JSONResponse({"error": str(exc)}, status_code=409)
         agregador.reiniciar(inicio)  # cada carga se observa en su propia ventana
+        actual["n"] = historial.abrir(inicio, pedido.modo, smtp_host)["n"]
         emergencias = None if pedido.modo == MODO_PROFESOR else pedido.emergencias
-        return {"modo": pedido.modo, "emergencias": emergencias}
+        return {"modo": pedido.modo, "emergencias": emergencias, "corrida": actual["n"]}
 
-    @app.get("/api/carga/logs")
-    def logs_de_la_carga(formato: Literal["log", "csv"] = "log"):
+    @app.get("/api/corridas/{n}/logs")
+    def logs_de_una_corrida(n: int, formato: Literal["log", "csv"] = "log"):
         # Síncrona a propósito: FastAPI la corre en un hilo y leer los logs no frena /api/estado.
-        ventana = k6.ventana()
-        if ventana is None:
-            return JSONResponse({"error": "no hay una carga terminada para descargar"}, status_code=409)
-        inicio, fin = ventana
-        registros = registros_de_carga(log_dir, inicio, fin)
-        cuerpo, tipo = (como_csv(registros), "text/csv") if formato == "csv" else (como_log(registros), "text/plain")
-        nombre = f"carga-{k6.modo}-{inicio.astimezone(COLOMBIA):%Y%m%d-%H%M%S}.{formato}"
-        return Response(cuerpo, media_type=f"{tipo}; charset=utf-8",
-                        headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
+        corrida = historial.buscar(n)
+        if corrida is None:
+            return JSONResponse({"error": f"no existe la corrida {n}"}, status_code=404)
+        if corrida["fin"] is None:
+            return JSONResponse({"error": "la corrida no ha terminado"}, status_code=409)
+        inicio, fin = datetime.fromisoformat(corrida["inicio"]), datetime.fromisoformat(corrida["fin"])
+        return _descarga(log_dir, inicio, fin, formato, f"corrida-{n}-{corrida['modo']}")
 
     @app.post("/api/servicios/{servicio}/{accion}")
     async def servicio(servicio: str, accion: str):
@@ -105,14 +131,16 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
             return JSONResponse({"error": f"Docker: {exc}"}, status_code=502)
         return {"servicio": servicio, "accion": accion}
 
-    @app.post("/api/ventana/reiniciar")
-    async def reiniciar_ventana() -> dict[str, str]:
-        desde = datetime.now(timezone.utc)
-        agregador.reiniciar(desde)
-        return {"desde": desde.isoformat()}
-
     app.mount("/", StaticFiles(directory=ESTATICOS, html=True), name="pagina")
     return app
+
+
+def _descarga(log_dir: Path, inicio: datetime, fin: datetime, formato: str, prefijo: str) -> Response:
+    registros = registros_de_carga(log_dir, inicio, fin)
+    cuerpo, tipo = (como_csv(registros), "text/csv") if formato == "csv" else (como_log(registros), "text/plain")
+    nombre = f"{prefijo}-{inicio.astimezone(COLOMBIA):%Y%m%d-%H%M%S}.{formato}"
+    return Response(cuerpo, media_type=f"{tipo}; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
 
 
 def build_app() -> FastAPI:

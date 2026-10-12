@@ -42,6 +42,8 @@ const hora = (iso) => (iso ? fmtHora.format(new Date(iso)) : "—");
 const num = (n) => (n === null || n === undefined ? "—" : fmtNum.format(n));
 
 let ultimoEstado = null;
+let proximaCorrida = 1;
+const descargando = new Set();  // "n-formato" de las descargas en curso: su botón sigue deshabilitado
 
 // ------------------------------------------------------------------ ciclo de consulta
 async function ciclo() {
@@ -62,14 +64,16 @@ async function ciclo() {
 function pintar(e) {
   const ahora = e.serie.length ? e.serie[e.serie.length - 1].t : Date.now() / 1000;
   pintarSalud(e);
-  pintarMedida(e.medida_rubrica, e.k6.estado === "corriendo");
+  pintarCorrida(e);
+  pintarMedida(e.medida_rubrica, e.corrida);
   pintarKpis(e);
+  pintarLinea(e);
+  pintarHistorial(e.historial, e.corrida);
   pintarFlujo(e, ahora);
   pintarAcciones(e);
   pintarGrafica(e.serie);
   pintarEmergencias(e.emergencias);
   pintarFeed(e.feed);
-  $("#ventana").textContent = e.ventana_desde ? `Ventana desde ${fmtHoraCorta.format(new Date(e.ventana_desde))}` : "Ventana: todo el historial";
   $("#actualizado").textContent = `Actualizado ${fmtHoraCorta.format(new Date())}`;
 }
 
@@ -94,7 +98,7 @@ const NIVELES = {
   warning: { icono: "!", texto: "15–45 s · 1,5 pts" },
   critical: { icono: "✕", texto: "> 45 s · 0,5 pts" },
 };
-function pintarMedida(m, cargaEnCurso) {
+function pintarMedida(m, corrida) {
   const marca = $("#escala-marca");
   const estado = $("#medida-estado");
   const neutro = (texto) => {
@@ -104,9 +108,10 @@ function pintarMedida(m, cargaEnCurso) {
     $("#medida-texto").textContent = texto;
     marca.hidden = true;
   };
-  // Mientras k6 envía, la "última petición" todavía no existe: la medida no es válida aún.
-  if (cargaEnCurso) return neutro("Carga en curso: la medida se fija cuando k6 termina");
-  if (m.segundos === null) return neutro("Sin correos en esta ventana");
+  // La medida pertenece a una corrida. Mientras k6 envía, la "última petición" todavía no existe.
+  if (!corrida) return neutro("Lanza una corrida para medir");
+  if (!corrida.fin) return neutro("Corrida en curso: la medida se fija cuando k6 termina");
+  if (m.segundos === null) return neutro("Sin correos de esta corrida todavía");
   const efectivo = Math.max(m.segundos, 0);
   $("#medida-valor").textContent = fmtSeg.format(efectivo);
   const n = NIVELES[m.nivel];
@@ -117,17 +122,101 @@ function pintarMedida(m, cargaEnCurso) {
   marca.style.left = `${(Math.min(efectivo, 60) / 60) * 100}%`;
 }
 
+// ------------------------------------------------------------------ corrida actual
+function pintarCorrida(e) {
+  const c = e.corrida;
+  if (!c) {
+    $("#corrida-titulo").textContent = "Sin corrida";
+    $("#corrida-horas").textContent = "los contadores muestran todo lo registrado";
+    return;
+  }
+  $("#corrida-titulo").textContent = `Corrida #${c.n} · ${NOMBRE_MODO[c.modo] ?? c.modo}`;
+  const inicio = fmtHoraCorta.format(new Date(c.inicio));
+  $("#corrida-horas").textContent = c.fin ? `${inicio} → ${fmtHoraCorta.format(new Date(c.fin))}` : `${inicio} → en curso`;
+}
+
+// ------------------------------------------------------------------ línea de tiempo (SVG propio)
+function pintarLinea(e) {
+  const svg = $("#linea-svg");
+  const c = e.corrida;
+  const visible = Boolean(c && e.ultima_peticion);
+  svg.hidden = !visible;
+  $(".leyenda-hitos").hidden = !visible;
+  $("#linea-vacio").hidden = visible;
+  $("#linea-vacio").textContent = c ? "Esperando la primera petición de la corrida…" : "Lanza una corrida para ver su línea de tiempo.";
+  if (!visible) return;
+
+  const t0 = new Date(c.inicio).getTime();
+  const ultima = new Date(e.ultima_peticion).getTime();
+  const emergencias = e.emergencias.filter((em) => em.en_corrida);
+  const recibidas = emergencias.map((em) => new Date(em.recibida).getTime());
+  const correos = emergencias.filter((em) => em.ms_envio !== null).map((em) => new Date(em.recibida).getTime() + em.ms_envio);
+  const ultimoCorreo = correos.length ? Math.max(...correos) : null;
+  const tFin = Math.max(ultima, ultimoCorreo ?? 0, c.fin ? new Date(c.fin).getTime() : Date.now());
+
+  const ancho = svg.clientWidth || 640;
+  const alto = 170;
+  const m = { izq: 16, der: 16 };
+  const w = ancho - m.izq - m.der;
+  const x = (t) => m.izq + ((t - t0) / Math.max(tFin - t0, 1)) * w;
+  const yBanda = 60, hBanda = 40, yHito = yBanda + hBanda / 2;
+  svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
+  svg.replaceChildren();
+
+  const texto = (contenido, attrs) => { const t = svgEl("text", attrs); t.textContent = contenido; svg.append(t); };
+  svg.append(svgEl("line", { class: "eje", x1: m.izq, x2: m.izq + w, y1: 122, y2: 122 }));
+  svg.append(svgEl("rect", { class: "carga", x: m.izq, y: yBanda, width: Math.max(x(ultima) - m.izq, 2), height: hBanda, rx: 6 }));
+  const duracion = (ultima - t0) / 1000;
+  texto(`k6 envía ${num(e.http.total)} peticiones (${fmtNum.format(Math.round(duracion * 10) / 10)} s)`, { x: m.izq + 8, y: yBanda - 8 });
+  texto(fmtHoraCorta.format(new Date(t0)), { x: m.izq, y: 140 });
+  texto(fmtHoraCorta.format(new Date(tFin)), { x: m.izq + w, y: 140, "text-anchor": "end" });
+
+  if (ultimoCorreo !== null && e.medida_rubrica.segundos !== null) {
+    svg.append(svgEl("line", { class: "tramo-medida", x1: x(ultima), x2: x(ultimoCorreo), y1: yHito, y2: yHito }));
+    texto(`${fmtSeg.format(Math.max(e.medida_rubrica.segundos, 0))} s`, { class: "medida-etiqueta", x: x(ultimoCorreo), y: yBanda - 8, "text-anchor": "end" });
+  }
+  for (const t of recibidas) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yHito, r: 4, style: "stroke:var(--serie-2)" }));
+  svg.append(svgEl("circle", { class: "hito", cx: x(ultima), cy: yHito, r: 6, style: "stroke:var(--serie-1)" }));
+  for (const t of correos) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yHito, r: 6, style: "stroke:var(--good)" }));
+  texto("última petición", { x: x(ultima), y: 160, "text-anchor": "end" });
+  svg.setAttribute("aria-label", `Corrida #${c.n}: carga de ${fmtNum.format(Math.round(duracion))} s, ${recibidas.length} Emergency, ${correos.length} correos`);
+}
+
+// ------------------------------------------------------------------ historial de corridas
+const NOMBRE_CORTO_MODO = { rafaga: "ráfaga", ritmo: "ritmo", profesor: "profesor" };
+function pintarHistorial(lista, actual) {
+  $("#historial-vacio").hidden = lista.length > 0;
+  $("#historial").replaceChildren(...lista.map((c) => {
+    const medida = c.medida?.segundos ?? null;
+    const boton = (formato) => el("button", {
+      className: "btn btn-chico", type: "button", dataset: { n: c.n, formato },
+      ...(!c.fin || descargando.has(`${c.n}-${formato}`) ? { disabled: "" } : {}),
+    }, `.${formato}`);
+    return el("tr", c.n === actual?.n ? { className: "actual" } : {},
+      el("td", {}, c.n),
+      el("td", {}, fmtHoraCorta.format(new Date(c.inicio)).slice(0, 5)),
+      el("td", {}, NOMBRE_CORTO_MODO[c.modo] ?? c.modo),
+      el("td", {}, nombreSmtp(c.smtp) === "mailpit" ? "Mailpit" : nombreSmtp(c.smtp)),
+      el("td", { class: "num" }, num(c.emergencias)),
+      el("td", { class: "num" }, num(c.rechazadas_429)),
+      el("td", { class: "num" }, !c.fin ? "en curso" : medida === null ? "—" : `${fmtSeg.format(Math.max(medida, 0))} s`),
+      el("td", {}, c.medida?.nivel ? el("span", { className: "insignia", dataset: { nivel: c.medida.nivel } }, fmtNum.format(c.medida.puntos)) : "—"),
+      el("td", { className: "acciones-fila" }, boton("log"), boton("csv")),
+    );
+  }));
+}
+
 // ------------------------------------------------------------------ KPIs
 function pintarKpis(e) {
   $("#kpi-aceptadas").textContent = num(e.http.aceptadas);
-  $("#kpi-aceptadas-pie").textContent = `de ${num(e.http.total)} recibidas por el gateway${e.http.otros_errores ? ` · ${num(e.http.otros_errores)} otros errores` : ""}`;
+  $("#kpi-aceptadas-pie").textContent = `aceptadas de ${num(e.http.total)}${e.http.otros_errores ? ` · ${num(e.http.otros_errores)} otros errores` : ""}`;
   $("#kpi-429").textContent = num(e.http.rechazadas_429);
   $("#kpi-enviadas").textContent = num(e.eventos.enviadas);
   $("#kpi-emergencias").textContent = num(e.eventos.emergencias);
   const extra = [e.eventos.reintentos && `${num(e.eventos.reintentos)} reintentos`, e.eventos.dlq && `${num(e.eventos.dlq)} en DLQ`, e.eventos.fallidas && `${num(e.eventos.fallidas)} sin encolar`].filter(Boolean);
-  $("#kpi-emergencias-pie").textContent = extra.length ? extra.join(" · ") : "correos enviados / detectadas";
+  $("#kpi-emergencias-pie").textContent = extra.length ? extra.join(" · ") : "correos / Emergency";
   $("#kpi-pendientes").textContent = e.redis.ok ? num(e.redis.pendientes) : "—";
-  $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes sin ACK · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
+  $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
 }
 
 // ------------------------------------------------------------------ arquitectura viva
@@ -175,15 +264,11 @@ function pintarFlujo(e, ahora) {
 function pintarAcciones(e) {
   const corriendo = e.k6.estado === "corriendo";
   $("#btn-carga").disabled = corriendo;
-  $("#btn-carga").textContent = corriendo ? "Carga en curso…" : textoBotonCarga();
+  proximaCorrida = (e.historial[0]?.n ?? 0) + 1;
+  $("#btn-carga").textContent = corriendo ? `Corrida #${e.corrida?.n ?? ""} en curso…` : textoBotonCarga();
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";
   const textoK6 = { corriendo: `Corriendo (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, terminado: `Terminada (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, fallido: `Falló (código ${e.k6.codigo})` }[e.k6.estado] ?? "Inactivo";
   fijarPildora($("#k6-estado"), nivelK6, textoK6);
-  // Solo se descarga una carga terminada (bien o mal); una carga nueva reemplaza a la anterior.
-  const descargable = e.k6.estado === "terminado" || e.k6.estado === "fallido";
-  for (const boton of document.querySelectorAll(".descargas button")) {
-    if (!boton.dataset.ocupado) boton.disabled = !descargable;
-  }
   const consola = $("#k6-salida");
   const texto = e.k6.salida.join("\n");
   if (consola.textContent !== texto) {
@@ -254,34 +339,36 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
   }
 });
 
-for (const boton of document.querySelectorAll(".descargas button")) {
-  boton.addEventListener("click", async () => {
-    boton.dataset.ocupado = "1";
-    boton.disabled = true;
-    try {
-      const r = await fetch(`/api/carga/logs?formato=${boton.dataset.formato}`);
-      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
-      const nombre = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") ?? "")?.[1] ?? `carga.${boton.dataset.formato}`;
-      const url = URL.createObjectURL(await r.blob());
-      el("a", { href: url, download: nombre }).click();
-      URL.revokeObjectURL(url);
-      avisar(`Descargado ${nombre}.`);
-    } catch (err) {
-      avisar(`No se pudieron descargar los logs: ${err.message}`);
-    } finally {
-      delete boton.dataset.ocupado;
-    }
-  });
-}
+// Los botones del historial se repintan cada segundo: el clic se escucha en la tabla.
+$("#historial").addEventListener("click", async (ev) => {
+  const boton = ev.target.closest("button[data-formato]");
+  if (!boton || boton.disabled) return;
+  const { n, formato } = boton.dataset;
+  descargando.add(`${n}-${formato}`);
+  boton.disabled = true;
+  try {
+    const r = await fetch(`/api/corridas/${n}/logs?formato=${formato}`);
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+    const nombre = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") ?? "")?.[1] ?? `corrida-${n}.${formato}`;
+    const url = URL.createObjectURL(await r.blob());
+    el("a", { href: url, download: nombre }).click();
+    URL.revokeObjectURL(url);
+    avisar(`Descargado ${nombre}.`);
+  } catch (err) {
+    avisar(`No se pudieron descargar los logs: ${err.message}`);
+  } finally {
+    descargando.delete(`${n}-${formato}`);
+  }
+});
 
 $("#btn-carga").addEventListener("click", async () => {
   const modo = modoElegido();
   const profesor = modo === "profesor";
   const emergencias = Number($("#emergencias").value);
   try {
-    await post("/api/carga", profesor ? { modo } : { modo, emergencias });
+    const d = await post("/api/carga", profesor ? { modo } : { modo, emergencias });
     const detalle = profesor ? "k6/profesor.js decide los Emergency" : `${emergencias} Emergency`;
-    avisar(`Carga lanzada con ${NOMBRE_MODO[modo]} (${detalle}). La ventana se reinició para observar solo esta corrida.`);
+    avisar(`Corrida #${d.corrida} lanzada con ${NOMBRE_MODO[modo]} (${detalle}). Solo cuenta lo que entra mientras k6 envía.`);
   } catch (err) {
     avisar(`No se pudo lanzar la carga: ${err.message}`);
   }
@@ -305,15 +392,6 @@ $("#fallas").addEventListener("click", async (ev) => {
   }
 });
 
-$("#btn-ventana").addEventListener("click", async () => {
-  try {
-    await post("/api/ventana/reiniciar");
-    avisar("Ventana reiniciada: los contadores empiezan desde ahora.");
-  } catch (err) {
-    avisar(`No se pudo reiniciar: ${err.message}`);
-  }
-});
-
 // ------------------------------------------------------------------ tema
 (function tema() {
   const raiz = document.documentElement;
@@ -325,7 +403,7 @@ $("#btn-ventana").addEventListener("click", async () => {
     const oscuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
     raiz.dataset.theme = oscuro ? "light" : "dark";
     try { localStorage.setItem("panel-tema", raiz.dataset.theme); } catch { /* ignorar */ }
-    if (ultimoEstado) pintarGrafica(ultimoEstado.serie);
+    if (ultimoEstado) { pintarGrafica(ultimoEstado.serie); pintarLinea(ultimoEstado); }
   });
 })();
 
@@ -447,8 +525,8 @@ function pintarEmergencias(lista) {
   $("#emergencias-vacio").hidden = lista.length > 0;
   $("#tabla-emergencias").replaceChildren(...lista.map((em) => {
     const [nivel, texto] = ESTADOS_EMERGENCIA[em.estado] ?? ["neutral", em.estado];
-    return el("tr", {},
-      el("td", { class: "placa" }, em.placa),
+    return el("tr", em.en_corrida ? {} : { className: "fuera", title: "Entró después de que k6 terminó: no cuenta en la corrida" },
+      el("td", { class: "placa" }, em.placa, em.en_corrida ? null : el("span", { className: "etiqueta-fuera" }, "fuera de corrida")),
       el("td", {}, hora(em.recibida)),
       el("td", { class: "num" }, em.ms_encolada === null ? "—" : `+${num(em.ms_encolada)} ms`),
       el("td", { class: "num" }, em.ms_envio === null ? "—" : `+${num(em.ms_envio)} ms`),
@@ -478,7 +556,7 @@ function pintarFeed(feed) {
   )));
 }
 
-addEventListener("resize", () => ultimoEstado && pintarGrafica(ultimoEstado.serie));
+addEventListener("resize", () => { if (ultimoEstado) { pintarGrafica(ultimoEstado.serie); pintarLinea(ultimoEstado); } });
 ciclo();
 
 // ------------------------------------------------------------------ modo de carga
@@ -487,7 +565,7 @@ function modoElegido() {
 }
 
 function textoBotonCarga() {
-  return modoElegido() === "profesor" ? "Lanzar carga · k6 del profesor" : "Lanzar carga · k6 propio";
+  return `Lanzar corrida #${proximaCorrida}`;
 }
 
 function nombreSmtp(host) {

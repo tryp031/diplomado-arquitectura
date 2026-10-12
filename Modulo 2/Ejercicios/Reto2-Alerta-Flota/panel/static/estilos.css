@@ -62,7 +62,8 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .marca { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .marca-icono { width: 32px; height: 32px; color: var(--acento); flex: none; }
 .marca h1 { font-size: 17px; font-weight: 650; }
-.sub { color: var(--tinta-2); font-size: 12.5px; }
+.asr { color: var(--tinta-2); font-size: 12.5px; max-width: 780px; margin-top: 2px; }
+.asr b { color: var(--tinta); }
 .barra-derecha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .meta { color: var(--tenue); font-size: 12px; }
 
@@ -99,19 +100,14 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 /* ---------- Rejilla principal ---------- */
 .contenido { padding: 20px 24px 8px; display: grid; gap: 16px; max-width: 1480px; margin: 0 auto; }
 .fila { display: grid; gap: 16px; }
-.fila-kpi { grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)); }
-.fila-arquitectura { grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr); }
+.fila-corrida { grid-template-columns: minmax(300px, 1fr) minmax(0, 2fr); }
+.fila-historial { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
 .fila-detalle { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
-.columna { display: grid; gap: 16px; align-content: start; min-width: 0; }
-.acciones { align-self: start; }
 @media (max-width: 1180px) {
-  .fila-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .fila-kpi .hero { grid-column: 1 / -1; }
-  .fila-arquitectura, .fila-detalle { grid-template-columns: minmax(0, 1fr); }
+  .fila-corrida, .fila-historial, .fila-detalle { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .barra, .contenido { padding-left: 16px; padding-right: 16px; }
-  .fila-kpi { grid-template-columns: minmax(0, 1fr); }
   .barra-derecha { width: 100%; }
   .hero-numero { font-size: 44px; }
 }
@@ -144,11 +140,24 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .escala-etiquetas span:first-child { transform: none; left: 0; }
 .escala-etiquetas .fin { right: 0; transform: none; }
 
-/* ---------- KPIs ---------- */
-.kpi { display: flex; flex-direction: column; gap: 6px; }
-.kpi-numero { font-size: 32px; font-weight: 700; letter-spacing: -.01em; margin-top: 4px; }
-.kpi-de { font-size: 18px; color: var(--tinta-2); font-weight: 600; }
-.kpi-pie { color: var(--tenue); font-size: 12px; margin-top: auto; }
+/* ---------- KPIs de la corrida ---------- */
+.mini { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.mini div { background: var(--superficie-2); border-radius: 10px; padding: 9px 11px; min-width: 0; }
+.mini b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.mini span { font-size: 12px; color: var(--tinta-2); }
+.mini b span { font-size: inherit; color: inherit; }
+
+/* ---------- Línea de tiempo ---------- */
+.linea svg { width: 100%; height: 170px; display: block; }
+.linea svg[hidden], .leyenda[hidden] { display: none; }
+.linea text { font-size: 11px; fill: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.linea .eje { stroke: var(--rejilla); }
+.linea .carga { fill: var(--serie-1); opacity: .22; }
+.linea .tramo-medida { stroke: var(--tinta); stroke-width: 2; }
+.linea .medida-etiqueta { font-weight: 650; fill: var(--tinta); }
+.linea .hito { fill: var(--superficie); stroke-width: 2.5; }
+.leyenda-hitos { margin-top: 8px; }
+.hito-clave { width: 10px; height: 10px; border-radius: 50%; border: 2.5px solid; display: inline-block; }
 
 /* ---------- Flujo de arquitectura ---------- */
 .flujo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 22px; }
@@ -175,12 +184,15 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .replicas li span:first-child { font-family: var(--mono); font-size: 11px; color: var(--tenue); overflow: hidden; text-overflow: ellipsis; }
 .nota { margin-top: 14px; font-size: 12.5px; color: var(--tinta-2); }
 
-/* ---------- Acciones ---------- */
-.acciones { display: flex; flex-direction: column; gap: 4px; }
-.bloque { padding: 12px 0; border-top: 1px solid var(--borde); }
-.bloque:first-of-type { border-top: 0; padding-top: 0; }
+/* ---------- Barra de control ---------- */
+.control-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.control-fila .segmentado, .control-fila .fila-campo { margin-bottom: 0; }
+.control-fila .btn-primario { width: auto; }
+.separador { flex: 1; }
+.btn-manual { border-style: dashed; }
 .ayuda { font-size: 12px; color: var(--tenue); margin-top: 6px; }
-.segmentado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 3px; border-radius: 10px; background: var(--superficie-2); border: 1px solid var(--borde); margin-bottom: 10px; }
+.ayuda.en-linea { margin-top: 0; }
+.segmentado { display: grid; grid-template-columns: repeat(3, auto); gap: 4px; padding: 3px; border-radius: 10px; background: var(--superficie-2); border: 1px solid var(--borde); margin-bottom: 10px; }
 .segmentado input { position: absolute; opacity: 0; pointer-events: none; }
 .segmentado span { display: block; text-align: center; padding: 6px 8px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--tinta-2); cursor: pointer; }
 .segmentado input:checked + span { background: var(--superficie); color: var(--tinta); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
@@ -188,12 +200,12 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .fila-campo[hidden] { display: none; }
 .fila-campo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--tinta-2); }
 .fila-campo input { width: 76px; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta); text-align: right; }
-.k6-estado { margin-top: 10px; }
 .consola { margin: 8px 0 0; padding: 10px; min-height: 64px; max-height: 140px; overflow: auto; border-radius: 9px; background: var(--superficie-2); border: 1px solid var(--borde); font: 11.5px/1.5 var(--mono); color: var(--tinta-2); white-space: pre-wrap; word-break: break-word; }
 .consola:empty::before { content: "La salida de k6 aparecerá aquí."; color: var(--tenue); }
-.descargas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
-.descargas .ayuda { flex-basis: 100%; margin: 0; }
-.fallas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.herramientas { display: grid; gap: 10px; }
+.herramientas summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--tinta-2); }
+.fallas { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.esperado { display: block; font-size: 12px; color: var(--tenue); margin-top: 2px; }
 .fallas li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px; font-size: 13px; }
 .falla-estado { font-size: 12px; color: var(--tenue); }
 .falla-estado[data-nivel="good"] { color: var(--tinta-2); }
@@ -237,6 +249,11 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .tabla td { padding: 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tabla .num { text-align: right; }
 .tabla td.placa { font-family: var(--mono); font-size: 12.5px; }
+.tabla tr.actual td { background: color-mix(in srgb, var(--acento) 8%, transparent); }
+.tabla tr.fuera td { color: var(--tenue); }
+.etiqueta-fuera { margin-left: 8px; font: 600 11px system-ui, sans-serif; color: var(--tenue); border: 1px solid var(--borde); border-radius: 999px; padding: 1px 7px; }
+.acciones-fila { display: flex; gap: 6px; }
+.btn-chico { padding: 3px 9px; font-size: 12px; }
 .insignia { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--tinta-2); }
 .insignia::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tenue); }
 .insignia[data-nivel="good"]::before { background: var(--good); }
