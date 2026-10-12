@@ -527,6 +527,58 @@ svg text{font-family:var(--sans)}
 @media print{body{background:#081522!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.lamina{break-after:page}}
 
 
+
+/* ═══ Freddy cinematic composition v3 · referencia editorial ═══ */
+:root{--gold:#ffc13b;--electric:#47c5ff;--mint:#48dbba}
+.lamina{padding-top:clamp(32px,4vw,64px);padding-bottom:85px}
+.lamina .caja{max-width:1330px}
+.lamina:not(:first-child) .caja>.kicker{margin-bottom:18px}
+.lamina:not(:first-child) h2{max-width:1130px;line-height:1.04;text-wrap:balance}
+.lamina:not(:first-child) h2::after{content:"";display:block;width:72px;height:4px;background:var(--gold);margin-top:23px}
+.lamina .rej.d2,.lamina .rej.d3,.lamina .rej.d4{align-items:stretch}
+.card{min-height:165px;border-radius:16px;box-shadow:0 16px 48px #0007;backdrop-filter:blur(8px);
+ background:linear-gradient(125deg,#091827ef,#12334bea);border:1px solid #4b8cb388}
+.card:before{width:3px;height:100%;background:linear-gradient(#f7b52d,#ffdf81)}
+.card.acento{background:linear-gradient(130deg,#082535f5,#125a68dd)}
+.card.acento:before{background:linear-gradient(#47c5ff,#43e2b5)}
+.card .et{color:var(--gold);font-size:11px;letter-spacing:.11em}
+.card .g{font-family:var(--display);font-size:clamp(30px,3.5vw,49px)}
+.card small{font-size:14px;color:#e0edf6}
+.card h3{color:white}
+.tabox{border-radius:16px;border-color:#36708d;box-shadow:0 22px 65px #0007}
+thead th{background:linear-gradient(100deg,#0a253b,#15415a);color:var(--gold)}
+.aviso{border-radius:13px;box-shadow:0 12px 38px #0004}
+.portada{min-height:calc(100vh - 185px);max-height:850px;display:flex;justify-content:center;align-items:flex-start;
+ padding:clamp(35px,6vw,95px);border:1px solid #f8bd3888;border-radius:18px;
+ background:linear-gradient(90deg,#071421f5 0%,#091b2cf0 48%,#0b2536a8 77%,#112f42c9 100%),
+ radial-gradient(ellipse at 76% 76%,#d59636,#135166 34%,#081522 72%)}
+.portada:after{content:"";position:absolute;right:-7%;bottom:-18%;top:auto;width:68%;height:80%;
+ border:0;border-radius:0;box-shadow:none;opacity:.8;pointer-events:none;
+ background:
+ linear-gradient(155deg,transparent 48%,#071522 49% 60%,transparent 61%) bottom/100% 65% no-repeat,
+ linear-gradient(25deg,transparent 48%,#1b4552 49% 59%,transparent 60%) bottom/100% 77% no-repeat,
+ radial-gradient(ellipse at 60% 79%,#f9b348aa,transparent 47%);
+ clip-path:polygon(0 100%,17% 68%,34% 83%,53% 30%,68% 65%,83% 39%,100% 76%,100% 100%)}
+.portada:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.42;
+ background:repeating-radial-gradient(ellipse at 80% 55%,transparent 0 21px,#ffe0a728 22px 23px,transparent 24px 41px);
+ mask-image:linear-gradient(90deg,transparent 37%,black 100%)}
+.portada h1{font-size:clamp(48px,6.4vw,93px);max-width:940px;line-height:1.05;
+ text-shadow:0 10px 35px #0008}
+.portada h1::first-line{color:var(--gold)}
+.portada .kicker{color:#f5d37e;letter-spacing:.2em}
+.portada .lede{max-width:730px}
+.portada p:last-child{border-top:1px solid #ffffff4a;padding-top:18px;max-width:690px}
+.lamina:not(:first-child){background-image:radial-gradient(ellipse at 100% 0%,#1a55633d,transparent 45%)}
+.lamina:not(:first-child) .caja{position:relative}
+.lamina:not(:first-child) .caja:before{content:"";position:absolute;right:0;top:0;width:100px;height:100px;
+ border-top:1px solid #ffc13b50;border-right:1px solid #ffc13b50;pointer-events:none}
+.lamina .rej.d3>.card:nth-child(2),.lamina .rej.d4>.card:nth-child(2){border-color:#268cbd99}
+.lamina .rej.d3>.card:nth-child(3),.lamina .rej.d4>.card:nth-child(3){border-color:#269b8599}
+pre.dib{font-size:clamp(10px,1vw,14px);background:linear-gradient(125deg,#06111f,#0c2338);
+ border-color:#2e7ba3;line-height:1.7}
+@media(min-width:1100px){.lamina:not(:first-child) .rej.d3>.card{min-height:220px}}
+@media(max-width:700px){.portada{min-height:600px}.portada:after{width:100%;height:46%;right:-10%;bottom:-10%}.portada h1{font-size:clamp(40px,10vw,58px)}.card{min-height:unset}}
+
 </style>
 </head>
 <body>
