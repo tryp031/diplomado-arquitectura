@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='15' width='64' height='64' fill='%233157ed'/%3E%3Cpath d='M18 20h28v24H18z' fill='none' stroke='white' stroke-width='5'/%3E%3Cpath d='M25 29h14M32 22v20' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600;700;800;900&display=swap">
 <style>
 /*
  * Mismo sistema visual que el plano de control (app/index.html): laboratorio claro,
@@ -433,6 +433,100 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
 :root[data-theme="dark"]{--paper:#0a1120;--surface:#121f35;--field:#15243c;--ink:#e8f0ff;--muted:#a4b5d0;--line:#2b3b56;--line-2:#21314a;--sky:#1a315a;--blue:#86aaff;--night:#080f1f}
 @media print{.barra,.progreso,.draft{display:none!important}body{background:white!important}.lamina{break-after:page;page-break-after:always}}
 
+/* ═══ FREDDY EDITORIAL / ARCHITECTURE FIELD NOTES ═══
+   Lenguaje visual inspirado en revistas de exploración científica:
+   titulares de alto contraste, acentos ámbar, mapas topográficos y
+   composición editorial. No se emplean logos de terceros. */
+:root{
+ --ink:#f4f3ed;--muted:#b7c3d1;--soft:#8ca1b6;
+ --paper:#081522;--surface:#11273a;--field:#152d41;
+ --line:#365064;--line-2:#203b50;
+ --blue:#52c3e8;--blue-deep:#2d9bc0;--blue-ink:#061b29;
+ --sky:#193d50;--lime:#f8bd38;--lime-ink:#171c22;
+ --green:#71d6b0;--green-soft:#123b36;
+ --red:#ff8270;--red-soft:#482a31;
+ --warn:#ffcc64;--warn-soft:#493b22;
+ --night:#071321;--night-ink:#ffffff;--night-muted:#a9c2d2;
+ --sh-s:0 16px 45px #0005;--sh-m:0 28px 70px #0008;
+ --sans:"DM Sans",system-ui,sans-serif;
+ --mono:"DM Mono",ui-monospace,monospace;
+ --display:"Playfair Display",Georgia,serif;
+}
+:root[data-theme="dark"],:root[data-theme="light"]{
+ --ink:#f4f3ed;--muted:#b7c3d1;--soft:#8ca1b6;
+ --paper:#081522;--surface:#11273a;--field:#152d41;
+ --line:#365064;--line-2:#203b50;--blue:#52c3e8;
+ --blue-deep:#2d9bc0;--blue-ink:#061b29;--sky:#193d50;
+ --lime:#f8bd38;--lime-ink:#171c22;--green:#71d6b0;
+ --green-soft:#123b36;--red:#ff8270;--red-soft:#482a31;
+ --warn:#ffcc64;--warn-soft:#493b22;--night:#071321;
+ --night-ink:#ffffff;--night-muted:#a9c2d2;
+}
+body{background:#081522;color:var(--ink);background-image:
+ radial-gradient(ellipse at 92% 8%,#20475c99,transparent 39%),
+ repeating-radial-gradient(ellipse at 85% 32%,transparent 0 28px,#ffffff08 29px 30px,transparent 31px 51px);
+ background-attachment:fixed}
+.barra{background:#081522e8;border-bottom:1px solid #ffffff26;box-shadow:0 7px 30px #0004}
+.marca{letter-spacing:.02em;font-weight:700}
+.marca .pin{background:#f8bd38;border-radius:0;width:5px;height:25px}
+.freddy-edition{border:1px solid #f8bd3880;color:#f8bd38;background:#f8bd3815}
+.progreso{background:linear-gradient(90deg,#f8bd38,#f9df89);height:3px}
+.lamina{position:relative;isolation:isolate}
+.lamina:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(150deg,transparent 64%,#ffffff04 100%)}
+.lamina:nth-of-type(3n):before{background:radial-gradient(ellipse at 80% 75%,#155a6760,transparent 52%)}
+.caja{max-width:1180px}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+ border:0;border-left:3px solid #f8bd38;border-radius:0;background:transparent;
+ color:#f8bd38;padding:4px 0 4px 14px}
+h1,h2{font-family:var(--display);font-weight:700;letter-spacing:-.035em}
+h1{font-size:clamp(52px,7.5vw,108px);line-height:1.04}
+h2{font-size:clamp(36px,4.7vw,65px);line-height:1.12;margin-bottom:28px;max-width:1040px}
+h3{font-family:var(--sans);font-size:clamp(18px,2vw,25px);letter-spacing:-.025em}
+p.lede{max-width:930px;font-size:clamp(18px,2.1vw,25px);line-height:1.5;color:#d6e0e9}
+.portada{min-height:570px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+ border:1px solid #e9c06965;border-radius:4px;
+ background:linear-gradient(90deg,#071321ee 0%,#0a1c2cdd 55%,#0d3546aa 100%),
+ radial-gradient(ellipse at 87% 65%,#f2a94a90 0%,#2b77878a 25%,#081522 72%);
+ padding:clamp(40px,6vw,80px);box-shadow:0 35px 100px #0009}
+.portada:before{content:"";position:absolute;inset:0;opacity:.38;pointer-events:none;
+ background:repeating-radial-gradient(ellipse at 90% 68%,transparent 0 24px,#f8bd3840 25px 26px,transparent 27px 47px);
+ mask-image:linear-gradient(90deg,transparent 35%,black)}
+.portada:after{content:"02";position:absolute;right:4%;top:2%;font-family:var(--display);font-size:clamp(180px,29vw,420px);font-weight:900;line-height:1;color:#ffffff08;border:0;box-shadow:none;width:auto;height:auto;border-radius:0}
+.portada h1{max-width:880px;color:#fff;text-wrap:balance}
+.portada h1::first-line{color:#f8bd38}
+.portada .lede{max-width:770px;color:#e4ebf0!important}
+.portada p:last-child{font-size:13px;color:#b7c3d1;letter-spacing:.04em}
+.card,.dgfig,.tabox,.figura{border:1px solid #446075;background:linear-gradient(145deg,#183349,#0d2234);
+ border-radius:4px;box-shadow:0 15px 36px #0004}
+.card{position:relative;overflow:hidden;padding:clamp(22px,2.7vw,34px)}
+.card:before{content:"";position:absolute;left:0;top:0;width:54px;height:3px;background:#f8bd38}
+.card.acento{background:linear-gradient(145deg,#23485c,#102c40)}
+.card.acento:before{background:#53c3e8}
+.card .et{color:#f8bd38;letter-spacing:.16em;font-family:var(--mono);font-size:10px}
+.card .g{font-family:var(--display);font-size:clamp(28px,3.6vw,44px);color:#fff}
+.card small{color:#c3d1dc;line-height:1.7}
+.rej{gap:19px}
+.aviso{border:1px solid #6e6044;border-left:4px solid #f8bd38;background:#283342;color:#f2eee5;border-radius:3px}
+.aviso.clave{border-left-color:#52c3e8}
+.aviso.ojo{border-left-color:#f8bd38}
+.tabox{overflow:hidden}
+thead th{background:#203b4e;color:#f8bd38;font-family:var(--mono);font-size:11px;letter-spacing:.09em}
+td{border-color:#ffffff17;color:#e4edf4}
+tbody tr:nth-child(even):not(.destaca) td{background:#ffffff07}
+pre.dib{background:#06121e;color:#dceaf4;border:1px solid #49677c;border-radius:4px;box-shadow:0 18px 55px #0006}
+.fuente{color:#9eb1c2;font-size:11px;border-top:1px solid #ffffff24;padding-top:12px;margin-top:24px}
+.notas{border-color:#567084;background:#142d40}
+.bt{border-radius:2px;border-color:#526e82;color:#e4ebf1}
+.bt:hover{background:#23465a;color:white}
+.aws-region{background:#10283a;border-radius:4px}
+.aws-svc{border-radius:3px;background:#18394e;border:1px solid #54758a}
+svg text{font-family:var(--sans)}
+::selection{background:#f8bd38;color:#091522}
+@media(max-width:700px){.portada{min-height:480px;padding:32px 23px}.portada:after{font-size:170px}.lamina{padding:25px 14px 75px}h1{font-size:clamp(44px,10vw,70px)}h2{font-size:clamp(33px,8vw,48px)}.freddy-edition{display:none}}
+@media print{body{background:#081522!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.lamina{break-after:page}}
+
+
 </style>
 </head>
 <body>
@@ -440,7 +534,7 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
 <div class="barra">
   <span class="marca"><span class="pin"></span> Reto 2 · Alerta de flota <span class="freddy-edition">EDICIÓN FREDDY · V2</span></span>
   <span class="sep"></span>
-  <span class="cuenta"><span id="actual">1</span>/<span id="total">20</span></span>
+  <span class="cuenta"><span id="actual">1</span>/<span id="total">21</span></span>
   <button class="bt" id="bNotas" aria-pressed="false" title="Tecla N">Notas</button>
   <button class="bt" id="bTema" title="Tecla T">Tema</button>
 </div>
