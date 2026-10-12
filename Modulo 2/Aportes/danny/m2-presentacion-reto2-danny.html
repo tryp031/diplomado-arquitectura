@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reto 2 · Alerta de flota</title>
+<meta name="description" content="Presentación del Reto 2 (alerta temprana para flota vehicular): versión local en Docker y versión AWS serverless. Módulo 2, Diplomado en Arquitectura de Software y Cloud Computing. Borrador generado con IA para revisión del equipo.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='15' width='64' height='64' fill='%233157ed'/%3E%3Cpath d='M18 20h28v24H18z' fill='none' stroke='white' stroke-width='5'/%3E%3Cpath d='M25 29h14M32 22v20' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/*
+ * Mismo sistema visual que el plano de control (app/index.html): laboratorio claro,
+ * tokens de color que el modo oscuro solo reasigna, y el dato numérico SIEMPRE en
+ * monoespaciada. Una lámina nueva hereda los dos temas sin tocar una regla.
+ */
+:root{
+  --ink:#16213c; --muted:#6d7890; --soft:#8a93a5;
+  --paper:#f5f7fb; --surface:#ffffff; --field:#fbfcff;
+  --line:#dce2ef; --line-2:#eef1f8;
+  --blue:#3157ed; --blue-ink:#ffffff; --sky:#e9efff; --blue-deep:#2646c9;
+  --lime:#dff66c; --lime-ink:#304100;
+  --green:#237457; --green-soft:#e5f7ef;
+  --red:#c8393b; --red-soft:#fff1f1;
+  --warn:#a8600c; --warn-soft:#fff6e8;
+  --night:#121c36; --night-ink:#ffffff; --night-muted:#a9b5ce;
+  --sh-s:0 8px 25px #2030640c;
+  --sh-m:0 12px 40px #25345e0d;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e7ecf8; --muted:#8e99b1; --soft:#7b8598;
+    --paper:#0c111e; --surface:#141b2d; --field:#101827;
+    --line:#242e47; --line-2:#1b2337;
+    --blue:#6d8cff; --blue-ink:#0b1020; --sky:#18213c; --blue-deep:#5878f0;
+    --lime:#cbe555; --lime-ink:#242f00;
+    --green:#57c391; --green-soft:#10281f;
+    --red:#e8706e; --red-soft:#2b1518;
+    --warn:#dda94f; --warn-soft:#2a2113;
+    --night:#090e1b; --night-ink:#eef2fb; --night-muted:#94a1bd;
+    --sh-s:0 8px 25px #00000040; --sh-m:0 12px 40px #00000059;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e7ecf8; --muted:#8e99b1; --soft:#7b8598;
+  --paper:#0c111e; --surface:#141b2d; --field:#101827;
+  --line:#242e47; --line-2:#1b2337;
+  --blue:#6d8cff; --blue-ink:#0b1020; --sky:#18213c; --blue-deep:#5878f0;
+  --lime:#cbe555; --lime-ink:#242f00;
+  --green:#57c391; --green-soft:#10281f;
+  --red:#e8706e; --red-soft:#2b1518;
+  --warn:#dda94f; --warn-soft:#2a2113;
+  --night:#090e1b; --night-ink:#eef2fb; --night-muted:#94a1bd;
+  --sh-s:0 8px 25px #00000040; --sh-m:0 12px 40px #00000059;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased}
+
+/* ══ Barra superior ══ */
+.barra{position:fixed; top:0; left:0; right:0; height:52px; z-index:40;
+  display:flex; align-items:center; gap:14px; padding:0 18px;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+.marca{display:flex; align-items:center; gap:9px; font-weight:800; font-size:14px; letter-spacing:-.01em}
+.marca .pin{width:9px; height:9px; border-radius:3px; background:var(--blue); flex:none}
+.barra .sep{flex:1}
+.barra .cuenta{font-family:var(--mono); font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+.bt{border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;
+  border-radius:9px; padding:6px 11px; font-family:var(--sans); font-weight:700; font-size:12.5px;
+  transition:background .12s, color .12s}
+.bt:hover{background:var(--line-2); color:var(--ink)}
+.bt[aria-pressed="true"]{background:var(--sky); color:var(--blue); border-color:transparent}
+.progreso{position:fixed; top:52px; left:0; height:2px; background:var(--blue); z-index:41;
+  width:0; transition:width .2s ease}
+
+/* ══ Láminas ══ */
+main{scroll-snap-type:y mandatory; height:100vh; overflow-y:scroll; padding-top:52px}
+.lamina{scroll-snap-align:start; min-height:calc(100vh - 52px);
+  display:flex; align-items:center; justify-content:center; padding:36px 24px 86px;
+  border-bottom:1px solid var(--line-2)}
+/* Si la lamina no cabe, `center` la desborda por arriba y la barra fija se come el
+   kicker. `safe` hace que el navegador caiga a `start` justo en ese caso. */
+@supports (align-items:safe center){ .lamina{align-items:safe center} }
+.caja{width:100%; max-width:1040px}
+
+.kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px;
+  font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--blue);
+  background:var(--sky); border-radius:999px; padding:5px 12px; margin-bottom:14px}
+h1{font-size:clamp(34px,5.4vw,58px); line-height:1.06; letter-spacing:-.033em; margin:0 0 18px; font-weight:900}
+h2{font-size:clamp(26px,3.5vw,39px); line-height:1.12; letter-spacing:-.028em; margin:0 0 14px; font-weight:850}
+h3{font-size:18px; letter-spacing:-.01em; margin:26px 0 10px; font-weight:800}
+p{margin:0 0 13px; max-width:68ch; color:var(--ink)}
+p.lede{font-size:clamp(17px,2.1vw,21px); line-height:1.45; color:var(--muted); max-width:62ch}
+strong{font-weight:750}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:600}
+
+/* ══ Portada ══ */
+.portada{background:var(--blue); color:#fff; border-radius:26px; padding:clamp(32px,5vw,58px);
+  box-shadow:var(--sh-m)}
+.portada h1{color:#fff}
+.portada .kicker{background:#ffffff26; color:#fff}
+.portada p{color:#ffffffd9}
+.firma{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:32px;
+  padding-top:22px; border-top:1px solid #ffffff2e; font-size:14px; color:#ffffffc4}
+.firma b{color:#fff; font-weight:700}
+
+/* ══ Cifra protagonista ══ */
+.cifra{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; margin:16px 0}
+.cifra .v{font-family:var(--mono); font-weight:600; letter-spacing:-.04em;
+  font-size:clamp(46px,8vw,86px); line-height:.94; color:var(--blue)}
+.cifra .u{font-family:var(--mono); font-size:clamp(17px,2.4vw,25px); color:var(--muted)}
+.cifra.ok .v{color:var(--green)}
+.cifra.mal .v{color:var(--red)}
+
+/* ══ Rejillas ══ */
+.rej{display:grid; gap:13px; margin:18px 0}
+.rej.d2{grid-template-columns:repeat(2,1fr)}
+.rej.d3{grid-template-columns:repeat(3,1fr)}
+.rej.d4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:820px){ .rej.d2,.rej.d3,.rej.d4{grid-template-columns:1fr} }
+
+.card{background:var(--surface); border:1px solid var(--line); border-radius:17px;
+  padding:19px; box-shadow:var(--sh-s)}
+.card .et{font-family:var(--mono); font-size:11.5px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--soft); display:block; margin-bottom:9px}
+.card .g{font-family:var(--mono); font-size:clamp(24px,3.4vw,34px); font-weight:600;
+  letter-spacing:-.03em; display:block; line-height:1.08; color:var(--ink)}
+.card small{display:block; margin-top:9px; color:var(--muted); font-size:13.5px; line-height:1.45}
+.card.acento{background:var(--sky); border-color:transparent}
+.card.acento .g{color:var(--blue)}
+.card.bien{background:var(--green-soft); border-color:transparent}
+.card.bien .g{color:var(--green)}
+.card.mal{background:var(--red-soft); border-color:transparent}
+.card.mal .g{color:var(--red)}
+.card.noche{background:var(--night); border-color:transparent}
+.card.noche .g,.card.noche .et{color:var(--night-ink)}
+.card.noche small{color:var(--night-muted)}
+
+/* ══ Tablas ══ */
+.tabox{overflow-x:auto; margin:18px 0; border:1px solid var(--line); border-radius:15px;
+  background:var(--surface); box-shadow:var(--sh-s)}
+table{width:100%; border-collapse:collapse; font-size:14.5px}
+th,td{padding:11px 15px; text-align:left; border-bottom:1px solid var(--line-2); white-space:nowrap}
+thead th{font-family:var(--mono); font-size:11.5px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--soft); background:var(--field)}
+tbody tr:last-child td{border-bottom:0}
+/* La columna numerica se alinea a la derecha en TODA la columna, encabezado incluido:
+   si el `th` queda a la izquierda y el dato a la derecha, la cifra se lee corrida
+   respecto de su propio titulo. */
+th.n,td.n{text-align:right}
+td.n{font-family:var(--mono); font-variant-numeric:tabular-nums}
+td.m{font-family:var(--mono); font-variant-numeric:tabular-nums}
+tr.destaca td{background:var(--sky); font-weight:700}
+tr.tenue td{color:var(--muted); font-style:italic}
+.si{color:var(--green); font-weight:800}
+.no{color:var(--red); font-weight:800}
+
+/* ══ Barras comparativas ══ */
+.barras{margin:22px 0; display:grid; gap:11px}
+.fila{display:grid; grid-template-columns:clamp(120px,17vw,190px) 1fr max-content;
+  align-items:center; gap:13px}
+.fila .nom{font-size:14px; font-weight:650; text-align:right; color:var(--muted)}
+.fila .pista{display:block; height:26px; background:var(--line-2); border-radius:7px; overflow:hidden}
+/* `.relleno` es un <span>: sin `display:block` sigue siendo inline y el navegador
+   ignora width y height — la barra sale vacia aunque el estilo diga 100 %. */
+.fila .relleno{display:block; height:100%; background:var(--blue); border-radius:7px; min-width:3px}
+.fila .relleno.alto{background:var(--red)}
+.fila .val{font-family:var(--mono); font-size:13.5px; font-variant-numeric:tabular-nums;
+  font-weight:600; white-space:nowrap}
+@media (max-width:640px){ .fila{grid-template-columns:1fr; gap:4px} .fila .nom{text-align:left} }
+
+/* ══ Avisos ══ */
+.aviso{border-radius:14px; padding:14px 18px; margin:16px 0; font-size:14.5px; line-height:1.5;
+  border-left:3px solid}
+.aviso.clave{background:var(--sky); border-color:var(--blue)}
+.aviso.ojo{background:var(--warn-soft); border-color:var(--warn)}
+.aviso.pare{background:var(--red-soft); border-color:var(--red)}
+.aviso b{font-weight:800}
+.aviso p{margin:0 0 8px; max-width:none} .aviso p:last-child{margin:0}
+
+/* ══ Diagrama ASCII ══ */
+pre.dib{font-family:var(--mono); font-size:13px; line-height:1.55; background:var(--night);
+  color:var(--night-ink); border-radius:15px; padding:20px 22px; overflow-x:auto; margin:20px 0}
+
+/* ══ Píldoras ══ */
+.pill{display:inline-block; font-family:var(--mono); font-size:11.5px; font-weight:600;
+  padding:3px 9px; border-radius:999px; letter-spacing:.03em}
+.pill.viva{background:var(--green-soft); color:var(--green)}
+.pill.arch{background:var(--line-2); color:var(--muted)}
+
+/* ══ Notas del orador ══ */
+.notas{display:none; margin-top:26px; border-top:1px dashed var(--line); padding-top:18px}
+body.con-notas .notas{display:block}
+.notas .tag{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--lime-ink); background:var(--lime);
+  border-radius:5px; padding:3px 8px; display:inline-block; margin-bottom:10px}
+.notas p{font-size:14.5px; color:var(--muted); max-width:72ch}
+.notas .tiempo{font-family:var(--mono); color:var(--soft); font-size:13px}
+.notas code{font-family:var(--mono); font-size:13px; background:var(--line-2);
+  padding:1px 5px; border-radius:4px}
+
+/* ══ Marca de borrador ══ */
+.draft{position:fixed; right:16px; bottom:16px; z-index:39;
+  font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.07em;
+  background:var(--warn); color:#fff; border-radius:999px; padding:7px 14px;
+  box-shadow:var(--sh-s)}
+
+/* ══ Impresión / PDF ══ */
+@media print{
+  .barra,.progreso,.draft{display:none}
+  main{height:auto; overflow:visible; padding-top:0; scroll-snap-type:none}
+  .lamina{min-height:auto; page-break-after:always; border:0; padding:22px 0}
+  body{background:#fff; font-size:12px}
+  .notas{display:block !important}
+}
+
+/* Figura generada: lleva su propio lienzo claro (fondo blanco dentro del SVG), así que
+   la tarjeta se mantiene clara también en tema oscuro. Se incrusta sin modificar el SVG:
+   es evidencia, y los CSV que la originan no están versionados — no se puede regenerar. */
+.figura{margin:20px 0 4px; border:1px solid var(--line); border-radius:12px;
+  overflow:hidden; background:#ffffff; box-shadow:var(--sh-s)}
+.figura svg{display:block; width:100%; height:auto}
+.figura figcaption{padding:11px 15px; border-top:1px solid #e5e7eb; background:#f8fafc;
+  color:#475569; font-size:12.5px; line-height:1.55}
+.figura figcaption b{color:#1e293b}
+.tabox.prosa td{white-space:normal}
+.tabox.prosa td:first-child{white-space:nowrap; vertical-align:top}
+
+/* ══ Diagramas (v2) ══
+ * Redibujados como SVG en línea en vez de incrustar capturas: cada color sale de un
+ * token, así que el diagrama cambia de tema con la lámina y se lee nítido a cualquier
+ * tamaño. Convención de color, la misma en los cuatro:
+ *   noche = programa del equipo · dorado suave = capa del sistema operativo o
+ *   dominio compartido · verde = memoria compartida · azul = TCP Python.
+ */
+.dgfig{margin:20px 0 4px; background:var(--surface); border:1px solid var(--line);
+  border-radius:15px; box-shadow:var(--sh-s); overflow:hidden}
+.dgfig svg{display:block; width:100%; height:auto; padding:14px 12px 6px}
+.dgfig figcaption{padding:11px 16px; border-top:1px solid var(--line-2); background:var(--field);
+  color:var(--muted); font-size:13px; line-height:1.55}
+.dgfig figcaption b{color:var(--ink)}
+.dg text{font-family:var(--sans); fill:var(--ink); font-size:14px}
+.dg .mono{font-family:var(--mono)}
+.dg .t-b{font-weight:800}
+.dg .t-m{fill:var(--muted)}
+.dg .t-s{fill:var(--soft); font-style:italic; font-size:13px}
+.dg .t-blue{fill:var(--blue)} .dg .t-warn{fill:var(--warn)} .dg .t-green{fill:var(--green)}
+.dg .t-inv{fill:var(--night-ink)} .dg .t-inv2{fill:var(--night-muted)}
+.dg .t-white{fill:#fff}
+.dg .prog{fill:var(--night)}
+.dg .os{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.5}
+.dg .shm{fill:var(--green-soft); stroke:var(--green); stroke-width:1.5}
+.dg .file{fill:var(--surface); stroke:var(--ink); stroke-width:1.3}
+.dg .dom{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.3}
+.dg .dat{fill:var(--surface); stroke:var(--muted); stroke-width:1.3}
+.dg .card-w{fill:var(--surface); stroke:var(--night); stroke-width:1.3}
+.dg .g-b{fill:color-mix(in srgb, var(--blue) 7%, var(--surface)); stroke:var(--blue); stroke-width:1.3; stroke-dasharray:6 4}
+.dg .g-w{fill:color-mix(in srgb, var(--warn) 8%, var(--surface)); stroke:var(--warn); stroke-width:1.3; stroke-dasharray:6 4}
+.dg .g-n{fill:var(--line-2); stroke:var(--soft); stroke-width:1.3; stroke-dasharray:6 4}
+.dg .band-n{fill:var(--line-2); stroke:var(--line)}
+.dg .band-g{fill:var(--green-soft); stroke:var(--green); stroke-opacity:.45}
+.dg .f-blue{fill:var(--blue)} .dg .f-warn{fill:var(--warn)} .dg .f-green{fill:var(--green)}
+.dg .f-night{fill:var(--night)} .dg .f-muted{fill:var(--muted)}
+.dg .l-blue{stroke:var(--blue); stroke-width:2; fill:none}
+.dg .l-warn{stroke:var(--warn); stroke-width:2; fill:none}
+.dg .l-green{stroke:var(--green); stroke-width:2; fill:none}
+.dg .l-night{stroke:var(--night); stroke-width:2; fill:none}
+.dg .l-muted{stroke:var(--muted); stroke-width:1.6; fill:none; stroke-dasharray:5 4}
+.dg .l-life{stroke:var(--soft); stroke-width:1.4; stroke-dasharray:5 5}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dg .l-night{stroke:var(--ink)} }
+:root[data-theme="dark"] .dg .l-night{stroke:var(--ink)}
+
+/* ══ Listas de trade-offs ══ */
+.to{list-style:none; margin:12px 0 0; padding:0; display:grid; gap:10px}
+.to li{position:relative; padding-left:26px; font-size:14.5px; line-height:1.5; color:var(--ink)}
+.to li::before{position:absolute; left:0; top:1px; width:18px; height:18px; border-radius:6px;
+  display:grid; place-items:center; font-family:var(--mono); font-size:12px; font-weight:700}
+.to li.gana::before{content:"+"; background:var(--green-soft); color:var(--green)}
+.to li.pierde::before{content:"−"; background:var(--red-soft); color:var(--red)}
+.to li b{font-weight:800}
+.card h3{margin:0 0 4px; font-size:19px}
+.card .ruta{font-family:var(--mono); font-size:12px; color:var(--soft)}
+
+/* ══ Agregados del deck del M2 ══ */
+.pill.pend{background:var(--warn-soft); color:var(--warn)}
+.fuente{font-family:var(--mono); font-size:11.5px; color:var(--soft); max-width:none; margin-top:10px; line-height:1.5}
+.fuente code{font-size:11.5px}
+code{font-family:var(--mono); font-size:.92em}
+.portada code{background:#ffffff26; padding:1px 5px; border-radius:4px}
+.dg .dat{fill:var(--field); stroke:var(--muted); stroke-width:1.3}
+.tabox.prosa td{white-space:normal; vertical-align:top}
+.tabox.prosa td:first-child{white-space:normal; min-width:150px}
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <span class="marca"><span class="pin"></span> Reto 2 · Alerta de flota · Group 2</span>
+  <span class="sep"></span>
+  <span class="cuenta"><span id="actual">1</span>/<span id="total">16</span></span>
+  <button class="bt" id="bNotas" aria-pressed="false" title="Tecla N">Notas</button>
+  <button class="bt" id="bTema" title="Tecla T">Tema</button>
+</div>
+<div class="progreso" id="progreso"></div>
+<div class="draft">BORRADOR · revisar en equipo</div>
+
+<main id="main">
+
+<!-- ═══ 1 · Portada ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <div class="portada">
+      <span class="kicker">Módulo 2 · Actividad M2 · Reto 2</span>
+      <h1>Alerta temprana para una flota vehicular</h1>
+      <p class="lede" style="color:#ffffffd9">1000 eventos en 30 s, un <code>Emergency</code> y un correo a Gmail.
+        La misma arquitectura en dos entornos: <b>local con Docker</b> y <b>AWS serverless</b>.</p>
+      <p style="margin-top:22px">Group 2 · Camilo Céspedes · Freddy Aparicio · Danny Mazo<br>
+        Diplomado en Arquitectura de Software y Cloud Computing · PUJ Cali · octubre 2026</p>
+    </div>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~40 s</span>
+      <p>Presentar al equipo y el reto en una frase. Anunciar el hilo conductor desde ya: «priorizamos un atributo, lo pagamos con otro, y todo lo que viene se deriva de esa decisión».</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · Problema ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">01 · El problema</span>
+    <h2>Lo que pide el enunciado, en números</h2>
+    <div class="rej d4">
+      <div class="card"><span class="et">Carga</span><span class="g">1000</span><small>eventos en 30 s con el k6 oficial (10 VUs). El 100 % debe procesarse.</small></div>
+      <div class="card"><span class="et">Límite de tasa</span><span class="g">15 r/s</span><small>en el API Gateway (rate). Burst 2000 en la imagen del enunciado.</small></div>
+      <div class="card"><span class="et">Procesadores</span><span class="g">≤ 10</span><small>instancias activas a la vez (Lambda, contenedores, ECS…).</small></div>
+      <div class="card acento"><span class="et">Correo</span><span class="g">&lt; 15 s</span><small>para 2,5 puntos. 15–45 s → 1,5 · &gt; 45 s → 0,5.</small></div>
+    </div>
+    <div class="aviso ojo">
+      <p><b>La tensión de fondo.</b> 1000 peticiones en 30 s son unas 33–36 r/s, más del doble del rate de 15.
+        Lo que hace posible el «100 % procesado» es el <b>burst de 2000</b>, no el rate.</p>
+      <p><b>Dos criterios de tiempo.</b> El PDF dice «del último envío de k6 al envío y recepción del correo», con corte en 15 s.
+        En el encuentro del 06/10, según las notas de Freddy, el docente habló de <b>&lt; 16 s desde el envío del <code>Emergency</code> hasta que el correo llega</b>. Medimos los dos tramos que controlamos y declaramos el que no.</p>
+    </div>
+    <p class="fuente">Fuente: <code>Material-Clase/Actividad-Reto2.md</code> · notas del 06/10 en <code>Aportes/danny/m2-preguntas-encuentro-0610-danny.md</code> §10.4</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min</span>
+      <p>No leer la lista. Remarcar dos cosas: 35 r/s contra un rate de 15 (por eso importa el burst) y que hay dos versiones del criterio de tiempo. No discutir cuál es «la buena»: decir que medimos ambas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · Atributo ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">02 · Atributo de calidad priorizado</span>
+    <h2>Priorizamos el <span style="color:var(--blue)">desempeño</span> de la alerta</h2>
+    <p class="lede">Priorizamos la <b>latencia de la alerta</b> (del <code>Emergency</code> al correo), porque es lo que la rúbrica gradúa
+      y lo que le importa a un conductor en pánico, <b>a costa de</b> un posible correo duplicado y de una pieza más (la cola).</p>
+    <div class="rej d3">
+      <div class="card acento"><span class="et">Priorizamos</span><span class="g" style="font-size:24px">Latencia de la alerta</span><small>El correo sale en paralelo a la recepción: la petición no espera el envío.</small></div>
+      <div class="card"><span class="et">Restricción dura</span><span class="g" style="font-size:24px">No perder un Emergency</span><small>Si no se puede encolar, se responde 503. Nunca un 200 sobre una alerta perdida.</small></div>
+      <div class="card mal"><span class="et">A costa de</span><span class="g" style="font-size:24px">Duplicados posibles</span><small>Entrega al-menos-una-vez: un reintento puede mandar el mismo correo dos veces.</small></div>
+    </div>
+    <div class="aviso pare">
+      <p><b>Pendiente: el equipo debe cerrar esta frase antes de exponer.</b> El diseño local (Danny, 04/10) prioriza
+        <b>desempeño</b>. El aporte de Camilo (12/10) prioriza <b>disponibilidad/confiabilidad</b> («que la alerta nunca se pierda»).
+        Las dos lecturas usan las mismas tácticas, pero el profesor pidió en el M1 <b>un</b> hilo conductor.
+        Esta lámina asume desempeño, con «no perder» como restricción.</p>
+    </div>
+    <p class="fuente">Fuentes: <code>Reto2-Alerta-Flota/docs/2026-10-04-reto2-local-design.md</code> D7 · <code>Aportes/camilo/m2-respuestas-exposicion-12.1-12.2.md</code> §12.1 y pregunta 2</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>Esta es la lámina que vale 0,5 y la que faltó en el M1. Decirla con la fórmula: «priorizamos X, por Y, a costa de Z». Si el equipo decide disponibilidad, se cambian el título y las tres tarjetas. El resto del deck aguanta las dos lecturas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · Arquitectura lógica ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">03 · Diagrama de arquitectura</span>
+    <h2>Una arquitectura lógica, dos implementaciones</h2>
+    <p class="lede">Gateway con límite → ingesta que responde ya → cola → notificador asíncrono → correo.
+      Lo que cambia entre entornos son los <b>adaptadores</b>, no el patrón.</p>
+    <figure class="dgfig">
+      <svg class="dg" viewBox="0 0 1000 400" role="img" aria-labelledby="d4t">
+        <title id="d4t">Componentes equivalentes de la versión local y la versión AWS, por rol</title>
+        <defs>
+          <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted"/></marker>
+          <marker id="a4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-blue"/></marker>
+        </defs>
+        <!-- roles -->
+        <text x="112" y="40" text-anchor="middle" class="mono t-b t-m" font-size="12.5">GATEWAY + LÍMITE</text>
+        <text x="307" y="40" text-anchor="middle" class="mono t-b t-m" font-size="12.5">INGESTA</text>
+        <text x="502" y="40" text-anchor="middle" class="mono t-b t-m" font-size="12.5">COLA + DLQ</text>
+        <text x="697" y="40" text-anchor="middle" class="mono t-b t-m" font-size="12.5">NOTIFICADOR</text>
+        <text x="892" y="40" text-anchor="middle" class="mono t-b t-m" font-size="12.5">CORREO</text>
+        <!-- carril local -->
+        <rect x="5" y="60" width="990" height="155" rx="16" class="g-n"/>
+        <text x="22" y="84" class="mono t-b" font-size="13">LOCAL · Docker Compose · HTTP</text>
+        <rect x="27" y="100" width="170" height="96" rx="12" class="card-w"/>
+        <text x="112" y="128" text-anchor="middle" class="t-b">nginx</text>
+        <text x="112" y="150" text-anchor="middle" class="mono" font-size="11.5">limit_req 15 r/s</text>
+        <text x="112" y="170" text-anchor="middle" class="mono t-m" font-size="11.5">burst 2000 · :8080</text>
+        <rect x="222" y="100" width="170" height="96" rx="12" class="card-w"/>
+        <text x="307" y="128" text-anchor="middle" class="t-b">ingest ×2</text>
+        <text x="307" y="150" text-anchor="middle" class="mono" font-size="11.5">FastAPI</text>
+        <text x="307" y="170" text-anchor="middle" class="mono t-m" font-size="11.5">200 · 400 · 503</text>
+        <rect x="417" y="100" width="170" height="96" rx="12" class="card-w"/>
+        <text x="502" y="128" text-anchor="middle" class="t-b">Redis Streams</text>
+        <text x="502" y="150" text-anchor="middle" class="mono" font-size="11.5">consumer group</text>
+        <text x="502" y="170" text-anchor="middle" class="mono t-m" font-size="11.5">+ stream DLQ</text>
+        <rect x="612" y="100" width="170" height="96" rx="12" class="card-w"/>
+        <text x="697" y="128" text-anchor="middle" class="t-b">notifier ×1</text>
+        <text x="697" y="150" text-anchor="middle" class="mono" font-size="11.5">reintentos 1·2·4 s</text>
+        <text x="697" y="170" text-anchor="middle" class="mono t-m" font-size="11.5">redrive de la DLQ</text>
+        <rect x="807" y="100" width="170" height="96" rx="12" class="dat"/>
+        <text x="892" y="128" text-anchor="middle" class="t-b">SMTP Gmail</text>
+        <text x="892" y="150" text-anchor="middle" class="mono" font-size="11.5">App Password</text>
+        <text x="892" y="170" text-anchor="middle" class="mono t-m" font-size="11.5">Mailpit en dev</text>
+        <path d="M197 148 H220" class="l-muted" marker-end="url(#a4)"/>
+        <path d="M392 148 H415" class="l-muted" marker-end="url(#a4)"/>
+        <path d="M587 148 H610" class="l-muted" marker-end="url(#a4)"/>
+        <path d="M782 148 H805" class="l-muted" marker-end="url(#a4)"/>
+        <!-- carril AWS -->
+        <rect x="5" y="235" width="990" height="155" rx="16" class="g-b"/>
+        <text x="22" y="259" class="mono t-b t-blue" font-size="13">AWS · opción B · us-east-2 · HTTPS</text>
+        <rect x="27" y="275" width="170" height="96" rx="12" class="card-w"/>
+        <text x="112" y="303" text-anchor="middle" class="t-b">API Gateway</text>
+        <text x="112" y="325" text-anchor="middle" class="mono" font-size="10.5">15 r/s · burst 2000</text>
+        <text x="112" y="345" text-anchor="middle" class="mono t-m" font-size="11.5">TLS 1.3 · prod</text>
+        <rect x="222" y="275" width="170" height="96" rx="12" class="card-w"/>
+        <text x="307" y="303" text-anchor="middle" class="t-b">Lambda ingesta</text>
+        <text x="307" y="325" text-anchor="middle" class="mono" font-size="11.5">reservada 10</text>
+        <text x="307" y="345" text-anchor="middle" class="mono t-m" font-size="11.5">200 · 400 · 503</text>
+        <rect x="417" y="275" width="170" height="96" rx="12" class="card-w"/>
+        <text x="502" y="303" text-anchor="middle" class="t-b">SQS estándar</text>
+        <text x="502" y="325" text-anchor="middle" class="mono" font-size="11.5">visibilidad 90 s</text>
+        <text x="502" y="345" text-anchor="middle" class="mono t-m" font-size="11.5">+ DLQ (máx. 3)</text>
+        <rect x="612" y="275" width="170" height="96" rx="12" class="card-w"/>
+        <text x="697" y="303" text-anchor="middle" class="t-b">Lambda notifier</text>
+        <text x="697" y="325" text-anchor="middle" class="mono" font-size="11.5">2 intentos ≤ 12 s</text>
+        <text x="697" y="345" text-anchor="middle" class="mono t-m" font-size="11.5">reservada 2</text>
+        <rect x="807" y="275" width="170" height="96" rx="12" class="dat"/>
+        <text x="892" y="303" text-anchor="middle" class="t-b">Amazon SES</text>
+        <text x="892" y="325" text-anchor="middle" class="mono" font-size="11.5">correo verificado</text>
+        <text x="892" y="345" text-anchor="middle" class="mono t-m" font-size="11.5">→ Gmail del equipo</text>
+        <path d="M197 323 H220" class="l-blue" marker-end="url(#a4b)"/>
+        <path d="M392 323 H415" class="l-blue" marker-end="url(#a4b)"/>
+        <path d="M587 323 H610" class="l-blue" marker-end="url(#a4b)"/>
+        <path d="M782 323 H805" class="l-blue" marker-end="url(#a4b)"/>
+      </svg>
+      <figcaption><b>Entra:</b> k6 (10 VUs, 1000 iteraciones). <b>Position</b> termina en la ingesta con 200.
+        <b>Emergency</b> se registra, se encola y responde 200; el correo sale después, fuera de la petición.
+        Logs JSON con hora Colombia en cada paso (archivos locales / CloudWatch).</figcaption>
+    </figure>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>Leer el diagrama por columnas, no por filas: cada rol tiene su equivalente. Decir que esto es posible porque el código local se escribió con puertos y adaptadores (cola, notificador). Las Lambdas de Camilo reimplementan la misma lógica (no el mismo archivo).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · Local ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">04 · Implementación local</span>
+    <h2>Local: Docker Compose en nuestras máquinas</h2>
+    <pre class="dib">k6 ──► nginx :8080 (limit_req 15 r/s, burst 2000) ──► ingest ×2 (FastAPI)
+                                                       │ Position  → EVENT_RECEIVED → 200
+                                                       │ Emergency → EMERGENCY_RECEIVED → XADD → 200
+                                                       ▼                    (Redis caído → 503)
+                                                Redis Streams ──► notifier ×1 ──► SMTP Gmail
+                                                                  │ falla → reintento 1·2·4 s → DLQ
+                                                                  └ cada 15 s: redrive de la DLQ</pre>
+    <div class="rej d3">
+      <div class="card"><span class="et">Equivalencias</span><small>API Gateway → <b>nginx limit_req</b> (token bucket con la misma semántica) · SQS → <b>Redis Streams</b> (pendiente hasta <code>XACK</code> ≈ visibilidad) · SES → <b>SMTP de Gmail</b>.</small></div>
+      <div class="card"><span class="et">Por qué local primero</span><small>Iterar sin cuenta en la nube ni sandbox de SES, demo desde nuestras máquinas y sin costo.</small></div>
+      <div class="card"><span class="et">Pruebas</span><small>Tests unitarios del dominio, la ingesta y el worker con puertos falsos, más una prueba de integración con Mailpit.</small></div>
+    </div>
+    <p class="fuente">Fuente: <code>Reto2-Alerta-Flota/README.md</code> y <code>docs/2026-10-04-reto2-local-design.md</code> §1–§5</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min</span>
+      <p>Contar la decisión de arrancar en local como una decisión con costo: hubo que demostrar cada restricción de AWS con un equivalente. Mencionar el bug real de nginx: con <code>$server_name</code> vacío no limitaba nada. Se encontró midiendo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · AWS ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">05 · Implementación en AWS</span>
+    <h2>AWS opción B: serverless en us-east-2</h2>
+    <pre class="dib">k6 ──HTTPS──► API Gateway REST (stage prod · rate 15 · burst 2000 · TLS 1.3)
+                  │ proxy
+                  ▼
+             Lambda reto2-ingesta (reservada 10) ──► SQS reto2-emergencias (visibilidad 90 s)
+                                                        │ trigger · batch 1 · máx. 2
+                                                        ▼
+                                Lambda reto2-notifier (reservada 2 · timeout 15 s)
+                                  │ 2 intentos (timeout 2+3 s, espera 1 s) ──► SES ──► Gmail
+                                  └ agota intentos → DLQ explícita · CloudWatch Logs en cada paso</pre>
+    <div class="rej d3">
+      <div class="card"><span class="et">Región con evidencia</span><small><b>us-east-2</b>: k6 con 10 VUs contra 4 regiones; ganó en promedio (186,4 ms), mediana y p90. Una sola muestra con curl había dado lo contrario.</small></div>
+      <div class="card"><span class="et">Reintentos acotados</span><small>De ~39 s en el peor caso a <b>≤ 12 s</b>. El SDK con <code>max_attempts=1</code> para que no agregue reintentos ocultos.</small></div>
+      <div class="card"><span class="et">Calentador</span><small>EventBridge Scheduler cada 5 min para evitar el arranque en frío. Se enciende solo en la ventana de medición.</small></div>
+    </div>
+    <p class="fuente">Fuente: <code>Aportes/camilo/m2-aws-opcion-b-camilo/arquitectura-aws-opcion-b.md</code> §1, §6, §8, §9. Números reportados por Camilo; nadie más del equipo los ha verificado aún.</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>Ideal que lo presente Camilo. Contar el despliegue por pasos (API Gateway con mock → ingesta → SQS → notifier + SES → carga completa): cada paso se validó antes de seguir. La lección de la región: una sola muestra engaña.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · Decisiones ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">06 · Decisiones de arquitectura</span>
+    <h2>Qué decidimos, por qué y a costa de qué</h2>
+    <div class="tabox prosa">
+      <table>
+        <thead><tr><th>Decisión</th><th>Por qué</th><th>A costa de</th></tr></thead>
+        <tbody>
+          <tr><td><b>Responder 200 ya;</b> solo el Emergency pasa por cola</td><td>El envío del correo no ocupa la concurrencia de la ingesta (ley de Little)</td><td>Una pieza más y entrega al-menos-una-vez</td></tr>
+          <tr><td><b>Cola</b> (Redis Streams / SQS) con DLQ</td><td>Un mensaje queda pendiente hasta confirmarse: permite reintentar sin perderlo</td><td>Hay que explicar ACK, visibilidad y pendientes</td></tr>
+          <tr><td><b>Puertos y adaptadores</b></td><td>Pasar de Redis/SMTP a SQS/SES es cambiar un adaptador; el worker se prueba sin red</td><td>Una capa de indirección pequeña</td></tr>
+          <tr><td><b>Local y luego AWS</b></td><td>Local para iterar sin costo; AWS porque el enunciado nombra sus servicios y da HTTPS gestionado</td><td>Dos implementaciones que mantener y la lógica duplicada en las Lambdas</td></tr>
+          <tr><td><b>Presupuesto de reintentos</b> acotado</td><td>Que un fallo no saque el correo de la banda de 15 s</td><td>Se rinde antes: más casos van a la DLQ</td></tr>
+          <tr><td><b>Sin idempotencia</b></td><td>Ningún requisito la exige; el <code>event_id</code> permitiría deduplicar si hiciera falta</td><td>Correo duplicado posible</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fuente">Fuentes: diseño local §1 · diseño AWS §6 y §9</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>Vale 0,5. Leer solo la columna «a costa de»: es la que demuestra criterio. Conectar la primera fila con el atributo: responder ya es lo que protege la latencia.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · Tácticas ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">07 · Tácticas de arquitectura</span>
+    <h2>Cada táctica, en un componente concreto</h2>
+    <div class="tabox prosa">
+      <table>
+        <thead><tr><th>Táctica (deck del curso)</th><th>Local</th><th>AWS</th><th>Atributo</th></tr></thead>
+        <tbody>
+          <tr><td><b>Gestionar la llegada de eventos</b> · limitar la tasa</td><td>nginx <code>limit_req</code> 15 r/s, burst 2000</td><td>Throttling del stage <code>prod</code></td><td>Desempeño</td></tr>
+          <tr><td><b>Limitar la respuesta al evento</b> · encolar</td><td>Redis Streams</td><td>SQS</td><td>Desempeño</td></tr>
+          <tr><td><b>Introducir concurrencia</b></td><td>2 réplicas de ingest; notifier con envíos simultáneos acotados</td><td>Instancias de Lambda en paralelo</td><td>Desempeño</td></tr>
+          <tr><td><b>Tiempos de ejecución acotados</b></td><td>Timeout SMTP de 4 s por operación</td><td>Timeout de SES 2+3 s; Lambda 15 s</td><td>Desempeño</td></tr>
+          <tr><td><b>Programar recursos</b> · cupo fijo</td><td>3 procesadores</td><td>Concurrencia reservada</td><td>Desempeño (y el límite)</td></tr>
+          <tr><td><b>Retry</b> con límite</td><td>1·2·4 s → DLQ → redrive cada 15 s</td><td>2 intentos → DLQ</td><td>Disponibilidad</td></tr>
+          <tr><td><b>Detección y manejo de excepciones</b></td><td>Cola caída → 503, nunca 200</td><td>SQS falla → 503</td><td>Disponibilidad</td></tr>
+          <tr><td><b>Reintroducción</b> · reclamar pendientes</td><td><code>XAUTOCLAIM</code> al arrancar el notifier</td><td>Visibilidad de SQS y redrive (máx. 3)</td><td>Disponibilidad</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fuente">Nombres según <code>Material-Clase/Tacticas-Desempeno.md</code> (Control Resource Demand / Manage Resources) y <code>Tacticas-Disponibilidad.md</code> (Exception detection, Retry). La fila de reintroducción es interpretación del equipo.</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 30 s</span>
+      <p>Es la lámina que más pesa (1,0). Para cada fila decir la cadena «táctica → componente → qué atributo favorece → cómo ayuda al reto». Si preguntan táctica contra patrón: la cola con DLQ es un patrón que combina varias tácticas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · 200 vs 429 ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">08 · Contrato HTTP</span>
+    <h2>Qué garantiza nuestro <code>200 OK</code>, y cuándo aparece el <code>429</code></h2>
+    <div class="rej d3">
+      <div class="card bien"><span class="et">200</span><span class="g" style="font-size:22px">Válido y guardado</span><small>Position: validado y registrado. Emergency: <b>ya encolado</b>. No garantiza que el correo salió ni que llegó.</small></div>
+      <div class="card"><span class="et">503</span><span class="g" style="font-size:22px">No se pudo encolar</span><small>Preferimos un error visible a confirmar una alerta perdida. Quien envía debe reintentar.</small></div>
+      <div class="card mal"><span class="et">429</span><span class="g" style="font-size:22px">Se agotó el burst</span><small>Lo responde el gateway (nginx o API Gateway) antes de llegar a la ingesta.</small></div>
+    </div>
+    <h3>Prueba del limitador (local, 04/10, burst bajado a 100 a propósito)</h3>
+    <div class="tabox">
+      <table>
+        <thead><tr><th>Modo</th><th class="n">200</th><th class="n">429</th><th>Esperado por token bucket</th></tr></thead>
+        <tbody>
+          <tr><td>Ráfaga</td><td class="n">102</td><td class="n">898</td><td>≈ 100 del cubo + lo recargado en &lt; 1 s</td></tr>
+          <tr><td>Ritmo de referencia (~35 r/s)</td><td class="n">522</td><td class="n">478</td><td class="m">100 + 15 × 28 = 520</td></tr>
+          <tr class="destaca"><td>Burst 2000 (configuración real)</td><td class="n">1000</td><td class="n">0</td><td>1000 &lt; 2000: el cubo nunca se vacía</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="aviso ojo"><p><b>Abierto:</b> según las notas del 06/10, el docente pide un <code>200</code> por cada una de las 1000 peticiones.
+      Con burst 2000 se cumple, pero por encima de ese volumen el sistema respondería <code>429</code>, en los dos entornos.
+      Cambiarlo (aceptar todo y encolar) movería el límite de 15 r/s del gateway al consumo de la cola.</p></div>
+    <p class="fuente">Fuentes: <code>Reto2-Alerta-Flota/README.md</code> «Prueba del limitador» · <code>m2-revision-aws-opcion-b-danny.md</code> §3.5</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>Insistir en la frase «200 = guardado, no enviado». La tabla prueba que el limitador funciona: sin la prueba negativa, un 1000/1000 no demuestra nada sobre el límite.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · Evidencias k6 ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">09 · Evidencias con el k6 del profesor</span>
+    <h2>1000 de 1000 en los dos entornos, con el correo muy por debajo de 15 s</h2>
+    <div class="barras" aria-label="Medida de la rúbrica frente al corte de 15 s">
+      <div class="fila"><span class="nom">Local (06/10)</span><span class="pista"><span class="relleno" style="width:8.9%"></span></span><span class="val">1,33 s</span></div>
+      <div class="fila"><span class="nom">AWS (11/10)</span><span class="pista"><span class="relleno" style="width:10.9%"></span></span><span class="val">1,642 s</span></div>
+      <div class="fila"><span class="nom">Corte de la rúbrica</span><span class="pista"><span class="relleno alto" style="width:100%"></span></span><span class="val">15 s</span></div>
+    </div>
+    <div class="tabox">
+      <table>
+        <thead><tr><th>Métrica</th><th class="n">Local (Docker)</th><th class="n">AWS (opción B)</th></tr></thead>
+        <tbody>
+          <tr><td>Peticiones exitosas</td><td class="n">1000/1000</td><td class="n">1000/1000 · 0 % fallos</td></tr>
+          <tr><td>Medida de la rúbrica (última petición → <code>EMAIL_SENT</code>)</td><td class="n">1,33 s</td><td class="n">1,642 s</td></tr>
+          <tr><td><code>http_req_duration</code> promedio / p95</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">119,65 / 129,09 ms</td></tr>
+          <tr><td>Duración de la carga · tasa</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">~22,5 s · 44,7 r/s</td></tr>
+          <tr><td>Recepción → <code>EMAIL_SENT</code> (un Emergency)</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">1,66 s (con arranque en frío)</td></tr>
+          <tr><td>Hasta la llegada a Gmail</td><td class="n"><span class="pill pend">a mano</span></td><td class="n"><span class="pill pend">a mano</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fuente">Local: <code>m2-revision-aws-opcion-b-danny.md</code> §1 (corrida del 06/10 con Gmail). AWS: <code>arquitectura-aws-opcion-b.md</code> §9 pasos 4–5 y <code>m2-respuestas-exposicion-12.1-12.2.md</code> preguntas 4, 11 y 12.
+      «Pendiente» = el dato no está registrado en el repo; hay que sacarlo de la próxima corrida.</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 30 s</span>
+      <p>Las dos medidas no miden exactamente lo mismo. Local toma la última petición que vio nginx; AWS, la última que vio la Lambda de ingesta. Ninguna incluye la entrega de Gmail, que se confirma con «Mostrar original». Antes de exponer conviene llenar los «pendiente» con una corrida local nueva desde el panel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · Procesamiento y Emergency ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">10 · Procesamiento y trazabilidad</span>
+    <h2>Seguir un Emergency de punta a punta con su <code>event_id</code></h2>
+    <pre class="dib">EVENT_RECEIVED      ×999  ingesta  → Position validado y registrado (procesado)
+EMERGENCY_RECEIVED  ×1    ingesta  → hora exacta de recepción (-05:00, ms)
+EMERGENCY_ENQUEUED        ingesta  → ya está en la cola: recién aquí se responde 200
+EMAIL_SENT                notifier → hora del envío · ms_since_received · attempt
+  (o EMAIL_RETRY → EMAIL_DLQ si se agotan los intentos)</pre>
+    <div class="rej d2">
+      <div class="card"><span class="et">1000 únicos, no 1000 peticiones</span><small>Se cuentan <code>event_id</code> (UUID) distintos. En AWS, la consulta a CloudWatch dio <b>1000 eventos recibidos</b> en la corrida de referencia. El panel local muestra «procesados (únicos)».</small></div>
+      <div class="card mal"><span class="et">El k6 del profesor no garantiza 1 Emergency</span><small>Asume 100 iteraciones por VU, pero <code>shared-iterations</code> no lo asegura. Medido: <b>0, 1 o varios</b> por corrida (1, 2 y 1 el 06/10). El Emergency no siempre es la última petición.</small></div>
+    </div>
+    <p class="fuente">Fuentes: diseño local §4 · <code>arquitectura-aws-opcion-b.md</code> §6.4 · <code>m2-respuestas-exposicion-12.1-12.2.md</code> pregunta 7 (script <code>medir-aws.py</code> de Camilo, que no está en el repo)</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min</span>
+      <p>Responde a «registrar al procesar, no solo al recibir»: para un Position, procesar es validar y registrar; para un Emergency, procesar termina con <code>EMAIL_SENT</code>. Mostrar en la demo el CSV de la corrida filtrado por el <code>event_id</code> del Emergency.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 12 · Instancias y HTTPS ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">11 · Instancias y HTTPS</span>
+    <h2>Dos restricciones con un estado distinto en cada entorno</h2>
+    <div class="tabox prosa">
+      <table>
+        <thead><tr><th>Restricción</th><th>Local</th><th>AWS</th></tr></thead>
+        <tbody>
+          <tr><td><b>≤ 10 instancias</b></td><td><span class="si">Cumple:</span> 3 procesadores (2 ingest + 1 notifier). 5 contando nginx y Redis.</td><td><span class="no">No cumple tal como está:</span> reservada <b>10</b> en ingesta + <b>2</b> en notifier = hasta <b>12</b> instancias a la vez.</td></tr>
+          <tr><td><b>HTTPS</b></td><td><span class="no">No:</span> nginx en HTTP. Brecha abierta.</td><td><span class="si">Sí:</span> API Gateway con TLS 1.3 únicamente. El TLS termina ahí; adentro protege IAM.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="aviso pare">
+      <p><b>Decisión abierta: el reparto 10 + 2 en AWS.</b> El 11/10 se subió la ingesta de 8 a 10 porque, con 10 VUs, 8 instancias producían 2 throttles en 1000 peticiones.
+        Que el notifier no compite por el cupo de la ingesta es cierto para el throttling, pero <b>no hace que 12 quepa en «≤ 10»</b>. Opciones:</p>
+      <p>(a) <b>8 + 2</b>, aceptando algún throttle ocasional con 10 VUs (o un reintento en el cliente, si se permite).
+        (b) <b>9 + 1</b>: menos throttles que con 8, pero no los elimina con 10 VUs, y un solo correo a la vez.
+        (c) <b>API Gateway → SQS directo</b>, sin Lambda en el camino síncrono, como propone el propio Camilo: el límite deja de depender de los VUs.</p>
+    </div>
+    <p class="fuente">Fuentes: <code>arquitectura-aws-opcion-b.md</code> §9 paso 4 («Corrección del reparto») · <code>m2-respuestas-exposicion-12.1-12.2.md</code> pregunta 10 y 15 · diseño local §2</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 30 s</span>
+      <p>Decirlo nosotros antes de que lo pregunte el profesor. Si el equipo ya eligió una opción antes de exponer, cambiar el aviso rojo por la decisión y su costo. No presentar el 10 + 2 como cumplimiento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 13 · Fallas ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">12 · Disponibilidad</span>
+    <h2>Qué pasa si se cae un componente</h2>
+    <div class="tabox prosa">
+      <table>
+        <thead><tr><th>Se cae</th><th>Mientras está caído</th><th>Al volver</th></tr></thead>
+        <tbody>
+          <tr><td><b>Correo</b> (SMTP / SES)</td><td>Local: reintentos 1·2·4 s y luego DLQ. AWS: 2 intentos (≤ 12 s) y luego DLQ.</td><td>Local: cada 15 s devuelve a la cola lo que lleva menos de 10 min en la DLQ (<code>EMAIL_REDRIVEN</code>). AWS: queda en la DLQ para revisión.</td></tr>
+          <tr><td><b>Cola</b> (Redis / SQS)</td><td>El Emergency responde <b>503</b> y no se guarda. Los Position siguen con 200.</td><td>El notifier se reconecta solo. Lo que recibió 503 no se recupera: debe reenviarlo el cliente.</td></tr>
+          <tr><td><b>Notifier</b></td><td>Los Emergency se acumulan en la cola.</td><td>Local: reclama los pendientes (<code>PENDING_CLAIMED</code>). AWS: SQS los vuelve a ofrecer pasada la visibilidad (90 s).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fuente">Local: verificado el 11/10 apagando cada componente desde el panel (<code>README.md</code>). AWS: caso <code>EMAIL_RETRY → EMAIL_DLQ</code> en 2,05 s verificado; la caída a mitad de envío es comportamiento documentado de SQS, no forzado.</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min</span>
+      <p>Si hay tiempo en la demo local, apagar el SMTP desde el panel, enviar un Emergency y encenderlo: se ve el redrive. Aclarar que esto es disponibilidad al servicio de la restricción «no perder», no el atributo priorizado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 14 · Panel ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">13 · Plano de control</span>
+    <h2>Un panel para observar, con un switch Local / AWS</h2>
+    <div class="rej d2">
+      <div class="card acento"><span class="et">Qué es</span><small>Una página que lanza el k6 del profesor, envía un Emergency manual y muestra la medida de la rúbrica con semáforo, el historial de corridas y la descarga de logs (.log / .csv). <b>No está en el camino de los eventos</b>: observar no altera la latencia medida.</small></div>
+      <div class="card"><span class="et">Switch Local / AWS <span class="pill pend">en implementación</span></span><small>Un interruptor cambia la fuente sin tocar el resto. <b>Local</b> lee los logs, Redis y Docker. <b>AWS</b> lee CloudWatch Logs y el estado de SQS con un usuario IAM de <b>solo lectura</b>, y apunta k6 y el Emergency manual al API Gateway.
+        En AWS no hay inyección de fallas: el panel no tiene permisos para apagar nada.</small></div>
+    </div>
+    <div class="aviso clave"><p><b>Lección del M1, aplicada:</b> lo que observa no puede estar en el camino de lo que se mide. Por eso el panel corre aparte y no cuenta como procesador.</p></div>
+    <p class="fuente">Fuentes: <code>Reto2-Alerta-Flota/README.md</code> «Panel de control» · <code>arquitectura-aws-opcion-b.md</code> §7. El switch se está construyendo en paralelo; revisar esta lámina cuando se mergee.</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min</span>
+      <p>Aquí empieza la demo en vivo. Orden sugerido: (1) modo Local: lanzar el k6 del profesor y mostrar la medida y el correo; (2) cambiar el switch a AWS y repetir; (3) abrir el correo en Gmail. Si AWS falla en vivo, la versión local es el plan B.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 15 · Riesgos ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">14 · Riesgos y límites conocidos</span>
+    <h2>Lo que no está resuelto, dicho por nosotros</h2>
+    <div class="tabox prosa">
+      <table>
+        <thead><tr><th>Riesgo</th><th>Impacto</th><th>Qué hacemos</th></tr></thead>
+        <tbody>
+          <tr><td><b>SES cae en spam</b></td><td>El correo llega, pero a spam: Gmail lo marca «a través de amazonses.com» (desalineación DMARC, sin dominio propio)</td><td>Documentado como límite. Lo de raíz sería un dominio propio con DKIM</td></tr>
+          <tr><td><b>AWS configurado a mano en la consola</b></td><td>No se puede reproducir desde el repo: solo el código de las Lambdas está versionado</td><td>Pendiente: exportar la configuración o pasarla a IaC</td></tr>
+          <tr><td><b>Reparto 10 + 2 en AWS</b></td><td>Hasta 12 instancias contra un límite de 10</td><td>Decidir (a), (b) o (c) de la lámina 12</td></tr>
+          <tr><td><b>k6 del profesor</b></td><td>0, 1 o varios Emergency por corrida; no siempre es la última petición</td><td>La medida toma el último correo de la corrida; lo declaramos en el informe</td></tr>
+          <tr><td><b>La medida no llega a Gmail</b></td><td>AWS mide recepción → envío por SES; local, última petición → entrega al SMTP. Ninguna mide la llegada al buzón</td><td>Anotar la llegada desde «Mostrar original» en una corrida de la demo</td></tr>
+          <tr><td><b>HTTPS local</b> y <b>200 vs 429</b></td><td>Brechas frente a lo reportado del 06/10</td><td>AWS resuelve HTTPS; el 429 sigue abierto en los dos</td></tr>
+          <tr><td><b>Lógica duplicada</b></td><td>Las Lambdas reimplementan el dominio local: pueden divergir</td><td>Aceptado por tiempo; empaquetar el dominio como capa sería lo limpio</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fuente">Fuentes: <code>arquitectura-aws-opcion-b.md</code> §4, §6.4 y §9 · <code>m2-revision-aws-opcion-b-danny.md</code> §2–§3 · <code>Aportes/camilo/FUENTES.md</code> «Límites»</p>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
+      <p>No disculparse: presentarlo como gestión de riesgos. Cada fila tiene una acción. El profesor viene de banca: espera ver trazabilidad y límites declarados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 16 · Cierre ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <div class="portada">
+      <span class="kicker">Cierre</span>
+      <h2 style="color:#fff">Priorizamos la latencia de la alerta, sin perder un Emergency, a costa de un posible duplicado</h2>
+      <p class="lede" style="color:#ffffffd9">Gateway con límite, ingesta que responde ya, cola, notificador asíncrono. La misma arquitectura en Docker y en AWS:
+        1000/1000 y el correo en ~1,3–1,6 s contra un corte de 15 s.</p>
+      <p style="margin-top:18px">Pendiente antes del 20/10: atributo único del equipo · reparto de instancias en AWS · datos locales de k6 · llegada a Gmail medida.</p>
+    </div>
+    <div class="notas">
+      <span class="tag">Notas</span> <span class="tiempo">~40 s</span>
+      <p>Cerrar con la misma frase del principio. Abrir preguntas. Para las preguntas probables, usar <code>Aportes/camilo/m2-respuestas-exposicion-12.1-12.2.md</code> (16 respuestas con evidencia).</p>
+    </div>
+  </div>
+</section>
+
+</main>
+<script>
+(function () {
+  'use strict';
+  var main = document.getElementById('main');
+  var laminas = Array.prototype.slice.call(document.querySelectorAll('.lamina'));
+  var elActual = document.getElementById('actual');
+  var elProg = document.getElementById('progreso');
+  document.getElementById('total').textContent = laminas.length;
+
+  /* Qué lámina se está viendo: la última cuyo borde superior ya pasó el centro del
+     viewport. Barato y estable frente al scroll-snap, que durante la transición puede
+     dejar dos parcialmente visibles. */
+  function indiceActual() {
+    var centro = main.scrollTop + main.clientHeight / 2, i = 0;
+    for (var n = 0; n < laminas.length; n++) {
+      if (laminas[n].offsetTop <= centro) i = n;
+    }
+    return i;
+  }
+  function actualizar() {
+    var i = indiceActual();
+    elActual.textContent = i + 1;
+    elProg.style.width = ((i + 1) / laminas.length * 100) + '%';
+  }
+  main.addEventListener('scroll', actualizar, {passive: true});
+  actualizar();
+
+  function ir(d) {
+    var destino = Math.min(Math.max(indiceActual() + d, 0), laminas.length - 1);
+    main.scrollTo({top: laminas[destino].offsetTop, behavior: 'smooth'});
+  }
+
+  var bNotas = document.getElementById('bNotas');
+  function alternarNotas() {
+    var on = document.body.classList.toggle('con-notas');
+    bNotas.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  bNotas.addEventListener('click', alternarNotas);
+
+  /* El tema sigue al sistema hasta que alguien lo fuerza aquí; a partir de ese
+     momento manda data-theme, igual que en el plano de control. */
+  var bTema = document.getElementById('bTema');
+  bTema.addEventListener('click', function () {
+    var forzado = document.documentElement.getAttribute('data-theme');
+    var oscuroAhora = forzado === 'dark' ||
+      (!forzado && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', oscuroAhora ? 'light' : 'dark');
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); ir(1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); ir(-1); }
+    else if (k === 'Home') { e.preventDefault(); main.scrollTo({top: 0, behavior: 'smooth'}); }
+    else if (k === 'End') { e.preventDefault(); main.scrollTo({top: laminas[laminas.length - 1].offsetTop, behavior: 'smooth'}); }
+    else if (k === 'n' || k === 'N') { alternarNotas(); }
+    else if (k === 't' || k === 'T') { bTema.click(); }
+  });
+})();
+</script>
+</body>
+</html>

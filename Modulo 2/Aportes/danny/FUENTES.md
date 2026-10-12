@@ -118,3 +118,25 @@ y la nota de la línea de tiempo, que ya no reemplaza esa gráfica sino que la c
 **Límites:** revisión **estática**: no se ejecutó nada contra la cuenta AWS de Camilo. Lo marcado
 «✓ validado» en su diagrama se toma como reporte suyo. Los ajustes son propuestas: el aporte de Camilo
 no se modificó.
+
+---
+
+## `m2-presentacion-reto2-danny.html` (+ `m2-presentacion-reto2-guion-danny.md`)
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny), con asistencia de IA |
+| **Fecha** | 2026-10-12 |
+| **Módulo** | 2 — Reto 2 |
+| **Tema** | Presentación del Reto 2 (16 láminas con notas del orador) y su guion: las dos implementaciones (local en Docker y opción B en AWS), decisiones, tácticas, evidencias, riesgos y el switch Local/AWS del panel |
+| **Tipo** | `investigacion` — elaborada con IA; **no es material oficial** ni versión aprobada por el equipo |
+| **Fuentes** | `Material-Clase/Actividad-Reto2.md` · `Ejercicios/Reto2-Alerta-Flota/README.md` y `docs/2026-10-04-reto2-local-design.md` · `../camilo/m2-aws-opcion-b-camilo/arquitectura-aws-opcion-b.md` · `../camilo/m2-respuestas-exposicion-12.1-12.2.md` · `m2-preguntas-encuentro-0610-danny.md` §10–12 (aporte de Freddy) · `m2-revision-aws-opcion-b-danny.md` · `Material-Clase/Tacticas-Desempeno.md` y `Tacticas-Disponibilidad.md` |
+| **Estado** | borrador · para revisar en equipo antes de la exposición |
+
+**Límites:**
+- Los números de AWS los reporta Camilo y nadie más los ha verificado. Los locales salen del README y de la revisión del 09/10.
+- Quedan marcados como **pendiente**: el p95, la duración y la recepción → envío de la corrida local, y la llegada real a Gmail en los dos entornos.
+- **Contradicción registrada, sin resolver:** el atributo priorizado. El diseño local dice desempeño y el aporte de Camilo dice disponibilidad/confiabilidad. El deck asume desempeño y lo señala en la lámina 3.
+- El reparto de concurrencia en AWS (10 + 2 = 12) se presenta como **decisión abierta** frente al límite de 10, con tres opciones. No se presenta como cumplimiento.
+- La lámina del panel describe el switch Local/AWS, que se estaba implementando en paralelo. Hay que revisarla cuando se mergee.
+- Usa el mismo sistema visual y el mismo script de navegación que `Modulo 1/Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html`. Solo depende de Google Fonts.
