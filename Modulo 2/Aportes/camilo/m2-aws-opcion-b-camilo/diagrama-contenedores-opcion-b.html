@@ -70,6 +70,7 @@
     vertical-align: -2px;
   }
   .sw-done { background: #dcf3e2; border: 2px solid var(--done-border); }
+  .sw-navy { background: #e2ebf3; border: 2px solid #123252; }
   .sw-pending { background: #fdedc8; border: 2px solid var(--pending-border); }
   .sw-neutral { background: #e9ecf0; border: 2px solid var(--neutral-border); }
   table.facts {
@@ -97,19 +98,96 @@
 <body>
 <div class="wrap">
   <h1>Reto 2 — Alerta de flota vehicular, camino B en AWS</h1>
-  <p class="subtitle">Diagrama de contenedores (C4, nivel 2) y estado de construcción al 09/10/2026 · región us-east-2 · documento de trabajo, acompaña a <code>arquitectura-aws-opcion-b.md</code></p>
+  <p class="subtitle">Diagrama de contenedores (C4, nivel 2) y estado de construcción al 12/10/2026 · región us-east-2 · documento de trabajo, acompaña a <code>arquitectura-aws-opcion-b.md</code></p>
 
-  <div class="callout">
-    <strong>Se puede probar ya mismo:</strong> cualquiera puede apuntar a
+  <div class="callout" style="background:#e2efe8;border-color:#2b6a4b;">
+    <strong style="color:#1f5a3a;">Camino completo, validado de punta a punta:</strong> cualquiera puede apuntar a
     <code>https://ofuhehmw59.execute-api.us-east-2.amazonaws.com/prod/event-notification</code>
-    con un <code>POST</code> igual al del enunciado, y va a responder correctamente (200 a <code>Position</code>,
-    200 a <code>Emergency</code> si ya se encoló). Lo único que <strong>todavía no pasa</strong> es el envío real
-    del correo: SES rechaza el envío porque la identidad del remitente no está verificada — eso es lo único
-    que falta para cerrar el camino completo.
+    con un <code>POST</code> igual al del enunciado — responde 200, encola el <code>Emergency</code>, y el correo
+    se envía de verdad por SES hacia <code>grupo2arquitecturasoftware@gmail.com</code>. Carga oficial del profesor:
+    <strong>1000/1000, 0% fallos</strong> (avg 119.65 ms). Único pendiente real: el correo cae en spam por la
+    desalineación DMARC de enviar un <code>@gmail.com</code> a través de SES — documentado, no bloqueante.
   </div>
 
-  <h2>Diagrama de contenedores</h2>
-  <p class="section-note">El color indica el estado real en la cuenta de AWS: verde = creado y validado con una prueba real; ámbar = creado pero bloqueado por algo externo; gris = actor o sistema externo. El "qué hace" de cada pieza va debajo de su caja, no adentro.</p>
+  <h2>Vista general (zoom-out)</h2>
+  <p class="section-note">Antes del detalle: así se ve el sistema completo desde afuera, con AWS colapsado en una sola caja (su desglose está en la siguiente sección).</p>
+
+  <div class="diagram-frame">
+<svg viewBox="0 0 1480 560" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ahSolid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#123252"/>
+    </marker>
+    <marker id="ahDashed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6b7c"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Persona ===== -->
+  <circle cx="85" cy="190" r="20" fill="#2f8f5b"/>
+  <path d="M55,262 Q55,220 85,220 Q115,220 115,262 Z" fill="#2f8f5b"/>
+  <text x="85" y="286" text-anchor="middle" font-size="14" font-weight="700" fill="#17212b">Persona</text>
+  <text x="85" y="304" text-anchor="middle" font-size="12" fill="#5b6b7c">opera el panel y</text>
+  <text x="85" y="320" text-anchor="middle" font-size="12" fill="#5b6b7c">lanza la prueba de carga</text>
+  <line x1="120" y1="235" x2="196" y2="235" stroke="#123252" stroke-width="2.2" marker-end="url(#ahSolid)"/>
+  <text x="158" y="223" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79">opera</text>
+
+  <g transform="translate(170,0)">
+  <rect x="30" y="60" width="380" height="420" rx="10" fill="#eef2f7" stroke="#9aa5b1" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <text x="50" y="90" font-size="15" font-weight="700" fill="#4a5568" letter-spacing="0.4">PANEL DE CONTROL</text>
+  <text x="50" y="108" font-size="11.5" font-style="italic" fill="#64748b">(hoy solo tiene k6; el resto sigue pendiente)</text>
+
+  <rect x="58" y="150" width="324" height="118" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
+  <rect x="58" y="150" width="324" height="44" rx="10" fill="#123252"/>
+  <rect x="58" y="180" width="324" height="14" fill="#123252"/>
+  <text x="220" y="176" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">K6</text>
+  <text x="220" y="218" text-anchor="middle" font-size="13" fill="#3f5a61">genera la carga de prueba</text>
+  <text x="220" y="238" text-anchor="middle" font-size="12.5" fill="#64748b">10 VUs · 1000 iteraciones</text>
+
+  <rect x="58" y="300" width="324" height="90" rx="10" fill="#fff" stroke="#9aa5b1" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="80" y="328" font-size="14" font-weight="700" fill="#4a5568">Lector de estado</text>
+  <text x="80" y="350" font-size="12" font-style="italic" fill="#64748b">(pendiente) leería AWS vía boto3</text>
+  <text x="80" y="368" font-size="12" font-style="italic" fill="#64748b">— CloudWatch Logs, SQS —</text>
+
+  <rect x="470" y="60" width="380" height="420" rx="10" fill="#fdf6e8" stroke="#c9a35e" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <text x="490" y="90" font-size="15" font-weight="700" fill="#8a6318" letter-spacing="0.4">AWS · US-EAST-2</text>
+
+  <rect x="510" y="200" width="300" height="180" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
+  <rect x="510" y="200" width="300" height="44" rx="10" fill="#123252"/>
+  <rect x="510" y="230" width="300" height="14" fill="#123252"/>
+  <text x="660" y="226" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">AWS</text>
+  <text x="660" y="266" text-anchor="middle" font-size="12.5" fill="#3f5a61">API Gateway → Lambda ingesta</text>
+  <text x="660" y="284" text-anchor="middle" font-size="12.5" fill="#3f5a61">→ SQS → Lambda notifier → SES</text>
+  <text x="660" y="312" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2b6a4b">✓ construido y validado</text>
+  <text x="660" y="334" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">(detalle abajo)</text>
+  <text x="660" y="356" text-anchor="middle" font-size="12" fill="#64748b">1000/1000 · avg 119.65 ms</text>
+
+  <rect x="950" y="200" width="300" height="140" rx="10" fill="#fff" stroke="#5b6b7c" stroke-width="1.8"/>
+  <rect x="950" y="200" width="300" height="44" rx="10" fill="#5b6b7c"/>
+  <rect x="950" y="230" width="300" height="14" fill="#5b6b7c"/>
+  <text x="1100" y="226" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Gmail</text>
+  <text x="1100" y="266" text-anchor="middle" font-size="12.5" fill="#3f5a61">bandeja personal</text>
+  <text x="1100" y="286" text-anchor="middle" font-size="12.5" fill="#3f5a61">recibe la alerta por correo</text>
+  <text x="1100" y="312" text-anchor="middle" font-size="11.5" font-style="italic" fill="#64748b">sistema externo</text>
+
+  <line x1="382" y1="209" x2="508" y2="250" stroke="#123252" stroke-width="2.2" marker-end="url(#ahSolid)"/>
+  <text x="430" y="196" font-size="12" fill="#1f4e79" font-weight="700">HTTPS POST</text>
+  <text x="430" y="238" font-size="11" fill="#64748b">(10 VUs, 1000 it.)</text>
+
+  <line x1="810" y1="270" x2="948" y2="270" stroke="#123252" stroke-width="2.2" marker-end="url(#ahSolid)"/>
+  <text x="845" y="258" text-anchor="middle" font-size="12" fill="#1f4e79" font-weight="700">correo</text>
+
+  <line x1="382" y1="345" x2="508" y2="345" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ahDashed)"/>
+  <text x="430" y="333" text-anchor="middle" font-size="11.5" font-style="italic" fill="#5b6b7c">futuro · boto3</text>
+
+  <text x="650" y="525" text-anchor="middle" font-size="13" font-style="italic" fill="#5b6b7c">El panel de control hoy solo tiene a k6 construido; el resto (lector de estado) sigue pendiente.</text>
+  <text x="650" y="546" text-anchor="middle" font-size="13" font-style="italic" fill="#5b6b7c">El recorrido real y validado es Persona → K6 → AWS → Gmail.</text>
+  </g>
+</svg>
+  </div>
+
+  <h2>Diagrama de contenedores (detalle de AWS)</h2>
+  <p class="section-note">El color indica el estado real en la cuenta de AWS: verde = creado y validado con una prueba real; gris = actor o sistema externo. El "qué hace" de cada pieza va debajo de su caja, no adentro.</p>
 
   <div class="diagram-frame">
 <svg viewBox="0 0 1760 710" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
@@ -170,7 +248,7 @@
   <text x="610" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">Lambda: reto2-ingesta</text>
   <text x="610" y="224" text-anchor="middle" font-size="12" fill="#4a5568">Python 3.14 · proxy Lambda</text>
   <text x="610" y="262" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ validado (log + SQS)</text>
-  <text x="610" y="282" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b7791f">⚠ reservada 8: bloqueada (cuota)</text>
+  <text x="610" y="282" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ reservada 10 (= VUs del k6)</text>
   <text x="610" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: responde 200 ya</text>
   <text x="610" y="332.5" text-anchor="middle" font-size="12" fill="#374151">mismo a Position; a Emergency</text>
   <text x="610" y="347" text-anchor="middle" font-size="12" fill="#374151">le registra la hora y la</text>
@@ -191,23 +269,24 @@
   <text x="1110" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">Lambda: reto2-notifier</text>
   <text x="1110" y="224" text-anchor="middle" font-size="12" fill="#4a5568">Python 3.14 · timeout 15s</text>
   <text x="1110" y="258" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ reintento→DLQ en 2.05s</text>
-  <text x="1110" y="277" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ concurrencia del trigger: 2</text>
-  <text x="1110" y="295" text-anchor="middle" font-size="10.5" fill="#4a5568">(envío real: ver SES →)</text>
+  <text x="1110" y="277" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ reservada 2 + trigger máx 2</text>
+  <text x="1110" y="295" text-anchor="middle" font-size="10.5" fill="#4a5568">(envío real confirmado)</text>
   <text x="1110" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: arma el correo y</text>
   <text x="1110" y="332.5" text-anchor="middle" font-size="12" fill="#374151">lo envía por SES con 2</text>
   <text x="1110" y="347" text-anchor="middle" font-size="12" fill="#374151">intentos (≤12s); si falla,</text>
   <text x="1110" y="361.5" text-anchor="middle" font-size="12" fill="#374151">lo manda a la DLQ.</text>
 
   <!-- ===== SES ===== -->
-  <rect x="1250" y="170" width="210" height="130" rx="12" fill="url(#gradPending)" stroke="#c17d11" stroke-width="2.2" filter="url(#cardShadow)"/>
-  <text x="1355" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#7a4e0c">Amazon SES</text>
+  <rect x="1250" y="170" width="210" height="130" rx="12" fill="url(#gradDone)" stroke="#1f7a3d" stroke-width="2.2" filter="url(#cardShadow)"/>
+  <text x="1355" y="204" text-anchor="middle" font-size="15.5" font-weight="700" fill="#155c2a">Amazon SES</text>
   <text x="1355" y="224" text-anchor="middle" font-size="12" fill="#4a5568">servicio de envío de correo</text>
-  <text x="1355" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#c17d11">✗ sin verificar (bloqueado)</text>
+  <text x="1355" y="262" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f7a3d">✓ identidad verificada</text>
+  <text x="1355" y="279" text-anchor="middle" font-size="11" font-style="italic" fill="#4a5568">(cae en spam — DMARC)</text>
   <text x="1355" y="318" text-anchor="middle" font-size="12" fill="#374151">Qué hace: envía el correo</text>
   <text x="1355" y="332.5" text-anchor="middle" font-size="12" fill="#374151">final a Gmail. Necesita la</text>
   <text x="1355" y="347" text-anchor="middle" font-size="12" fill="#374151">identidad del remitente</text>
   <text x="1355" y="361.5" text-anchor="middle" font-size="12" fill="#374151">verificada antes de enviar.</text>
-  <text x="1355" y="377" text-anchor="middle" font-size="9.5" font-family="Consolas, monospace" fill="#7a4e0c">notificadoremergenciaflotas@gmail.com</text>
+  <text x="1355" y="377" text-anchor="middle" font-size="9.5" font-family="Consolas, monospace" fill="#2f6b43">grupo2arquitecturasoftware@gmail.com</text>
 
   <!-- ===== Gmail (externo) ===== -->
   <rect x="1500" y="170" width="200" height="130" rx="12" fill="url(#gradNeutral)" stroke="#64748b" stroke-width="2.2" filter="url(#cardShadow)"/>
@@ -261,8 +340,8 @@
   <line x1="1220" y1="235" x2="1248" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
   <text x="1234" y="221" text-anchor="middle" font-size="10" fill="#4a5568">SES</text>
 
-  <line x1="1460" y1="235" x2="1498" y2="235" stroke="#c17d11" stroke-width="2.4" stroke-dasharray="6 5" marker-end="url(#arrowFail)"/>
-  <text x="1479" y="221" text-anchor="middle" font-size="9.5" fill="#7a4e0c">bloqueado</text>
+  <line x1="1460" y1="235" x2="1498" y2="235" stroke="#374151" stroke-width="2.4" marker-end="url(#arrowSolid)"/>
+  <text x="1479" y="221" text-anchor="middle" font-size="9.5" fill="#4a5568">correo</text>
 
   <!-- ===== Connecting arrows, row1 -> row2 (banda ancha 300-460, sin cruzar los pies de foto) ===== -->
   <!-- Failure: notifier -> DLQ -->
@@ -284,7 +363,6 @@
 
   <div class="legend">
     <span><span class="swatch sw-done"></span>Creado y validado con una prueba real</span>
-    <span><span class="swatch sw-pending"></span>Creado, bloqueado por algo externo</span>
     <span><span class="swatch sw-neutral"></span>Actor / sistema externo (no se construyó)</span>
   </div>
 
@@ -374,17 +452,17 @@
   <text x="660" y="133" text-anchor="middle" font-size="12" fill="#4a5568">SQS + DLQ</text>
   <text x="660" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado</text>
 
-  <circle cx="935" cy="62" r="32" fill="#fdedc8" stroke="#c17d11" stroke-width="3"/>
-  <text x="935" y="69" text-anchor="middle" font-size="16" fill="#7a4e0c">●</text>
+  <circle cx="935" cy="62" r="32" fill="#dcf3e2" stroke="#1f7a3d" stroke-width="3"/>
+  <text x="935" y="71" text-anchor="middle" font-size="19" fill="#155c2a">✓</text>
   <text x="935" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 4</text>
   <text x="935" y="133" text-anchor="middle" font-size="12" fill="#4a5568">Notifier + SES</text>
-  <text x="935" y="150" text-anchor="middle" font-size="11" fill="#7a4e0c">en curso (SES bloqueado)</text>
+  <text x="935" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado</text>
 
-  <circle cx="1210" cy="62" r="32" fill="#e9ecf0" stroke="#64748b" stroke-width="3"/>
-  <text x="1210" y="69" text-anchor="middle" font-size="16" fill="#334155">○</text>
+  <circle cx="1210" cy="62" r="32" fill="#dcf3e2" stroke="#1f7a3d" stroke-width="3"/>
+  <text x="1210" y="71" text-anchor="middle" font-size="19" fill="#155c2a">✓</text>
   <text x="1210" y="115" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a202c">Paso 5</text>
   <text x="1210" y="133" text-anchor="middle" font-size="12" fill="#4a5568">k6 completo</text>
-  <text x="1210" y="150" text-anchor="middle" font-size="11" fill="#334155">pendiente</text>
+  <text x="1210" y="150" text-anchor="middle" font-size="11" fill="#155c2a">completado · 1000/1000</text>
 </svg>
   </div>
 
@@ -392,17 +470,18 @@
   <table class="facts">
     <tr><th style="width:230px">Región</th><td>us-east-2 (Ohio) — decidida con evidencia de latencia, sección 8 del <code>.md</code></td></tr>
     <tr><th>API Gateway</th><td>reto2-alerta-flota (id <code>ofuhehmw59</code>) · stage <code>prod</code> · rate 15 / burst 2000</td></tr>
-    <tr><th>Endpoint</th><td><code>https://ofuhehmw59.execute-api.us-east-2.amazonaws.com/prod/event-notification</code> — responde ya; el correo real todavía no sale (SES sin verificar)</td></tr>
-    <tr><th>Lambda ingesta</th><td>reto2-ingesta · Python 3.14 · concurrencia reservada 8 (bloqueada por cuota de cuenta)</td></tr>
+    <tr><th>Endpoint</th><td><code>https://ofuhehmw59.execute-api.us-east-2.amazonaws.com/prod/event-notification</code> — responde y envía correo real (cae en spam por DMARC)</td></tr>
+    <tr><th>Lambda ingesta</th><td>reto2-ingesta · Python 3.14 · concurrencia reservada 10 (= VUs del k6 oficial)</td></tr>
     <tr><th>Cola principal</th><td>reto2-emergencias · visibilidad 90s · redrive a los 3 intentos</td></tr>
     <tr><th>DLQ</th><td>reto2-emergencias-dlq</td></tr>
-    <tr><th>Lambda notifier</th><td>reto2-notifier · timeout 15s · 2 intentos (≤12s) · concurrencia del trigger: 2</td></tr>
-    <tr><th>SES</th><td>identidad notificadoremergenciaflotas@gmail.com — pendiente de verificar</td></tr>
+    <tr><th>Lambda notifier</th><td>reto2-notifier · timeout 15s · 2 intentos (≤12s) · reservada 2 + concurrencia del trigger: 2</td></tr>
+    <tr><th>SES</th><td>identidad grupo2arquitecturasoftware@gmail.com — verificada, envío real confirmado</td></tr>
+    <tr><th>Carga completa (paso 5)</th><td>k6 del profesor: 1000/1000, 0% fallos, avg 119.65 ms / p95 129.09 ms</td></tr>
     <tr><th>Calentador</th><td>reto2-calentador-notifier (EventBridge Scheduler) · rate(5 min) · recordar apagarlo si no se está midiendo</td></tr>
   </table>
 
   <footer>
-    Documento de trabajo, fuera del repositorio del equipo. Generado a partir de <code>arquitectura-aws-opcion-b.md</code> el 09/10/2026. No es material oficial del curso.
+    Documento de trabajo, fuera del repositorio del equipo. Generado a partir de <code>arquitectura-aws-opcion-b.md</code>, actualizado el 12/10/2026. No es material oficial del curso.
   </footer>
 </div>
 </body>
