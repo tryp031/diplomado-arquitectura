@@ -31,9 +31,9 @@ class Historial:
         temporal.write_text(json.dumps(self._corridas, ensure_ascii=False, indent=1), encoding="utf-8")
         os.replace(temporal, self._path)
 
-    def abrir(self, inicio: datetime, modo: str, smtp: str) -> dict[str, Any]:
+    def abrir(self, inicio: datetime, modo: str, smtp: str, entorno: str = "local") -> dict[str, Any]:
         corrida = {"n": (self._corridas[-1]["n"] + 1) if self._corridas else 1,
-                   "inicio": inicio.isoformat(), "fin": None, "modo": modo, "smtp": smtp}
+                   "inicio": inicio.isoformat(), "fin": None, "modo": modo, "smtp": smtp, "entorno": entorno}
         self._corridas.append(corrida)
         self._guardar()
         return corrida
@@ -47,8 +47,11 @@ class Historial:
         self._guardar()
         return True
 
-    def vaciar(self) -> None:
-        self._corridas = []
+    def vaciar(self, entorno: str | None = None) -> None:
+        """Borra todas las corridas o solo las de un entorno. Las anteriores al switch no tienen
+        `entorno` y se tratan como locales."""
+        self._corridas = [] if entorno is None else [
+            c for c in self._corridas if c.get("entorno", "local") != entorno]
         self._guardar()
 
     def buscar(self, n: int) -> dict[str, Any] | None:

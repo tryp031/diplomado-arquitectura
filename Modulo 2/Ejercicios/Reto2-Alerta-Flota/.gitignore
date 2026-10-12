@@ -1,4 +1,5 @@
 # Secretos: el repo es PÚBLICO. Nunca versionar .env
+.env.aws
 .env
 logs/
 .venv/

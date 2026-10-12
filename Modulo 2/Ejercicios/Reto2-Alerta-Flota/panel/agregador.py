@@ -18,6 +18,10 @@ EVENTOS_FEED = {
     "CONSUMER_ERROR", "WORKER_ERROR", "NOTIFIER_STARTED", "PENDING_CLAIMED", "EMAIL_REDRIVEN",
 }
 SEGUNDOS_SERIE = 60
+# Líneas del recorrido (ENQUEUED, EMAIL_*) que llegan ANTES que su EMERGENCY_RECEIVED. En AWS pasa:
+# CloudWatch no garantiza el orden entre los grupos de logs de dos Lambdas. Se guardan hasta que
+# llegue la recepción; el tope solo evita crecer sin fin con líneas de una ventana anterior.
+MAX_HUERFANAS = 500
 # Cortes de la rúbrica del enunciado: < 15 s → 2.5 · 15-45 s → 1.5 · > 45 s → 0.5
 CORTES_RUBRICA = ((15, "good", 2.5), (45, "warning", 1.5), (math.inf, "critical", 0.5))
 
@@ -36,6 +40,10 @@ class LectorIncremental:
     def __init__(self, directorio: Path, patrones: tuple[str, ...]) -> None:
         self._directorio = directorio
         self._patrones = patrones
+        self.reiniciar()
+
+    def reiniciar(self) -> None:
+        """Olvida las posiciones: la próxima lectura vuelve a empezar por el principio."""
         self._posiciones: dict[Path, int] = {}
         self._restos: dict[Path, bytes] = {}
 
@@ -110,6 +118,7 @@ class Agregador:
         self._ultimo_visto: dict[str, datetime] = {}
         self._emergencias: dict[str, Emergencia] = {}
         self._normales: set[str] = set()  # event_id de eventos normales validados y registrados
+        self._huerfanas: dict[str, list[tuple[str, dict, datetime]]] = {}
         self._feed: deque[dict[str, Any]] = deque(maxlen=60)
 
     def cerrar(self, hasta: datetime) -> None:
@@ -170,17 +179,31 @@ class Agregador:
     def _seguir_emergencia(self, evento: str, registro: dict, momento: datetime) -> None:
         event_id = registro.get("event_id")
         if evento == "EMERGENCY_RECEIVED":
+            if event_id in self._emergencias:
+                return  # repetida: no reinicia un recorrido que ya avanzó
             self._emergencias[event_id] = Emergencia(event_id, registro.get("plate", ""), momento)
+            for previa in sorted(self._huerfanas.pop(event_id, []), key=lambda h: h[2]):
+                self._seguir_emergencia(*previa)
             return
         emergencia = self._emergencias.get(event_id) if event_id else None
         if emergencia is None:
-            return  # de una ventana anterior
+            # Llegó antes que su recepción, o es de una ventana anterior: se guarda por si acaso.
+            if event_id and (event_id in self._huerfanas or len(self._huerfanas) < MAX_HUERFANAS):
+                self._huerfanas.setdefault(event_id, []).append((evento, registro, momento))
+            return
+        # Una línea tardía (llegó fuera de orden) no hace retroceder el estado: un ENQUEUED o un
+        # RETRY que aparece después del EMAIL_SENT no deshace el envío.
+        terminada = emergencia.estado in ("enviada", "dlq")
         if evento == "EMERGENCY_ENQUEUED":
-            emergencia.encolada, emergencia.estado = momento, "encolada"
+            emergencia.encolada = momento
+            if emergencia.estado == "recibida":
+                emergencia.estado = "encolada"
         elif evento == "EMERGENCY_ENQUEUE_FAILED":
             emergencia.estado = "fallida"
         elif evento == "EMAIL_RETRY":
-            emergencia.intentos, emergencia.estado = registro.get("attempt", 0), "reintentando"
+            emergencia.intentos = max(emergencia.intentos, registro.get("attempt", 0))
+            if not terminada:
+                emergencia.estado = "reintentando"
         elif evento == "EMAIL_SENT":
             emergencia.enviada, emergencia.estado = momento, "enviada"
             emergencia.intentos = registro.get("attempt", emergencia.intentos)
