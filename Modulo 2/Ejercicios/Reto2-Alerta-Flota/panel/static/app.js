@@ -18,51 +18,54 @@ const fmtHoraCorta = new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, hour: "2
 // Nombre visible de cada modo de carga: el panel debe dejar claro qué k6 está corriendo.
 const NOMBRE_MODO = { rafaga: "ráfaga", ritmo: "ritmo de referencia", profesor: "k6 del profesor" };
 const AYUDA_MODO = {
-  profesor: "Script oficial del profesor (k6/profesor.js), solo con la URL hacia nuestro gateway. "
-    + "10 VUs · 1000 iteraciones · pausa 0,1 s. Él decide cuántos Emergency manda: normalmente 1, a veces 0 o 2.",
-  rafaga: "Script propio (k6/carga.js) sin pausas: las 1000 peticiones llegan en menos de 1 s.",
-  ritmo: "Script propio (k6/carga.js) a ~35 req/s durante ~28 s, como la salida de referencia del enunciado.",
+  profesor: "Script oficial (k6/profesor.js): 10 VUs · 1000 iteraciones. Suele enviar 1 Emergency (a veces 0 o 2).",
+  rafaga: "k6/carga.js sin pausas: 1000 peticiones en menos de 1 s.",
+  ritmo: "k6/carga.js a ~35 r/s durante ~28 s, como la salida de referencia del enunciado.",
 };
 
 // Rótulos que cambian con el entorno observado. La lógica de pintado es la misma para los dos:
 // las Lambdas de AWS escriben los mismos eventos JSON que la versión local. Los valores de AWS son
 // los del aporte de Camilo (arquitectura-aws-opcion-b.md, 11/10): configurados en la consola.
+// Igual en los dos entornos: lo que se borra no depende de cuál se esté mirando.
+const DIALOGO_LIMPIAR = "Se borran las corridas y la salida de k6 de Local y Cloud. En Local se vacían "
+  + "los logs y las colas de Redis. En AWS no se toca nada: CloudWatch y la DLQ se conservan.";
+
 const ROTULOS = {
   local: {
     nodos: {
       gateway: ["Gateway · nginx", "Token bucket 15 r/s · burst 2000"],
       ingest: ["Ingesta · FastAPI ×2", "Responde sin esperar el correo"],
       redis: ["Redis Streams", "Cola durable · ACK · DLQ"],
-      notifier: ["Notifier · asyncio", "Concurrencia 5 · reintentos 1/2/4 s"],
+      notifier: ["Notifier · asyncio", "5 a la vez · reintentos 1/2/4 s"],
       mailpit: ["SMTP", null],
     },
     mini: { k6: "k6", gateway: "nginx", ingest: "Ingesta ×2", redis: "Redis", notifier: "Notifier", mailpit: "SMTP" },
-    flujoMeta: "Se ilumina cada componente que registró actividad en los últimos 2 s",
-    nota: "Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.",
+    flujoMeta: "activo = actividad en los últimos 2 s",
+    nota: "Instancias: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel no cuenta.",
     medidaInfo: "Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.",
     pie429: "rate 15 r/s · burst 2000",
     pieCola: "pendientes sin ACK",
-    dialogo: "Se borran las corridas de Local y de Cloud del historial y la salida de k6 de ambos. En Local se vacían los logs de ingest, notifier y gateway y las colas de Redis. En Cloud no se toca AWS (el panel es de solo lectura): los logs de CloudWatch y la DLQ se conservan allá.",
-    pie: "Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.",
+    dialogo: DIALOGO_LIMPIAR,
+    pie: "Plano de control de solo lectura (logs, Redis, Docker): no toca el camino de los eventos.",
     ayuda: "",
   },
   aws: {
     nodos: {
       gateway: ["API Gateway · REST", "Stage prod · rate 15 · burst 2000"],
-      ingest: ["Lambda reto2-ingesta", "Concurrencia reservada 10 · instancias:"],
+      ingest: ["Lambda reto2-ingesta", "Reservada 10 · instancias:"],
       redis: ["Amazon SQS", "Cola estándar · DLQ"],
       notifier: ["Lambda reto2-notifier", "Reservada 2 · 2 intentos ≤ 12 s"],
       mailpit: ["Amazon SES", "Identidad verificada (cae en spam)"],
     },
     mini: { k6: "k6", gateway: "API Gateway", ingest: "λ ingesta", redis: "SQS", notifier: "λ notifier", mailpit: "SES" },
-    flujoMeta: "Se ilumina lo que registró actividad en CloudWatch (llega con ~5 s de retraso)",
-    nota: "Concurrencia reservada: <strong>10 + 2 = 12</strong> (ingesta + notifier), por encima del límite de 10 del enunciado: decisión abierta del equipo. Las filas de la ingesta son instancias (log streams) que atendieron tráfico.",
+    flujoMeta: "activo según CloudWatch (~5 s de retraso)",
+    nota: "Concurrencia reservada: <strong>10 + 2 = 12</strong>, por encima del límite de 10. Decisión abierta del equipo.",
     medidaInfo: "En AWS: desde la última petición registrada por la Lambda de ingesta (unos ms después del envío de k6) hasta el último EMAIL_SENT del notifier, según CloudWatch. No incluye la entrega de Gmail.",
-    pie429: "API Gateway no los registra en los logs de Lambda",
+    pie429: "no visibles en los logs de Lambda",
     pieCola: "en vuelo",
-    dialogo: "Se borran las corridas de Local y de Cloud del historial y la salida de k6 de ambos. En Local se vacían los logs de ingest, notifier y gateway y las colas de Redis. En Cloud no se toca AWS (el panel es de solo lectura): los logs de CloudWatch y la DLQ se conservan allá.",
-    pie: "Plano de control: lee CloudWatch Logs y el estado de SQS con un usuario IAM de solo lectura. Nunca escribe en el camino de los eventos.",
-    ayuda: " En AWS va contra el API Gateway del equipo (us-east-2). Antes de medir, activa el calentador del notifier en EventBridge. Use «Ráfaga» (la latencia de red ya da ~87 r/s y 10 VUs nunca pasan de 10 en vuelo) o el k6 del profesor; «Ritmo» se calibró para local y en AWS no alcanza las 1000 en 30 s.",
+    dialogo: DIALOGO_LIMPIAR,
+    pie: "Plano de control de solo lectura (CloudWatch y SQS): no toca el camino de los eventos.",
+    ayuda: " En Cloud: activa antes el calentador del notifier (EventBridge). Usa Ráfaga o el del profesor; Ritmo no llega a 1000 en 30 s.",
   },
 };
 const NOMBRE_ENTORNO = { local: "Local", aws: "Cloud" };
@@ -184,12 +187,12 @@ function pintarSegundaMedida(e) {
   if (!e.corrida || peor.segundos === null) {
     valor.textContent = "—";
     delete valor.dataset.nivel;
-    $("#e2c-detalle").textContent = "peor caso · criterio reportado < 16 s";
+    $("#e2c-detalle").textContent = "peor caso · meta < 16 s";
     return;
   }
   valor.textContent = `${fmtSeg.format(peor.segundos)} s`;
   valor.dataset.nivel = peor.segundos < CRITERIO_PROFESOR_S ? "good" : "critical";
-  $("#e2c-detalle").textContent = `peor caso (${peor.placa}) · criterio < 16 s`;
+  $("#e2c-detalle").textContent = `peor caso (${peor.placa}) · meta < 16 s`;
 }
 
 // ------------------------------------------------------------------ salida de k6
@@ -253,7 +256,7 @@ function pintarCorrida(e) {
   const c = e.corrida;
   if (!c) {
     $("#corrida-titulo").textContent = "Sin corrida";
-    $("#corrida-horas").textContent = "los contadores muestran todo lo registrado";
+    $("#corrida-horas").textContent = "contadores acumulados";
     return;
   }
   $("#corrida-titulo").textContent = `Corrida #${c.n} · ${NOMBRE_MODO[c.modo] ?? c.modo}`;
@@ -491,14 +494,14 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
     const d = await post("/api/emergencia");
     if (d.status_gateway !== 200) {
       // 503: la ingesta no pudo guardarla (p. ej. Redis caído). No responde OK por algo que perdería.
-      avisar(`Emergency ${d.placa} rechazada → HTTP ${d.status_gateway}: el sistema no pudo guardarla y no saldrá correo. Reenvíela cuando el servicio vuelva.`);
+      avisar(`Emergency ${d.placa} rechazada (HTTP ${d.status_gateway}): no se guardó y no saldrá correo. Reenvíala cuando el servicio vuelva.`);
       return;
     }
     const corrida = ultimoEstado?.corrida?.n;
     const efecto = corrida
-      ? `No altera la corrida #${corrida}: aparece en «Recorrido de cada emergencia» marcada «fuera de corrida».`
+      ? `No cuenta en la corrida #${corrida} (queda marcada «fuera de corrida»).`
       : "Aparece en «Recorrido de cada emergencia» y en los eventos del sistema.";
-    avisar(`Emergency ${d.placa} enviada por el gateway → HTTP ${d.status_gateway}. ${efecto}`);
+    avisar(`Emergency ${d.placa} enviada (HTTP ${d.status_gateway}). ${efecto}`);
   } catch (err) {
     avisar(`No se pudo enviar: ${err.message}`);
   } finally {
@@ -535,7 +538,7 @@ $("#btn-carga").addEventListener("click", async () => {
   try {
     const d = await post("/api/carga", profesor ? { modo } : { modo, emergencias });
     const detalle = profesor ? "k6/profesor.js decide los Emergency" : `${emergencias} Emergency`;
-    avisar(`Corrida #${d.corrida} lanzada con ${NOMBRE_MODO[modo]} (${detalle}). Solo cuenta lo que entra mientras k6 envía.`);
+    avisar(`Corrida #${d.corrida} lanzada: ${NOMBRE_MODO[modo]} (${detalle}).`);
   } catch (err) {
     avisar(`No se pudo lanzar la carga: ${err.message}`);
   }
@@ -787,7 +790,7 @@ for (const radio of document.querySelectorAll('input[name="entorno"]')) {
     cambiandoEntorno = true;
     try {
       await post("/api/entorno", { entorno: radio.value });
-      avisar(`Ahora observa ${radio.value === "aws" ? "Cloud (la opción B en AWS)" : "Local (Docker)"}. La corrida y la carga van contra ese entorno; el historial conserva las de ambos.`);
+      avisar(`Observando ${radio.value === "aws" ? "Cloud (AWS)" : "Local (Docker)"}. El historial conserva los dos.`);
     } catch (err) {
       avisar(`No se pudo cambiar de entorno: ${err.message}`);
     } finally {
