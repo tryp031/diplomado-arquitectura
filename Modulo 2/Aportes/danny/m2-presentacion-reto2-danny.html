@@ -296,6 +296,93 @@ code{font-family:var(--mono); font-size:.92em}
 .dg .dat{fill:var(--field); stroke:var(--muted); stroke-width:1.3}
 .tabox.prosa td{white-space:normal; vertical-align:top}
 .tabox.prosa td:first-child{white-space:normal; min-width:150px}
+
+/* ══ Lámina AWS: flujo por servicios ══
+ * Una sola rejilla de 13 columnas (7 servicios + 6 flechas). El recuadro punteado de la
+ * región es un elemento más de la rejilla que abarca de API Gateway a SES, por detrás:
+ * así el borde queda alineado con las tarjetas sin medir nada en JS. Bajo 1080 px la
+ * rejilla se vuelve una columna y las flechas apuntan hacia abajo. */
+.caja.ancha{max-width:1280px}
+.lede.una{max-width:none; margin-bottom:6px}
+.aws-flujo{display:grid; position:relative; margin:22px 0 8px; row-gap:10px;
+  grid-template-columns:repeat(6, minmax(0,1fr) 72px) minmax(0,1fr)}
+.aws-flujo > *{position:relative; z-index:1}
+.aws-region{grid-column:3 / 12; grid-row:1 / 4; z-index:0; margin:-8px -12px -12px;
+  border:1.5px dashed color-mix(in srgb, var(--blue) 55%, var(--line)); border-radius:18px;
+  background:color-mix(in srgb, var(--blue) 4%, transparent)}
+.aws-reg-et{grid-column:3 / 12; grid-row:1; justify-self:start; display:inline-flex; align-items:center;
+  gap:7px; font-family:var(--mono); font-size:11.5px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--blue); padding:2px 2px 0}
+.aws-reg-et svg{width:15px; height:15px}
+.aws-svc{grid-row:2; align-self:stretch; background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:12px 10px 11px; box-shadow:var(--sh-s);
+  display:flex; flex-direction:column; align-items:flex-start; gap:7px; min-width:0}
+.aws-svc .ico{width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+  background:var(--sky); color:var(--blue); flex:none}
+.aws-svc .ico svg{width:20px; height:20px}
+.aws-svc .ico.q{background:var(--warn-soft); color:var(--warn)}
+.aws-svc .ico.m{background:var(--green-soft); color:var(--green)}
+.aws-svc .ico.x{background:var(--line-2); color:var(--muted)}
+.aws-svc b{font-size:13.5px; font-weight:800; line-height:1.2; letter-spacing:-.01em}
+.aws-svc .d{display:block; font-family:var(--mono); font-size:10.5px; line-height:1.4;
+  color:var(--muted); overflow-wrap:anywhere}
+.aws-svc .d span{display:block}
+.aws-svc .d .ojo{color:var(--warn)}
+.aws-svc.fuera{background:var(--field); box-shadow:none}
+.aws-paso{grid-row:2; align-self:stretch; min-height:96px}
+.aws-paso .ln{position:absolute; left:6px; right:4px; top:50%; height:2px; background:var(--blue)}
+.aws-paso .ln::after{content:""; position:absolute; right:-2px; top:50%; transform:translateY(-50%);
+  border-left:8px solid var(--blue); border-top:5px solid transparent; border-bottom:5px solid transparent}
+.aws-paso .n{position:absolute; left:50%; bottom:calc(50% + 7px); transform:translateX(-50%);
+  width:23px; height:23px; border-radius:50%; background:var(--blue); color:var(--blue-ink);
+  font-family:var(--mono); font-size:12px; font-weight:700; display:grid; place-items:center}
+.aws-paso .r{position:absolute; left:0; right:0; top:calc(50% + 8px); text-align:center;
+  font-family:var(--mono); font-size:10px; line-height:1.3; color:var(--muted)}
+.aws-paso.suave .ln,.aws-paso.suave .ln::after{background:var(--soft)}
+.aws-paso.suave .ln::after{background:none; border-left-color:var(--soft)}
+.aws-sec{grid-column:3 / 12; grid-row:3; display:grid; grid-template-columns:repeat(3,1fr);
+  gap:10px; margin-top:4px}
+.aws-sec > div{display:flex; gap:9px; align-items:flex-start; border:1px dashed var(--line);
+  border-radius:12px; padding:8px 10px; background:var(--field); min-width:0}
+.aws-sec svg{width:17px; height:17px; flex:none; color:var(--soft); margin-top:1px}
+.aws-sec b{display:block; font-size:12.5px; font-weight:750; color:var(--muted)}
+.aws-sec small{display:block; font-size:11.5px; line-height:1.4; color:var(--soft)}
+.aws-sec code{font-size:10.5px}
+
+.aws-exp .card{padding:16px 17px}
+.aws-exp .card h3{display:flex; align-items:center; gap:9px; font-size:16px; margin:0 0 6px}
+.aws-exp .card h3 .n{width:24px; height:24px; border-radius:8px; flex:none; display:grid; place-items:center;
+  background:var(--sky); color:var(--blue); font-family:var(--mono); font-size:12.5px}
+.aws-exp .card small{margin-top:0}
+
+.aws-franja{background:var(--green-soft); border:1px solid color-mix(in srgb, var(--green) 30%, transparent);
+  border-radius:15px; padding:13px 18px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 22px}
+.aws-franja .t{font-weight:800; color:var(--green); font-size:14.5px; margin-right:4px}
+.aws-franja ul{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px 20px}
+.aws-franja li{display:flex; align-items:center; gap:7px; font-size:14px; font-weight:600}
+.aws-franja li svg{width:17px; height:17px; color:var(--green); flex:none}
+.aws-honesto{font-size:12.5px; color:var(--warn); margin:9px 0 0; max-width:none;
+  display:flex; gap:7px; align-items:baseline}
+.aws-honesto::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--warn);
+  flex:none; transform:translateY(-1px)}
+
+@media (max-width:1080px){
+  .aws-flujo{grid-template-columns:1fr; row-gap:0}
+  .aws-flujo > *{grid-column:auto !important; grid-row:auto !important}
+  .aws-region{display:none}
+  .aws-reg-et{margin:6px 0 8px; background:var(--sky); border-radius:999px; padding:4px 11px}
+  .aws-svc{display:grid; grid-template-columns:34px 1fr; column-gap:12px; row-gap:2px; align-items:center}
+  .aws-svc .ico{grid-row:1 / 3}
+  .aws-paso{min-height:46px; display:flex; align-items:center; gap:10px; padding-left:16px}
+  .aws-paso .ln,.aws-paso .n,.aws-paso .r{position:static; transform:none}
+  .aws-paso .ln{position:relative; top:auto; left:auto; right:auto; width:2px; height:34px; flex:none; order:0}
+  .aws-paso .ln::after{right:auto; left:50%; top:auto; bottom:-3px; transform:translateX(-50%);
+    border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid var(--blue); border-bottom:0}
+  .aws-paso.suave .ln::after{border-top-color:var(--soft); border-left-color:transparent}
+  .aws-paso .n{order:1; flex:none}
+  .aws-paso .r{order:2; text-align:left; font-size:11.5px}
+  .aws-sec{grid-template-columns:1fr; margin:12px 0 0}
+}
 </style>
 </head>
 <body>
@@ -494,27 +581,102 @@ code{font-family:var(--mono); font-size:.92em}
 
 <!-- ═══ 6 · AWS ═══ -->
 <section class="lamina">
-  <div class="caja">
+  <div class="caja ancha">
     <span class="kicker">05 · Implementación en AWS</span>
     <h2>AWS opción B: serverless en us-east-2</h2>
-    <pre class="dib">k6 ──HTTPS──► API Gateway REST (stage prod · rate 15 · burst 2000 · TLS 1.3)
-                  │ proxy
-                  ▼
-             Lambda reto2-ingesta (reservada 10) ──► SQS reto2-emergencias (visibilidad 90 s)
-                                                        │ trigger · batch 1 · máx. 2
-                                                        ▼
-                                Lambda reto2-notifier (reservada 2 · timeout 15 s)
-                                  │ 2 intentos (timeout 2+3 s, espera 1 s) ──► SES ──► Gmail
-                                  └ agota intentos → DLQ explícita · CloudWatch Logs en cada paso</pre>
-    <div class="rej d3">
-      <div class="card"><span class="et">Región con evidencia</span><small><b>us-east-2</b>: k6 con 10 VUs contra 4 regiones; ganó en promedio (186,4 ms), mediana y p90. Una sola muestra con curl había dado lo contrario.</small></div>
-      <div class="card"><span class="et">Reintentos acotados</span><small>De ~39 s en el peor caso a <b>≤ 12 s</b>. El SDK con <code>max_attempts=1</code> para que no agregue reintentos ocultos.</small></div>
-      <div class="card"><span class="et">Calentador</span><small>EventBridge Scheduler cada 5 min para evitar el arranque en frío. Se enciende solo en la ventana de medición.</small></div>
+    <p class="lede una">Cinco servicios gestionados en una región elegida midiendo: con k6 en 4 regiones, us-east-2 ganó en promedio.</p>
+
+    <div class="aws-flujo" role="img" aria-label="Flujo: k6 envía HTTPS POST a API Gateway, que pasa por proxy a la Lambda de ingesta; solo los Emergency van a SQS; SQS dispara la Lambda notifier, que envía por SES a Gmail. El notifier manda a la DLQ tras 2 intentos fallidos; ambas Lambdas escriben en CloudWatch Logs; EventBridge Scheduler calienta el notifier.">
+      <div class="aws-region" aria-hidden="true"></div>
+
+      <div class="aws-svc fuera" style="grid-column:1">
+        <span class="ico x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 10l3 2.5L7 15M12.5 15H17"/></svg></span>
+        <b>k6</b>
+        <span class="d"><span>cliente</span><span>10&nbsp;VUs</span><span>1000&nbsp;req</span></span>
+      </div>
+      <div class="aws-paso" style="grid-column:2"><span class="n">1</span><span class="ln"></span><span class="r">HTTPS POST</span></div>
+
+      <span class="aws-reg-et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Región: us-east-2</span>
+
+      <div class="aws-svc" style="grid-column:3">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9.5L12 4l8 5.5V20"/><path d="M9 20v-6h6v6M2.5 20h19"/></svg></span>
+        <b>API Gateway REST</b>
+        <span class="d"><span>POST /event-<wbr>notification</span><span>stage prod</span><span>rate&nbsp;15</span><span>burst&nbsp;2000</span></span>
+      </div>
+      <div class="aws-paso" style="grid-column:4"><span class="n">2</span><span class="ln"></span><span class="r">proxy</span></div>
+
+      <div class="aws-svc" style="grid-column:5">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5h3.2L17.5 20M12.3 10.5 6.5 20"/></svg></span>
+        <b>Lambda ingesta</b>
+        <span class="d"><span>reto2-<wbr>ingesta</span><span>reservada 10</span><span>Position&nbsp;→&nbsp;200 directo</span></span>
+      </div>
+      <div class="aws-paso" style="grid-column:6"><span class="n">3</span><span class="ln"></span><span class="r">solo Emergency</span></div>
+
+      <div class="aws-svc" style="grid-column:7">
+        <span class="ico q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="5" height="10" rx="1.2"/><rect x="9.5" y="7" width="5" height="10" rx="1.2"/><rect x="16.5" y="7" width="5" height="10" rx="1.2"/></svg></span>
+        <b>SQS</b>
+        <span class="d"><span>reto2-<wbr>emergencias</span><span>estándar</span><span>visibilidad 90&nbsp;s</span></span>
+      </div>
+      <div class="aws-paso" style="grid-column:8"><span class="n">4</span><span class="ln"></span><span class="r">batch&nbsp;1 · máx&nbsp;2</span></div>
+
+      <div class="aws-svc" style="grid-column:9">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5h3.2L17.5 20M12.3 10.5 6.5 20"/></svg></span>
+        <b>Lambda notifier</b>
+        <span class="d"><span>reto2-<wbr>notifier</span><span>reservada 2</span><span>timeout 15&nbsp;s</span></span>
+      </div>
+      <div class="aws-paso" style="grid-column:10"><span class="n">5</span><span class="ln"></span><span class="r">2&nbsp;intentos ≤&nbsp;12&nbsp;s</span></div>
+
+      <div class="aws-svc" style="grid-column:11">
+        <span class="ico m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
+        <b>SES</b>
+        <span class="d"><span>identidad verificada</span></span>
+      </div>
+      <div class="aws-paso suave" style="grid-column:12"><span class="ln"></span><span class="r">entrega</span></div>
+
+      <div class="aws-svc fuera" style="grid-column:13">
+        <span class="ico x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.5h5l1.2 3h5.6l1.2-3h5"/><path d="M5.5 5h13l2.5 8.5V19H3v-5.5z"/></svg></span>
+        <b>Gmail</b>
+        <span class="d"><span>grupo2<wbr>arquitectura<wbr>software<wbr>@gmail.com</span><span class="ojo">cae en spam (DMARC)</span></span>
+      </div>
+
+      <div class="aws-sec">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+          <span><b>CloudWatch Logs</b><small>ambas Lambdas → <code>EMERGENCY_RECEIVED</code>, <code>EMAIL_SENT</code></small></span>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+          <span><b>EventBridge Scheduler</b><small>→ notifier cada 5 min (calentador), solo en la ventana de prueba</small></span>
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M12 9v4M12 16v.01"/></svg>
+          <span><b>DLQ</b><small>notifier → <code>reto2-<wbr>emergencias-<wbr>dlq</code> tras 2 intentos fallidos</small></span>
+        </div>
+      </div>
     </div>
-    <p class="fuente">Fuente: <code>Aportes/camilo/m2-aws-opcion-b-camilo/arquitectura-aws-opcion-b.md</code> §1, §6, §8, §9. Números reportados por Camilo; nadie más del equipo los ha verificado aún.</p>
+
+    <div class="rej d3 aws-exp">
+      <div class="card"><h3><span class="n">1</span>Responder sin esperar el correo</h3><small>La ingesta responde <b>200</b> en milisegundos y encola solo los Emergency: el correo no ocupa el camino que mide k6.</small></div>
+      <div class="card"><h3><span class="n">2</span>SQS desacopla y no pierde</h3><small>Cola durable + DLQ: si el notifier falla o está ocupado, la alerta espera. Entrega <b>al menos una vez</b>.</small></div>
+      <div class="card"><h3><span class="n">3</span>Correo acotado en tiempo</h3><small>2 intentos de ≤&nbsp;5&nbsp;s y 1&nbsp;s de espera: <b>≤&nbsp;12&nbsp;s</b> antes de la DLQ. Medido: <b>1,66&nbsp;s</b> de recepción a <code>EMAIL_SENT</code>.</small></div>
+    </div>
+
+    <div class="aws-franja">
+      <span class="t">Por qué serverless aquí</span>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Escala automática</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sin servidores que administrar</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>HTTPS incluido en API Gateway</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Pago por uso</li>
+      </ul>
+    </div>
+    <p class="aws-honesto">Configurado a mano en la consola (sin IaC) · concurrencia 10 + 2 = 12 vs. límite 10: decisión abierta.</p>
+
+    <p class="fuente">Fuente: <code>Aportes/camilo/m2-aws-opcion-b-camilo/arquitectura-aws-opcion-b.md</code> §1, §6, §8, §9 (pasos 3–5). Números reportados por Camilo; nadie más del equipo los ha verificado aún.</p>
     <div class="notas">
       <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
-      <p>Ideal que lo presente Camilo. Contar el despliegue por pasos (API Gateway con mock → ingesta → SQS → notifier + SES → carga completa): cada paso se validó antes de seguir. La lección de la región: una sola muestra engaña.</p>
+      <p>Ideal que lo presente Camilo. Recorrer los números de izquierda a derecha: ① k6 entra por HTTPS, ② API Gateway aplica rate 15 / burst 2000 y pasa a la ingesta, ③ solo el Emergency va a la cola, ④ SQS dispara el notifier de a uno, ⑤ SES entrega en Gmail (en spam por DMARC, sin dominio propio). La fila tenue es lo que no está en el camino feliz: DLQ, logs y calentador.</p>
+      <p>Contar que se desplegó por pasos (API Gateway con mock → ingesta → SQS → notifier + SES → carga completa) y cada paso se validó antes de seguir. La lección de la región: una sola muestra con curl había dado lo contrario. Cerrar con la línea naranja: hecho a mano y 10 + 2 = 12 frente al límite de 10, decirlo nosotros antes que el profesor.</p>
     </div>
   </div>
 </section>
