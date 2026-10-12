@@ -96,6 +96,11 @@ insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, h
 **Límites:** los datos son de ejemplo (la fila 16,4 s está inspirada en el 06/10, no es un registro).
 No hay código detrás: el costo de cada cambio es una estimación.
 
+**Cambio del 11/10/2026 (Danny):** se retira la sección 6 «Inyectar fallas» y en su lugar entra la
+gráfica «Peticiones por segundo · últimos 60 s» del panel actual (dibujo replicado de `pintarGrafica`
+en `panel/static/app.js`, con datos de ejemplo de la corrida #3). Se ajustan la tabla «Qué cambia y por qué»
+y la nota de la línea de tiempo, que ya no reemplaza esa gráfica sino que la complementa.
+
 ---
 
 ## `m2-revision-aws-opcion-b-danny.md`
