@@ -72,7 +72,20 @@ flowchart LR
   colas; listar Lambdas, buckets de S3 u otro grupo de logs da `AccessDenied`. Un Emergency manual
   (`PNL-278`) respondió 200 por API Gateway y el panel lo mostró recibido → encolado (+362 ms) →
   correo enviado (+2019 ms), leído de CloudWatch. La DLQ tenía 4 mensajes de pruebas anteriores de
-  Camilo. Falta una corrida completa con el k6 del profesor.
+  Camilo.
+- **Corridas completas desde el panel (12/10/2026, 22:55, sin calentador):**
+
+  | # | Modo | Peticiones | Fallos | p95 | Emergency | Medida (última petición → correo) | Instancias |
+  |---|---|---|---|---|---|---|---|
+  | 4 | k6 del profesor | 1000 (45,7 r/s) | 0 % | 120,5 ms | **0** (defecto conocido del script) | — | 8 |
+  | 5 | Ritmo | 769 | 0 % | 118,2 ms | 0 (se cortó a los 30 s) | — | 6 |
+  | 6 | Ráfaga, 1 Emergency | 1000 (87,1 r/s) | 0 % | 120,8 ms | 1, `VFH-999` | **1,352 s** (2,5 pts); recepción → `EMAIL_SENT` 1,602 s | 9 |
+
+  El panel contó desde CloudWatch las mismas 1000 peticiones que k6, y la descarga de la corrida 6
+  trae las 1003 líneas (999 `EVENT_RECEIVED` + el recorrido del Emergency).
+  **Hallazgo:** «Ritmo» (pausa de 0,28 s) se calibró para la latencia local (~2 ms). En AWS cada
+  petición ya tarda ~108 ms, así que no termina en 30 s. En AWS se usa «Ráfaga» o el k6 del profesor.
+  Con 10 VUs nunca hay más de 10 peticiones en vuelo, así que la ráfaga no provoca throttling.
 - **Probado también con dobles** de CloudWatch y SQS (`tests/panel/test_aws.py`, `test_app_entornos.py`).
 - **Cuota de FilterLogEvents**: es baja por cuenta y región (*Probable*: del orden de unas pocas
   llamadas por segundo). El panel consulta como mucho cada 2 s por grupo. Si aparece

@@ -60,7 +60,7 @@ const ROTULOS = {
     pieCola: "en vuelo",
     dialogo: "Se borran solo las corridas de AWS del historial. CloudWatch y SQS no se tocan: el panel tiene permisos de solo lectura en AWS.",
     pie: "Plano de control: lee CloudWatch Logs y el estado de SQS con un usuario IAM de solo lectura. Nunca escribe en el camino de los eventos.",
-    ayuda: " En AWS va contra el API Gateway del equipo (us-east-2). Antes de medir, activa el calentador del notifier en EventBridge. La ráfaga supera la concurrencia reservada de la ingesta (10): espere throttling de Lambda.",
+    ayuda: " En AWS va contra el API Gateway del equipo (us-east-2). Antes de medir, activa el calentador del notifier en EventBridge. Use «Ráfaga» (la latencia de red ya da ~87 r/s y 10 VUs nunca pasan de 10 en vuelo) o el k6 del profesor; «Ritmo» se calibró para local y en AWS no alcanza las 1000 en 30 s.",
   },
 };
 const NOMBRE_ENTORNO = { local: "Local", aws: "AWS" };
