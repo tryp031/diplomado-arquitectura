@@ -422,6 +422,11 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
   boton.disabled = true;
   try {
     const d = await post("/api/emergencia");
+    if (d.status_gateway !== 200) {
+      // 503: la ingesta no pudo guardarla (p. ej. Redis caído). No responde OK por algo que perdería.
+      avisar(`Emergency ${d.placa} rechazada → HTTP ${d.status_gateway}: el sistema no pudo guardarla y no saldrá correo. Reenvíela cuando el servicio vuelva.`);
+      return;
+    }
     const corrida = ultimoEstado?.corrida?.n;
     const efecto = corrida
       ? `No altera la corrida #${corrida}: aparece en «Recorrido de cada emergencia» marcada «fuera de corrida».`
@@ -641,6 +646,7 @@ const NOMBRES_EVENTO = {
   WORKER_ERROR: "Error del worker",
   NOTIFIER_STARTED: "Notifier iniciado",
   PENDING_CLAIMED: "Pendientes reclamados",
+  EMAIL_REDRIVEN: "Reintento desde la DLQ",
 };
 function pintarFeed(feed) {
   $("#feed-vacio").hidden = feed.length > 0;

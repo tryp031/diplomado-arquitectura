@@ -104,3 +104,29 @@ def test_el_cliente_reintenta_si_redis_se_reinicio():
     assert kwargs["retry"].get_retries() >= 3
     assert {ConnectionError, TimeoutError} <= set(kwargs["retry_on_error"])
     assert kwargs["decode_responses"] is True
+
+
+async def test_redrive_devuelve_a_la_cola_lo_reciente_de_la_dlq(client):
+    # Si el SMTP estuvo caído más que los reintentos, la alerta quedó en la DLQ: al volver, se reintenta.
+    from datetime import timedelta
+    from alerta.logjson import format_ts, now_local
+    q = queue(client)
+    await q.ensure_group()
+    reciente = EmergencyAlert("ev-r", "AAA-111", "OK", format_ts(now_local() - timedelta(seconds=30)))
+    vieja = EmergencyAlert("ev-v", "BBB-222", "OK", format_ts(now_local() - timedelta(minutes=20)))
+    for alerta in (reciente, vieja):
+        await q.publish(alerta)
+    for d in await q.fetch(count=10, block_ms=10):
+        await q.dead_letter(d, "SMTPConnectError: caído")
+
+    movidas = await q.redrive(max_age_s=600, count=100)
+
+    assert movidas == 1
+    [delivery] = await q.fetch(count=10, block_ms=10)
+    assert delivery.alert == reciente  # mismo event_id y misma hora de recepción
+    dlq = await client.xrange("em-dlq")
+    assert [campos["event_id"] for _, campos in dlq] == ["ev-v"]  # la vieja queda para auditoría
+
+
+async def test_redrive_sin_dlq_no_falla(client):
+    assert await queue(client).redrive(max_age_s=600, count=100) == 0

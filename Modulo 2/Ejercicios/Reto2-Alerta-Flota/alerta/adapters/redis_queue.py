@@ -5,6 +5,8 @@ si el notifier cae a mitad del envío, otro consumidor lo reclama con XAUTOCLAIM
 """
 from __future__ import annotations
 
+from datetime import datetime
+
 import redis.asyncio as redis
 from redis.asyncio import Redis
 from redis.asyncio.retry import Retry
@@ -12,6 +14,7 @@ from redis.backoff import ExponentialBackoff
 from redis.exceptions import ConnectionError, ResponseError, TimeoutError
 
 from alerta.domain import EmergencyAlert
+from alerta.logjson import now_local
 from alerta.ports import Delivery
 
 
@@ -95,6 +98,22 @@ class RedisAlertQueue:
     async def dead_letter(self, delivery: Delivery, error: str) -> None:
         await self._redis.xadd(self._dlq_stream, {**delivery.alert.to_fields(), "error": error})
         await self.ack(delivery.message_id)
+
+    async def redrive(self, max_age_s: float, count: int) -> int:
+        """Devuelve a la cola principal las alertas de la DLQ con menos de `max_age_s` desde su
+        recepción. Las más viejas quedan en la DLQ para revisión humana: un aviso de emergencia
+        con tanta demora ya no se manda solo. Mismo event_id y misma hora de recepción.
+        Al-menos-una-vez: si el proceso cae entre XADD y XDEL, la alerta puede repetirse."""
+        movidas = 0
+        ahora = now_local()
+        for message_id, fields in await self._redis.xrange(self._dlq_stream, count=count):
+            alert = EmergencyAlert.from_fields(fields)
+            if (ahora - datetime.fromisoformat(alert.received_at)).total_seconds() > max_age_s:
+                continue
+            await self._redis.xadd(self._stream, alert.to_fields())
+            await self._redis.xdel(self._dlq_stream, message_id)
+            movidas += 1
+        return movidas
 
 
 def _delivery(message_id: str, fields: dict[str, str]) -> Delivery:

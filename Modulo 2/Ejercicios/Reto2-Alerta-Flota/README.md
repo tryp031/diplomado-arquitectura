@@ -118,6 +118,19 @@ nginx hasta el último `EMAIL_SENT`. Se toma de nginx y no del fin de k6 porque 
 incluye la pausa final del modo ritmo y (b) nginx usa el mismo reloj que los servicios. La llegada
 a Gmail no la controlamos: se anota a mano.
 
+## Qué pasa si se cae un componente (y cómo se recupera)
+
+Verificado el 11/10/2026 apagando cada uno desde el panel.
+
+| Se cae | Qué pasa mientras está caído | Al volver |
+|---|---|---|
+| **SMTP** (Mailpit/Gmail) | El notifier reintenta a 1, 2 y 4 s; si sigue caído, la alerta va a la DLQ (`EMAIL_DLQ`). | Cada 15 s el notifier devuelve a la cola lo que está en la DLQ (`EMAIL_REDRIVEN`) y el correo sale, con el mismo `event_id`. Alertas con más de 10 min no se reenvían solas: quedan en la DLQ para revisión. |
+| **Redis** | Un `Emergency` responde **503 y no se guarda** (`EMERGENCY_ENQUEUE_FAILED`): no se confirma lo que no se puede encolar. Quien lo envía debe reintentar. El notifier registra `CONSUMER_ERROR` y espera. | El notifier se reconecta solo y recrea el grupo si hace falta. Lo enviado durante la caída **no** se recupera (recibió 503). |
+| **Notifier** | Los `Emergency` se acumulan en el stream. | Al arrancar reclama los pendientes (`PENDING_CLAIMED`) y los envía. |
+
+Entrega **al-menos-una-vez**: un reintento puede producir un correo duplicado (el atributo
+priorizado es desempeño, a costa de un posible duplicado).
+
 ## Borrar los datos y empezar de cero (panel)
 
 El botón **Borrar datos** del encabezado (con confirmación, deshabilitado mientras corre k6) deja
