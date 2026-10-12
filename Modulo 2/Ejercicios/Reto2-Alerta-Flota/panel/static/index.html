@@ -23,7 +23,7 @@
       <!-- Qué sistema se observa. Cambiarlo no toca el plano de datos: solo cambia lo que se mira. -->
       <div class="segmentado entorno" id="entorno" role="radiogroup" aria-label="Entorno observado">
         <label><input type="radio" name="entorno" value="local" checked><span>Local · Docker</span></label>
-        <label><input type="radio" name="entorno" value="aws"><span>AWS · nube</span></label>
+        <label><input type="radio" name="entorno" value="aws"><span>Cloud</span></label>
       </div>
       <span id="salud" class="pildora" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="salud-texto">Conectando…</span></span>
       <button id="btn-limpiar" class="btn btn-peligro" type="button">Borrar datos</button>
@@ -221,7 +221,7 @@
   <dialog id="dialogo-limpiar" class="dialogo" aria-labelledby="dialogo-titulo">
     <form method="dialog">
       <h2 id="dialogo-titulo">¿Borrar todos los datos de las pruebas?</h2>
-      <p id="dialogo-texto">Se borran las corridas locales del historial, se vacían los logs de ingest, notifier y gateway, y se vacían
+      <p id="dialogo-texto">Se borran las corridas de Local y de Cloud del historial, se vacían los logs de ingest, notifier y gateway, y se vacían
         las colas de Redis.</p>
       <p class="aviso-dialogo">No se puede deshacer. Si alguna corrida es evidencia para el informe, descargue antes sus logs desde el historial.</p>
       <div class="dialogo-botones">

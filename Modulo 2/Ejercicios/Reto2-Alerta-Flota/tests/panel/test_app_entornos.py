@@ -149,16 +149,27 @@ async def test_en_aws_no_se_apagan_servicios(panel):
     assert respuesta.status_code == 400
 
 
-async def test_borrar_datos_en_aws_no_toca_redis_ni_las_corridas_locales(panel):
-    cliente, _, _, enviados, historial, *_ = panel
+async def test_borrar_datos_limpia_local_y_cloud_desde_cualquier_entorno(panel):
+    cliente, k6_local, k6_aws, enviados, historial, *_ = panel
     ahora = datetime.now(timezone.utc)
     historial.abrir(ahora, "profesor", "mailpit", "local")
     historial.abrir(ahora, "profesor", "Amazon SES", "aws")
     async with cliente:
         await cliente.post("/api/entorno", json={"entorno": "aws"})
-        assert (await cliente.post("/api/datos/limpiar")).status_code == 200
-    assert "redis vaciado" not in enviados
-    assert [c["entorno"] for c in historial.listar()] == ["local"]
+        respuesta = await cliente.post("/api/datos/limpiar")
+    assert respuesta.status_code == 200 and respuesta.json()["entornos"] == ["aws", "local"]
+    assert "redis vaciado" in enviados  # lo local se borra aunque se esté mirando Cloud
+    assert historial.listar() == []
+    assert getattr(k6_local, "olvidado", False) and getattr(k6_aws, "olvidado", False)
+
+
+async def test_borrar_datos_no_procede_con_una_carga_en_curso_en_el_otro_entorno(panel):
+    cliente, k6_local, *_ = panel
+    async with cliente:
+        await cliente.post("/api/entorno", json={"entorno": "aws"})
+        k6_local.ocupado = True
+        respuesta = await cliente.post("/api/datos/limpiar")
+    assert respuesta.status_code == 409
 
 
 async def test_los_logs_de_una_corrida_salen_del_entorno_donde_corrio(panel):

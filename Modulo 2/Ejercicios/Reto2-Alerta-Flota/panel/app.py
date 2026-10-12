@@ -175,22 +175,27 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
 
     @app.post("/api/datos/limpiar")
     async def limpiar() -> Any:
-        """Borra lo ejecutado en el entorno activo (historial, logs, colas) para correr con data limpia.
+        """Borra lo ejecutado en LOS DOS entornos para empezar con data limpia: historial completo,
+        estado de k6, logs y colas de Redis (local).
 
-        En AWS solo se borra lo del panel: el usuario IAM es de solo lectura y no toca CloudWatch ni SQS.
+        En Cloud solo se borra lo que guarda el panel: el usuario IAM es de solo lectura y no toca
+        CloudWatch ni SQS (sus logs y la DLQ se conservan en AWS).
         """
-        entorno = activo()
-        if entorno.k6.resumen()["estado"] == "corriendo":
+        if alguna_carga_corriendo():
             return JSONResponse({"error": "hay una carga en curso: espere a que termine"}, status_code=409)
-        try:
-            resultado = await entorno.vaciar()
-        except Exception as exc:  # sin Redis no se borra nada: mejor un error que un borrado a medias
-            return JSONResponse({"error": f"Redis no respondió: {exc}"}, status_code=502)
-        historial.vaciar(entorno.nombre)
-        entorno.k6.olvidar()
+        logs_vaciados = 0
+        # Local primero: si Redis falla, no se borra nada (mejor un error que un borrado a medias).
+        for entorno in sorted(entornos.values(), key=lambda e: e.nombre != "local"):
+            try:
+                logs_vaciados += (await entorno.vaciar())["logs_vaciados"]
+            except Exception as exc:
+                return JSONResponse({"error": f"Redis no respondió: {exc}"}, status_code=502)
+        historial.vaciar()
+        for entorno in entornos.values():
+            entorno.k6.olvidar()
         agregador.reiniciar(None)
         actual["n"] = None
-        return resultado
+        return {"logs_vaciados": logs_vaciados, "entornos": sorted(entornos)}
 
     @app.post("/api/servicios/{servicio}/{accion}")
     async def servicio(servicio: str, accion: str):

@@ -42,7 +42,7 @@ const ROTULOS = {
     medidaInfo: "Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.",
     pie429: "rate 15 r/s · burst 2000",
     pieCola: "pendientes sin ACK",
-    dialogo: "Se borran las corridas locales del historial, se vacían los logs de ingest, notifier y gateway, y se vacían las colas de Redis.",
+    dialogo: "Se borran las corridas de Local y de Cloud del historial y la salida de k6 de ambos. En Local se vacían los logs de ingest, notifier y gateway y las colas de Redis. En Cloud no se toca AWS (el panel es de solo lectura): los logs de CloudWatch y la DLQ se conservan allá.",
     pie: "Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.",
     ayuda: "",
   },
@@ -60,12 +60,12 @@ const ROTULOS = {
     medidaInfo: "En AWS: desde la última petición registrada por la Lambda de ingesta (unos ms después del envío de k6) hasta el último EMAIL_SENT del notifier, según CloudWatch. No incluye la entrega de Gmail.",
     pie429: "API Gateway no los registra en los logs de Lambda",
     pieCola: "en vuelo",
-    dialogo: "Se borran solo las corridas de AWS del historial. CloudWatch y SQS no se tocan: el panel tiene permisos de solo lectura en AWS.",
+    dialogo: "Se borran las corridas de Local y de Cloud del historial y la salida de k6 de ambos. En Local se vacían los logs de ingest, notifier y gateway y las colas de Redis. En Cloud no se toca AWS (el panel es de solo lectura): los logs de CloudWatch y la DLQ se conservan allá.",
     pie: "Plano de control: lee CloudWatch Logs y el estado de SQS con un usuario IAM de solo lectura. Nunca escribe en el camino de los eventos.",
     ayuda: " En AWS va contra el API Gateway del equipo (us-east-2). Antes de medir, activa el calentador del notifier en EventBridge. Use «Ráfaga» (la latencia de red ya da ~87 r/s y 10 VUs nunca pasan de 10 en vuelo) o el k6 del profesor; «Ritmo» se calibró para local y en AWS no alcanza las 1000 en 30 s.",
   },
 };
-const NOMBRE_ENTORNO = { local: "Local", aws: "AWS" };
+const NOMBRE_ENTORNO = { local: "Local", aws: "Cloud" };
 let entornoPintado = null;
 let cambiandoEntorno = false;
 
@@ -242,7 +242,7 @@ dialogo.addEventListener("close", async () => {
   try {
     await post("/api/datos/limpiar");
     lineasMostradas = -1;
-    avisar("Datos borrados. La próxima es la corrida #1, con data limpia.");
+    avisar("Datos de Local y Cloud borrados. La próxima es la corrida #1, con data limpia.");
   } catch (err) {
     avisar(`No se pudieron borrar los datos: ${err.message}`);
   }
@@ -427,7 +427,7 @@ function pintarAcciones(e) {
   const corriendo = e.k6.estado === "corriendo";
   $("#btn-carga").disabled = corriendo;
   $("#btn-limpiar").disabled = corriendo;
-  $("#btn-limpiar").title = corriendo ? "Espere a que termine la carga" : "Borra historial, logs y colas para empezar con data limpia";
+  $("#btn-limpiar").title = corriendo ? "Espere a que termine la carga" : "Borra los datos de Local y Cloud para empezar con data limpia";
   proximaCorrida = (e.historial[0]?.n ?? 0) + 1;
   $("#btn-carga").textContent = corriendo ? `Corrida #${e.corrida?.n ?? ""} en curso…` : textoBotonCarga();
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";
@@ -787,7 +787,7 @@ for (const radio of document.querySelectorAll('input[name="entorno"]')) {
     cambiandoEntorno = true;
     try {
       await post("/api/entorno", { entorno: radio.value });
-      avisar(`Ahora observa ${radio.value === "aws" ? "la opción B en AWS" : "el sistema local en Docker"}. La corrida y la carga van contra ese entorno; el historial conserva las de ambos.`);
+      avisar(`Ahora observa ${radio.value === "aws" ? "Cloud (la opción B en AWS)" : "Local (Docker)"}. La corrida y la carga van contra ese entorno; el historial conserva las de ambos.`);
     } catch (err) {
       avisar(`No se pudo cambiar de entorno: ${err.message}`);
     } finally {
