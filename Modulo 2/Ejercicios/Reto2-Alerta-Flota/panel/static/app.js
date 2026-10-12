@@ -125,24 +125,24 @@ function pintarMedida(m, corrida) {
   marca.style.left = `${(Math.min(efectivo, 60) / 60) * 100}%`;
 }
 
-// ------------------------------------------------------------------ segunda medida
+// ------------------------------------------------------------------ Emergency → correo
 const CRITERIO_PROFESOR_S = 16;  // reportado por Freddy (06/10); la rúbrica escrita dice 15 s
 function pintarSegundaMedida(e) {
   const peor = e.emergencia_a_correo;
   const valor = $("#e2c-valor");
   if (!e.corrida || peor.segundos === null) {
     valor.textContent = "—";
-    valor.dataset.nivel = "neutral";
-    $("#e2c-detalle").textContent = "criterio reportado: < 16 s";
+    delete valor.dataset.nivel;
+    $("#e2c-detalle").textContent = "peor caso · criterio reportado < 16 s";
     return;
   }
   valor.textContent = `${fmtSeg.format(peor.segundos)} s`;
   valor.dataset.nivel = peor.segundos < CRITERIO_PROFESOR_S ? "good" : "critical";
-  $("#e2c-detalle").textContent = `${peor.placa} · criterio reportado: < 16 s · recepción → entrega al SMTP`;
+  $("#e2c-detalle").textContent = `peor caso (${peor.placa}) · criterio < 16 s`;
 }
 
 // ------------------------------------------------------------------ salida de k6
-// El texto completo viaja por /api/k6/salida y solo cuando la sección está abierta.
+// El texto completo viaja por /api/k6/salida, y solo cuando cambia la cantidad de líneas.
 let lineasMostradas = -1;
 let inicioMostrado = null;
 let pidiendoSalida = false;
@@ -150,9 +150,8 @@ function pintarConsola(k6) {
   const estado = { corriendo: "corriendo", terminado: "terminada", fallido: `falló (código ${k6.codigo})` }[k6.estado] ?? "sin carga todavía";
   const modo = k6.modo ? `${NOMBRE_MODO[k6.modo] ?? k6.modo} · ` : "";
   $("#k6-resumen").textContent = `· ${modo}${estado} · ${num(k6.lineas)} líneas`;
-  $("#k6-estado-consola").textContent = k6.inicio ? `Inicio ${hora(k6.inicio)}${k6.fin ? ` · fin ${hora(k6.fin)}` : ""}` : "—";
-  if (!$("#k6-detalle").open || pidiendoSalida) return;
-  if (k6.lineas === lineasMostradas && k6.inicio === inicioMostrado) return;
+  $("#k6-estado-consola").textContent = k6.inicio ? `Inicio ${hora(k6.inicio)}${k6.fin ? ` · fin ${hora(k6.fin)}` : ""}` : "";
+  if (pidiendoSalida || (k6.lineas === lineasMostradas && k6.inicio === inicioMostrado)) return;
   pidiendoSalida = true;
   fetch("/api/k6/salida", { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
@@ -160,7 +159,7 @@ function pintarConsola(k6) {
       const consola = $("#k6-salida");
       const alFinal = consola.scrollHeight - consola.scrollTop - consola.clientHeight < 24;
       consola.textContent = lineas.join("\n");
-      if (alFinal || lineasMostradas < 0) consola.scrollTop = consola.scrollHeight;  // no arrastra a quien está leyendo arriba
+      if (alFinal || k6.inicio !== inicioMostrado) consola.scrollTop = consola.scrollHeight;  // no arrastra a quien lee arriba
       lineasMostradas = k6.lineas;
       inicioMostrado = k6.inicio;
     })
@@ -168,10 +167,6 @@ function pintarConsola(k6) {
     .finally(() => { pidiendoSalida = false; });
 }
 
-$("#k6-detalle").addEventListener("toggle", () => {
-  lineasMostradas = -1;
-  if (ultimoEstado) pintarConsola(ultimoEstado.k6);
-});
 $("#k6-ajustar").addEventListener("change", (ev) => $("#k6-salida").classList.toggle("ajustada", ev.currentTarget.checked));
 $("#k6-copiar").addEventListener("click", async () => {
   try {
@@ -188,6 +183,20 @@ $("#k6-descargar").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+// ------------------------------------------------------------------ borrar datos
+const dialogo = $("#dialogo-limpiar");
+$("#btn-limpiar").addEventListener("click", () => { dialogo.returnValue = ""; dialogo.showModal(); });
+dialogo.addEventListener("close", async () => {
+  if (dialogo.returnValue !== "borrar") return;
+  try {
+    await post("/api/datos/limpiar");
+    lineasMostradas = -1;
+    avisar("Datos borrados. La próxima es la corrida #1, con data limpia.");
+  } catch (err) {
+    avisar(`No se pudieron borrar los datos: ${err.message}`);
+  }
+});
+
 // ------------------------------------------------------------------ corrida actual
 function pintarCorrida(e) {
   const c = e.corrida;
@@ -202,54 +211,66 @@ function pintarCorrida(e) {
 }
 
 // ------------------------------------------------------------------ línea de tiempo (SVG propio)
+// Tres filas rotuladas sobre el mismo eje de tiempo: la carga de k6, cuándo entró cada Emergency y
+// cuándo salió su correo. Una línea vertical une cada Emergency con su correo. Abajo, el tramo que
+// mide la rúbrica en números, porque a la escala de la carga (~30 s) unos milisegundos no se ven.
 function pintarLinea(e) {
-  const svg = $("#linea-svg");
   const c = e.corrida;
   const visible = Boolean(c && e.ultima_peticion);
-  svg.hidden = !visible;
-  $(".leyenda-hitos").hidden = !visible;
+  $("#linea-cuerpo").hidden = !visible;
   $("#linea-vacio").hidden = visible;
   $("#linea-vacio").textContent = c ? "Esperando la primera petición de la corrida…" : "Lanza una corrida para ver su línea de tiempo.";
   if (!visible) return;
 
+  const svg = $("#linea-svg");
   const t0 = new Date(c.inicio).getTime();
   const ultima = new Date(e.ultima_peticion).getTime();
-  const emergencias = e.emergencias.filter((em) => em.en_corrida);
-  const recibidas = emergencias.map((em) => new Date(em.recibida).getTime());
-  const correos = emergencias.filter((em) => em.ms_envio !== null).map((em) => new Date(em.recibida).getTime() + em.ms_envio);
+  const emergencias = e.emergencias.filter((em) => em.en_corrida).map((em) => {
+    const recibida = new Date(em.recibida).getTime();
+    return { ...em, t: recibida, correo: em.ms_envio === null ? null : recibida + em.ms_envio };
+  });
+  const correos = emergencias.filter((em) => em.correo !== null).map((em) => em.correo);
   const ultimoCorreo = correos.length ? Math.max(...correos) : null;
   const tFin = Math.max(ultima, ultimoCorreo ?? 0, c.fin ? new Date(c.fin).getTime() : Date.now());
 
   const ancho = svg.clientWidth || 640;
-  const alto = 170;
-  const m = { izq: 16, der: 16 };
+  const etiquetas = ancho < 520 ? 92 : 130;
+  const m = { izq: etiquetas, der: 12 };
   const w = ancho - m.izq - m.der;
   const x = (t) => m.izq + ((t - t0) / Math.max(tFin - t0, 1)) * w;
-  // Un carril por tipo de hito: el correo sale milisegundos después del Emergency y en la misma
-  // fila se taparían. Arriba Emergency, en la banda la última petición, abajo el correo.
-  const yBanda = 52, hBanda = 40, yHito = yBanda + hBanda / 2;
-  const yEmergencia = yBanda - 12, yCorreo = yBanda + hBanda + 12;
+  const filas = { carga: 24, emergencia: 64, correo: 104 };
+  const alto = 146;
   svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
   svg.replaceChildren();
+  const texto = (contenido, attrs) => { const t = svgEl("text", attrs); t.textContent = contenido; svg.append(t); return t; };
+  const conTitulo = (nodo, titulo) => { const t = svgEl("title"); t.textContent = titulo; nodo.append(t); svg.append(nodo); };
 
-  const texto = (contenido, attrs) => { const t = svgEl("text", attrs); t.textContent = contenido; svg.append(t); };
-  svg.append(svgEl("line", { class: "eje", x1: m.izq, x2: m.izq + w, y1: 122, y2: 122 }));
-  svg.append(svgEl("line", { class: "guia", x1: x(ultima), x2: x(ultima), y1: yEmergencia, y2: yCorreo }));
-  svg.append(svgEl("rect", { class: "carga", x: m.izq, y: yBanda, width: Math.max(x(ultima) - m.izq, 2), height: hBanda, rx: 6 }));
-  const duracion = (ultima - t0) / 1000;
-  texto(`k6 envía ${num(e.http.total)} peticiones (${fmtNum.format(Math.round(duracion * 10) / 10)} s)`, { x: m.izq + 8, y: yBanda + hBanda / 2 + 4 });
-  texto(fmtHoraCorta.format(new Date(t0)), { x: m.izq, y: 140 });
-  texto(fmtHoraCorta.format(new Date(tFin)), { x: m.izq + w, y: 140, "text-anchor": "end" });
-
-  if (ultimoCorreo !== null && e.medida_rubrica.segundos !== null) {
-    svg.append(svgEl("line", { class: "tramo-medida", x1: x(ultima), x2: Math.max(x(ultimoCorreo), x(ultima) + 1), y1: yCorreo, y2: yCorreo }));
-    texto(`medida ${fmtSeg.format(Math.max(e.medida_rubrica.segundos, 0))} s`, { class: "medida-etiqueta", x: m.izq + w, y: 160, "text-anchor": "end" });
+  for (const [clave, rotulo] of [["carga", "Peticiones k6"], ["emergencia", "Emergency recibido"], ["correo", "Correo enviado"]]) {
+    svg.append(svgEl("line", { class: "carril", x1: m.izq, x2: m.izq + w, y1: filas[clave], y2: filas[clave] }));
+    texto(rotulo, { class: "rotulo", x: 0, y: filas[clave] + 4 });
   }
-  for (const t of recibidas) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yEmergencia, r: 5, style: "stroke:var(--serie-2)" }));
-  for (const t of correos) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yCorreo, r: 5, style: "stroke:var(--good)" }));
-  svg.append(svgEl("circle", { class: "hito", cx: x(ultima), cy: yHito, r: 6, style: "stroke:var(--serie-1)" }));
-  texto("última petición", { x: x(ultima) - 10, y: yHito - 10, "text-anchor": "end", class: "etiqueta-hito" });
-  svg.setAttribute("aria-label", `Corrida #${c.n}: carga de ${fmtNum.format(Math.round(duracion))} s, ${recibidas.length} Emergency, ${correos.length} correos`);
+  const duracion = (ultima - t0) / 1000;
+  conTitulo(svgEl("rect", { class: "carga", x: m.izq, y: filas.carga - 9, width: Math.max(x(ultima) - m.izq, 2), height: 18, rx: 5 }),
+    `k6 envió ${num(e.http.total)} peticiones en ${fmtNum.format(Math.round(duracion * 10) / 10)} s`);
+  texto(`${num(e.http.total)} en ${fmtNum.format(Math.round(duracion * 10) / 10)} s`, { class: "dentro", x: m.izq + 8, y: filas.carga + 4 });
+
+  for (const em of emergencias) {
+    if (em.correo !== null) svg.append(svgEl("line", { class: "union", x1: x(em.t), x2: x(em.correo), y1: filas.emergencia, y2: filas.correo }));
+  }
+  for (const em of emergencias) {
+    const detalle = `${em.placa} · recibido ${hora(em.recibida)}${em.ms_envio === null ? " · correo pendiente" : ` · correo +${num(em.ms_envio)} ms`}`;
+    conTitulo(svgEl("circle", { class: "hito", cx: x(em.t), cy: filas.emergencia, r: 5, style: "stroke:var(--serie-2)" }), detalle);
+    if (em.correo !== null) conTitulo(svgEl("circle", { class: "hito", cx: x(em.correo), cy: filas.correo, r: 5, style: "stroke:var(--good)" }), detalle);
+  }
+  svg.append(svgEl("line", { class: "guia", x1: x(ultima), x2: x(ultima), y1: filas.carga - 12, y2: filas.correo + 10 }));
+  conTitulo(svgEl("circle", { class: "hito", cx: x(ultima), cy: filas.carga, r: 6, style: "stroke:var(--serie-1)" }), `Última petición ${hora(e.ultima_peticion)}`);
+  texto(fmtHoraCorta.format(new Date(t0)), { class: "eje-texto", x: m.izq, y: alto - 4 });
+  texto(fmtHoraCorta.format(new Date(tFin)), { class: "eje-texto", x: m.izq + w, y: alto - 4, "text-anchor": "end" });
+  svg.setAttribute("aria-label", `Corrida #${c.n}: ${emergencias.length} Emergency, ${correos.length} correos, carga de ${fmtNum.format(Math.round(duracion))} s`);
+
+  $("#tramo-desde").textContent = hora(e.ultima_peticion);
+  $("#tramo-hasta").textContent = ultimoCorreo === null ? "pendiente" : hora(new Date(ultimoCorreo).toISOString());
+  $("#tramo-valor").textContent = e.medida_rubrica.segundos === null ? "—" : `${fmtSeg.format(Math.max(e.medida_rubrica.segundos, 0))} s`;
 }
 
 // ------------------------------------------------------------------ historial de corridas
@@ -283,15 +304,14 @@ function pintarHistorial(lista, actual) {
 // ------------------------------------------------------------------ KPIs
 function pintarKpis(e) {
   $("#kpi-aceptadas").textContent = num(e.http.aceptadas);
-  $("#kpi-aceptadas-pie").textContent = `aceptadas de ${num(e.http.total)}${e.http.otros_errores ? ` · ${num(e.http.otros_errores)} otros errores` : ""}`;
+  $("#kpi-aceptadas-pie").textContent = `de ${num(e.http.total)} recibidas por el gateway${e.http.otros_errores ? ` · ${num(e.http.otros_errores)} otros errores` : ""}`;
   $("#kpi-429").textContent = num(e.http.rechazadas_429);
   $("#kpi-enviadas").textContent = num(e.eventos.enviadas);
   $("#kpi-emergencias").textContent = num(e.eventos.emergencias);
-  $("#kpi-emergencias-pie").textContent = e.eventos.fallidas ? `correos / Emergency · ${num(e.eventos.fallidas)} sin encolar` : "correos / Emergency";
+  $("#kpi-emergencias-pie").textContent = [`${num(e.eventos.reintentos)} reintentos`, e.eventos.dlq && `${num(e.eventos.dlq)} en DLQ`, e.eventos.fallidas && `${num(e.eventos.fallidas)} sin encolar`].filter(Boolean).join(" · ");
   $("#kpi-procesados").textContent = num(e.eventos.procesados);
-  $("#kpi-reintentos").textContent = num(e.eventos.reintentos);
   $("#kpi-pendientes").textContent = e.redis.ok ? num(e.redis.pendientes) : "—";
-  $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
+  $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes sin ACK · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
 }
 
 // ------------------------------------------------------------------ arquitectura viva
@@ -339,6 +359,8 @@ function pintarFlujo(e, ahora) {
 function pintarAcciones(e) {
   const corriendo = e.k6.estado === "corriendo";
   $("#btn-carga").disabled = corriendo;
+  $("#btn-limpiar").disabled = corriendo;
+  $("#btn-limpiar").title = corriendo ? "Espere a que termine la carga" : "Borra historial, logs y colas para empezar con data limpia";
   proximaCorrida = (e.historial[0]?.n ?? 0) + 1;
   $("#btn-carga").textContent = corriendo ? `Corrida #${e.corrida?.n ?? ""} en curso…` : textoBotonCarga();
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";

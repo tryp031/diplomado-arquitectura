@@ -47,6 +47,10 @@ class Historial:
         self._guardar()
         return True
 
+    def vaciar(self) -> None:
+        self._corridas = []
+        self._guardar()
+
     def buscar(self, n: int) -> dict[str, Any] | None:
         return next((c for c in self._corridas if c["n"] == n), None)
 

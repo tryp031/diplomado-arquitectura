@@ -41,3 +41,12 @@ def test_archivo_corrupto_empieza_vacio_sin_romper_el_panel(tmp_path):
     historial = Historial(path)
     assert historial.listar() == []
     assert historial.abrir(INICIO, "rafaga", "mailpit")["n"] == 1
+
+
+def test_vaciar_reinicia_la_numeracion(tmp_path):
+    historial = Historial(tmp_path / "corridas.json")
+    historial.abrir(INICIO, "rafaga", "mailpit")
+    historial.vaciar()
+    assert historial.listar() == []
+    assert Historial(tmp_path / "corridas.json").listar() == []
+    assert historial.abrir(INICIO, "rafaga", "mailpit")["n"] == 1

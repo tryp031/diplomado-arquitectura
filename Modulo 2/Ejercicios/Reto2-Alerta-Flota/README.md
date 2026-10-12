@@ -28,20 +28,23 @@ Abrir http://localhost:8090. Versión 2 (11/10/2026), a partir de la maqueta
   Debe decir lo mismo que el informe.
 - **Barra de control:** modo de carga, «Lanzar corrida #N» y, aparte, el Emergency manual, que
   **no cuenta en ninguna corrida**.
-- **Corrida:** la medida de la rúbrica con semáforo (< 15 s / 15–45 s / > 45 s) y sus KPI
-  pertenecen a la corrida, no a una ventana de tiempo. Al terminar k6 la corrida se cierra: lo que
+- **Corrida:** la medida de la rúbrica con semáforo (< 15 s / 15–45 s / > 45 s) y una fila de
+  indicadores (aceptadas, procesados, 429, correos, Emergency → correo, cola) pertenecen a la
+  corrida, no a una ventana de tiempo. Al terminar k6 la corrida se cierra: lo que
   entra después (p. ej. un Emergency manual) se ve marcado «fuera de corrida» y no altera la medida.
   Los correos de las emergencias de la carga sí cuentan aunque salgan después (reintentos).
-- **Línea de tiempo** de la corrida: carga, Emergency recibido, última petición y correo.
+- **Línea de tiempo** de la corrida en tres filas rotuladas (peticiones k6, Emergency recibido,
+  correo enviado) y, debajo, el tramo que mide la rúbrica en números.
 - **Historial de corridas** con medida, rúbrica y descarga de logs por fila. Se guarda en
   `logs/panel-corridas.json`, así que sobrevive a reiniciar el panel.
 - **Peticiones por segundo** contra la línea de 15 r/s, la arquitectura en vivo, el recorrido de
   cada emergencia y los eventos del sistema.
-- Debajo de la medida, **Emergency → correo (peor caso)**: aproxima el criterio reportado del
+- **Emergency → correo (peor caso)**: aproxima el criterio reportado del
   profesor (< 16 s del envío del Emergency a la llegada del correo). El panel ve de la recepción
   en ingest a la entrega al SMTP; la llegada al buzón de Gmail no la ve.
 - **Procesados (únicos):** eventos normales validados y registrados + Emergency con correo enviado.
-- Plegados al final: la salida **completa** de k6 (copiar / descargar .txt) y la **inyección de fallas** (apagar SMTP, Redis o el
+- La salida **completa** de k6, de inicio a fin (copiar / descargar .txt).
+- Plegada al final: la **inyección de fallas** (apagar SMTP, Redis o el
   notifier), cada una con lo que debería verse y la táctica que demuestra.
 
 - Es **plano de control**: solo lee los logs, Redis y Docker. No escribe en el camino de los eventos,
@@ -115,17 +118,17 @@ nginx hasta el último `EMAIL_SENT`. Se toma de nginx y no del fin de k6 porque 
 incluye la pausa final del modo ritmo y (b) nginx usa el mismo reloj que los servicios. La llegada
 a Gmail no la controlamos: se anota a mano.
 
-## Empezar de cero (antes de la corrida oficial o de la exposición)
+## Borrar los datos y empezar de cero (panel)
 
-```bash
-scripts/reiniciar.sh --simular   # muestra qué haría
-scripts/reiniciar.sh             # pide confirmación
-```
+El botón **Borrar datos** del encabezado (con confirmación, deshabilitado mientras corre k6) deja
+el sistema como recién levantado: borra el historial de corridas (la próxima vuelve a ser la #1),
+**vacía** los logs de ingest, notifier y gateway y vacía las colas de Redis. Por API:
+`POST /api/datos/limpiar` (409 con una carga en curso).
 
-Detiene panel, gateway, ingest y notifier, vacía los streams de Redis, **mueve** `logs/` a
-`logs-archivo/<fecha>/` (no borra nada: ahí queda también el historial de corridas) y vuelve a
-encender los mismos contenedores, así que conserva el modo Gmail o Mailpit. Es un script y no un
-botón del panel a propósito: un «borrar todo» junto a «Lanzar corrida» es un accidente en plena demo.
+- Los logs se truncan, no se eliminan: cada servicio tiene su archivo abierto en modo append y,
+  si se borrara, seguiría escribiendo en un archivo fantasma.
+- El stream se vacía con `XTRIM` y no con `DEL`, para no llevarse el consumer group del notifier.
+- **No se puede deshacer.** Si una corrida es evidencia para el informe, descargue antes sus logs.
 
 ## Descargar los logs de una corrida (panel)
 

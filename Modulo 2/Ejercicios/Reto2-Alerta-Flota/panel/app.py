@@ -22,6 +22,7 @@ from pydantic import BaseModel
 from panel.agregador import Agregador, LectorIncremental
 from panel.corridas import Historial
 from panel.exportar import COLOMBIA, como_csv, como_log, registros_de_carga
+from panel.limpieza import vaciar_logs
 from panel.infra import MODO_PROFESOR
 
 ESTATICOS = Path(__file__).parent / "static"
@@ -35,7 +36,8 @@ class PedidoCarga(BaseModel):
 def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lector_nginx: LectorIncremental,
                redis_info: Callable[[], Awaitable[dict]], docker: Any, k6: Any,
                gateway: httpx.AsyncClient, gateway_url: str, smtp_host: str = "mailpit",
-               log_dir: Path = Path("logs"), historial: Historial | None = None) -> FastAPI:
+               log_dir: Path = Path("logs"), historial: Historial | None = None,
+               redis_vaciar: Callable[[], Awaitable[None]] | None = None) -> FastAPI:
     app = FastAPI(title="Reto 2 — panel de control")
     historial = historial or Historial(log_dir / "panel-corridas.json")
     # Corrida que el agregador está observando. Tras reiniciar el panel no hay ninguna: las del
@@ -126,6 +128,23 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         inicio, fin = datetime.fromisoformat(corrida["inicio"]), datetime.fromisoformat(corrida["fin"])
         return _descarga(log_dir, inicio, fin, formato, f"corrida-{n}-{corrida['modo']}")
 
+    @app.post("/api/datos/limpiar")
+    async def limpiar() -> Any:
+        """Borra lo ejecutado hasta ahora (historial, logs, colas) para correr con data limpia."""
+        if k6.resumen()["estado"] == "corriendo":
+            return JSONResponse({"error": "hay una carga en curso: espere a que termine"}, status_code=409)
+        try:
+            if redis_vaciar:
+                await redis_vaciar()
+        except Exception as exc:  # sin Redis no se borra nada: mejor un error que un borrado a medias
+            return JSONResponse({"error": f"Redis no respondió: {exc}"}, status_code=502)
+        logs = vaciar_logs(log_dir)
+        historial.vaciar()
+        k6.olvidar()
+        agregador.reiniciar(None)
+        actual["n"] = None
+        return {"logs_vaciados": logs}
+
     @app.post("/api/servicios/{servicio}/{accion}")
     async def servicio(servicio: str, accion: str):
         try:
@@ -152,6 +171,7 @@ def build_app() -> FastAPI:
     import redis.asyncio as redis
 
     from panel.infra import Docker, EjecutorK6, estado_redis
+    from panel.limpieza import vaciar_redis
 
     logs = Path(os.environ.get("LOG_DIR", "logs"))
     stream = os.environ.get("STREAM", "emergencies")
@@ -165,6 +185,7 @@ def build_app() -> FastAPI:
         lector_servicio=LectorIncremental(logs, ("ingest-*.log", "notifier-*.log")),
         lector_nginx=LectorIncremental(logs / "nginx", ("gateway-access.log",)),
         redis_info=lambda: estado_redis(client, stream, dlq_stream, group),
+        redis_vaciar=lambda: vaciar_redis(client, stream, dlq_stream),
         docker=Docker(os.environ.get("COMPOSE_PROJECT", "reto2-alerta-flota")),
         k6=EjecutorK6(os.environ.get("K6_SCRIPT", "/app/k6/carga.js"), gateway_url,
                       logs / "k6-summary.json",

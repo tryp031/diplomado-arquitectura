@@ -149,6 +149,14 @@ class EjecutorK6:
         if self._tarea:
             await self._tarea
 
+    def olvidar(self) -> None:
+        """Vuelve al estado de recién creado (al borrar los datos). No aplica con una carga en curso."""
+        if self.ocupado:
+            raise RuntimeError("hay una carga en curso")
+        self.estado, self.modo, self.codigo = "inactivo", None, None
+        self.inicio = self.fin = None
+        self.salida.clear()
+
     def salida_completa(self) -> list[str]:
         return list(self.salida)
 

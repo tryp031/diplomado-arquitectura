@@ -47,6 +47,9 @@ class K6Falso:
     def salida_completa(self):
         return ["running (0m01.0s)", "http_reqs: 1000"]
 
+    def olvidar(self):
+        self.ultima, self.olvidado = None, True
+
     def ventana(self):
         return None if self.ocupado else self.ultima
 
@@ -66,6 +69,9 @@ def entorno(tmp_path):
     async def redis_info():
         return {"ok": True, "stream": 0, "pendientes": 0, "dlq": 0}
 
+    async def redis_vaciar():
+        enviados.append("redis vaciado")
+
     agregador, docker, k6 = Agregador(), DockerFalso(), K6Falso()
     app = create_app(
         agregador=agregador,
@@ -74,7 +80,7 @@ def entorno(tmp_path):
         redis_info=redis_info, docker=docker, k6=k6,
         gateway=httpx.AsyncClient(transport=httpx.MockTransport(gateway)),
         gateway_url="http://gateway/events", log_dir=tmp_path,
-        historial=Historial(tmp_path / "corridas.json"),
+        historial=Historial(tmp_path / "corridas.json"), redis_vaciar=redis_vaciar,
     )
     cliente = httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://panel")
     return cliente, agregador, docker, k6, enviados
@@ -254,3 +260,29 @@ async def test_salida_de_k6_completa_por_su_propio_endpoint(entorno):
     async with cliente:
         respuesta = await cliente.get("/api/k6/salida")
     assert respuesta.json()["lineas"] == ["running (0m01.0s)", "http_reqs: 1000"]
+
+
+# --- borrar datos y empezar de cero -----------------------------------------------------------
+
+async def test_limpiar_borra_historial_logs_y_colas(entorno, tmp_path):
+    cliente, agregador, _, k6, enviados = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        k6.ocupado = False
+        respuesta = await cliente.post("/api/datos/limpiar")
+        estado = (await cliente.get("/api/estado")).json()
+    assert respuesta.status_code == 200
+    assert (tmp_path / "ingest-a.log").stat().st_size == 0
+    assert "redis vaciado" in enviados
+    assert k6.olvidado is True
+    assert estado["historial"] == [] and estado["corrida"] is None
+    assert estado["eventos"]["recibidos"] == 0
+
+
+async def test_no_se_limpia_con_una_carga_en_curso(entorno, tmp_path):
+    cliente, *_ = entorno
+    async with cliente:
+        await cliente.post("/api/carga", json={"modo": "rafaga", "emergencias": 1})
+        respuesta = await cliente.post("/api/datos/limpiar")
+    assert respuesta.status_code == 409
+    assert (tmp_path / "ingest-a.log").stat().st_size > 0

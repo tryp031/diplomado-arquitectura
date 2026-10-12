@@ -184,3 +184,18 @@ async def test_estado_redis_caido():
             raise ConnectionError("no hay redis")
     estado = await estado_redis(Caido(), "em", "em-dlq", "g")
     assert estado["ok"] is False and "no hay redis" in estado["error"]
+
+
+async def test_k6_olvidar_deja_el_ejecutor_como_recien_creado(tmp_path):
+    proceso = ProcesoFalso(["linea"])
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    k6.olvidar()
+    assert k6.resumen()["estado"] == "inactivo" and k6.salida_completa() == []
+    assert k6.ventana() is None
