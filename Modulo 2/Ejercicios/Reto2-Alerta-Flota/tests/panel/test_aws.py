@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime, timedelta, timezone
 
 from panel.agregador import Agregador
@@ -164,3 +165,50 @@ def test_estado_sqs_usa_el_mismo_formato_que_redis():
 def test_estado_sqs_sin_configurar_o_sin_permiso():
     assert estado_sqs(SqsFalso(), None, "dlq")["ok"] is False
     assert "AccessDenied" in estado_sqs(SqsFalso(falla=True), "cola", "dlq")["error"]
+
+
+# --- Regresión 12/10 (HEA-587): el correo llegó a Gmail, pero el panel dejó la emergencia en «recibida».
+def _linea_servicio(segundo, evento, **campos):
+    momento = T0 + timedelta(seconds=segundo)
+    rol = "notifier" if evento.startswith("EMAIL") else "ingest"
+    return (f"{rol}-a", {"ts": momento.isoformat(timespec="milliseconds"), "service": rol, "event": evento,
+                         "event_id": "e1", "plate": "HEA-587", **campos})
+
+
+def test_un_emergency_received_repetido_no_borra_el_recorrido():
+    agregador = Agregador()
+    agregador.ingerir_servicio([_linea_servicio(0, "EMERGENCY_RECEIVED"), _linea_servicio(0.3, "EMERGENCY_ENQUEUED"),
+                                _linea_servicio(0.7, "EMAIL_SENT", attempt=1)])
+    agregador.ingerir_servicio([_linea_servicio(0, "EMERGENCY_RECEIVED")])  # entregado otra vez
+    emergencia = agregador.resumen(T0 + timedelta(seconds=60))["emergencias"][0]
+    assert emergencia["estado"] == "enviada" and emergencia["ms_envio"] == 700
+
+
+def test_un_correo_que_llega_antes_que_su_emergency_no_se_pierde():
+    # CloudWatch no garantiza el orden entre dos grupos de logs: el notifier puede aparecer primero.
+    agregador = Agregador()
+    agregador.ingerir_servicio([_linea_servicio(0.7, "EMAIL_SENT", attempt=1)])
+    agregador.ingerir_servicio([_linea_servicio(0, "EMERGENCY_RECEIVED"), _linea_servicio(0.3, "EMERGENCY_ENQUEUED")])
+    resumen = agregador.resumen(T0 + timedelta(seconds=60))
+    assert resumen["emergencias"][0]["estado"] == "enviada"
+    assert resumen["eventos"]["enviadas"] == 1
+
+
+def test_dos_consultas_simultaneas_no_entregan_dos_veces_la_misma_linea():
+    import threading
+    eventos = {GRUPOS["ingest"]: [linea(1, "EMERGENCY_RECEIVED", event_id="e1")]}
+
+    class LogsLento(LogsFalso):
+        def filter_log_events(self, **pedido):
+            time.sleep(0.05)  # ambas consultas quedan en vuelo a la vez
+            return super().filter_log_events(**pedido)
+
+    lec = LectorCloudWatch(LogsLento(eventos), GRUPOS, intervalo_s=0,
+                           reloj=lambda: (T0 + timedelta(seconds=60)).timestamp())
+    entregados = []
+    hilos = [threading.Thread(target=lambda: entregados.extend(lec.leer())) for _ in range(2)]
+    for h in hilos:
+        h.start()
+    for h in hilos:
+        h.join()
+    assert len(entregados) == 1

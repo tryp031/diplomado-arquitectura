@@ -204,6 +204,14 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
             return JSONResponse({"error": f"Docker: {exc}"}, status_code=502)
         return {"servicio": servicio, "accion": accion}
 
+    @app.middleware("http")
+    async def sin_cache(request, call_next):
+        # El navegador revalida la página y su JS en cada carga: tras reconstruir el panel nadie
+        # se queda viendo una versión vieja (pasó el 12/10 con la ayuda del modo AWS).
+        respuesta = await call_next(request)
+        respuesta.headers["Cache-Control"] = "no-cache"
+        return respuesta
+
     app.mount("/", StaticFiles(directory=ESTATICOS, html=True), name="pagina")
     return app
 

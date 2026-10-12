@@ -20,6 +20,7 @@ es cómo llegan:
 from __future__ import annotations
 
 import json
+import threading
 import time
 from datetime import datetime
 from typing import Any, Callable
@@ -77,6 +78,9 @@ class LectorCloudWatch:
         self._mirar_atras_ms = int(mirar_atras_s * 1000)
         self._reloj = reloj
         self.error: str | None = None
+        # Dos pestañas del panel consultan a la vez y /api/estado lee en un hilo: sin el candado,
+        # dos lecturas simultáneas podrían entregar la misma línea dos veces.
+        self._candado = threading.Lock()
         self.reiniciar()
 
     def reiniciar(self) -> None:
@@ -86,6 +90,10 @@ class LectorCloudWatch:
         self._entregados: dict[str, int] = {}  # eventId → timestamp, para no repetir
 
     def leer(self) -> list[tuple[str, dict]]:
+        with self._candado:
+            return self._leer()
+
+    def _leer(self) -> list[tuple[str, dict]]:
         ahora = self._reloj()
         if self._ultima_consulta is not None and ahora - self._ultima_consulta < self._intervalo:
             return []
