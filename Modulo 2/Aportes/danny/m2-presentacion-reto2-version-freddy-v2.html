@@ -579,6 +579,17 @@ pre.dib{font-size:clamp(10px,1vw,14px);background:linear-gradient(125deg,#06111f
 @media(min-width:1100px){.lamina:not(:first-child) .rej.d3>.card{min-height:220px}}
 @media(max-width:700px){.portada{min-height:600px}.portada:after{width:100%;height:46%;right:-10%;bottom:-10%}.portada h1{font-size:clamp(40px,10vw,58px)}.card{min-height:unset}}
 
+
+/* Recorrido por etapas: SVG vectorial editable, inspirado en la perspectiva Stage-Gate */
+.lamina-recorrido .caja{max-width:1440px}
+.lamina-recorrido .lede{max-width:1200px}
+.recorrido-marco{position:relative;margin:24px 0 20px;overflow:auto;border:1px solid #4d7792;
+ border-radius:17px;background:linear-gradient(160deg,#0b2034,#0b192b 65%,#172f40);
+ box-shadow:0 24px 70px #0008}
+.recorrido-svg{display:block;width:100%;min-width:960px;height:auto}
+.recorrido-resumen .card{min-height:180px}
+@media(max-width:760px){.recorrido-marco{margin-left:-10px;margin-right:-10px}.recorrido-svg{min-width:1000px}}
+
 </style>
 </head>
 <body>
@@ -586,7 +597,7 @@ pre.dib{font-size:clamp(10px,1vw,14px);background:linear-gradient(125deg,#06111f
 <div class="barra">
   <span class="marca"><span class="pin"></span> Reto 2 · Alerta de flota <span class="freddy-edition">EDICIÓN FREDDY · V2</span></span>
   <span class="sep"></span>
-  <span class="cuenta"><span id="actual">1</span>/<span id="total">21</span></span>
+  <span class="cuenta"><span id="actual">1</span>/<span id="total">22</span></span>
   <button class="bt" id="bNotas" aria-pressed="false" title="Tecla N">Notas</button>
   <button class="bt" id="bTema" title="Tecla T">Tema</button>
 </div>
@@ -612,6 +623,98 @@ pre.dib{font-size:clamp(10px,1vw,14px);background:linear-gradient(125deg,#06111f
     </div>
   </div>
 </section>
+
+
+<!-- ═══ Contexto y solución: recorrido ilustrado basado en la implementación ═══ -->
+<section class="lamina lamina-recorrido" aria-label="Recorrido de la solución de alerta de flota">
+<div class="caja">
+<span class="kicker">Del problema a la solución · recorrido del evento</span>
+<h2>De 1.000 señales a una alerta que importa</h2>
+<p class="lede">Nuestro diseño separa la recepción masiva del envío de correo: las posiciones se registran; una emergencia entra en una cola y activa un notificador recuperable.</p>
+<div class="recorrido-marco">
+<svg class="recorrido-svg" viewBox="0 0 1380 620" role="img" aria-labelledby="rec-title rec-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="rec-title">Recorrido por etapas de la solución local Reto 2</title>
+<desc id="rec-desc">Seis etapas: k6 genera mil eventos; nginx limita a 15 solicitudes por segundo con burst 2000; FastAPI recibe en dos réplicas; eventos Position se registran y Emergency se encola en Redis Streams; notifier envía correo mediante SMTP a Mailpit o Gmail; logs y panel permiten observar resultados. Se muestran rutas de error 429, 503 y reintentos con DLQ.</desc>
+<defs>
+<linearGradient id="path-gold" x1="0" x2="1" y1="0" y2="0"><stop stop-color="#d99217"/><stop offset=".55" stop-color="#ffcf56"/><stop offset="1" stop-color="#f4a82b"/></linearGradient>
+<linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#214c66"/><stop offset="1" stop-color="#0b2236"/></linearGradient>
+<linearGradient id="emer" x1="0" x2="1"><stop stop-color="#ff9d44"/><stop offset="1" stop-color="#ee4b43"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="7"/></filter>
+<marker id="rec-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#ffd36c"/></marker>
+</defs>
+<g opacity=".19" stroke="#7ac0d6" fill="none"><path d="M20 78 Q220 -20 440 65 T920 70 T1360 55"/><path d="M20 100 Q220 2 440 87 T920 92 T1360 77"/><path d="M20 122 Q220 24 440 109 T920 114 T1360 99"/></g>
+<!-- Main golden runway, perspective -->
+<path d="M68 455 L1265 455 L1360 382 L163 382Z" fill="#ffd46b" opacity=".15"/>
+<path d="M66 450 L1256 450 L1348 389" stroke="url(#path-gold)" stroke-width="15" fill="none" stroke-linecap="round"/>
+<path d="M1350 390 L1308 378 L1324 415Z" fill="#ffcf56"/>
+<g font-family="DM Sans, sans-serif" text-anchor="middle">
+<!-- Isometric stage cards -->
+<g transform="translate(48 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#315c70"/><polygon points="0,315 160,315 160,431 0,431" fill="#143c56"/><polygon points="160,315 196,289 196,403 160,431" fill="#0a283e"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#102638" stroke="#56b7d2"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">01 · PRUEBA</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="23">k6</text>
+<g stroke="#f7b83d" stroke-width="4" fill="none"><path d="M60 270 l15 -26 15 26 15 -26 15 26"/></g>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">1.000 peticiones</text><text x="82" y="240" fill="#9dd2e6" font-size="13">10 usuarios virtuales</text>
+</g>
+<g transform="translate(270 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#315c70"/><polygon points="0,315 160,315 160,431 0,431" fill="#143c56"/><polygon points="160,315 196,289 196,403 160,431" fill="#0a283e"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#102638" stroke="#56b7d2"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">02 · ACCESO</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="22">nginx</text>
+<rect x="64" y="249" width="36" height="52" rx="7" fill="#09243b" stroke="#e5a735" stroke-width="3"/>
+<circle cx="82" cy="260" r="6" fill="#ff625d"/><circle cx="82" cy="275" r="6" fill="#ffca4e"/><circle cx="82" cy="290" r="6" fill="#51d69c"/>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">15 req/s</text><text x="82" y="240" fill="#9dd2e6" font-size="13">burst 2.000 · 429</text>
+</g>
+<g transform="translate(492 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#315c70"/><polygon points="0,315 160,315 160,431 0,431" fill="#143c56"/><polygon points="160,315 196,289 196,403 160,431" fill="#0a283e"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#102638" stroke="#56b7d2"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">03 · INGESTA</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="21">FastAPI ×2</text>
+<g transform="translate(50 258)" stroke="#7bd9ed" stroke-width="3" fill="#163f58"><rect width="42" height="36" rx="5"/><rect x="15" y="-15" width="42" height="36" rx="5"/></g>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">Validar + registrar</text><text x="82" y="240" fill="#9dd2e6" font-size="13">Position → log · 200</text>
+</g>
+<g transform="translate(714 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#785339"/><polygon points="0,315 160,315 160,431 0,431" fill="#744332"/><polygon points="160,315 196,289 196,403 160,431" fill="#4d2d29"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#392a2c" stroke="#f6a54d"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">04 · COLA</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="21">Redis</text>
+<g transform="translate(82 267)"><ellipse rx="43" ry="12" fill="#fa9d52"/><rect x="-43" y="0" width="86" height="29" fill="#c24f39"/><ellipse cy="29" rx="43" ry="12" fill="#ed7350"/></g>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">Emergency</text><text x="82" y="240" fill="#ffd29b" font-size="13">Streams · XADD</text>
+</g>
+<g transform="translate(936 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#315c70"/><polygon points="0,315 160,315 160,431 0,431" fill="#143c56"/><polygon points="160,315 196,289 196,403 160,431" fill="#0a283e"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#102638" stroke="#56b7d2"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">05 · ALERTA</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="20">Notifier ×1</text>
+<g transform="translate(58 256)" stroke="#79d8ec" stroke-width="3" fill="#153c52"><rect width="55" height="38" rx="4"/><path d="M2 4 L28 23 L53 4" fill="none"/></g>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">SMTP</text><text x="82" y="240" fill="#9dd2e6" font-size="13">Reintentos · DLQ</text>
+</g>
+<g transform="translate(1158 0)">
+<polygon points="0,315 160,315 196,289 36,289" fill="#315c70"/><polygon points="0,315 160,315 160,431 0,431" fill="#143c56"/><polygon points="160,315 196,289 196,403 160,431" fill="#0a283e"/>
+<rect x="12" y="330" width="138" height="76" rx="7" fill="#102638" stroke="#56b7d2"/>
+<text x="81" y="356" fill="#ffcf56" font-weight="800" font-size="17">06 · CORREO</text><text x="81" y="382" fill="#fff" font-weight="700" font-size="21">Gmail</text>
+<g transform="translate(55 256)" stroke="#e8c477" stroke-width="3" fill="#e7eef2"><rect width="55" height="38" rx="4"/><path d="M2 4 L28 23 L53 4" fill="none" stroke="#d65b49"/></g>
+<text x="82" y="219" fill="#fff" font-size="16" font-weight="700">Destinatario</text><text x="82" y="240" fill="#9dd2e6" font-size="13">Recepción por verificar</text>
+</g>
+</g>
+<!-- arrows between process stations -->
+<g fill="none" stroke="#ffd36c" stroke-width="3.5" marker-end="url(#rec-arrow)"><path d="M243 345 H263"/><path d="M465 345 H485"/><path d="M687 345 H707"/><path d="M909 345 H929"/><path d="M1131 345 H1151"/></g>
+<!-- Route annotation -->
+<g font-family="DM Sans, sans-serif">
+<rect x="72" y="490" width="605" height="94" rx="12" fill="#0c2a3b" stroke="#4b95b5"/>
+<text x="92" y="520" fill="#f7c14b" font-size="18" font-weight="800">RUTA NORMAL · POSITION</text>
+<text x="92" y="547" fill="#e1eef5" font-size="16">Validación → log de procesamiento → HTTP 200</text>
+<text x="92" y="568" fill="#9ac3d3" font-size="13">No se envía correo para eventos de posición.</text>
+<rect x="700" y="490" width="605" height="94" rx="12" fill="#36232a" stroke="#f49a50"/>
+<text x="721" y="520" fill="#ffba60" font-size="18" font-weight="800">RUTA CRÍTICA · EMERGENCY</text>
+<text x="721" y="547" fill="#fff1e7" font-size="16">XADD → 200 → worker → SMTP → EMAIL_SENT → XACK</text>
+<text x="721" y="568" fill="#f4c7ae" font-size="13">Redis caído: 503. Fallo SMTP: reintentos y DLQ.</text>
+</g>
+</svg>
+</div>
+<div class="rej d3 recorrido-resumen">
+<div class="card"><span class="et">Decisión arquitectónica</span><h3>Desacoplamiento</h3><small>El correo no bloquea la ingesta. Redis Streams conserva los Emergency pendientes hasta que el worker los confirma con XACK.</small></div>
+<div class="card"><span class="et">Límite demostrado en diseño</span><h3>3 procesadores</h3><small>Dos réplicas FastAPI y un notificador. El gateway y Redis son infraestructura adicional; el panel observa fuera del camino crítico.</small></div>
+<div class="card acento"><span class="et">Evidencia y límite</span><h3>Logs + panel</h3><small>El panel registra corridas y correlaciona event_id. EMAIL_SENT acredita el envío SMTP, no la llegada efectiva al buzón. El gateway local usa HTTP: HTTPS está pendiente.</small></div>
+</div>
+<p class="fuente">Diagrama conceptual elaborado a partir del código y documentación de <code>Modulo 2/Ejercicios/Reto2-Alerta-Flota</code>: <code>README.md</code>, <code>docker-compose.yml</code>, <code>gateway/default.conf.template</code> y <code>docs/2026-10-04-reto2-local-design.md</code>. Vista de la solución local; la alternativa AWS se explica en las láminas siguientes.</p>
+</div></section>
 
 <!-- ═══ 2 · Problema ═══ -->
 <section class="lamina">
