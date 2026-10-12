@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Reto 2 — Respuestas a 12.1 y 12.2 (exposición), camino AWS</title>
+<style>
+:root{
+  --ground:#F1F4F4; --surface:#fff; --surface-2:#E7EDED;
+  --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+  --rule:#CDDADC; --rule-2:#E1E9EA;
+  --accent:#0A6C7C; --accent-soft:#DBEDEF;
+  --signal:#A85B0C; --signal-soft:#F7E8D4;
+  --ok:#2B6A4B; --ok-soft:#E2EFE8;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#5FB584; --ok-soft:#10261B;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px;
+  display:grid;grid-template-columns:1fr;gap:0 48px}
+@media (min-width:1040px){.wrap{grid-template-columns:240px minmax(0,1fr)}}
+header.mh{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 26px;margin-bottom:36px}
+.kick{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.9rem,4.4vw,2.8rem);
+  line-height:1.07;letter-spacing:-.022em;margin:0 0 14px;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-3);margin:0;line-height:1.8}
+nav.rail{display:none}
+@media (min-width:1040px){
+  nav.rail{display:block;align-self:start;position:sticky;top:24px;
+    font-family:var(--sans);font-size:.82rem;padding-bottom:40px;
+    max-height:calc(100vh - 48px);overflow-y:auto}
+}
+nav.rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;border:none;padding:0}
+nav.rail ol{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:3px}
+nav.rail a{display:block;color:var(--ink-2);text-decoration:none;padding:2px 0;line-height:1.3;font-size:.8rem}
+nav.rail a:hover{color:var(--accent)}
+main{min-width:0}
+h2{font-family:var(--sans);font-weight:600;font-size:1.55rem;line-height:1.22;
+  letter-spacing:-.016em;margin:52px 0 14px;padding-top:14px;border-top:1px solid var(--rule);
+  scroll-margin-top:16px;text-wrap:balance}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h3{font-family:var(--sans);font-weight:600;font-size:1.08rem;margin:36px 0 10px;scroll-margin-top:16px}
+p{margin:0 0 12px;max-width:72ch}
+ul,ol{max-width:70ch;margin:0 0 14px;padding-left:22px}
+li{margin-bottom:6px}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.1em .34em;border-radius:2px}
+hr{border:none;border-top:1px solid var(--rule-2);margin:36px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--surface);
+  padding:14px 18px;margin:16px 0;max-width:72ch;border-radius:0 3px 3px 0}
+blockquote p{margin:0 0 8px;font-size:.92rem}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.87rem;line-height:1.5}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.62rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+/* bloques de respuesta directa / evidencia, estilo tarjeta */
+.answer{background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:16px 20px;margin:0 0 14px}
+.answer .direct{font-family:var(--sans);font-weight:600;font-size:1rem;color:var(--ink);
+  margin:0 0 10px;line-height:1.4}
+.answer p{margin:0 0 10px;font-size:.95rem}
+.answer p:last-child{margin-bottom:0}
+.evidence{background:var(--ok-soft);border-left:3px solid var(--ok);border-radius:0 3px 3px 0;
+  padding:8px 14px;margin:10px 0;font-family:var(--sans);font-size:.85rem;color:var(--ink-2)}
+.evidence strong{color:var(--ok)}
+.honest{background:var(--signal-soft);border-left:3px solid var(--signal);border-radius:0 3px 3px 0;
+  padding:8px 14px;margin:10px 0;font-family:var(--sans);font-size:.85rem;color:var(--ink-2)}
+.honest strong{color:var(--signal)}
+.pending{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 3px 3px 0;
+  padding:8px 14px;margin:10px 0;font-family:var(--sans);font-size:.85rem;color:var(--ink-2)}
+.pending strong{color:var(--accent)}
+.tag{font-family:var(--mono);font-size:.68rem;font-style:normal;color:var(--ink-3)}
+footer{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:48px;padding-top:22px;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);line-height:1.7}
+@media print{nav.rail{display:none} .wrap{grid-template-columns:1fr} body{background:#fff}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mh">
+  <p class="kick">Diplomado en Arquitectura de Software y Cloud Computing · Group 2</p>
+  <h1>Reto 2 — Respuestas a 12.1 y 12.2 (exposición), camino AWS</h1>
+  <p class="meta">m2-respuestas-exposicion-12.1-12.2.md</p>
+</header>
+<nav class="rail" aria-label="Contenido">
+  <h2>12.1</h2>
+  <ol><li><a href="#121-temas-de-teoria">Tabla de temas de teoría</a></li></ol>
+  <h2>12.2 — Preguntas</h2>
+  <ol>
+    <li><a href="#q1">1. Nube o local</a></li>
+    <li><a href="#q2">2. Atributo principal</a></li>
+    <li><a href="#q3">3. Tácticas</a></li>
+    <li><a href="#q4">4. Límite 15/s</a></li>
+    <li><a href="#q5">5. Exceso de solicitudes</a></li>
+    <li><a href="#q6">6. Qué garantiza 200</a></li>
+    <li><a href="#q7">7. 1000 únicos</a></li>
+    <li><a href="#q8">8. Falla tras 200</a></li>
+    <li><a href="#q9">9. Duplicados/reintentos</a></li>
+    <li><a href="#q10">10. Máximo 10 instancias</a></li>
+    <li><a href="#q11">11. Carga vs. emergencia</a></li>
+    <li><a href="#q12">12. &lt;16s k6→correo</a></li>
+    <li><a href="#q13">13. Timestamps distintas máquinas</a></li>
+    <li><a href="#q14">14. Demoras de correo</a></li>
+    <li><a href="#q15">15. Fin de HTTPS</a></li>
+    <li><a href="#q16">16. Cuello de botella</a></li>
+  </ol>
+</nav>
+<main>
+<div class="tw"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody>
+<tr><td><strong>Tema</strong></td><td>Puntos 12.1 y 12.2 de <code>Modulo 2/Aportes/danny/m2-preguntas-encuentro-0610-danny.md</code></td></tr>
+<tr><td><strong>Fecha</strong></td><td>2026-10-12</td></tr>
+<tr><td><strong>Tipo</strong></td><td><code>investigacion</code> — elaborado con IA, apoyado en mediciones reales; <strong>no es material oficial</strong></td></tr>
+<tr><td><strong>Fuentes</strong></td><td><code>arquitectura-aws-opcion-b.md</code> · <code>medir-aws.py</code> · <code>m2-preguntas-encuentro-0610-danny.md</code> · sistema local <code>Reto2-Alerta-Flota/</code></td></tr>
+<tr><td><strong>Estado</strong></td><td>borrador, para repasar antes de la exposición</td></tr>
+</tbody></table></div>
+
+<blockquote>
+<p><strong>Origen:</strong> <strong>Curso</strong> = lo dice el material del diplomado · <strong>Complementario</strong> = conocimiento general de arquitectura/cloud · <strong>Recomendación</strong> = criterio propio de arquitecto.</p>
+<p><strong>Confianza:</strong> <strong>Seguro</strong> = medido o verificado · <strong>Probable</strong> = razonado, sin verificar directamente · <strong>Suposición</strong> = no confirmado.</p>
+<p><strong>Capa de control:</strong> el panel (<code>panel/</code>) hoy solo existe para local. Para AWS está planeado, no construido — se marca con 🛠️ donde aplica; mientras tanto su función la cumple <code>medir-aws.py</code>.</p>
+<p>Cada respuesta de 12.2 sigue el mismo orden: <strong>respuesta directa</strong>, justificación, y una caja verde de <strong>Evidencia</strong> cuando existe un dato medido real.</p>
+</blockquote>
+<hr>
+
+<h2 id="121-temas-de-teoria">12.1 — Temas de teoría: cómo los cubrimos</h2>
+<div class="tw"><table><thead><tr><th>Tema</th><th>Cómo lo cubrimos</th><th>Evidencia / justificación</th></tr></thead><tbody>
+<tr><td><strong>Atributos de calidad</strong></td><td>Priorizamos <strong>disponibilidad/confiabilidad</strong> del camino <code>Emergency</code> sobre latencia mínima o costo. Seguridad como restricción dura (TLS 1.3, IAM mínimo privilegio).</td><td><span class="tag">Recomendación</span> — SQS, DLQ y "duplicado antes que pérdida" son consecuencia de esa priorización.</td></tr>
+<tr><td><strong>Tácticas de arquitectura</strong></td><td>Intermediario/broker (SQS), limitación de demanda (rate/burst), timeout + reintento acotado (notifier), recursos dedicados (concurrencia reservada).</td><td><span class="tag">Curso + Complementario</span> — ver pregunta 3.</td></tr>
+<tr><td><strong>Síncrono y asíncrono</strong></td><td>La petición HTTP <strong>termina cuando <code>reto2-ingesta</code> responde</strong> — antes de cualquier envío de correo. El envío es async, vía trigger de SQS.</td><td><span class="tag">Seguro</span> — es el propio código.</td></tr>
+<tr><td><strong>Colas y sobrecarga</strong></td><td>SQS desacopla productor/consumidor. Si notifier no da abasto, los mensajes se <strong>acumulan</strong>, no se pierden ni bloquean a ingesta.</td><td><span class="tag">Seguro</span> — validado en el paso 3.</td></tr>
+<tr><td><strong>Limitación de solicitudes</strong></td><td><strong>Tasa</strong> (API Gateway, 15 r/s), <strong>concurrencia</strong> (Lambda, reservada 10), <strong>capacidad</strong> (función de la latencia). Tres mecanismos, capas distintas.</td><td><span class="tag">Seguro</span> — medidas por separado, preguntas 4 y 10.</td></tr>
+<tr><td><strong>Rate y burst</strong></td><td><em>Rate</em> = recarga del balde (15/s); <em>burst</em> = tamaño del balde (2000). 1000 peticiones nunca agotan 2000.</td><td><span class="tag">Curso + Seguro</span> — 1000/1000 sin ningún <code>429</code>.</td></tr>
+<tr><td><strong>Escalabilidad y paralelismo</strong></td><td>Horizontal = más instancias; vertical = más memoria/CPU (no tocado); paralelismo = los 10 VUs simultáneos. Límite vía "Simultaneidad reservada".</td><td><span class="tag">Seguro</span> — ver throttling corregido, pregunta 10.</td></tr>
+<tr><td><strong>HTTP y HTTPS</strong></td><td><code>200</code>=aceptado/encolado; <code>429</code>=rate limit; <code>5xx</code>=throttle no manejado. TLS 1.3 únicamente, SNI obligatorio.</td><td><span class="tag">Curso + Seguro</span> — verificado en consola y en pasos 2-3.</td></tr>
+<tr><td><strong>Entrega de mensajes</strong></td><td>SQS entrega <strong>al menos una vez</strong> → posibles duplicados. Decisión: duplicado antes que pérdida.</td><td><span class="tag">Recomendación</span> — sección 6 del diseño.</td></tr>
+<tr><td><strong>Medición y trazabilidad</strong></td><td><em>Latencia</em> = operación puntual; <em>rendimiento</em> = throughput agregado. Correlación vía <code>event_id</code> + timestamps ISO 8601.</td><td><span class="tag">Seguro</span> 🛠️ — <code>medir-aws.py</code>; panel para AWS pendiente.</td></tr>
+<tr><td><strong>Ubicación de componentes</strong></td><td>Región (<code>us-east-2</code>) elegida con evidencia medida. Gmail, dependencia externa, sin la misma certeza.</td><td><span class="tag">Seguro</span> — sección 8 del diseño.</td></tr>
+<tr><td><strong>Pruebas con k6</strong></td><td>1000 peticiones / 10 VUs. Defecto de <code>shared-iterations</code>: no garantiza cuántos <code>Emergency</code> por corrida (0, 1, hasta 3).</td><td><span class="tag">Seguro</span> — verificado varias veces.</td></tr>
+<tr><td><strong>Envío de correo</strong></td><td><em>Entregado al servidor</em> = SES acepta (<code>EMAIL_SENT</code>). <em>Llega al destinatario</em> = aparece en Gmail (fuera de control).</td><td><span class="tag">Seguro</span> — CloudWatch / verificación manual.</td></tr>
+</tbody></table></div>
+<hr>
+
+<h2>12.2 — Respuestas a las posibles preguntas</h2>
+
+<h3 id="q1">1. ¿Por qué escogieron nube o local? ¿Qué cambiaría al desplegar en otro entorno?</h3>
+<div class="answer">
+<p class="direct">Empezamos en local y migramos a AWS por fidelidad al enunciado, no por preferencia tecnológica.</p>
+<p>Local (Docker Compose) primero: el enunciado es condicional y permite iterar sin depender de una cuenta en la nube <span class="tag">(Recomendación)</span>. AWS después: el diplomado es de <em>Cloud Computing</em> y ofrece los servicios que el enunciado nombra literalmente, en vez de imitarlos <span class="tag">(Curso)</span>.</p>
+<p>En otro proveedor (Azure, GCP) cambiarían los <strong>nombres</strong> de los servicios, pero el <strong>patrón arquitectónico</strong> (gateway → cola → procesador async → correo) se mantiene <span class="tag">(Complementario, Probable)</span>.</p>
+<div class="evidence"><strong>Evidencia:</strong> las dos versiones implementan la misma arquitectura lógica, documentada en la tabla de equivalencia de <code>diagrama-contenedores-opcion-b.html</code>.</div>
+</div>
+
+<h3 id="q2">2. ¿Cuál es el atributo de calidad más importante y dónde se refleja?</h3>
+<div class="answer">
+<p class="direct">Disponibilidad/confiabilidad de la alerta <code>Emergency</code>: que el intento de envío nunca se pierda en silencio. <span class="tag">(Recomendación)</span></p>
+<p>Se refleja en: SQS como amortiguador, DLQ como respaldo explícito (el código lo manda él mismo, sin esperar el redrive), y la decisión de tolerar duplicados antes que arriesgar una pérdida.</p>
+<div class="evidence"><strong>Evidencia:</strong> en ningún momento de la sesión un <code>Emergency</code> quedó sin intento de envío — siempre terminó en <code>EMAIL_SENT</code> o <code>EMAIL_DLQ</code>.</div>
+</div>
+
+<h3 id="q3">3. ¿Qué tácticas aplicaron y qué componente implementa cada una?</h3>
+<div class="answer">
+<p class="direct"><span class="tag">(Curso + Complementario)</span> — una táctica logra un atributo de calidad; un patrón compone varias tácticas.</p>
+<div class="tw"><table><thead><tr><th>Táctica</th><th>Componente</th><th>Atributo</th></tr></thead><tbody>
+<tr><td>Intermediario / broker</td><td>SQS (<code>reto2-emergencias</code>)</td><td>Disponibilidad bajo picos</td></tr>
+<tr><td>Limitación de demanda</td><td>Stage de API Gateway (15/2000)</td><td>Cumplimiento del límite, capacidad</td></tr>
+<tr><td>Timeout + reintento acotado</td><td>Lambda <code>reto2-notifier</code> (≤12s)</td><td>Disponibilidad sin violar el tiempo</td></tr>
+<tr><td>Recursos dedicados</td><td>Concurrencia reservada (10/2)</td><td>Cumplimiento del límite de instancias</td></tr>
+<tr><td>Redundancia de respaldo</td><td>DLQ + redrive (maxReceiveCount 3)</td><td>Confiabilidad</td></tr>
+</tbody></table></div>
+<div class="evidence"><strong>Evidencia:</strong> las cinco están configuradas y validadas en los pasos 1-5 del despliegue.</div>
+</div>
+
+<h3 id="q4">4. ¿Dónde se limita el backend a 15 solicitudes por segundo y cómo verificaron ese límite?</h3>
+<div class="answer">
+<p class="direct">En el <em>stage</em> <code>prod</code> de API Gateway (rate=15, burst=2000) — antes de llegar a cualquier Lambda. <span class="tag">(Curso + Seguro)</span></p>
+<div class="evidence"><strong>Evidencia:</strong> k6 oficial (1000 peticiones / 10 VUs / ~22.5s ≈ 44.7 req/s) sin ningún <code>429</code>.</div>
+<div class="honest"><strong>Limitación honesta:</strong> esto confirma que el burst absorbe el volumen del test, no que se probó el rate de 15/s bajo carga sostenida lo bastante larga para agotarlo. <span class="tag">(Probable)</span></div>
+</div>
+
+<h3 id="q5">5. ¿Qué sucede si llegan más solicitudes de las que el backend puede procesar?</h3>
+<div class="answer">
+<p class="direct">Depende de la capa: dos mecanismos distintos, dos respuestas distintas.</p>
+<ul>
+<li>Burst de API Gateway agotado → <code>429</code> nativo <span class="tag">(Curso, Seguro)</span>.</li>
+<li>Concurrencia reservada de Lambda superada → <em>throttle</em>, API Gateway lo traduce en error de servidor <span class="tag">(Complementario, Seguro)</span>.</li>
+</ul>
+<div class="evidence"><strong>Evidencia:</strong> con reservada 8 y 10 VUs, fallaron exactamente 2/1000, coincidiendo con <code>AWS/Lambda Throttles = 2</code>. Al subir a 10: 1000/1000.</div>
+</div>
+
+<h3 id="q6">6. ¿Qué garantiza exactamente el <code>200 OK</code> en su implementación?</h3>
+<div class="answer">
+<p class="direct">Que el payload es válido y, si es <code>Emergency</code>, que ya quedó encolado en SQS — no que el correo se envió ni que llegó. <span class="tag">(Seguro)</span></p>
+<p>Si el encolado falla, responde <code>503</code> explícitamente; nunca confirma una alerta no guardada.</p>
+<div class="evidence"><strong>Evidencia:</strong> en el paso 2, antes de la cola, cualquier <code>Emergency</code> devolvía <code>503</code> a propósito — reproducido y confirmado.</div>
+</div>
+
+<h3 id="q7">7. ¿Cómo demuestran que se procesaron 1.000 mensajes únicos y no solamente que se recibieron 1.000 peticiones?</h3>
+<div class="answer">
+<p class="direct">Contando <code>event_id</code> (UUID) distintos en los logs, no peticiones HTTP. <span class="tag">(Seguro)</span></p>
+<div class="evidence"><strong>Evidencia:</strong> <code>medir-aws.py</code> dio <code>eventos_recibidos: 1000</code>, exacto a las 1000 del k6.</div>
+<div class="pending"><strong>Capa de control:</strong> el panel que haría esto en vivo solo existe para local; para AWS, hoy lo cumple este script. 🛠️</div>
+</div>
+
+<h3 id="q8">8. ¿Qué ocurre si una instancia falla después de responder <code>200 OK</code> y antes de procesar el mensaje?</h3>
+<div class="answer">
+<p class="direct">El mensaje no se pierde: SQS lo vuelve a ofrecer a otra instancia. <span class="tag">(Complementario, Probable)</span></p>
+<p>Si <code>reto2-notifier</code> muere a medio procesar, el mensaje vuelve a ser visible tras 90s y otra instancia lo reintenta (<em>at-least-once</em> nativo de SQS). Si falla 3 veces, el redrive lo manda al DLQ.</p>
+<div class="evidence"><strong>Evidencia parcial (Seguro):</strong> el código sí manda a la DLQ en ≤12s, más rápido que el redrive — caso real de <code>EMAIL_DLQ</code> en 2.05s.</div>
+</div>
+
+<h3 id="q9">9. ¿Cómo manejan los mensajes duplicados, los reintentos y los fallos de procesamiento?</h3>
+<div class="answer">
+<ul>
+<li><strong>Duplicados</strong> <span class="tag">(Recomendación)</span>: posibles por at-least-once; aceptados, riesgo bajo con presupuesto de 12s.</li>
+<li><strong>Reintentos</strong> <span class="tag">(Seguro)</span>: 2 intentos de SES (≈2+3s por intento, 1s de espera, ≤12s total), <code>max_attempts=1</code> sin reintentos ocultos del SDK.</li>
+<li><strong>Fallos</strong> <span class="tag">(Seguro)</span>: agotados los 2 intentos, el código manda a la DLQ y registra <code>EMAIL_DLQ</code>.</li>
+</ul>
+<div class="evidence"><strong>Evidencia:</strong> caso real del paso 4 — <code>EMAIL_RETRY</code> → <code>EMAIL_DLQ</code> en 2.05s total.</div>
+</div>
+
+<h3 id="q10">10. ¿Cómo evitan superar las 10 instancias y qué efecto tiene aumentar su número?</h3>
+<div class="answer">
+<p class="direct">Con "Simultaneidad reservada" de Lambda — mecanismo nativo de AWS, no un contador propio. <span class="tag">(Curso + Seguro)</span></p>
+<p>Reparto: <strong>10</strong> en <code>reto2-ingesta</code> (= VUs del test oficial) y <strong>2</strong> en <code>reto2-notifier</code> (reservada de función + concurrencia máxima del trigger).</p>
+<div class="honest"><strong>Nota honesta:</strong> el peor caso teórico combinado es 12, no 10 — ingesta y notifier no compiten por el mismo cupo. Interpretación razonada, no violación oculta. <span class="tag">(Recomendación)</span></div>
+<div class="evidence"><strong>Evidencia:</strong> la corrección 8→10 eliminó el throttling (pregunta 5); config final confirmada en consola.</div>
+</div>
+
+<h3 id="q11">11. ¿Qué diferencia hay entre el tiempo de toda la carga y el tiempo del evento de emergencia?</h3>
+<div class="answer">
+<p class="direct">Dos métricas de naturaleza distinta, aunque se midan en la misma corrida. <span class="tag">(Complementario)</span></p>
+<p>Toda la carga mide <strong>rendimiento agregado</strong> (throughput). El evento <code>Emergency</code> mide <strong>latencia de un camino crítico específico</strong>, el único con corte de tiempo de la rúbrica.</p>
+<div class="evidence"><strong>Evidencia:</strong> carga total ~22.5s a 44.7 req/s; <code>ms_since_received</code> individual entre 590ms y 2.54s.</div>
+</div>
+
+<h3 id="q12">12. ¿Cómo demuestran los menos de 16 segundos desde el envío del <code>Emergency</code> en k6 hasta la llegada del correo?</h3>
+<div class="answer">
+<p class="direct">Medimos automáticamente el tramo bajo nuestro control; el tramo de entrega real a Gmail se confirma a mano. <span class="tag">(Seguro / Probable-manual)</span></p>
+<p><code>medir-aws.py</code> dio <code>ultima_peticion_a_ultimo_correo_s: 1.642s</code> — esto es "última petición vista por ingesta → <code>EMAIL_SENT</code>", no literalmente "envío de k6 → correo recibido en la bandeja" (la redacción exacta de la rúbrica). El tramo final depende de Google.</p>
+<div class="evidence"><strong>Evidencia disponible:</strong> el correo de <code>FTE-710</code> (<code>EMAIL_SENT</code> 13:15:46.323) apareció en Gmail como "1:15 p.m." — misma franja de minuto, entrega en segundos, no minutos.</div>
+<div class="pending"><strong>Pendiente para cerrar esto del todo:</strong> tomar el "Mostrar original" de un correo de prueba en Gmail (trae el <code>Received:</code> exacto de Google) y restarlo contra <code>EMAIL_SENT</code> — daría la cifra real de punta a punta.</div>
+</div>
+
+<h3 id="q13">13. ¿Cómo comparan marcas de tiempo de componentes ubicados en máquinas diferentes?</h3>
+<div class="answer">
+<p class="direct">Con timestamps ISO 8601 con zona horaria explícita, generados por el propio código — no el reloj de k6. <span class="tag">(Seguro)</span></p>
+<p>Todas las Lambdas y CloudWatch comparten el reloj NTP de AWS, eliminando el desfase que sí tuvo el sistema local entre máquina física y VM. Para k6 (máquina aparte), se usa un margen de tolerancia (2-5s) al definir la ventana en CloudWatch.</p>
+<div class="evidence"><strong>Evidencia:</strong> ningún caso de esta sesión mostró inconsistencia de tiempos entre Lambdas al cruzar <code>event_id</code>.</div>
+</div>
+
+<h3 id="q14">14. ¿Qué ocurre si el envío o la entrega del correo se demora?</h3>
+<div class="answer">
+<p class="direct">Dos escenarios distintos. <span class="tag">(Seguro para SES; Probable/sin SLA para Gmail)</span></p>
+<p>Si SES tarda: el timeout corto corta el intento y reintenta, acotando el peor caso a ≤12s. Si tarda la <strong>entrega</strong> de Gmail, eso ocurre fuera de nuestro código.</p>
+<div class="evidence"><strong>Evidencia:</strong> en todas las pruebas, la entrega pareció tomar segundos — pero sin SLA garantizado por Gmail.</div>
+</div>
+
+<h3 id="q15">15. ¿Dónde termina la conexión HTTPS y cómo se protegen las comunicaciones posteriores?</h3>
+<div class="answer">
+<p class="direct">El TLS termina en API Gateway; de ahí hacia adentro, IAM controla el acceso. <span class="tag">(Curso + Complementario)</span></p>
+<p>API Gateway fuerza TLS 1.3 únicamente, acceso Estricto con SNI obligatorio. Hacia adentro, el tráfico va por la red interna de AWS, cifrada por el proveedor.</p>
+<div class="evidence"><strong>Evidencia:</strong> política verificada en consola; el <code>AccessDenied</code> real corregido en el paso 4 prueba que IAM sí se aplica.</div>
+</div>
+
+<h3 id="q16">16. ¿Cuál es el principal cuello de botella y qué evidencia respalda esa conclusión?</h3>
+<div class="answer">
+<p class="direct">Hoy, ninguno bajo la carga oficial — pero sí encontramos y corregimos uno durante esta preparación. <span class="tag">(Seguro)</span></p>
+<p>Con la configuración corregida: 1000/1000, 0% fallos, avg 119.65ms / p95 129.09ms. El cuello real: concurrencia reservada insuficiente (8, bajo los 10 VUs).</p>
+<div class="evidence"><strong>Evidencia:</strong> <code>AWS/Lambda Throttles = 2</code> coincidiendo exacto con los 2 fallos antes de la corrección.</div>
+<div class="honest"><strong>Siguientes techos esperables (Probable, no alcanzados):</strong> cuota de concurrencia de la cuenta (hoy 1000) o el burst del stage (2000).</div>
+</div>
+
+</main>
+<footer><p>Generado desde <code>m2-respuestas-exposicion-12.1-12.2.md</code>. No editar este HTML directamente: se regenera desde el Markdown.</p></footer>
+</div></body></html>
