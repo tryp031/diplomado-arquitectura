@@ -44,6 +44,9 @@ class K6Falso:
     def resumen(self):
         return {"estado": "corriendo" if self.ocupado else "inactivo"}
 
+    def salida_completa(self):
+        return ["running (0m01.0s)", "http_reqs: 1000"]
+
     def ventana(self):
         return None if self.ocupado else self.ultima
 
@@ -205,7 +208,8 @@ async def test_al_terminar_k6_la_corrida_se_cierra_y_queda_en_el_historial(entor
     assert agregador.hasta == fin
     [corrida] = estado["historial"]
     assert corrida["fin"] == fin.isoformat()
-    assert {"medida", "emergencias", "enviadas", "aceptadas", "total", "rechazadas_429"} <= corrida.keys()
+    assert {"medida", "emergencias", "enviadas", "aceptadas", "total", "rechazadas_429",
+            "procesados", "emergencia_a_correo"} <= corrida.keys()
 
 
 async def test_una_carga_que_no_arranca_no_abre_corrida(entorno):
@@ -243,3 +247,10 @@ async def test_descargar_logs_de_una_corrida_del_historial(entorno, tmp_path):
     assert log.headers["content-disposition"] == 'attachment; filename="corrida-1-profesor-20261012-230000.log"'
     assert json.loads(log.text.splitlines()[0])["event_id"] == "p1"
     assert tabla.text.splitlines()[0] == "ts,service,replica,event,event_id,plate,detalle"
+
+
+async def test_salida_de_k6_completa_por_su_propio_endpoint(entorno):
+    cliente, *_ = entorno
+    async with cliente:
+        respuesta = await cliente.get("/api/k6/salida")
+    assert respuesta.json()["lineas"] == ["running (0m01.0s)", "http_reqs: 1000"]

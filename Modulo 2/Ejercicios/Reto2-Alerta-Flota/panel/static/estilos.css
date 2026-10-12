@@ -156,6 +156,13 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .linea .tramo-medida { stroke: var(--tinta); stroke-width: 2; }
 .linea .medida-etiqueta { font-weight: 650; fill: var(--tinta); }
 .linea .hito { fill: var(--superficie); stroke-width: 2.5; }
+.linea .guia { stroke: var(--eje); stroke-dasharray: 3 3; }
+.linea .etiqueta-hito { fill: var(--tinta-2); font-weight: 600; }
+.segunda-medida { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 12px; color: var(--tenue); }
+.segunda-valor { margin-top: 4px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.segunda-valor b { font-size: 22px; color: var(--tinta); font-variant-numeric: tabular-nums; }
+.segunda-valor b[data-nivel="good"]::before { content: "● "; color: var(--good); font-size: 14px; }
+.segunda-valor b[data-nivel="critical"]::before { content: "● "; color: var(--critical); font-size: 14px; }
 .leyenda-hitos { margin-top: 8px; }
 .hito-clave { width: 10px; height: 10px; border-radius: 50%; border: 2.5px solid; display: inline-block; }
 
@@ -200,7 +207,12 @@ h3 { font-size: 12px; font-weight: 600; color: var(--tenue); text-transform: upp
 .fila-campo[hidden] { display: none; }
 .fila-campo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--tinta-2); }
 .fila-campo input { width: 76px; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta); text-align: right; }
-.consola { margin: 8px 0 0; padding: 10px; min-height: 64px; max-height: 140px; overflow: auto; border-radius: 9px; background: var(--superficie-2); border: 1px solid var(--borde); font: 11.5px/1.5 var(--mono); color: var(--tinta-2); white-space: pre-wrap; word-break: break-word; }
+.consola-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.consola-barra .meta { flex: 1; }
+.campo-check { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tinta-2); cursor: pointer; }
+/* De inicio a fin: alto generoso y sin cortar líneas, para que la tabla de métricas de k6 quede alineada. */
+.consola { margin: 8px 0 0; padding: 12px 14px; min-height: 320px; max-height: 70vh; overflow: auto; border-radius: 9px; background: var(--superficie-2); border: 1px solid var(--borde); font: 12px/1.55 var(--mono); color: var(--tinta); white-space: pre; tab-size: 4; }
+.consola.ajustada { white-space: pre-wrap; word-break: break-word; }
 .consola:empty::before { content: "La salida de k6 aparecerá aquí."; color: var(--tenue); }
 .herramientas { display: grid; gap: 10px; }
 .herramientas summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--tinta-2); }

@@ -109,6 +109,7 @@ class Agregador:
         self._por_replica: Counter[str] = Counter()
         self._ultimo_visto: dict[str, datetime] = {}
         self._emergencias: dict[str, Emergencia] = {}
+        self._normales: set[str] = set()  # event_id de eventos normales validados y registrados
         self._feed: deque[dict[str, Any]] = deque(maxlen=60)
 
     def cerrar(self, hasta: datetime) -> None:
@@ -147,6 +148,8 @@ class Agregador:
                 self._eventos[evento] += 1
                 if evento in ("EVENT_RECEIVED", "EMERGENCY_RECEIVED"):
                     self._por_replica[archivo] += 1
+                if evento == "EVENT_RECEIVED" and registro.get("event_id"):
+                    self._normales.add(registro["event_id"])
             if evento in EVENTOS_FEED:
                 self._feed.appendleft({
                     "ts": momento.isoformat(timespec="milliseconds"),
@@ -192,6 +195,7 @@ class Agregador:
         if ultimo_correo and self._ultima_peticion:
             medida = round((ultimo_correo - self._ultima_peticion).total_seconds(), 3)
         estados = Counter(e.estado for e in emergencias)
+        peor = max((e for e in emergencias if e.enviada), key=lambda e: e.enviada - e.recibida, default=None)
         return {
             "ventana_desde": self.desde.isoformat() if self.desde else None,
             "ventana_hasta": self.hasta.isoformat() if self.hasta else None,
@@ -210,9 +214,18 @@ class Agregador:
                 "dlq": estados["dlq"],
                 "fallidas": estados["fallida"],
                 "reintentos": self._eventos["EMAIL_RETRY"],
+                # Un evento normal termina al validarse y registrarse (no tiene más pasos);
+                # un Emergency, cuando su correo sale. Se cuentan event_id únicos.
+                "procesados": len(self._normales) + estados["enviada"],
             },
             "por_replica": dict(self._por_replica),
             "medida_rubrica": calificar(medida),
+            # Criterio reportado del profesor: del envío del Emergency a la llegada del correo.
+            # El panel ve de la recepción en ingest a la entrega al SMTP: es una aproximación.
+            "emergencia_a_correo": {
+                "segundos": round((peor.enviada - peor.recibida).total_seconds(), 3) if peor else None,
+                "placa": peor.placa if peor else None,
+            },
             "serie": self._serie(ahora),
             "emergencias": [{**e.como_dict(), "en_corrida": self._en_corrida(e.recibida)} for e in todas[:25]],
             "feed": sorted(self._feed, key=lambda f: _fecha(f["ts"]), reverse=True)[:40],

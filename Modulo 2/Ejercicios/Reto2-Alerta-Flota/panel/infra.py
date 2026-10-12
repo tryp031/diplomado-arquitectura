@@ -22,6 +22,8 @@ MODOS_K6 = {"rafaga": None, "ritmo": "0.28"}  # SLEEP_S: el ritmo imita la salid
 # El k6 del profesor decide solo cuántos Emergency manda y a qué ritmo: no recibe parámetros.
 MODO_PROFESOR = "profesor"
 MAX_EMERGENCIAS = 100
+# Una carga de 1000 iteraciones produce unos pocos cientos de líneas: el tope solo evita crecer sin fin.
+MAX_LINEAS_K6 = 5000
 _COLOR_ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
 
@@ -92,7 +94,7 @@ class EjecutorK6:
         self.inicio: datetime | None = None
         self.fin: datetime | None = None
         self.codigo: int | None = None
-        self.salida: deque[str] = deque(maxlen=30)
+        self.salida: deque[str] = deque(maxlen=MAX_LINEAS_K6)
 
     @property
     def ocupado(self) -> bool:
@@ -147,6 +149,9 @@ class EjecutorK6:
         if self._tarea:
             await self._tarea
 
+    def salida_completa(self) -> list[str]:
+        return list(self.salida)
+
     def resumen(self) -> dict[str, Any]:
         ultimo = None
         if self._resumen_path.exists():
@@ -160,6 +165,6 @@ class EjecutorK6:
             "inicio": self.inicio.isoformat() if self.inicio else None,
             "fin": self.fin.isoformat() if self.fin else None,
             "codigo": self.codigo,
-            "salida": list(self.salida)[-12:],
+            "lineas": len(self.salida),  # el texto va por /api/k6/salida: no viaja en cada consulta
             "ultimo_resumen": ultimo,
         }

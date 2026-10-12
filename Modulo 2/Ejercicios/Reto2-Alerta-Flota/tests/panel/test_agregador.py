@@ -175,3 +175,22 @@ def test_reiniciar_reabre_la_corrida():
     a.cerrar(T0 + timedelta(seconds=28))
     a.reiniciar(T0 + timedelta(seconds=40))
     assert a.hasta is None
+
+
+def test_procesados_cuenta_eventos_validados_y_emergencias_con_correo():
+    # Un evento normal termina al validarse y registrarse; un Emergency, al enviarse su correo.
+    r = corrida().resumen(T0 + timedelta(seconds=31))
+    assert r["eventos"]["procesados"] == 3  # p1, p2 y e1 (correo enviado)
+
+
+def test_emergencia_a_correo_es_el_peor_caso_de_la_corrida():
+    a = Agregador()
+    a.ingerir_servicio([
+        ("ingest-a", svc(1, "EMERGENCY_RECEIVED", event_id="e1", plate="AAA-111")),
+        ("ingest-a", svc(5, "EMERGENCY_RECEIVED", event_id="e2", plate="BBB-222")),
+        ("notifier-x", svc(1.2, "EMAIL_SENT", service="notifier", event_id="e1", attempt=1)),
+        ("notifier-x", svc(8, "EMAIL_SENT", service="notifier", event_id="e2", attempt=2)),
+    ])
+    peor = a.resumen(T0 + timedelta(seconds=9))["emergencia_a_correo"]
+    assert peor == {"segundos": 3.0, "placa": "BBB-222"}
+    assert Agregador().resumen(T0)["emergencia_a_correo"] == {"segundos": None, "placa": None}

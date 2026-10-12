@@ -37,7 +37,11 @@ Abrir http://localhost:8090. Versión 2 (11/10/2026), a partir de la maqueta
   `logs/panel-corridas.json`, así que sobrevive a reiniciar el panel.
 - **Peticiones por segundo** contra la línea de 15 r/s, la arquitectura en vivo, el recorrido de
   cada emergencia y los eventos del sistema.
-- Plegados al final: la salida de k6 y la **inyección de fallas** (apagar SMTP, Redis o el
+- Debajo de la medida, **Emergency → correo (peor caso)**: aproxima el criterio reportado del
+  profesor (< 16 s del envío del Emergency a la llegada del correo). El panel ve de la recepción
+  en ingest a la entrega al SMTP; la llegada al buzón de Gmail no la ve.
+- **Procesados (únicos):** eventos normales validados y registrados + Emergency con correo enviado.
+- Plegados al final: la salida **completa** de k6 (copiar / descargar .txt) y la **inyección de fallas** (apagar SMTP, Redis o el
   notifier), cada una con lo que debería verse y la táctica que demuestra.
 
 - Es **plano de control**: solo lee los logs, Redis y Docker. No escribe en el camino de los eventos,
@@ -110,6 +114,18 @@ La medida de la rúbrica es `ultima_peticion_a_ultimo_correo_s`: desde la últim
 nginx hasta el último `EMAIL_SENT`. Se toma de nginx y no del fin de k6 porque (a) el fin de k6
 incluye la pausa final del modo ritmo y (b) nginx usa el mismo reloj que los servicios. La llegada
 a Gmail no la controlamos: se anota a mano.
+
+## Empezar de cero (antes de la corrida oficial o de la exposición)
+
+```bash
+scripts/reiniciar.sh --simular   # muestra qué haría
+scripts/reiniciar.sh             # pide confirmación
+```
+
+Detiene panel, gateway, ingest y notifier, vacía los streams de Redis, **mueve** `logs/` a
+`logs-archivo/<fecha>/` (no borra nada: ahí queda también el historial de corridas) y vuelve a
+encender los mismos contenedores, así que conserva el modo Gmail o Mailpit. Es un script y no un
+botón del panel a propósito: un «borrar todo» junto a «Lanzar corrida» es un accidente en plena demo.
 
 ## Descargar los logs de una corrida (panel)
 

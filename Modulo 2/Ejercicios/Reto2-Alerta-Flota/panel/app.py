@@ -57,7 +57,8 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
             actual["n"], medida=resumen["medida_rubrica"], total=resumen["http"]["total"],
             aceptadas=resumen["http"]["aceptadas"], rechazadas_429=resumen["http"]["rechazadas_429"],
             emergencias=resumen["eventos"]["emergencias"], enviadas=resumen["eventos"]["enviadas"],
-            dlq=resumen["eventos"]["dlq"],
+            dlq=resumen["eventos"]["dlq"], procesados=resumen["eventos"]["procesados"],
+            emergencia_a_correo=resumen["emergencia_a_correo"]["segundos"],
         )
 
     @app.get("/api/estado")
@@ -79,6 +80,10 @@ def create_app(*, agregador: Agregador, lector_servicio: LectorIncremental, lect
         except Exception as exc:  # sin socket de Docker el panel sigue sirviendo los datos
             resultado["contenedores"], resultado["docker_error"] = {}, f"{type(exc).__name__}: {exc}"
         return resultado
+
+    @app.get("/api/k6/salida")
+    def salida_k6() -> dict[str, Any]:
+        return {"lineas": k6.salida_completa()}
 
     @app.post("/api/emergencia")
     async def emergencia() -> dict[str, Any]:

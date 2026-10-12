@@ -84,8 +84,24 @@ async def test_k6_arma_el_comando_segun_el_modo(tmp_path):
     await asyncio.wait_for(k6.esperar(), 1)
     estado = k6.resumen()
     assert estado["estado"] == "terminado"
-    assert estado["salida"] == ["running (0m01.0s)"]  # sin códigos de color
+    assert estado["lineas"] == 1
+    assert k6.salida_completa() == ["running (0m01.0s)"]  # sin códigos de color
     assert estado["fin"] is not None
+
+
+async def test_k6_guarda_la_salida_de_inicio_a_fin(tmp_path):
+    # Antes se guardaban 30 líneas y se mostraban 12: el resumen final de k6 llegaba cortado.
+    lineas = [f"linea {i}" for i in range(500)]
+    proceso = ProcesoFalso(lineas)
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    assert k6.salida_completa() == lineas
 
 
 async def test_k6_ventana_solo_existe_cuando_la_carga_termino(tmp_path):

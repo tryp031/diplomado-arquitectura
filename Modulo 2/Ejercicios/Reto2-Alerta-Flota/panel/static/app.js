@@ -12,6 +12,7 @@ const fmtSeg = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 3, maximu
 const fmtHora = new Intl.DateTimeFormat("es-CO", {
   timeZone: ZONA, hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3, hour12: false,
 });
+const fmtFecha = new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
 const fmtHoraCorta = new Intl.DateTimeFormat("es-CO", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
 // Nombre visible de cada modo de carga: el panel debe dejar claro qué k6 está corriendo.
@@ -67,7 +68,9 @@ function pintar(e) {
   pintarCorrida(e);
   pintarMedida(e.medida_rubrica, e.corrida);
   pintarKpis(e);
+  pintarSegundaMedida(e);
   pintarLinea(e);
+  pintarConsola(e.k6);
   pintarHistorial(e.historial, e.corrida);
   pintarFlujo(e, ahora);
   pintarAcciones(e);
@@ -122,6 +125,69 @@ function pintarMedida(m, corrida) {
   marca.style.left = `${(Math.min(efectivo, 60) / 60) * 100}%`;
 }
 
+// ------------------------------------------------------------------ segunda medida
+const CRITERIO_PROFESOR_S = 16;  // reportado por Freddy (06/10); la rúbrica escrita dice 15 s
+function pintarSegundaMedida(e) {
+  const peor = e.emergencia_a_correo;
+  const valor = $("#e2c-valor");
+  if (!e.corrida || peor.segundos === null) {
+    valor.textContent = "—";
+    valor.dataset.nivel = "neutral";
+    $("#e2c-detalle").textContent = "criterio reportado: < 16 s";
+    return;
+  }
+  valor.textContent = `${fmtSeg.format(peor.segundos)} s`;
+  valor.dataset.nivel = peor.segundos < CRITERIO_PROFESOR_S ? "good" : "critical";
+  $("#e2c-detalle").textContent = `${peor.placa} · criterio reportado: < 16 s · recepción → entrega al SMTP`;
+}
+
+// ------------------------------------------------------------------ salida de k6
+// El texto completo viaja por /api/k6/salida y solo cuando la sección está abierta.
+let lineasMostradas = -1;
+let inicioMostrado = null;
+let pidiendoSalida = false;
+function pintarConsola(k6) {
+  const estado = { corriendo: "corriendo", terminado: "terminada", fallido: `falló (código ${k6.codigo})` }[k6.estado] ?? "sin carga todavía";
+  const modo = k6.modo ? `${NOMBRE_MODO[k6.modo] ?? k6.modo} · ` : "";
+  $("#k6-resumen").textContent = `· ${modo}${estado} · ${num(k6.lineas)} líneas`;
+  $("#k6-estado-consola").textContent = k6.inicio ? `Inicio ${hora(k6.inicio)}${k6.fin ? ` · fin ${hora(k6.fin)}` : ""}` : "—";
+  if (!$("#k6-detalle").open || pidiendoSalida) return;
+  if (k6.lineas === lineasMostradas && k6.inicio === inicioMostrado) return;
+  pidiendoSalida = true;
+  fetch("/api/k6/salida", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+    .then(({ lineas }) => {
+      const consola = $("#k6-salida");
+      const alFinal = consola.scrollHeight - consola.scrollTop - consola.clientHeight < 24;
+      consola.textContent = lineas.join("\n");
+      if (alFinal || lineasMostradas < 0) consola.scrollTop = consola.scrollHeight;  // no arrastra a quien está leyendo arriba
+      lineasMostradas = k6.lineas;
+      inicioMostrado = k6.inicio;
+    })
+    .catch(() => { /* se reintenta en el próximo ciclo */ })
+    .finally(() => { pidiendoSalida = false; });
+}
+
+$("#k6-detalle").addEventListener("toggle", () => {
+  lineasMostradas = -1;
+  if (ultimoEstado) pintarConsola(ultimoEstado.k6);
+});
+$("#k6-ajustar").addEventListener("change", (ev) => $("#k6-salida").classList.toggle("ajustada", ev.currentTarget.checked));
+$("#k6-copiar").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText($("#k6-salida").textContent);
+    avisar("Salida de k6 copiada al portapapeles.");
+  } catch {
+    avisar("El navegador no permitió copiar: seleccione el texto y use Cmd/Ctrl+C.");
+  }
+});
+$("#k6-descargar").addEventListener("click", () => {
+  const url = URL.createObjectURL(new Blob([$("#k6-salida").textContent + "\n"], { type: "text/plain;charset=utf-8" }));
+  const n = ultimoEstado?.corrida?.n;
+  el("a", { href: url, download: n ? `k6-corrida-${n}.txt` : "k6-salida.txt" }).click();
+  URL.revokeObjectURL(url);
+});
+
 // ------------------------------------------------------------------ corrida actual
 function pintarCorrida(e) {
   const c = e.corrida;
@@ -159,26 +225,30 @@ function pintarLinea(e) {
   const m = { izq: 16, der: 16 };
   const w = ancho - m.izq - m.der;
   const x = (t) => m.izq + ((t - t0) / Math.max(tFin - t0, 1)) * w;
-  const yBanda = 60, hBanda = 40, yHito = yBanda + hBanda / 2;
+  // Un carril por tipo de hito: el correo sale milisegundos después del Emergency y en la misma
+  // fila se taparían. Arriba Emergency, en la banda la última petición, abajo el correo.
+  const yBanda = 52, hBanda = 40, yHito = yBanda + hBanda / 2;
+  const yEmergencia = yBanda - 12, yCorreo = yBanda + hBanda + 12;
   svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
   svg.replaceChildren();
 
   const texto = (contenido, attrs) => { const t = svgEl("text", attrs); t.textContent = contenido; svg.append(t); };
   svg.append(svgEl("line", { class: "eje", x1: m.izq, x2: m.izq + w, y1: 122, y2: 122 }));
+  svg.append(svgEl("line", { class: "guia", x1: x(ultima), x2: x(ultima), y1: yEmergencia, y2: yCorreo }));
   svg.append(svgEl("rect", { class: "carga", x: m.izq, y: yBanda, width: Math.max(x(ultima) - m.izq, 2), height: hBanda, rx: 6 }));
   const duracion = (ultima - t0) / 1000;
-  texto(`k6 envía ${num(e.http.total)} peticiones (${fmtNum.format(Math.round(duracion * 10) / 10)} s)`, { x: m.izq + 8, y: yBanda - 8 });
+  texto(`k6 envía ${num(e.http.total)} peticiones (${fmtNum.format(Math.round(duracion * 10) / 10)} s)`, { x: m.izq + 8, y: yBanda + hBanda / 2 + 4 });
   texto(fmtHoraCorta.format(new Date(t0)), { x: m.izq, y: 140 });
   texto(fmtHoraCorta.format(new Date(tFin)), { x: m.izq + w, y: 140, "text-anchor": "end" });
 
   if (ultimoCorreo !== null && e.medida_rubrica.segundos !== null) {
-    svg.append(svgEl("line", { class: "tramo-medida", x1: x(ultima), x2: x(ultimoCorreo), y1: yHito, y2: yHito }));
-    texto(`${fmtSeg.format(Math.max(e.medida_rubrica.segundos, 0))} s`, { class: "medida-etiqueta", x: x(ultimoCorreo), y: yBanda - 8, "text-anchor": "end" });
+    svg.append(svgEl("line", { class: "tramo-medida", x1: x(ultima), x2: Math.max(x(ultimoCorreo), x(ultima) + 1), y1: yCorreo, y2: yCorreo }));
+    texto(`medida ${fmtSeg.format(Math.max(e.medida_rubrica.segundos, 0))} s`, { class: "medida-etiqueta", x: m.izq + w, y: 160, "text-anchor": "end" });
   }
-  for (const t of recibidas) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yHito, r: 4, style: "stroke:var(--serie-2)" }));
+  for (const t of recibidas) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yEmergencia, r: 5, style: "stroke:var(--serie-2)" }));
+  for (const t of correos) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yCorreo, r: 5, style: "stroke:var(--good)" }));
   svg.append(svgEl("circle", { class: "hito", cx: x(ultima), cy: yHito, r: 6, style: "stroke:var(--serie-1)" }));
-  for (const t of correos) svg.append(svgEl("circle", { class: "hito", cx: x(t), cy: yHito, r: 6, style: "stroke:var(--good)" }));
-  texto("última petición", { x: x(ultima), y: 160, "text-anchor": "end" });
+  texto("última petición", { x: x(ultima) - 10, y: yHito - 10, "text-anchor": "end", class: "etiqueta-hito" });
   svg.setAttribute("aria-label", `Corrida #${c.n}: carga de ${fmtNum.format(Math.round(duracion))} s, ${recibidas.length} Emergency, ${correos.length} correos`);
 }
 
@@ -192,14 +262,18 @@ function pintarHistorial(lista, actual) {
       className: "btn btn-chico", type: "button", dataset: { n: c.n, formato },
       ...(!c.fin || descargando.has(`${c.n}-${formato}`) ? { disabled: "" } : {}),
     }, `.${formato}`);
+    const duracion = c.fin ? (new Date(c.fin) - new Date(c.inicio)) / 1000 : null;
     return el("tr", c.n === actual?.n ? { className: "actual" } : {},
       el("td", {}, c.n),
-      el("td", {}, fmtHoraCorta.format(new Date(c.inicio)).slice(0, 5)),
+      el("td", { title: hora(c.inicio) }, fmtFecha.format(new Date(c.inicio))),
       el("td", {}, NOMBRE_CORTO_MODO[c.modo] ?? c.modo),
       el("td", {}, nombreSmtp(c.smtp) === "mailpit" ? "Mailpit" : nombreSmtp(c.smtp)),
+      el("td", { class: "num" }, duracion === null ? "—" : `${fmtNum.format(Math.round(duracion * 10) / 10)} s`),
+      el("td", { class: "num" }, num(c.procesados)),
       el("td", { class: "num" }, num(c.emergencias)),
       el("td", { class: "num" }, num(c.rechazadas_429)),
       el("td", { class: "num" }, !c.fin ? "en curso" : medida === null ? "—" : `${fmtSeg.format(Math.max(medida, 0))} s`),
+      el("td", { class: "num" }, c.emergencia_a_correo == null ? "—" : `${fmtSeg.format(c.emergencia_a_correo)} s`),
       el("td", {}, c.medida?.nivel ? el("span", { className: "insignia", dataset: { nivel: c.medida.nivel } }, fmtNum.format(c.medida.puntos)) : "—"),
       el("td", { className: "acciones-fila" }, boton("log"), boton("csv")),
     );
@@ -213,8 +287,9 @@ function pintarKpis(e) {
   $("#kpi-429").textContent = num(e.http.rechazadas_429);
   $("#kpi-enviadas").textContent = num(e.eventos.enviadas);
   $("#kpi-emergencias").textContent = num(e.eventos.emergencias);
-  const extra = [e.eventos.reintentos && `${num(e.eventos.reintentos)} reintentos`, e.eventos.dlq && `${num(e.eventos.dlq)} en DLQ`, e.eventos.fallidas && `${num(e.eventos.fallidas)} sin encolar`].filter(Boolean);
-  $("#kpi-emergencias-pie").textContent = extra.length ? extra.join(" · ") : "correos / Emergency";
+  $("#kpi-emergencias-pie").textContent = e.eventos.fallidas ? `correos / Emergency · ${num(e.eventos.fallidas)} sin encolar` : "correos / Emergency";
+  $("#kpi-procesados").textContent = num(e.eventos.procesados);
+  $("#kpi-reintentos").textContent = num(e.eventos.reintentos);
   $("#kpi-pendientes").textContent = e.redis.ok ? num(e.redis.pendientes) : "—";
   $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
 }
@@ -269,12 +344,6 @@ function pintarAcciones(e) {
   const nivelK6 = { corriendo: "activo", terminado: "good", fallido: "critical" }[e.k6.estado] ?? "neutral";
   const textoK6 = { corriendo: `Corriendo (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, terminado: `Terminada (${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo})`, fallido: `Falló (código ${e.k6.codigo})` }[e.k6.estado] ?? "Inactivo";
   fijarPildora($("#k6-estado"), nivelK6, textoK6);
-  const consola = $("#k6-salida");
-  const texto = e.k6.salida.join("\n");
-  if (consola.textContent !== texto) {
-    consola.textContent = texto;
-    consola.scrollTop = consola.scrollHeight;
-  }
   for (const fila of document.querySelectorAll("#fallas li")) {
     const contenedor = e.contenedores[`${fila.dataset.servicio}-1`];
     const estado = fila.querySelector(".falla-estado");

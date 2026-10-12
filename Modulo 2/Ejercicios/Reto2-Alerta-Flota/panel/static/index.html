@@ -71,11 +71,17 @@
           </div>
           <div class="escala-etiquetas"><span>0 s</span><span style="left:25%">15 s · 2,5 pts</span><span style="left:75%">45 s · 1,5 pts</span><span class="fin">60 s+</span></div>
         </div>
+        <div class="segunda-medida">
+          <p><span class="etiqueta-info" title="Criterio reportado del profesor (notas de Freddy, 06/10): del envío del Emergency en k6 a la llegada del correo, menos de 16 s. El panel ve desde la recepción en ingest hasta la entrega al SMTP (EMAIL_SENT): la red de k6 a ingest y la entrega de Gmail no se ven aquí.">Emergency → correo · peor caso</span></p>
+          <p class="segunda-valor"><b id="e2c-valor">—</b> <span id="e2c-detalle" class="meta">criterio reportado: &lt; 16 s</span></p>
+        </div>
         <div class="mini">
           <div><b id="kpi-aceptadas">—</b><span id="kpi-aceptadas-pie">aceptadas</span></div>
+          <div><b id="kpi-procesados">—</b><span id="kpi-procesados-pie" title="event_id únicos. Un evento normal termina al validarse y registrarse; un Emergency, cuando sale su correo.">procesados (únicos)</span></div>
           <div><b id="kpi-429">—</b><span>rechazadas (429)</span></div>
           <div><b><span id="kpi-enviadas">—</span> / <span id="kpi-emergencias">—</span></b><span id="kpi-emergencias-pie">correos / Emergency</span></div>
           <div><b id="kpi-pendientes">—</b><span id="kpi-cola-pie">pendientes · DLQ —</span></div>
+          <div><b id="kpi-reintentos">—</b><span>reintentos de correo</span></div>
         </div>
       </article>
 
@@ -86,9 +92,9 @@
         </header>
         <svg id="linea-svg" role="img" aria-label="Línea de tiempo de la corrida"></svg>
         <ul class="leyenda leyenda-hitos" aria-label="Leyenda">
-          <li><span class="hito-clave" style="border-color:var(--serie-2)"></span>Emergency recibido</li>
+          <li><span class="hito-clave" style="border-color:var(--serie-2)"></span>Emergency recibido (carril superior)</li>
           <li><span class="hito-clave" style="border-color:var(--serie-1)"></span>Última petición (nginx)</li>
-          <li><span class="hito-clave" style="border-color:var(--good)"></span>Correo enviado (EMAIL_SENT)</li>
+          <li><span class="hito-clave" style="border-color:var(--good)"></span>Correo enviado (carril inferior)</li>
         </ul>
         <p id="linea-vacio" class="vacio">Lanza una corrida para ver su línea de tiempo.</p>
       </article>
@@ -100,7 +106,7 @@
         <header class="tarjeta-cabeza"><h2>Historial de corridas</h2><span class="meta">evidencia para el informe · logs por corrida</span></header>
         <div class="tabla-envoltura">
           <table class="tabla">
-            <thead><tr><th>#</th><th>Hora</th><th>Modo</th><th>SMTP</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th>Rúbrica</th><th>Logs</th></tr></thead>
+            <thead><tr><th>#</th><th>Fecha</th><th>Modo</th><th>SMTP</th><th class="num">Duración</th><th class="num">Procesados</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th class="num" title="Emergency → correo, peor caso">E → correo</th><th>Rúbrica</th><th>Logs</th></tr></thead>
             <tbody id="historial"></tbody>
           </table>
           <p id="historial-vacio" class="vacio">Todavía no hay corridas. Cada carga queda registrada aquí, aunque se reinicie el panel.</p>
@@ -165,9 +171,15 @@
 
     <!-- Herramientas plegadas: no son lo que se proyecta, pero siguen a mano -->
     <section class="tarjeta herramientas" aria-label="Herramientas">
-      <details>
-        <summary>Salida de k6</summary>
-        <pre id="k6-salida" class="consola" aria-label="Salida de k6"></pre>
+      <details id="k6-detalle">
+        <summary>Salida de k6 <span id="k6-resumen" class="meta">· sin carga todavía</span></summary>
+        <div class="consola-barra">
+          <span id="k6-estado-consola" class="meta">—</span>
+          <label class="campo-check"><input id="k6-ajustar" type="checkbox"> Ajustar líneas</label>
+          <button id="k6-copiar" class="btn btn-chico" type="button">Copiar</button>
+          <button id="k6-descargar" class="btn btn-chico" type="button">Descargar .txt</button>
+        </div>
+        <pre id="k6-salida" class="consola" tabindex="0" aria-label="Salida completa de k6"></pre>
       </details>
       <details>
         <summary>Inyectar fallas (demostración de disponibilidad)</summary>
