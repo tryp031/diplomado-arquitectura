@@ -67,10 +67,13 @@ flowchart LR
 
 ## Riesgos y límites
 
-- **No verificado contra la cuenta real**: a la fecha nadie del equipo, salvo Camilo, tiene
-  credenciales. Está probado con dobles de CloudWatch/SQS (`tests/panel/test_aws.py`,
-  `test_app_entornos.py`) y con un AWS simulado en el navegador. La primera corrida real es la
-  verificación pendiente.
+- **Verificado contra la cuenta real (12/10/2026, 22:49).** Usuario `user-boto3-solo-lectura` con la
+  política inline `Reto2-SoloLecturaLogsYColas` (la de arriba). Lee los dos grupos de logs y las dos
+  colas; listar Lambdas, buckets de S3 u otro grupo de logs da `AccessDenied`. Un Emergency manual
+  (`PNL-278`) respondió 200 por API Gateway y el panel lo mostró recibido → encolado (+362 ms) →
+  correo enviado (+2019 ms), leído de CloudWatch. La DLQ tenía 4 mensajes de pruebas anteriores de
+  Camilo. Falta una corrida completa con el k6 del profesor.
+- **Probado también con dobles** de CloudWatch y SQS (`tests/panel/test_aws.py`, `test_app_entornos.py`).
 - **Cuota de FilterLogEvents**: es baja por cuenta y región (*Probable*: del orden de unas pocas
   llamadas por segundo). El panel consulta como mucho cada 2 s por grupo. Si aparece
   `ThrottlingException`, subir `intervalo_s` en `LectorCloudWatch`.
