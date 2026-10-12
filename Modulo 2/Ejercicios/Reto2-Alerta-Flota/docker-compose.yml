@@ -77,6 +77,11 @@ services:
     command: ["uvicorn", "--factory", "panel.app:build_app", "--host", "0.0.0.0", "--port", "8090", "--no-access-log"]
     ports:
       - "127.0.0.1:8090:8090"   # solo local: el panel puede apagar contenedores
+    # Opcional: con .env.aws el switch del panel también puede observar la opción B en AWS
+    # (URL del API Gateway, colas y credenciales IAM de SOLO LECTURA). Sin él, solo local.
+    env_file:
+      - path: .env.aws
+        required: false
     environment:
       REDIS_URL: redis://redis:6379/0
       LOG_DIR: /logs

@@ -36,6 +36,10 @@ class LectorIncremental:
     def __init__(self, directorio: Path, patrones: tuple[str, ...]) -> None:
         self._directorio = directorio
         self._patrones = patrones
+        self.reiniciar()
+
+    def reiniciar(self) -> None:
+        """Olvida las posiciones: la próxima lectura vuelve a empezar por el principio."""
         self._posiciones: dict[Path, int] = {}
         self._restos: dict[Path, bytes] = {}
 

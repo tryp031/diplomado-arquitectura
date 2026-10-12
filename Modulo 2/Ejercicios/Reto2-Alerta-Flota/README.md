@@ -54,6 +54,14 @@ Abrir http://localhost:8090. Versión 2 (11/10/2026), a partir de la maqueta
 - El k6 lanzado desde el panel corre en su contenedor contra `http://gateway/events` (red interna).
   Para mediciones formales sigue valiendo correr k6 desde el equipo + `scripts/medir.py`.
 
+### Switch Local ↔ AWS (12/10/2026)
+
+El encabezado del panel tiene un switch **Local · Docker / AWS · nube**. En AWS el panel lee la
+opción B de Camilo (CloudWatch Logs + SQS, solo lectura) y lanza k6 y el Emergency manual contra
+el API Gateway. Se activa con `.env.aws` (copiar `.env.aws.example`). Sin ese archivo, el switch
+de AWS queda deshabilitado y el panel funciona igual que antes. Diseño, política IAM y límites:
+[`docs/2026-10-12-panel-switch-aws.md`](docs/2026-10-12-panel-switch-aws.md).
+
 ## Requisitos
 
 Docker Desktop corriendo · [k6](https://k6.io) (`brew install k6` / `winget install k6`) · Python 3.12+ solo para tests y `medir.py`.

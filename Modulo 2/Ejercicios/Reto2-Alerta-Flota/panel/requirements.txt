@@ -2,3 +2,4 @@ fastapi>=0.115
 uvicorn[standard]>=0.30
 redis>=5.0
 httpx>=0.27
+boto3>=1.34   # solo para el entorno AWS del switch (CloudWatch Logs + SQS, lectura)

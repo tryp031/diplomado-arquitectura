@@ -24,6 +24,49 @@ const AYUDA_MODO = {
   ritmo: "Script propio (k6/carga.js) a ~35 req/s durante ~28 s, como la salida de referencia del enunciado.",
 };
 
+// Rótulos que cambian con el entorno observado. La lógica de pintado es la misma para los dos:
+// las Lambdas de AWS escriben los mismos eventos JSON que la versión local. Los valores de AWS son
+// los del aporte de Camilo (arquitectura-aws-opcion-b.md, 11/10): configurados en la consola.
+const ROTULOS = {
+  local: {
+    nodos: {
+      gateway: ["Gateway · nginx", "Token bucket 15 r/s · burst 2000"],
+      ingest: ["Ingesta · FastAPI ×2", "Responde sin esperar el correo"],
+      redis: ["Redis Streams", "Cola durable · ACK · DLQ"],
+      notifier: ["Notifier · asyncio", "Concurrencia 5 · reintentos 1/2/4 s"],
+      mailpit: ["SMTP", null],
+    },
+    flujoMeta: "Se ilumina cada componente que registró actividad en los últimos 2 s",
+    nota: "Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.",
+    medidaInfo: "Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.",
+    pie429: "rate 15 r/s · burst 2000",
+    pieCola: "pendientes sin ACK",
+    dialogo: "Se borran las corridas locales del historial, se vacían los logs de ingest, notifier y gateway, y se vacían las colas de Redis.",
+    pie: "Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.",
+    ayuda: "",
+  },
+  aws: {
+    nodos: {
+      gateway: ["API Gateway · REST", "Stage prod · rate 15 · burst 2000"],
+      ingest: ["Lambda reto2-ingesta", "Concurrencia reservada 10 · instancias:"],
+      redis: ["Amazon SQS", "Cola estándar · DLQ"],
+      notifier: ["Lambda reto2-notifier", "Reservada 2 · 2 intentos ≤ 12 s"],
+      mailpit: ["Amazon SES", "Identidad verificada (cae en spam)"],
+    },
+    flujoMeta: "Se ilumina lo que registró actividad en CloudWatch (llega con ~5 s de retraso)",
+    nota: "Concurrencia reservada: <strong>10 + 2 = 12</strong> (ingesta + notifier), por encima del límite de 10 del enunciado: decisión abierta del equipo. Las filas de la ingesta son instancias (log streams) que atendieron tráfico.",
+    medidaInfo: "En AWS: desde la última petición registrada por la Lambda de ingesta (unos ms después del envío de k6) hasta el último EMAIL_SENT del notifier, según CloudWatch. No incluye la entrega de Gmail.",
+    pie429: "API Gateway no los registra en los logs de Lambda",
+    pieCola: "en vuelo",
+    dialogo: "Se borran solo las corridas de AWS del historial. CloudWatch y SQS no se tocan: el panel tiene permisos de solo lectura en AWS.",
+    pie: "Plano de control: lee CloudWatch Logs y el estado de SQS con un usuario IAM de solo lectura. Nunca escribe en el camino de los eventos.",
+    ayuda: " En AWS va contra el API Gateway del equipo (us-east-2). Antes de medir, activa el calentador del notifier en EventBridge. La ráfaga supera la concurrencia reservada de la ingesta (10): espere throttling de Lambda.",
+  },
+};
+const NOMBRE_ENTORNO = { local: "Local", aws: "AWS" };
+let entornoPintado = null;
+let cambiandoEntorno = false;
+
 function el(tag, props = {}, ...hijos) {
   const nodo = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -64,6 +107,7 @@ async function ciclo() {
 
 function pintar(e) {
   const ahora = e.serie.length ? e.serie[e.serie.length - 1].t : Date.now() / 1000;
+  pintarEntorno(e);
   pintarSalud(e);
   pintarCorrida(e);
   pintarMedida(e.medida_rubrica, e.corrida);
@@ -88,6 +132,11 @@ function fijarPildora(nodo, nivel, texto) {
 // ------------------------------------------------------------------ salud general
 const ESENCIALES = ["gateway-1", "ingest-1", "ingest-2", "notifier-1", "redis-1"];
 function pintarSalud(e) {
+  if (e.entorno.activo === "aws") {
+    if (e.entorno.error) return fijarPildora($("#salud"), "critical", "AWS: no se pudo leer CloudWatch");
+    if (!e.redis.ok) return fijarPildora($("#salud"), "warning", "AWS: SQS sin datos");
+    return fijarPildora($("#salud"), "good", "AWS conectado");
+  }
   if (e.docker_error) return fijarPildora($("#salud"), "warning", "Sin acceso a Docker");
   const caidos = ESENCIALES.filter((c) => e.contenedores[c]?.estado !== "running");
   if (caidos.length) return fijarPildora($("#salud"), "critical", `${caidos.length} componente${caidos.length > 1 ? "s" : ""} detenido${caidos.length > 1 ? "s" : ""}`);
@@ -287,6 +336,7 @@ function pintarHistorial(lista, actual) {
     return el("tr", c.n === actual?.n ? { className: "actual" } : {},
       el("td", {}, c.n),
       el("td", { title: hora(c.inicio) }, fmtFecha.format(new Date(c.inicio))),
+      el("td", {}, el("span", { className: "insignia-entorno", dataset: { entorno: c.entorno ?? "local" } }, NOMBRE_ENTORNO[c.entorno ?? "local"])),
       el("td", {}, NOMBRE_CORTO_MODO[c.modo] ?? c.modo),
       el("td", {}, nombreSmtp(c.smtp) === "mailpit" ? "Mailpit" : nombreSmtp(c.smtp)),
       el("td", { class: "num" }, duracion === null ? "—" : `${fmtNum.format(Math.round(duracion * 10) / 10)} s`),
@@ -305,13 +355,15 @@ function pintarHistorial(lista, actual) {
 function pintarKpis(e) {
   $("#kpi-aceptadas").textContent = num(e.http.aceptadas);
   $("#kpi-aceptadas-pie").textContent = `de ${num(e.http.total)} recibidas por el gateway${e.http.otros_errores ? ` · ${num(e.http.otros_errores)} otros errores` : ""}`;
-  $("#kpi-429").textContent = num(e.http.rechazadas_429);
+  // En AWS el 429 lo responde API Gateway y nunca llega a la Lambda: el panel no puede verlo.
+  $("#kpi-429").textContent = e.entorno.activo === "aws" ? "n/d" : num(e.http.rechazadas_429);
   $("#kpi-enviadas").textContent = num(e.eventos.enviadas);
   $("#kpi-emergencias").textContent = num(e.eventos.emergencias);
   $("#kpi-emergencias-pie").textContent = [`${num(e.eventos.reintentos)} reintentos`, e.eventos.dlq && `${num(e.eventos.dlq)} en DLQ`, e.eventos.fallidas && `${num(e.eventos.fallidas)} sin encolar`].filter(Boolean).join(" · ");
   $("#kpi-procesados").textContent = num(e.eventos.procesados);
   $("#kpi-pendientes").textContent = e.redis.ok ? num(e.redis.pendientes) : "—";
-  $("#kpi-cola-pie").textContent = e.redis.ok ? `pendientes sin ACK · DLQ ${num(e.redis.dlq)}` : "Redis no responde";
+  const nombreCola = e.entorno.activo === "aws" ? "SQS" : "Redis";
+  $("#kpi-cola-pie").textContent = e.redis.ok ? `${ROTULOS[e.entorno.activo].pieCola} · DLQ ${num(e.redis.dlq)}` : `${nombreCola} no responde`;
 }
 
 // ------------------------------------------------------------------ arquitectura viva
@@ -329,10 +381,10 @@ function pintarFlujo(e, ahora) {
     k6: { activo: e.k6.estado === "corriendo", salud: e.k6.estado === "fallido" ? "critical" : "neutral",
           dato: e.k6.estado === "corriendo" ? `Corriendo · ${NOMBRE_MODO[e.k6.modo] ?? e.k6.modo}` : e.k6.estado === "terminado" ? "Última carga terminada" : "En espera" },
     gateway: { activo: reciente(e.ultimo_visto.gateway, ahora), salud: saludDe(e, "gateway-1"),
-               dato: `${num(e.http.total)} peticiones · ${num(e.http.rechazadas_429)} × 429` },
+               dato: e.entorno.activo === "aws" ? `${num(e.http.total)} peticiones` : `${num(e.http.total)} peticiones · ${num(e.http.rechazadas_429)} × 429` },
     ingest: { activo: reciente(e.ultimo_visto.ingest, ahora), salud: saludDe(e, "ingest-1", "ingest-2") },
     redis: { activo: reciente(e.ultimo_visto.ingest, ahora) && e.eventos.emergencias > 0, salud: e.redis.ok ? "good" : "critical",
-             dato: e.redis.ok ? `Pend. ${num(e.redis.pendientes)} · DLQ ${num(e.redis.dlq)}` : "No responde" },
+             dato: e.redis.ok ? `${e.entorno.activo === "aws" ? "En vuelo" : "Pend."} ${num(e.redis.pendientes)} · DLQ ${num(e.redis.dlq)}` : "No responde" },
     notifier: { activo: reciente(e.ultimo_visto.notifier, ahora), salud: saludDe(e, "notifier-1"),
                 dato: `${num(e.eventos.enviadas)} enviados · ${num(e.eventos.reintentos)} reintentos` },
     mailpit: { activo: reciente(e.ultimo_visto.notifier, ahora) && e.eventos.enviadas > 0,
@@ -347,7 +399,7 @@ function pintarFlujo(e, ahora) {
     const dato = nodo.querySelector(".nodo-dato");
     if (dato) dato.textContent = n.dato;
   }
-  $("#smtp-rol").textContent = e.smtp.local ? "Mailpit (desarrollo)" : `${nombreSmtp(e.smtp.host)} (externo)`;
+  if (e.entorno.activo !== "aws") $("#smtp-rol").textContent = e.smtp.local ? "Mailpit (desarrollo)" : `${nombreSmtp(e.smtp.host)} (externo)`;
   const replicas = $('[data-dato="replicas"]');
   const filas = Object.entries(e.por_replica).sort();
   replicas.replaceChildren(...(filas.length
@@ -675,10 +727,55 @@ function nombreSmtp(host) {
 
 function pintarModo() {
   const modo = modoElegido();
-  $("#modo-ayuda").textContent = AYUDA_MODO[modo];
+  $("#modo-ayuda").textContent = AYUDA_MODO[modo] + ROTULOS[entornoPintado ?? "local"].ayuda;
   $("#campo-emergencias").hidden = modo === "profesor"; // ese script decide cuántos manda
   if (!$("#btn-carga").disabled) $("#btn-carga").textContent = textoBotonCarga();
 }
 
 for (const radio of document.querySelectorAll('input[name="modo"]')) radio.addEventListener("change", pintarModo);
 pintarModo();
+
+// ------------------------------------------------------------------ entorno: local ↔ AWS
+function pintarEntorno(e) {
+  const { activo, aws_disponible: disponible, aws_motivo: motivo } = e.entorno;
+  const corriendo = e.k6.estado === "corriendo";
+  for (const radio of document.querySelectorAll('input[name="entorno"]')) {
+    if (!cambiandoEntorno) radio.checked = radio.value === activo;
+    // Con una carga en curso no se cambia de entorno: la corrida quedaría a medio observar.
+    radio.disabled = (radio.value === "aws" && !disponible) || (radio.value !== activo && corriendo);
+  }
+  document.querySelector('input[name="entorno"][value="aws"]').closest("label").title =
+    disponible ? "Observar la opción B desplegada en AWS" : motivo ?? "AWS no está configurado";
+  $("#entorno").title = corriendo ? "Espere a que termine la carga para cambiar de entorno" : "";
+  if (entornoPintado === activo) return;  // los rótulos se cambian una vez, no en cada segundo
+  entornoPintado = activo;
+  const r = ROTULOS[activo];
+  document.body.dataset.entorno = activo;
+  for (const [clave, [titulo, rol]] of Object.entries(r.nodos)) {
+    const nodo = document.querySelector(`[data-nodo="${clave}"]`);
+    nodo.querySelector(".nodo-titulo").textContent = titulo;
+    if (rol !== null) nodo.querySelector(".nodo-rol").textContent = rol;
+  }
+  $("#flujo-meta").textContent = r.flujoMeta;
+  $("#flujo-nota").innerHTML = r.nota;  // texto fijo de este archivo, no viene de los eventos
+  $("#medida-info").title = r.medidaInfo;
+  $("#kpi-429-pie").textContent = r.pie429;
+  $("#dialogo-texto").textContent = r.dialogo;
+  $("#pie-texto").textContent = r.pie;
+  $("#herramientas").hidden = activo === "aws";  // en AWS el panel observa: no inyecta fallas
+  pintarModo();
+}
+
+for (const radio of document.querySelectorAll('input[name="entorno"]')) {
+  radio.addEventListener("change", async () => {
+    cambiandoEntorno = true;
+    try {
+      await post("/api/entorno", { entorno: radio.value });
+      avisar(`Ahora observa ${radio.value === "aws" ? "la opción B en AWS" : "el sistema local en Docker"}. La corrida y la carga van contra ese entorno; el historial conserva las de ambos.`);
+    } catch (err) {
+      avisar(`No se pudo cambiar de entorno: ${err.message}`);
+    } finally {
+      cambiandoEntorno = false;  // el próximo ciclo marca el entorno que de verdad quedó activo
+    }
+  });
+}

@@ -20,6 +20,11 @@
       </div>
     </div>
     <div class="barra-derecha">
+      <!-- Qué sistema se observa. Cambiarlo no toca el plano de datos: solo cambia lo que se mira. -->
+      <div class="segmentado entorno" id="entorno" role="radiogroup" aria-label="Entorno observado">
+        <label><input type="radio" name="entorno" value="local" checked><span>Local · Docker</span></label>
+        <label><input type="radio" name="entorno" value="aws"><span>AWS · nube</span></label>
+      </div>
       <span id="salud" class="pildora" data-nivel="neutral"><span class="punto" aria-hidden="true"></span><span id="salud-texto">Conectando…</span></span>
       <button id="btn-limpiar" class="btn btn-peligro" type="button">Borrar datos</button>
       <button id="btn-tema" class="btn btn-icono" type="button" aria-label="Cambiar tema">
@@ -59,7 +64,7 @@
           <h2 id="corrida-titulo">Sin corrida</h2>
           <span id="corrida-horas" class="meta">—</span>
         </header>
-        <p class="meta"><span class="etiqueta-info" title="Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.">Última petición → último correo</span></p>
+        <p class="meta"><span id="medida-info" class="etiqueta-info" title="Se mide desde la última petición de la carga vista por nginx (mismo reloj que los servicios) hasta el último EMAIL_SENT de las emergencias de la carga. No incluye la entrega de Gmail.">Última petición → último correo</span></p>
         <div class="hero-cuerpo">
           <p class="hero-numero"><span id="medida-valor">—</span><span class="hero-unidad">s</span></p>
           <p id="medida-estado" class="estado" data-nivel="neutral"><span class="estado-icono" aria-hidden="true">•</span><span id="medida-texto">Lanza una corrida para medir</span></p>
@@ -97,7 +102,7 @@
     <section class="fila fila-kpi" aria-label="Indicadores de la corrida">
       <article class="tarjeta kpi"><h2>Aceptadas</h2><p class="kpi-numero" id="kpi-aceptadas">—</p><p class="kpi-pie" id="kpi-aceptadas-pie">por el gateway</p></article>
       <article class="tarjeta kpi"><h2 title="event_id únicos. Un evento normal termina al validarse y registrarse; un Emergency, cuando sale su correo.">Procesados (únicos)</h2><p class="kpi-numero" id="kpi-procesados">—</p><p class="kpi-pie">validados o con correo enviado</p></article>
-      <article class="tarjeta kpi"><h2>Rechazadas (429)</h2><p class="kpi-numero" id="kpi-429">—</p><p class="kpi-pie">rate 15 r/s · burst 2000</p></article>
+      <article class="tarjeta kpi"><h2>Rechazadas (429)</h2><p class="kpi-numero" id="kpi-429">—</p><p class="kpi-pie" id="kpi-429-pie">rate 15 r/s · burst 2000</p></article>
       <article class="tarjeta kpi"><h2>Correos / Emergency</h2><p class="kpi-numero"><span id="kpi-enviadas">—</span><span class="kpi-de"> / <span id="kpi-emergencias">—</span></span></p><p class="kpi-pie" id="kpi-emergencias-pie">— reintentos</p></article>
       <article class="tarjeta kpi"><h2 title="Criterio reportado del profesor (notas de Freddy, 06/10): del envío del Emergency en k6 a la llegada del correo, menos de 16 s. El panel ve desde la recepción en ingest hasta la entrega al SMTP (EMAIL_SENT).">Emergency → correo</h2><p class="kpi-numero" id="e2c-valor">—</p><p class="kpi-pie" id="e2c-detalle">peor caso · criterio reportado &lt; 16 s</p></article>
       <article class="tarjeta kpi"><h2>Cola de emergencias</h2><p class="kpi-numero" id="kpi-pendientes">—</p><p class="kpi-pie" id="kpi-cola-pie">pendientes · DLQ —</p></article>
@@ -109,7 +114,7 @@
         <header class="tarjeta-cabeza"><h2>Historial de corridas</h2><span class="meta">evidencia para el informe · logs por corrida</span></header>
         <div class="tabla-envoltura">
           <table class="tabla">
-            <thead><tr><th>#</th><th>Fecha</th><th>Modo</th><th>SMTP</th><th class="num">Duración</th><th class="num">Procesados</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th class="num" title="Emergency → correo, peor caso">E → correo</th><th>Rúbrica</th><th>Logs</th></tr></thead>
+            <thead><tr><th>#</th><th>Fecha</th><th>Entorno</th><th>Modo</th><th>Correo</th><th class="num">Duración</th><th class="num">Procesados</th><th class="num">Emergency</th><th class="num">429</th><th class="num">Medida</th><th class="num" title="Emergency → correo, peor caso">E → correo</th><th>Rúbrica</th><th>Logs</th></tr></thead>
             <tbody id="historial"></tbody>
           </table>
           <p id="historial-vacio" class="vacio">Todavía no hay corridas. Cada carga queda registrada aquí, aunque se reinicie el panel.</p>
@@ -140,7 +145,7 @@
     <article class="tarjeta">
       <header class="tarjeta-cabeza">
         <h2>Arquitectura en vivo</h2>
-        <span class="meta">Se ilumina cada componente que registró actividad en los últimos 2 s</span>
+        <span class="meta" id="flujo-meta">Se ilumina cada componente que registró actividad en los últimos 2 s</span>
       </header>
       <ol class="flujo" id="flujo">
         <li class="nodo" data-nodo="k6"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">k6</p><p class="nodo-rol">Vehículos simulados</p><p class="nodo-dato" data-dato="k6">—</p></li>
@@ -150,7 +155,7 @@
         <li class="nodo" data-nodo="notifier"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">Notifier · asyncio</p><p class="nodo-rol">Concurrencia 5 · reintentos 1/2/4 s</p><p class="nodo-dato" data-dato="notifier">—</p></li>
         <li class="nodo" data-nodo="mailpit"><span class="nodo-estado" aria-hidden="true"></span><p class="nodo-titulo">SMTP</p><p class="nodo-rol" id="smtp-rol">Mailpit (dev) · Gmail (demo)</p><p class="nodo-dato" data-dato="smtp">—</p></li>
       </ol>
-      <p class="nota">Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.</p>
+      <p class="nota" id="flujo-nota">Instancias de procesamiento: <strong>3 de 10</strong> (2 ingest + 1 notifier). El panel corre en un perfil aparte y no cuenta como procesador.</p>
     </article>
 
     <!-- Detalle: emergencias y eventos -->
@@ -187,7 +192,7 @@
     </article>
 
     <!-- Herramientas plegadas: no son lo que se proyecta, pero siguen a mano -->
-    <section class="tarjeta herramientas" aria-label="Herramientas">
+    <section class="tarjeta herramientas" id="herramientas" aria-label="Herramientas">
       <details>
         <summary>Inyectar fallas (demostración de disponibilidad)</summary>
         <ul class="fallas" id="fallas">
@@ -202,8 +207,8 @@
   <dialog id="dialogo-limpiar" class="dialogo" aria-labelledby="dialogo-titulo">
     <form method="dialog">
       <h2 id="dialogo-titulo">¿Borrar todos los datos de las pruebas?</h2>
-      <p>Se borra el historial de corridas, se vacían los logs de ingest, notifier y gateway, y se vacían
-        las colas de Redis. La numeración vuelve a la corrida #1.</p>
+      <p id="dialogo-texto">Se borran las corridas locales del historial, se vacían los logs de ingest, notifier y gateway, y se vacían
+        las colas de Redis.</p>
       <p class="aviso-dialogo">No se puede deshacer. Si alguna corrida es evidencia para el informe, descargue antes sus logs desde el historial.</p>
       <div class="dialogo-botones">
         <button class="btn" value="cancelar" type="submit" autofocus>Cancelar</button>
@@ -213,7 +218,7 @@
   </dialog>
 
   <footer class="pie">
-    <span>Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.</span>
+    <span id="pie-texto">Plano de control: lee logs y el estado de Redis/Docker. Nunca escribe en el camino de los eventos.</span>
     <span id="actualizado">—</span>
   </footer>
 
