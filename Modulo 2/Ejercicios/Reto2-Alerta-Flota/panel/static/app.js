@@ -422,7 +422,11 @@ $("#btn-emergencia").addEventListener("click", async (ev) => {
   boton.disabled = true;
   try {
     const d = await post("/api/emergencia");
-    avisar(`Emergency ${d.placa} enviada por el gateway → HTTP ${d.status_gateway}.`);
+    const corrida = ultimoEstado?.corrida?.n;
+    const efecto = corrida
+      ? `No altera la corrida #${corrida}: aparece en «Recorrido de cada emergencia» marcada «fuera de corrida».`
+      : "Aparece en «Recorrido de cada emergencia» y en los eventos del sistema.";
+    avisar(`Emergency ${d.placa} enviada por el gateway → HTTP ${d.status_gateway}. ${efecto}`);
   } catch (err) {
     avisar(`No se pudo enviar: ${err.message}`);
   } finally {

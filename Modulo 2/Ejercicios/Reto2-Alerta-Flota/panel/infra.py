@@ -132,8 +132,9 @@ class EjecutorK6:
 
     async def _seguir(self, proceso: Any) -> None:
         async for linea in proceso.stdout:
-            texto = _COLOR_ANSI.sub("", linea.decode(errors="replace")).strip()
-            if texto:
+            # rstrip y no strip: el logo y la tabla de métricas de k6 se alinean con espacios iniciales.
+            texto = _COLOR_ANSI.sub("", linea.decode(errors="replace")).rstrip()
+            if texto or (self.salida and self.salida[-1]):  # conserva separadores, sin apilar vacías
                 self.salida.append(texto)
         self.codigo = await proceso.wait()
         self.fin = datetime.now(timezone.utc)

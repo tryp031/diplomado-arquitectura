@@ -199,3 +199,18 @@ async def test_k6_olvidar_deja_el_ejecutor_como_recien_creado(tmp_path):
     k6.olvidar()
     assert k6.resumen()["estado"] == "inactivo" and k6.salida_completa() == []
     assert k6.ventana() is None
+
+
+async def test_k6_conserva_la_sangria_y_las_lineas_en_blanco(tmp_path):
+    # El logo de k6 y su tabla de métricas se alinean con espacios iniciales: no se recortan.
+    lineas = ["          /\\      Grafana   /‾‾/  ", "     /\\  /  \\     |\\  __   /  /", "", "  execution: local"]
+    proceso = ProcesoFalso(lineas)
+
+    async def lanzar(*args, **kwargs):
+        return proceso
+
+    k6 = EjecutorK6("s.js", "http://g", tmp_path / "k6.json", lanzar=lanzar)
+    await k6.iniciar("rafaga", emergencias=1)
+    proceso.liberar.set()
+    await asyncio.wait_for(k6.esperar(), 1)
+    assert k6.salida_completa() == ["          /\\      Grafana   /‾‾/", "     /\\  /  \\     |\\  __   /  /", "", "  execution: local"]
