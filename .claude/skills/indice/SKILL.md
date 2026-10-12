@@ -34,3 +34,16 @@ El índice vive en `INDICE.html`, en la raíz del repo. No hay otro: no lo busqu
 3. Responde en una o dos líneas: que el índice quedó abierto y, si el comando del paso 2 listó
    archivos, cuántos son y cuáles hay que enlazar. **No edites el índice por tu cuenta**: ofrece
    actualizarlo y espera a que te digan que sí. Es un archivo compartido del equipo.
+
+## Si piden actualizarlo
+
+`INDICE.html` es **generado**: nunca lo edites a mano, porque la siguiente regeneración borra el
+cambio. Corre `python3 _Base-Conocimiento/generar-indice.py` y compara qué enlaces entraron y
+cuáles salieron. Revisa dos cosas que el generador no sabe resolver solo:
+
+- **Autor:** lo toma de la carpeta `Aportes/<autor>/`. Si un documento vive en la carpeta de otra
+  persona, confirma el autor con `git log` y corrígelo en `AUTORES`. No muevas el archivo.
+- **Descripción:** si la tarjeta muestra algo genérico («Diplomado… · Group 2»), agrega una línea
+  en `DESCRIPCIONES` (clave: nombre de archivo sin extensión).
+
+Haz el cambio en una rama y abre un PR, como cualquier otro cambio.
