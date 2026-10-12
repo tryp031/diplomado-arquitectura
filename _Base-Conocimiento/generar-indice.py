@@ -76,6 +76,14 @@ DESCRIPCIONES = {
     "Tacticas-Seguridad": "Deck oficial: confidencialidad, integridad y disponibilidad; tácticas de detectar, resistir, reaccionar y recuperarse; IPS.",
     "Tacticas-Desplegabilidad": "Deck oficial (complementario): pipeline y sistema desplegado; blue/green, rolling, canary, feature toggle.",
     "Tacticas-Usabilidad": "Deck oficial (complementario): iniciativa del usuario y del sistema; MVC, Observer, Memento.",
+    "m2-revision-aws-opcion-b-danny": "Revisión técnica del despliegue en AWS de Camilo: veredicto, comparación con la opción local y ajustes propuestos.",
+    "m2-respuestas-exposicion-12.1-12.2": "Cómo cubre la opción B en AWS los puntos 12.1 y 12.2 de las preguntas del 06/10, con evidencia medida en CloudWatch.",
+}
+
+# Autor real cuando el documento vive en la carpeta de otra persona (p. ej., una versión de su
+# trabajo). La carpeta no se cambia: es un aporte firmado. Clave: nombre de archivo sin extensión.
+AUTORES = {
+    "m2-presentacion-reto2-version-freddy-v2": "freddy",  # versión de Freddy sobre la de Danny (git log)
 }
 
 # Títulos para páginas cuyo <title> no dice qué son desde el índice.
@@ -146,7 +154,7 @@ def clasifica(rel):
         return "oficial", None
     m = re.search(r"/Aportes/([^/]+)/", p)
     if m:
-        return "aporte", m.group(1)
+        return "aporte", AUTORES.get(rel.stem, m.group(1))
     if "/Ejercicios/" in p or "/Laboratorios/" in p:
         return "herramienta", None
     return "otro", None
