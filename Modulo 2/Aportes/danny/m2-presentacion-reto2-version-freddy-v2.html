@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reto 2 · Alerta de flota | Versión Freddy</title>
-<meta name="description" content="Presentación del Reto 2 (alerta temprana para flota vehicular): versión local en Docker y versión AWS serverless. Módulo 2, Diplomado en Arquitectura de Software y Cloud Computing. Borrador generado con IA para revisión del equipo.">
+<meta name="description" content="Presentación del Reto 2 (alerta temprana para flota vehicular): versión local en Docker y versión AWS serverless. Módulo 2, Diplomado en Arquitectura de Software y Cloud Computing. Presentación técnica de arquitectura: requisitos, decisiones, evidencias y límites de las implementaciones local y AWS.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='15' width='64' height='64' fill='%233157ed'/%3E%3Cpath d='M18 20h28v24H18z' fill='none' stroke='white' stroke-width='5'/%3E%3Cpath d='M25 29h14M32 22v20' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -440,12 +440,12 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
 <div class="barra">
   <span class="marca"><span class="pin"></span> Reto 2 · Alerta de flota <span class="freddy-edition">EDICIÓN FREDDY · V2</span></span>
   <span class="sep"></span>
-  <span class="cuenta"><span id="actual">1</span>/<span id="total">16</span></span>
+  <span class="cuenta"><span id="actual">1</span>/<span id="total">20</span></span>
   <button class="bt" id="bNotas" aria-pressed="false" title="Tecla N">Notas</button>
   <button class="bt" id="bTema" title="Tecla T">Tema</button>
 </div>
 <div class="progreso" id="progreso"></div>
-<div class="draft">VERSIÓN FREDDY · V2</div>
+
 
 <main id="main">
 
@@ -805,7 +805,7 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
         </tbody>
       </table>
     </div>
-    <div class="aviso ojo"><p><b>Abierto:</b> según las notas del 06/10, el docente pide un <code>200</code> por cada una de las 1000 peticiones.
+    <div class="aviso ojo"><p><b>Abierto:</b> según los apuntes del encuentro del 06/10, se solicita un <code>200</code> por cada una de las 1000 peticiones.
       Con burst 2000 se cumple, pero por encima de ese volumen el sistema respondería <code>429</code>, en los dos entornos.
       Cambiarlo (aceptar todo y encolar) movería el límite de 15 r/s del gateway al consumo de la cola.</p></div>
     <p class="fuente">Fuentes: <code>Reto2-Alerta-Flota/README.md</code> «Prueba del limitador» · <code>m2-revision-aws-opcion-b-danny.md</code> §3.5</p>
@@ -820,7 +820,7 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
 <section class="lamina">
   <div class="caja">
     <span class="kicker">09 · Evidencias con el k6 del profesor</span>
-    <h2>1000 de 1000 en los dos entornos, con el correo muy por debajo de 15 s</h2>
+    <h2>1000 respuestas exitosas: distinguir envío, procesamiento y entrega</h2>
     <div class="barras" aria-label="Medida de la rúbrica frente al corte de 15 s">
       <div class="fila"><span class="nom">Local (06/10)</span><span class="pista"><span class="relleno" style="width:8.9%"></span></span><span class="val">1,33 s</span></div>
       <div class="fila"><span class="nom">AWS (11/10)</span><span class="pista"><span class="relleno" style="width:10.9%"></span></span><span class="val">1,642 s</span></div>
@@ -831,7 +831,7 @@ pre.dib{border-radius:20px;padding:26px;line-height:1.8;box-shadow:0 12px 35px #
         <thead><tr><th>Métrica</th><th class="n">Local (Docker)</th><th class="n">AWS (opción B)</th></tr></thead>
         <tbody>
           <tr><td>Peticiones exitosas</td><td class="n">1000/1000</td><td class="n">1000/1000 · 0 % fallos</td></tr>
-          <tr><td>Medida de la rúbrica (última petición → <code>EMAIL_SENT</code>)</td><td class="n">1,33 s</td><td class="n">1,642 s</td></tr>
+          <tr><td>Medida instrumental (última petición → <code>EMAIL_SENT</code>)</td><td class="n">1,33 s</td><td class="n">1,642 s</td></tr>
           <tr><td><code>http_req_duration</code> promedio / p95</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">119,65 / 129,09 ms</td></tr>
           <tr><td>Duración de la carga · tasa</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">~22,5 s · 44,7 r/s</td></tr>
           <tr><td>Recepción → <code>EMAIL_SENT</code> (un Emergency)</td><td class="n"><span class="pill pend">pendiente</span></td><td class="n">1,66 s (con arranque en frío)</td></tr>
@@ -894,7 +894,7 @@ EMAIL_SENT                notifier → hora del envío · ms_since_received · a
     <p class="fuente">Fuentes: <code>arquitectura-aws-opcion-b.md</code> §9 paso 4 («Corrección del reparto») · <code>m2-respuestas-exposicion-12.1-12.2.md</code> pregunta 10 y 15 · diseño local §2</p>
     <div class="notas">
       <span class="tag">Notas</span> <span class="tiempo">~1 min 30 s</span>
-      <p>Decirlo nosotros antes de que lo pregunte el profesor. Si el equipo ya eligió una opción antes de exponer, cambiar el aviso rojo por la decisión y su costo. No presentar el 10 + 2 como cumplimiento.</p>
+      <p>Decirlo nosotros antes de que lo pregunte el profesor. Si se cambia la configuración, actualizar esta lámina únicamente después de verificarla. No presentar el 10 + 2 como cumplimiento.</p>
     </div>
   </div>
 </section>
@@ -928,7 +928,7 @@ EMAIL_SENT                notifier → hora del envío · ms_since_received · a
     <span class="kicker">13 · Plano de control</span>
     <h2>Un panel para observar, con un switch Local / AWS</h2>
     <div class="rej d2">
-      <div class="card acento"><span class="et">Qué es</span><small>Una página que lanza el k6 del profesor, envía un Emergency manual y muestra la medida de la rúbrica con semáforo, el historial de corridas y la descarga de logs (.log / .csv). <b>No está en el camino de los eventos</b>: observar no altera la latencia medida.</small></div>
+      <div class="card acento"><span class="et">Qué es</span><small>Una página que lanza el k6 del profesor, envía un Emergency manual y muestra la medida instrumental disponible con semáforo, el historial de corridas y la descarga de logs (.log / .csv). <b>No está en el camino de los eventos</b>: observar no altera la latencia medida.</small></div>
       <div class="card"><span class="et">Switch Local / AWS <span class="pill pend">en implementación</span></span><small>Un interruptor cambia la fuente sin tocar el resto. <b>Local</b> lee los logs, Redis y Docker. <b>AWS</b> lee CloudWatch Logs y el estado de SQS con un usuario IAM de <b>solo lectura</b>, y apunta k6 y el Emergency manual al API Gateway.
         En AWS no hay inyección de fallas: el panel no tiene permisos para apagar nada.</small></div>
     </div>
@@ -963,20 +963,87 @@ EMAIL_SENT                notifier → hora del envío · ms_since_received · a
     <p class="fuente">Fuentes: <code>arquitectura-aws-opcion-b.md</code> §4, §6.4 y §9 · <code>m2-revision-aws-opcion-b-danny.md</code> §2–§3 · <code>Aportes/camilo/FUENTES.md</code> «Límites»</p>
     <div class="notas">
       <span class="tag">Notas</span> <span class="tiempo">~1 min 15 s</span>
-      <p>No disculparse: presentarlo como gestión de riesgos. Cada fila tiene una acción. El profesor viene de banca: espera ver trazabilidad y límites declarados.</p>
+      <p>Presentar los riesgos como decisiones técnicas y verificaciones pendientes. Cada fila tiene una acción. Relacionar cada riesgo con una decisión verificable y su evidencia.</p>
     </div>
   </div>
 </section>
+
+
+<!-- ═══ Freddy V2 · Criterios de aceptación ═══ -->
+<section class="lamina"><div class="caja ancha">
+<span class="kicker">Criterios de aceptación · encuentro 06/10</span>
+<h2>Del requisito a una prueba demostrable</h2>
+<p class="lede">Los apuntes del encuentro complementan el enunciado. Separar requisito, configuración y evidencia evita confundir un resultado observado con cumplimiento integral.</p>
+<div class="tabox prosa"><table><thead><tr><th>Criterio reportado</th><th>Cómo demostrarlo</th><th>Estado de la evidencia disponible</th></tr></thead><tbody>
+<tr><td><b>1.000 solicitudes; k6 sin alterar</b></td><td>Script original, reporte de ejecución y conteo de respuestas</td><td>Se reportan 1.000/1.000 en ambas variantes</td></tr>
+<tr><td><b>Backend ≤ 15 solicitudes/s</b></td><td>Configuración y prueba de limitación sin perder mensajes</td><td>Rate 15 y burst 2.000: distinguir tasa sostenida de ráfaga</td></tr>
+<tr><td><b>200 OK en cada solicitud</b></td><td>Conteo de códigos HTTP; definir cuándo se responde</td><td>1000/1000 en corridas de referencia; no implica procesamiento terminado</td></tr>
+<tr><td><b>1.000 mensajes procesados</b></td><td>Logs de fin de procesamiento por identificador único</td><td>Verificar por separado recepción y procesamiento final</td></tr>
+<tr><td><b>Emergency y correo</b></td><td>Traza del evento hasta la recepción en buzón</td><td>Envío por SES/SMTP ≠ llegada al destinatario</td></tr>
+<tr><td><b>≤ 10 instancias; HTTPS</b></td><td>Configuración, inventario de instancias y prueba TLS</td><td>AWS 10+2 excede 10; HTTPS local sigue abierto</td></tr>
+</tbody></table></div>
+<p class="fuente">Base: notas del encuentro del 06/10, apartados 10.1–10.7. Son aclaraciones reportadas, no transcripción ni sustituto de la rúbrica oficial.</p>
+</div></section>
+<!-- ═══ Freddy V2 · ubicación y latencia ═══ -->
+<section class="lamina"><div class="caja">
+<span class="kicker">Decisión de despliegue</span>
+<h2>La ubicación física también es una decisión de arquitectura</h2>
+<div class="rej d2">
+<div class="card"><span class="et">Implementación local · Docker</span><h3>Componentes próximos entre sí</h3><small>nginx, ingesta, Redis y notificador se ejecutan en el entorno local descrito. La comunicación interna reduce saltos de red externos; el servicio de correo y el cliente de prueba pueden introducir latencia adicional. Registrar máquina, red y ubicación real de k6.</small></div>
+<div class="card acento"><span class="et">Implementación AWS · us-east-2</span><h3>Servicios administrados en una región</h3><small>API Gateway, Lambda, SQS, SES y CloudWatch participan en el flujo. La región elegida debe justificarse frente a la ubicación del generador k6 y del destinatario; el correo sale hacia un sistema externo cuya entrega no controlamos.</small></div>
+</div>
+<div class="aviso clave"><p><b>Qué medir:</b> cliente k6 → gateway, gateway → ingesta, espera en cola, notificador → proveedor de correo y llegada al buzón. La cercanía geográfica es una hipótesis de diseño; sin tiempos desglosados no demuestra por sí sola menor latencia.</p></div>
+<p class="fuente">Base: notas del encuentro, §10.1. Las ubicaciones exactas de los equipos locales y las latencias por salto requieren evidencia adicional.</p>
+</div></section>
+<!-- ═══ Freddy V2 · recorrido temporal ═══ -->
+<section class="lamina"><div class="caja">
+<span class="kicker">Medición de extremo a extremo</span>
+<h2>El reloj de Emergency comienza cuando k6 lo envía</h2>
+<div class="rej d4">
+<div class="card"><span class="et">T0 · k6</span><span class="g">Envío</span><small>Marca de tiempo del evento Emergency.</small></div>
+<div class="card"><span class="et">T1 · backend</span><span class="g">Recepción</span><small>Registro de ingreso asociado al mismo event_id.</small></div>
+<div class="card"><span class="et">T2 · correo</span><span class="g">Envío</span><small>Confirmación de SMTP/SES: aún no acredita entrega.</small></div>
+<div class="card acento"><span class="et">T3 · destinatario</span><span class="g">Llegada</span><small>Encabezados del mensaje o evidencia de recepción.</small></div>
+</div>
+<div class="aviso ojo"><p><b>Criterio reportado en las notas:</b> T3 − T0 &lt; 16 s. La rúbrica citada previamente usa un corte de 15 s y otra referencia de inicio. <b>Se deben contrastar ambas fuentes antes de afirmar cumplimiento.</b> Las cifras de 1,33 s y 1,642 s disponibles en el repositorio no equivalen a T3 − T0.</p></div>
+<div class="card"><span class="et">Trazabilidad mínima propuesta</span><small><code>event_id</code> · tipo de evento · instante de recepción · instante de procesamiento completo · resultado · intentos de envío. Correlacionar relojes y zonas horarias entre k6, servicios y buzón. No atribuir a CloudWatch una confirmación de recepción que no registra.</small></div>
+<p class="fuente">Base: notas del encuentro, §10.4 y §11. Los &lt;16 s son una aclaración reportada; no modifican la rúbrica oficial.</p>
+</div></section>
+<!-- ═══ Freddy V2 · tácticas y trade-offs ═══ -->
+<section class="lamina"><div class="caja ancha">
+<span class="kicker">Atributos de calidad y tácticas</span>
+<h2>Qué táctica aplicamos, dónde y qué sacrificamos</h2>
+<div class="tabox prosa"><table><thead><tr><th>Táctica</th><th>Componente</th><th>Atributo favorecido</th><th>Compromiso y comprobación</th></tr></thead><tbody>
+<tr><td><b>Desacoplamiento asíncrono</b></td><td>Redis Streams / SQS</td><td>Desempeño y disponibilidad</td><td>Respuesta rápida, pero procesamiento diferido: auditar logs finales</td></tr>
+<tr><td><b>Control de admisión</b></td><td>nginx / API Gateway</td><td>Estabilidad bajo carga</td><td>Rate 15 con burst: pueden aparecer 429 al agotarse el cupo</td></tr>
+<tr><td><b>Reintentos y DLQ</b></td><td>Notifier y colas</td><td>Confiabilidad</td><td>Posibles duplicados: correlación e idempotencia</td></tr>
+<tr><td><b>Concurrencia acotada</b></td><td>Contenedores / Lambda</td><td>Uso de recursos</td><td>Verificar límite global de 10, no confundirlo con hilos</td></tr>
+<tr><td><b>Canal cifrado</b></td><td>Gateway HTTPS</td><td>Seguridad</td><td>Demostrar TLS en el acceso; proteger también saltos internos</td></tr>
+<tr><td><b>Observabilidad</b></td><td>Logs y panel externo</td><td>Diagnosticabilidad</td><td>Contar eventos únicos procesados; panel fuera del camino crítico</td></tr>
+</tbody></table></div>
+<p class="fuente">Base: notas del encuentro, §10.7 y §12.1; arquitectura y comportamientos descritos en la presentación original.</p>
+</div></section>
+<!-- ═══ Freddy V2 · defensa técnica ═══ -->
+<section class="lamina"><div class="caja">
+<span class="kicker">Defensa técnica</span><h2>Tres preguntas que deben tener respuesta verificable</h2>
+<div class="rej d3">
+<div class="card"><span class="et">01 · 200 OK</span><h3>¿Qué se garantiza?</h3><small>El 200 de Emergency se emite tras encolar. Es aceptación durable según la implementación, no confirmación de entrega del correo. Verificar recuperación ante fallos.</small></div>
+<div class="card"><span class="et">02 · Rate vs burst</span><h3>¿Por qué 1.000/1.000?</h3><small>El límite de 15 solicitudes/s regula la tasa sostenida. Un burst de 2.000 admite ráfagas; no significa que el backend procese 1.000 mensajes inmediatamente.</small></div>
+<div class="card"><span class="et">03 · 10 instancias</span><h3>¿Se cumple el máximo?</h3><small>La configuración AWS descrita reserva 10 + 2 instancias potenciales. Hasta ajustar y verificar, no presentar la restricción como cumplida.</small></div>
+</div>
+<div class="aviso clave"><p><b>Guion de demostración:</b> enseñar k6 original → códigos HTTP → logs de 1.000 eventos únicos completados → traza de Emergency → correo recibido → límites de instancias y TLS. Distinguir siempre <b>verificado</b>, <b>documentado</b> y <b>pendiente de prueba</b>.</p></div>
+<p class="fuente">Base: notas del encuentro, §11–§12.3.</p>
+</div></section>
 
 <!-- ═══ 16 · Cierre ═══ -->
 <section class="lamina">
   <div class="caja">
     <div class="portada">
       <span class="kicker">Cierre</span>
-      <h2 style="color:#fff">Priorizamos la latencia de la alerta, sin perder un Emergency, a costa de un posible duplicado</h2>
+      <h2 style="color:#fff">Desempeño y trazabilidad: decisiones, resultados y límites</h2>
       <p class="lede" style="color:#ffffffd9">Gateway con límite, ingesta que responde ya, cola, notificador asíncrono. La misma arquitectura en Docker y en AWS:
-        1000/1000 y el correo en ~1,3–1,6 s contra un corte de 15 s.</p>
-      <p style="margin-top:18px">Pendiente antes del 20/10: atributo único del equipo · reparto de instancias en AWS · datos locales de k6 · llegada a Gmail medida.</p>
+        1000 respuestas exitosas en las corridas documentadas; el tiempo hasta la llegada al buzón requiere evidencia independiente.</p>
+      <p style="margin-top:18px">Siguientes verificaciones: límite de instancias en AWS, HTTPS local, registros de procesamiento único y recepción real del correo.</p>
     </div>
     <div class="notas">
       <span class="tag">Notas</span> <span class="tiempo">~40 s</span>
