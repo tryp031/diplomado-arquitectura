@@ -140,3 +140,18 @@ no se modificó.
 - El reparto de concurrencia en AWS (10 + 2 = 12) se presenta como **decisión abierta** frente al límite de 10, con tres opciones. No se presenta como cumplimiento.
 - La lámina del panel describe el switch Local/AWS, que se estaba implementando en paralelo. Hay que revisarla cuando se mergee.
 - Usa el mismo sistema visual y el mismo script de navegación que `Modulo 1/Aportes/danny/m1-presentacion-reto-latencia-v2-danny.html`. Solo depende de Google Fonts.
+
+## `m2-respaldo-corrida7-aws/` — Logs de la corrida #7 en AWS (respaldo)
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny), exportación desde el panel |
+| **Fecha** | 2026-10-14 (corrida ejecutada el 13/10, 19:45 hora Colombia, durante el encuentro) |
+| **Módulo** | 2 — Reto 2 |
+| **Tema** | Logs de CloudWatch de la corrida #7 contra AWS: k6 del profesor, 2 `Emergency`, 2 correos, 0 DLQ, 1,256 s según el panel |
+| **Tipo** | `dato-medido` — exportado del sistema, sin editar |
+| **Fuentes** | `GET /api/corridas/7/logs` del panel (lee CloudWatch Logs de `reto2-ingesta` y `reto2-notifier`) |
+| **Estado** | respaldo · la corrida oficial es la #2 (`Entregables/logs/`) |
+
+**Por qué existe:** CloudWatch tiene retención corta. Si los logs vencen, el panel ya no puede
+volver a exportarlos. Se guardaron antes de que eso pase.
