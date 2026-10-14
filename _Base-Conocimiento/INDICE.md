@@ -1,15 +1,15 @@
 # Índice maestro y estado del diplomado
 
-> Actualizado: 2026-09-30 (fila del Módulo 2). El resto del archivo conserva el estado del 15/09.
+> Actualizado: 2026-10-13 (estado de los módulos 1 y 2, entregas y tareas del encuentro del 13/10). Las secciones históricas conservan su fecha.
 
 ## Estado por módulo
 
 | Módulo | Título | Material | Estudio | Salida procesada |
 |---|---|---|---|---|
 | 0 | Inducción / Aula Virtual | ✅ completo | ✅ analizado | `Modulo 0/Consolidado/RESUMEN-MODULO-0.md` |
-| 1 | **Fundamentos de la Arquitectura de Software** | 🟡 parcial (faltan Genially + video) | 🟡 en curso | **`Modulo 1/Consolidado/m1-consolidado.md`**, `Modulo 1/Temario/TEMARIO-M1.md`, `Modulo 1/Consolidado/ANALISIS-APERTURA-M1.md` |
-| 2 | **Requerimientos y tácticas de arquitectura** (Reto 2: alerta de flota vehicular) | 🟡 casi completo (falta el video de Seguridad y el script k6) | 🟡 en curso | `Modulo 2/README.md`, `Modulo 2/Aportes/danny/m2-cuaderno-estudio-danny.html` |
-| 3 | *(pendiente)* | ⬜ | ⬜ | — |
+| 1 | **Fundamentos de la Arquitectura de Software** | ✅ cerrado 29/09 | ✅ calificado (actividad 100 %, autoevaluación 100 %) | **`Modulo 1/Consolidado/m1-consolidado.md`**, `Modulo 1/Temario/TEMARIO-M1.md`, `Modulo 1/Consolidado/ANALISIS-APERTURA-M1.md` |
+| 2 | **Requerimientos y tácticas de arquitectura** (Reto 2: alerta de flota vehicular) | ✅ completo | 🟡 presentado el 13/10; entregables hasta el 20/10 | `Modulo 2/README.md`, `Modulo 2/Aportes/danny/m2-cuaderno-estudio-danny.html`, **`Modulo 2/Entregables/presentacion-reto2.html`** |
+| 3 | *(pendiente; Reto 3 por publicar)* | ⬜ | ⬜ | — |
 | 4 | *(pendiente)* | ⬜ | ⬜ | — |
 | Final | *(por confirmar si existe)* | ⬜ | ⬜ | — |
 
@@ -17,9 +17,38 @@
 
 | Entrega | Módulo | Límite | Estado |
 |---|---|---|---|
-| Autoevaluación M1 (cuestionario, **1 solo intento**, tiempo ilimitado) | 1 | 29/09/2026 | ⬜ |
-| Actividad M1 — Reto de Latencia Mínima (ZIP + PDF + logs + informe + video/demo) | 1 | 29/09/2026 | 🟡 2 de 4 variantes medidas · diseño y ADR hechos · falta informe y video |
+| Autoevaluación M1 | 1 | 29/09/2026 | ✅ 100 % |
+| Actividad M1 — Reto de Latencia Mínima | 1 | 29/09/2026 | ✅ 100 % |
+| **Autoevaluación M2** (individual; la de M1 fue de un solo intento) | 2 | 20/10/2026 | ⬜ **0 %, sin hacer** |
+| **Actividad M2 — Reto 2** (envío **individual** en Brightspace) | 2 | 20/10/2026 | 🟡 presentado el 13/10; faltan código, documentación técnica y logs |
 | Encuesta de valoración del programa (requisito de certificación) | — | fin del diplomado | ⬜ |
+
+## Encuentro del 13/10/2026 — tareas tras presentar el Reto 2
+
+> Fuente: mensaje del equipo después del encuentro, registrado por Danny el 13/10.
+
+| # | Responsable | Tarea |
+|---|---|---|
+| 1 | Daniel | Mejorar las láminas de la presentación para el entregable |
+| 2 | Daniel | Entregable del código |
+| 3 | Daniel | Logs y CSV de los resultados |
+| 4 | Freddy | Feedback del profesor: cómo abordar la presentación para ponerlo a aprender Claude |
+| 5 | Freddy y Camilo | Documentación técnica con el formato del reto 1 |
+
+Siguiente: ir revisando el **Reto 3** cuando se publique la información.
+
+### Criterio del profesor — comentario oficial de la actividad M1
+
+Fuente: Brightspace, calificación de la actividad M1 (100 %). Es la vara para los próximos retos:
+
+- **Valoró:** comparar dos alternativas, la demo funcionando y la interfaz interactiva para controlar
+  las pruebas y ver los resultados.
+- **Pide:** que la presentación no se concentre solo en mostrar implementaciones. Hay que identificar
+  **explícitamente el atributo de calidad prioritario**, explicar **qué decisiones** se tomaron y
+  **justificar por qué**, y usar las comparaciones para **discutir compromisos** (latencia,
+  complejidad, posibilidades de distribución).
+- **Siguiente paso, en sus palabras:** «fortalecer la argumentación arquitectónica que respalda las
+  soluciones implementadas».
 
 ## Material disponible
 
