@@ -61,8 +61,8 @@ eso necesita un usuario IAM con esta política, configurado en `local/.env.aws`:
 ## Brechas conocidas
 
 - **Instancias:** la concurrencia reservada es 10 (ingesta) + 2 (notifier) = 12, por encima del
-  límite de ≤ 10 instancias del enunciado. Bajo la carga de k6 se usaron 8 de ingesta, pero el cupo
-  configurado permitiría 12. La corrección es bajar la ingesta a 8 (8 + 2 = 10). Se declara como
+  límite de ≤ 10 instancias del enunciado. Bajo la carga de k6 se usaron 8 (6 de ingesta + 2 del
+  notifier), pero el cupo configurado permitiría 12. La corrección es bajar la ingesta a 8 (8 + 2 = 10). Se declara como
   brecha, no se oculta.
 - **Configuración en consola, sin IaC:** recrear el entorno depende de seguir esta tabla a mano.
 - **SES puede caer en spam** por la política DMARC del remitente.
