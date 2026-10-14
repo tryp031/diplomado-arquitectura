@@ -35,15 +35,40 @@ El mismo `event_id` une la recepción con el envío.
 | Rúbrica: último envío de k6 → envío del correo | última petición recibida (19:01:54.654) → `EMAIL_SENT` | **0,644 s** |
 | Emergency → correo | `EMERGENCY_RECEIVED` → `EMAIL_SENT` | **0,756 s** |
 | Indicador del panel | última respuesta de la ingesta (19:01:54.807) → `EMAIL_SENT` | 0,491 s |
+| **Hasta la llegada a Gmail** | última petición recibida (19:01:54.654) → llegada al buzón (19:01:55) | **entre 0,64 y 1,35 s** |
 
 El panel fecha cada petición cuando la ingesta **responde** (igual que nginx en la versión local). En
 el `Emergency`, eso ocurre después de encolarlo, así que su cifra es la más corta de las tres. Las tres
 cumplen con amplitud el criterio de 15 s.
 
+## Llegada del correo a Gmail
+
+Se tomó de las cabeceras del correo recibido (Gmail → «Mostrar original»), mismo `event_id`
+`ecf23272-82e4-4b40-96cc-0d627c9974bc`:
+
+```
+Received: from e226-3.smtp-out.us-east-2.amazonaws.com ... by mx.google.com ...; Tue, 13 Oct 2026 17:01:55 -0700 (PDT)
+Received: by 2002:a05:6f02:...  with SMTP id ...;                              Tue, 13 Oct 2026 17:01:55 -0700 (PDT)
+ARC-Seal: i=1; ... t=1791936115                                               (= 19:01:55 hora Colombia)
+Date: Wed, 14 Oct 2026 00:01:55 +0000                                         (puesto por SES al enviar)
+```
+
+17:01:55 PDT = **19:01:55 hora Colombia**. Gmail informa «Entregado tras 0 segundos». Como Gmail
+registra con resolución de **segundos**, la llegada ocurrió entre 19:01:55.298 (`EMAIL_SENT`) y
+19:01:55.999:
+
+- `EMAIL_SENT` → buzón: **menos de 0,7 s**.
+- Última petición de k6 → buzón: **entre 0,64 y 1,35 s**. Es el tramo completo que pide el criterio
+  del profesor («del envío en k6 a la llegada del correo»), y queda muy por debajo de 15 s.
+
 ## Límites de esta evidencia
 
-- `EMAIL_SENT` es la hora en que **SES aceptó** el mensaje, no la de llegada al buzón de Gmail. Esa
-  la pone Gmail y no aparece en estos logs.
+- Los relojes de AWS y de Gmail son distintos (ambos sincronizados por NTP). Su desfase es de
+  milisegundos, menor que la resolución de un segundo de las cabeceras de Gmail.
+- La cabecera de autenticación muestra `dmarc=fail (p=NONE)`: el remitente es una dirección
+  `@gmail.com` enviada a través de SES. Esta vez el correo llegó a «Recibidos», pero con otro
+  destinatario podría ir a spam. Es una brecha declarada: se corrige con un dominio propio verificado
+  en SES.
 - No es la única corrida: la #7 del mismo día (2 `Emergency`, 1,256 s según el panel) también
   cumplió. Se eligió la #2 porque generó exactamente un `Emergency`, que es lo que describe el
   enunciado. El script del profesor no lo garantiza: a veces envía 0 o 2.
