@@ -45,6 +45,7 @@ de cuál.*
 |---|---|---|---|
 | **Danny** | `Aportes/danny/m2-cuaderno-estudio-danny.md` (+ `.html`) | cuaderno de estudio con autoevaluación y glosario (con IA) | vigente · 30/09 |
 | **Danny** | `Aportes/danny/m2-autoevaluacion-danny.html` | autoevaluación interactiva propia: 29 preguntas, 4 niveles (con IA) | vigente · 04/10 |
+| **Danny** | `Aportes/danny/m2-autoevaluacion-oficial-danny.html` | cuadernillo de repaso de la autoevaluación **oficial** del M2: las 10 preguntas resueltas y analizadas (90 %, con IA) | vigente · 14/10 |
 | **Danny** | `Aportes/danny/m2-analisis-apertura-danny.md` (+ `.html`) | apunte (con IA) + propuesta de diseño del Reto 2 (§5) | vigente · reescrito 30/09 |
 | **Camilo** | — | — | sin aportes aún |
 | **Freddy** | — | — | sin aportes aún |

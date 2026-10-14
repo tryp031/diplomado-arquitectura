@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autoevaluación M2 — Atributos y tácticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+  :root{
+    color-scheme:light dark;
+    --ground:#F1F4F4; --surface:#FFFFFF; --surface-2:#E7EDED;
+    --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+    --rule:#CDDADC; --rule-2:#E1E9EA;
+    --accent:#0A6C7C; --accent-soft:#DBEDEF;
+    --signal:#A85B0C; --signal-soft:#F7E8D4;
+    --ok:#1B6B45; --ok-soft:#DCEFE4;
+    --bad:#9B2C2C; --bad-soft:#F7E0E0;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+      --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+      --rule:#233A3F; --rule-2:#1A2E32;
+      --accent:#5CB9C8; --accent-soft:#123338;
+      --signal:#E0A257; --signal-soft:#33240F;
+      --ok:#6FCB9B; --ok-soft:#10301F;
+      --bad:#E88C8C; --bad-soft:#331616;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#6FCB9B; --ok-soft:#10301F;
+    --bad:#E88C8C; --bad-soft:#331616;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1140px; margin:0 auto; padding:0 16px 96px;
+    display:grid; grid-template-columns:1fr; gap:0 56px;
+  }
+  @media (min-width:1020px){ .wrap{grid-template-columns:220px minmax(0,1fr); padding:0 24px 96px} }
+
+  /* ── masthead ─────────────────────────────────────────── */
+  .masthead{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 28px;margin-bottom:40px}
+  .kicker{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.95rem,4.6vw,3rem);line-height:1.05;letter-spacing:-.024em;text-wrap:balance;margin:0 0 18px}
+  .standfirst{font-size:1.16rem;line-height:1.6;color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+  .standfirst em{color:var(--ink);font-style:italic}
+  .facts{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--surface);margin:0}
+  .fact{flex:1 1 140px;padding:12px 18px;border-right:1px solid var(--rule-2)}
+  .fact:last-child{border-right:none}
+  .fact dt{font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin:0 0 5px}
+  .fact dd{margin:0;font-family:var(--sans);font-size:.92rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* ── rail ─────────────────────────────────────────────── */
+  .rail{display:none}
+  @media (min-width:1020px){
+    .rail{display:block;align-self:start;position:sticky;top:24px;font-family:var(--sans);font-size:.83rem;padding-bottom:40px;max-height:calc(100vh - 48px);overflow-y:auto}
+  }
+  .rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .rail ol{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:2px}
+  .rail a{display:flex;gap:9px;color:var(--ink-2);text-decoration:none;border:0;padding:3px 0;line-height:1.35}
+  .rail a:hover{color:var(--accent)}
+  .rail a .n{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);flex:0 0 16px;padding-top:1px}
+  .rail a.hit .n{color:var(--ok)}
+  .rail a.miss .n{color:var(--bad)}
+  .scorebox{border-top:1px solid var(--rule);padding-top:16px;margin-bottom:18px}
+  .scorebox .big{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+  .scorebox .cap{font-size:.76rem;color:var(--ink-3);line-height:1.4}
+  .railbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+
+  /* ── controles ────────────────────────────────────────── */
+  .btn{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);
+    border-radius:2px;padding:6px 10px;cursor:pointer;line-height:1.2;
+  }
+  .btn:hover{color:var(--accent);border-color:var(--accent)}
+  .topbar{
+    position:fixed;top:12px;right:12px;z-index:10;display:flex;gap:6px;
+  }
+  @media (max-width:1019px){.topbar{position:static;margin:16px 0 0;justify-content:flex-start;flex-wrap:wrap}}
+  @media (min-width:1020px){.topbar{display:none}}
+
+  /* ── tipografía general ───────────────────────────────── */
+  main{min-width:0}
+  section{padding-top:8px;margin-bottom:58px;scroll-margin-top:20px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.65rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h2.sec{font-family:var(--sans);font-weight:600;font-size:1.58rem;line-height:1.2;letter-spacing:-.017em;text-wrap:balance;margin:0 0 16px;max-width:34ch}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;letter-spacing:-.008em;margin:32px 0 10px;max-width:46ch}
+  p{margin:0 0 18px;max-width:66ch}
+  main ul,main ol{max-width:64ch;margin:0 0 18px;padding-left:22px}
+  main li{margin-bottom:7px}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:.1em .34em;border-radius:2px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{border-bottom-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;padding:.18em .48em;border-radius:2px;vertical-align:.14em;white-space:nowrap}
+  .p-curso{background:var(--accent-soft);color:var(--accent)}
+  .p-compl{background:var(--surface-2);color:var(--ink-2)}
+  .p-recom{background:var(--signal-soft);color:var(--signal)}
+
+  .note{border-left:2px solid var(--accent);background:var(--surface);padding:16px 20px;margin:24px 0;max-width:66ch;border-radius:0 3px 3px 0}
+  .note.risk{border-left-color:var(--signal)}
+  .note p:last-child{margin-bottom:0}
+  .note .lab{display:block;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+
+  blockquote{margin:22px 0;padding:0 0 0 18px;border-left:2px solid var(--rule);color:var(--ink-2);font-style:italic;max-width:62ch}
+
+  .tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.ok{color:var(--ok);font-weight:600}
+  .cat{font-family:var(--sans);font-weight:600}
+
+  /* ── bloque de pregunta ───────────────────────────────── */
+  .q{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px 22px 18px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .q.done{border-color:var(--rule-2)}
+  .qhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .qn{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .qhead h3{margin:0;font-size:1.08rem}
+  .stem{font-family:var(--sans);font-size:1rem;line-height:1.55;color:var(--ink);margin:0 0 16px;max-width:64ch}
+  .opts{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:7px;max-width:none}
+  .opts li{margin:0}
+  .opt{
+    width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;
+    font-family:var(--sans);font-size:.94rem;line-height:1.5;color:var(--ink);
+    background:var(--ground);border:1px solid var(--rule-2);border-radius:3px;
+    padding:11px 14px;cursor:pointer;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-2)}
+  .opt:disabled{cursor:default}
+  .opt .k{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--ink-3);flex:0 0 14px;padding-top:2px;text-transform:lowercase}
+  .opt.is-ok{background:var(--ok-soft);border-color:var(--ok)}
+  .opt.is-ok .k{color:var(--ok)}
+  .opt.is-bad{background:var(--bad-soft);border-color:var(--bad)}
+  .opt.is-bad .k{color:var(--bad)}
+  .opt.dim{opacity:.55}
+  .verdict{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin:12px 0 0;padding:7px 11px;border-radius:2px}
+  .verdict.ok{background:var(--ok-soft);color:var(--ok)}
+  .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+  details.why{margin-top:14px;border-top:1px solid var(--rule-2);padding-top:6px}
+  details.why summary{cursor:pointer;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 0;list-style:none;display:flex;gap:8px;align-items:center}
+  details.why summary::-webkit-details-marker{display:none}
+  details.why summary::before{content:"+";font-size:.85rem;color:var(--accent)}
+  details.why[open] summary::before{content:"\2212"}
+  details.why summary:hover{color:var(--accent)}
+  .why .body{font-size:1rem;line-height:1.66;color:var(--ink-2);padding-bottom:6px}
+  .why .body p{max-width:64ch}
+  .why .body strong{color:var(--ink)}
+  .key{
+    display:flex;gap:10px;align-items:flex-start;margin:18px 0 2px;padding:12px 15px;
+    background:var(--accent-soft);border-radius:3px;font-family:var(--sans);font-size:.93rem;
+    line-height:1.5;color:var(--ink);max-width:64ch;
+  }
+  .key .lab{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);flex:0 0 auto;padding-top:3px}
+
+  /* ── prompts ──────────────────────────────────────────── */
+  .prompt{position:relative;border:1px solid var(--rule);border-radius:3px;background:var(--surface);margin:14px 0}
+  .prompt pre{margin:0;padding:15px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;color:var(--ink-2);white-space:pre-wrap}
+  .prompt .copy{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .12s}
+  .prompt:hover .copy,.prompt .copy:focus-visible{opacity:1}
+  @media (hover:none){.prompt .copy{opacity:1}}
+
+  .hand{list-style:none;counter-reset:h;margin:22px 0;padding:0;display:grid;gap:1px;background:var(--rule-2);border:1px solid var(--rule);border-radius:3px;overflow:hidden;max-width:none}
+  .hand li{counter-increment:h;background:var(--surface);padding:13px 16px 13px 46px;position:relative;font-family:var(--sans);font-size:.94rem;margin:0;line-height:1.5}
+  .hand li::before{content:counter(h);position:absolute;left:17px;top:13px;font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+
+  footer.end{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:20px;padding-top:22px;font-family:var(--sans);font-size:.82rem;color:var(--ink-3);line-height:1.6}
+
+  @media print{
+    .topbar,.rail{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="btn" id="btn-theme" type="button">Tema</button>
+  <button class="btn" id="btn-open" type="button">Abrir análisis</button>
+  <button class="btn" id="btn-reset" type="button">Reiniciar</button>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Módulo 2 · Autoevaluación oficial · Diplomado en Arquitectura de Software y Cloud Computing</p>
+    <h1>Atributos de calidad y tácticas: las 10 preguntas, resueltas y desarmadas</h1>
+    <p class="standfirst">Cuaderno de repaso construido a partir de la autoevaluación oficial del Módulo 2 (resultado: 9 de 10). Cada pregunta se puede <em>volver a responder</em> antes de ver el análisis: primero eliges, después lees por qué la correcta es correcta, <em>por qué cada distractora está mal</em> y dónde aparece esa idea en nuestro Reto 2.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Autor</dt><dd>Daniel Mazo (Danny)</dd></div>
+      <div class="fact"><dt>Fecha</dt><dd>2026-10-14</dd></div>
+      <div class="fact"><dt>Preguntas</dt><dd>10</dd></div>
+      <div class="fact"><dt>Tipo</dt><dd>apunte de estudio</dd></div>
+      <div class="fact"><dt>Estado</dt><dd>vigente</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Índice">
+    <div class="scorebox">
+      <div class="big" id="score">0 / 10</div>
+      <div class="cap" id="scorecap">aciertos sobre respondidas</div>
+      <div class="railbtns">
+        <button class="btn" id="btn-theme-2" type="button">Tema</button>
+        <button class="btn" id="btn-reset-2" type="button">Reiniciar</button>
+        <button class="btn" id="btn-open-2" type="button">Abrir análisis</button>
+      </div>
+    </div>
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#marco"><span class="n">§</span><span>Marco conceptual</span></a></li>
+      <li><a href="#preguntas"><span class="n">§</span><span>Las 10 preguntas</span></a></li>
+    </ol>
+    <h2>Preguntas</h2>
+    <ol id="railq">
+      <li><a href="#p1" data-q="1"><span class="n">1</span><span>Requisito significativo</span></a></li>
+      <li><a href="#p2" data-q="2"><span class="n">2</span><span>Medible o no sirve</span></a></li>
+      <li><a href="#p3" data-q="3"><span class="n">3</span><span>Disponibilidad vs. desempeño</span></a></li>
+      <li><a href="#p4" data-q="4"><span class="n">4</span><span>99,9 % y redundancia</span></a></li>
+      <li><a href="#p5" data-q="5"><span class="n">5</span><span>Desempeño bajo carga</span></a></li>
+      <li><a href="#p6" data-q="6"><span class="n">6</span><span>Caché cerca del usuario</span></a></li>
+      <li><a href="#p7" data-q="7"><span class="n">7</span><span>Estándares (HL7)</span></a></li>
+      <li><a href="#p8" data-q="8"><span class="n">8</span><span>Registro de servicios</span></a></li>
+      <li><a href="#p9" data-q="9"><span class="n">9</span><span>Pilares de la seguridad</span></a></li>
+      <li><a href="#p10" data-q="10"><span class="n">10</span><span>Detectar, primero</span></a></li>
+    </ol>
+    <h2>Cierre</h2>
+    <ol>
+      <li><a href="#clave"><span class="n">§</span><span>Clave de respuestas</span></a></li>
+      <li><a href="#patrones"><span class="n">§</span><span>Patrones de examen</span></a></li>
+      <li><a href="#prompts"><span class="n">§</span><span>Prompts para profundizar</span></a></li>
+      <li><a href="#cuaderno"><span class="n">§</span><span>Para el cuaderno</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ══ MARCO ═══════════════════════════════════════════ -->
+    <section id="marco">
+      <p class="eyebrow">Antes de empezar</p>
+      <h2 class="sec">Las tres ideas que atraviesan todo el cuestionario</h2>
+
+      <div class="note">
+        <span class="lab">Cómo leer este documento</span>
+        <p>Las etiquetas marcan el origen de cada afirmación: <span class="pill p-curso">Curso</span> es contenido del Módulo 2 o de su bibliografía, <span class="pill p-compl">Complementario</span> es conocimiento externo que agrego para dar contexto, y <span class="pill p-recom">Criterio</span> es lectura propia. Las preguntas y sus opciones se transcriben de la autoevaluación; los análisis son míos. Los recuadros «En el Reto 2» conectan cada concepto con lo que construimos.</p>
+      </div>
+
+      <h3>1. Un atributo de calidad solo sirve si se puede medir <span class="pill p-curso">Curso</span></h3>
+      <p>Los requisitos <strong>arquitectónicamente significativos</strong> son los que obligan a cambiar la estructura del sistema. Casi siempre son atributos de calidad expresados con un número. Se documentan como <strong>escenario de calidad</strong>:</p>
+      <div class="tw"><table>
+        <thead><tr><th>Parte</th><th>Ejemplo en el Reto 2</th></tr></thead>
+        <tbody>
+          <tr><td class="cat">Fuente y estímulo</td><td>k6 envía 1000 eventos en 30 s, uno de ellos <code>Emergency</code></td></tr>
+          <tr><td class="cat">Entorno</td><td>Operación normal, con límite de 15 r/s en el gateway</td></tr>
+          <tr><td class="cat">Artefacto</td><td>Ingesta, cola y notificador</td></tr>
+          <tr><td class="cat">Respuesta</td><td>Se envía un correo de alerta</td></tr>
+          <tr><td class="cat">Medida de la respuesta</td><td>Correo en menos de 15 s desde la última petición de k6</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>2. Cuatro atributos, cuatro preguntas distintas <span class="pill p-curso">Curso</span></h3>
+      <div class="tw"><table>
+        <thead><tr><th>Atributo</th><th>Pregunta que responde</th><th>Tácticas típicas</th></tr></thead>
+        <tbody>
+          <tr><td class="cat">Desempeño</td><td>¿Responde a tiempo, también bajo carga?</td><td>Caché, concurrencia, réplicas, limitar la tasa, procesar en asíncrono</td></tr>
+          <tr><td class="cat">Disponibilidad</td><td>¿Está arriba cuando se necesita?</td><td>Redundancia, balanceo, heartbeat / ping-echo, failover, reintentos</td></tr>
+          <tr><td class="cat">Interoperabilidad</td><td>¿Intercambia información útil con otros sistemas?</td><td>Estándares (HL7, FHIR, JSON), registro y descubrimiento de servicios, adaptar u orquestar interfaces</td></tr>
+          <tr><td class="cat">Seguridad</td><td>¿Protege datos y servicios?</td><td>Detectar → resistir → reaccionar → recuperarse</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>3. Lento no es lo mismo que caído <span class="pill p-recom">Criterio</span></h3>
+      <p>Es el par que más confunde el cuestionario. Si el sistema <strong>responde, pero tarde</strong>, el problema es de <strong>desempeño</strong>. Si <strong>no responde</strong>, es de <strong>disponibilidad</strong>. Las preguntas 3 y 5 se resuelven solo con esta distinción.</p>
+    </section>
+
+    <!-- ══ PREGUNTAS ═══════════════════════════════════════ -->
+    <section id="preguntas">
+      <p class="eyebrow">Autoevaluación · <span style="color:var(--accent)">responde antes de abrir el análisis</span></p>
+      <h2 class="sec">Las 10 preguntas</h2>
+
+      <!-- P1 -->
+      <article class="q" id="p1" data-q="1" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 1</span><h3>El requisito que define la estructura</h3></div>
+        <p class="stem">Al diseñar un sistema de pago, ¿cuál de los siguientes aspectos tendría un impacto más profundo en la estructura técnica y las decisiones iniciales de su arquitectura?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Permitir personalizar el tema visual de la interfaz.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Garantizar que las transacciones se completen en menos de 3 segundos.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Incluir un historial detallado de transacciones.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Mostrar notificaciones animadas al usuario.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Un requisito de desempeño medible (menos de 3 s por transacción) es un <strong>requisito arquitectónicamente significativo</strong>: condiciona la concurrencia, el procesamiento asíncrono, la caché, la distribución de componentes y la infraestructura. Si cambia, cambia la estructura.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> y <strong>d)</strong> son decisiones de interfaz: se resuelven dentro de un componente, sin tocar la arquitectura.</li>
+            <li><strong>c)</strong> es un requisito funcional. Ojo con el matiz: con volúmenes enormes, un historial sí podría condicionar el almacenamiento, pero el enunciado no da ese dato. El único requisito con un número que obliga a diseñar es el de 3 s.</li>
+          </ul>
+          <div class="note"><span class="lab">En el Reto 2</span><p>«Correo en menos de 15 s» cumple el mismo papel: por él existe la cola y la ingesta responde sin esperar al correo.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Requisito significativo = atributo de calidad medible que obliga a cambiar la estructura.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P2 -->
+      <article class="q" id="p2" data-q="2" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 2</span><h3>Medible o no sirve</h3></div>
+        <p class="stem">En un escenario donde la prioridad es garantizar que un servicio responda en tiempo real, ¿qué atributo de calidad sería indispensable documentar como «arquitecturalmente significativo»?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Que el sistema soporte 10 idiomas diferentes.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Que la respuesta del servicio tarde menos de 50 milisegundos.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Que los usuarios puedan personalizar su perfil con avatares.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Que el sistema incluya tutoriales interactivos.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> «Tiempo real» es <strong>desempeño (latencia)</strong>, y para documentarlo hay que convertirlo en una <strong>medida verificable</strong>: menos de 50 ms. Es la «medida de la respuesta» del escenario de calidad.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Internacionalización: afecta la interfaz y el contenido, no el tiempo de respuesta.</li>
+            <li><strong>c)</strong> y <strong>d)</strong> son funcionalidades de usabilidad, ajenas a la latencia.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Un atributo sin número no se puede verificar. «Rápido» no es un requisito; «&lt; 50 ms» sí.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P3 -->
+      <article class="q" id="p3" data-q="3" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 3</span><h3>Disponibilidad vs. desempeño</h3></div>
+        <p class="stem">¿Cuál de las siguientes situaciones representa mejor un desafío crítico de disponibilidad en un sistema de comercio electrónico?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Los usuarios pueden cambiar el tamaño de las imágenes de los productos.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>El sistema tarda 5 segundos en cargar recomendaciones personalizadas.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>El servidor de pagos no responde durante una hora en día de grandes descuentos.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>La página de inicio muestra animaciones diferentes según la estación del año.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> La <strong>disponibilidad</strong> mide si el sistema está operativo y responde cuando se necesita. Una hora de caída del servidor de pagos en pleno pico es una falla de disponibilidad con impacto directo en el negocio.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>b)</strong> Es la distractora fuerte: el sistema <strong>sí responde</strong>, solo que lento. Eso es <strong>desempeño</strong>.</li>
+            <li><strong>a)</strong> y <strong>d)</strong> son funcionalidades visuales.</li>
+          </ul>
+          <p class="key"><span class="lab">Concepto</span><span>Lento = desempeño. No responde = disponibilidad.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P4 -->
+      <article class="q" id="p4" data-q="4" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 4</span><h3>99,9 % y redundancia</h3></div>
+        <p class="stem">Si un sistema debe garantizar un 99.9% de disponibilidad anual, ¿qué táctica arquitectónica sería más relevante para lograrlo?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Implementar un diseño visual adaptable a pantallas pequeñas.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Usar redundancia de servidores y balanceadores de carga.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Añadir opciones de personalización de colores en la interfaz.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Incluir una sección de comentarios en los perfiles de usuario.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> La <strong>redundancia</strong> (activa o pasiva) y el <strong>balanceo de carga</strong> eliminan los puntos únicos de falla: si un nodo cae, otro atiende.</p>
+          <div class="tw"><table>
+            <thead><tr><th>Disponibilidad</th><th>Caída máxima al año</th></tr></thead>
+            <tbody>
+              <tr><td>99 %</td><td>≈ 3,65 días</td></tr>
+              <tr><td>99,9 %</td><td>≈ 8,76 horas</td></tr>
+              <tr><td>99,99 %</td><td>≈ 52,6 minutos</td></tr>
+            </tbody>
+          </table></div>
+          <p><span class="pill p-compl">Complementario</span> Cada «nueve» extra divide la caída permitida por 10 y, en la práctica, multiplica el costo: más réplicas, más zonas, más automatización del failover.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>a)</strong>, <strong>c)</strong> y <strong>d)</strong> son de usabilidad o funcionales; ninguna evita una caída.</p>
+          <div class="note"><span class="lab">En el Reto 2</span><p>Usamos tácticas de disponibilidad al servicio de «no perder un <code>Emergency</code>»: reintentos acotados, DLQ y 503 cuando no se puede encolar. En AWS, la redundancia la ponen los servicios gestionados (Lambda, SQS), no nosotros.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>99,9 % ≈ 8,76 h de caída al año. Se logra quitando puntos únicos de falla.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P5 -->
+      <article class="q" id="p5" data-q="5" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 5</span><h3>Desempeño bajo carga</h3></div>
+        <p class="stem">En un sistema de reservas de vuelos, ¿cuál de los siguientes escenarios refleja un problema crítico de desempeño que afectaría directamente la experiencia del usuario?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>El sistema muestra imágenes de asientos en alta resolución.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>La página tarda 10 segundos en cargar la lista de vuelos disponibles durante horas pico.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Los usuarios pueden filtrar resultados por precio o aerolínea.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>La interfaz muestra un mensaje de bienvenida animado.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El <strong>desempeño</strong> es el tiempo de respuesta ante eventos y su comportamiento <strong>bajo carga</strong>. «10 s en horas pico» une las dos cosas: el sistema responde, pero no aguanta la demanda, y el usuario abandona la reserva.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Podría afectar el desempeño (imágenes pesadas), pero el enunciado no dice que algo sea lento. Es una característica, no un problema.</li>
+            <li><strong>c)</strong> y <strong>d)</strong> son funcionalidades.</li>
+          </ul>
+          <div class="note"><span class="lab">En el Reto 2</span><p>Es nuestro escenario: una ráfaga de 1000 eventos. Lo absorbimos con el burst de 2000 del gateway y con concurrencia de Lambda, y la ingesta responde sin esperar al correo.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Desempeño se juzga bajo carga, no en reposo.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P6 -->
+      <article class="q" id="p6" data-q="6" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 6</span><h3>Caché cerca del usuario</h3></div>
+        <p class="stem">Si un sistema de streaming debe garantizar una latencia menor a 2 segundos para reproducir videos, ¿qué táctica arquitectónica sería más efectiva para lograrlo?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Añadir subtítulos en múltiples idiomas.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Implementar caché distribuido cerca de los usuarios.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Permitir personalizar el color de la interfaz.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Incluir reseñas de otros espectadores.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> <strong>Mantener copias de los datos cerca del usuario</strong> (caché distribuido, CDN) es una táctica de desempeño de la categoría <em>gestionar recursos</em>: reduce la distancia de red y la carga sobre el origen, y por eso baja la latencia de forma directa.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>a)</strong>, <strong>c)</strong> y <strong>d)</strong> son funcionalidades; ninguna reduce la latencia.</p>
+          <div class="note"><span class="lab">En el Reto 2</span><p>La misma idea de «acercar» explica por qué elegimos us-east-2: la medimos con k6 desde 4 regiones y fue la de menor latencia promedio.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Menos distancia = menos latencia. La caché es la forma más directa de acortarla.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P7 -->
+      <article class="q" id="p7" data-q="7" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 7</span><h3>Estándares de intercambio (HL7)</h3></div>
+        <p class="stem">En un sistema de salud que integra laboratorios externos, hospitales y pacientes, ¿qué característica es esencial para garantizar que los resultados de análisis se compartan correctamente?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Que la interfaz del sistema tenga animaciones atractivas.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Que los datos se intercambien en formatos estándar como HL7.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Que los usuarios puedan personalizar el color de su perfil.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Que el sistema muestre publicidad de medicamentos.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Es un problema de <strong>interoperabilidad</strong>: sistemas independientes que deben intercambiar información y <strong>entenderla igual</strong>. Un formato estándar asegura las dos capas:</p>
+          <ul>
+            <li><strong>Sintáctica:</strong> los dos lados pueden leer el mensaje.</li>
+            <li><strong>Semántica:</strong> los dos lados le dan el mismo significado.</li>
+          </ul>
+          <p><span class="pill p-compl">Complementario</span> HL7 v2 y su sucesor FHIR (basado en REST y JSON) son los estándares internacionales para datos clínicos.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>a)</strong> y <strong>c)</strong> son visuales; <strong>d)</strong> es de negocio.</p>
+          <p class="key"><span class="lab">Concepto</span><span>Interoperar = poder leer el mensaje y entenderlo igual. Los estándares resuelven ambas cosas.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P8 -->
+      <article class="q" id="p8" data-q="8" data-correct="a">
+        <div class="qhead"><span class="qn">Pregunta 8</span><h3>Registro de servicios</h3></div>
+        <p class="stem">Si una empresa desea integrar su sistema de facturación con el de un proveedor externo, ¿qué táctica arquitectónica priorizaría para evitar problemas de compatibilidad?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Implementar un registro centralizado de servicios con metadatos descriptivos.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Añadir emoticones a las notificaciones del sistema.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Permitir que los usuarios cambien el tamaño de fuente en la interfaz.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Mostrar un ranking de empleados destacados.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Es una táctica de interoperabilidad de la categoría <strong>localizar</strong> (descubrir servicios). El registro guarda contratos, versiones, formatos y endpoints, así que cada sistema encuentra el servicio correcto y sabe <strong>cómo hablarle</strong>. Eso evita incompatibilidades de interfaz o de versión.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>b)</strong>, <strong>c)</strong> y <strong>d)</strong> no son técnicas. Es la única opción que habla de integración.</p>
+          <p><span class="pill p-recom">Criterio</span> En la práctica, para integrar <em>un</em> proveedor externo lo primero suele ser un <strong>contrato de API versionado</strong> (OpenAPI, por ejemplo). El registro centralizado rinde más cuando hay muchos servicios que descubrir. En el examen gana porque es la única opción técnica.</p>
+          <p class="key"><span class="lab">Concepto</span><span>Interoperabilidad: localizar el servicio y gestionar su interfaz (contratos, versiones, formatos).</span></p>
+        </div></details>
+      </article>
+
+      <!-- P9 -->
+      <article class="q" id="p9" data-q="9" data-correct="a">
+        <div class="qhead"><span class="qn">Pregunta 9</span><h3>Pilares de la seguridad (CIA)</h3></div>
+        <p class="stem">Un sistema bancario en línea debe garantizar que solo el titular de una cuenta pueda realizar transferencias. ¿Qué pilar de la seguridad es más relevante para cumplir este requisito?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Confidencialidad, porque asegura que solo usuarios autorizados accedan a la información.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Integridad, porque evita que los datos sean alterados durante la transacción.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Disponibilidad, porque garantiza que el sistema esté operativo cuando se necesite.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Privacidad, porque protege los datos personales del usuario.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta (según la clave oficial).</strong> En la tríada <strong>CIA</strong> (Confidencialidad, Integridad, Disponibilidad), la <strong>confidencialidad</strong> protege datos y servicios contra el <strong>acceso no autorizado</strong>. «Solo el titular» se cumple con autenticación y autorización, que el cuestionario asocia a confidencialidad.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>b)</strong> Tal como está redactada, habla de datos alterados <em>durante la transacción</em> (en tránsito), un riesgo distinto al de quién puede ordenarla.</li>
+            <li><strong>c)</strong> Que el sistema esté arriba no dice nada sobre quién puede usarlo.</li>
+            <li><strong>d)</strong> La privacidad es más amplia: el tratamiento de datos personales.</li>
+          </ul>
+          <div class="note risk">
+            <span class="lab">Reparo propio <span class="pill p-recom">Criterio</span></span>
+            <p>La pregunta tiene un matiz que vale la pena conocer. Bass define la <strong>integridad</strong> como que datos y servicios <em>no estén sujetos a manipulación no autorizada</em>. Una transferencia hecha por alguien que no es el titular es, justamente, una manipulación no autorizada, así que un argumento por la integridad también es defendible. Lo que desempata en el examen es la <strong>redacción de cada opción</strong>: la a) habla de «solo usuarios autorizados» (la frase del enunciado) y la b) habla de alteración en tránsito. Regla para el examen: «solo autorizados» → confidencialidad.</p>
+          </div>
+          <p class="key"><span class="lab">Concepto</span><span>CIA: confidencialidad (quién accede), integridad (que no se altere), disponibilidad (que esté arriba).</span></p>
+        </div></details>
+      </article>
+
+      <!-- P10 -->
+      <article class="q" id="p10" data-q="10" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 10</span><h3>La primera táctica: detectar</h3></div>
+        <p class="stem">Si un sistema de salud detecta un intento de acceso no autorizado a historiales médicos, ¿qué táctica de seguridad debería activarse primero?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Resistir, para bloquear inmediatamente el acceso del intruso.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Detectar, para identificar y registrar el comportamiento sospechoso.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Recuperarse, para restaurar los datos afectados.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Reaccionar, para notificar al equipo de seguridad y tomar medidas.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Las tácticas de seguridad de Bass se agrupan en cuatro categorías que siguen el ciclo de un ataque: <strong>Detectar → Resistir → Reaccionar → Recuperarse</strong>. La primera es <strong>detectar</strong>: identificar y <strong>registrar</strong> el comportamiento sospechoso (detección de intrusos, auditoría, verificación de integridad de mensajes, detección de anomalías). Sin esa detección, el sistema no sabe contra qué resistir, cómo reaccionar ni qué recuperar.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a) Resistir</strong> va después: bloquear o limitar el acceso una vez identificada la amenaza.</li>
+            <li><strong>d) Reaccionar</strong> es responder al ataque ya confirmado: notificar, revocar el acceso, bloquear cuentas.</li>
+            <li><strong>c) Recuperarse</strong> es la última fase: restaurar datos y servicio.</li>
+          </ul>
+          <div class="note risk">
+            <span class="lab">La que fallamos</span>
+            <p>En la autoevaluación respondimos <strong>Resistir</strong>, y fue la única incorrecta. La trampa está en el enunciado: dice que el sistema «detecta» el intento, y eso empuja a pensar que la detección ya ocurrió. Pero la pregunta evalúa el <strong>orden de las tácticas</strong>, y la primera siempre es <strong>Detectar</strong>, que incluye <em>registrar</em> lo que pasó.</p>
+          </div>
+          <div class="note"><span class="lab">En el Reto 2</span><p>Los logs JSON con <code>event_id</code> de cada paso son, en pequeño, la capacidad de «detectar y registrar»: sin ellos no habríamos podido reconstruir la corrida oficial ni demostrar cuándo llegó el correo.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Seguridad: Detectar → Resistir → Reaccionar → Recuperarse. Siempre se empieza por detectar.</span></p>
+        </div></details>
+      </article>
+    </section>
+
+    <!-- ══ CLAVE ═══════════════════════════════════════════ -->
+    <section id="clave">
+      <p class="eyebrow">Referencia</p>
+      <h2 class="sec">Clave de respuestas</h2>
+      <p>Está plegada a propósito: si la abres antes de responder, el documento pierde su función.</p>
+      <details class="why"><summary>Mostrar la clave</summary><div class="body">
+        <div class="tw"><table>
+          <thead><tr><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th></tr></thead>
+          <tbody><tr><td>b</td><td>b</td><td>c</td><td>b</td><td>b</td><td>b</td><td>b</td><td>a</td><td>a</td><td>b</td></tr></tbody>
+        </table></div>
+      </div></details>
+    </section>
+
+    <!-- ══ PATRONES ════════════════════════════════════════ -->
+    <section id="patrones">
+      <p class="eyebrow">Lo que sirve para los módulos siguientes</p>
+      <h2 class="sec">Patrones para resolver este tipo de pregunta</h2>
+      <ol class="hand">
+        <li><strong>Hay una sola opción técnica y medible.</strong> Las distractoras suelen ser estéticas o de usabilidad (colores, avatares, animaciones, emoticones). En la mayoría de las preguntas basta con descartarlas.</li>
+        <li><strong>Busca el número.</strong> «Menos de 3 s», «menos de 50 ms», «99,9 %»: la opción con una medida verificable es la que describe un atributo de calidad.</li>
+        <li><strong>Lento o caído.</strong> Si el sistema responde tarde, es desempeño; si no responde, es disponibilidad (preguntas 3 y 5).</li>
+        <li><strong>Las preguntas de seguridad son de vocabulario y de orden.</strong> Cuando todas las opciones son técnicas (preguntas 9 y 10), lo que decide es la definición exacta (CIA) o la secuencia (detectar primero).</li>
+        <li><strong>No te dejes llevar por el verbo del enunciado.</strong> Que diga «detecta» no significa que la detección ya esté hecha: la pregunta 10 evalúa el orden, no la narración.</li>
+      </ol>
+    </section>
+
+    <!-- ══ PROMPTS ═════════════════════════════════════════ -->
+    <section id="prompts">
+      <p class="eyebrow">Seguir estudiando</p>
+      <h2 class="sec">Prompts para profundizar</h2>
+      <p>Para pegar en una conversación nueva. Pasa el cursor sobre cada bloque para copiarlo.</p>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame las tácticas de seguridad de Bass (detectar, resistir,
+reaccionar y recuperarse) con un ejemplo concreto de un sistema
+bancario para cada una, y en qué orden se activan ante un ataque.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame la diferencia entre confidencialidad e integridad con
+5 escenarios ambiguos de banca en línea. Para cada uno dime cuál
+pilar aplica y por qué el otro no.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Ayúdame a escribir escenarios de calidad completos (fuente, estímulo,
+entorno, artefacto, respuesta, medida) para desempeño, disponibilidad,
+interoperabilidad y seguridad en un sistema de alertas de flota.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Compara redundancia activa, redundancia pasiva y spare (repuesto
+en frío): tiempo de recuperación, costo y cuándo usar cada una
+para alcanzar 99,9 % y 99,99 % de disponibilidad.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Tómame una evaluación de 10 preguntas de opción múltiple sobre
+atributos de calidad y tácticas (desempeño, disponibilidad,
+interoperabilidad y seguridad), al nivel de este módulo. No me des
+las respuestas hasta que yo responda todas.</pre></div>
+    </section>
+
+    <!-- ══ CUADERNO ════════════════════════════════════════ -->
+    <section id="cuaderno">
+      <p class="eyebrow">Cierre</p>
+      <h2 class="sec">Los seis puntos que resumen el módulo</h2>
+      <ol class="hand">
+        <li><strong>Requisito significativo</strong> = atributo de calidad medible que obliga a cambiar la estructura.</li>
+        <li><strong>Escenario de calidad:</strong> estímulo → respuesta → medida. Sin medida, no hay requisito.</li>
+        <li><strong>Desempeño</strong> se juzga bajo carga: caché, concurrencia, asincronía, limitar la tasa.</li>
+        <li><strong>Disponibilidad</strong> se gana quitando puntos únicos de falla: redundancia, balanceo, failover. 99,9 % ≈ 8,76 h al año.</li>
+        <li><strong>Interoperabilidad</strong> = leer el mensaje y entenderlo igual: estándares, contratos y registro de servicios.</li>
+        <li><strong>Seguridad:</strong> CIA para saber qué se protege; detectar → resistir → reaccionar → recuperarse para saber cómo.</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer class="end">
+    <p>Aporte de Daniel Mazo (Danny) · Módulo 2 — Requerimientos y Tácticas de Arquitectura de Software · 14/10/2026.<br>
+    Fuente primaria: autoevaluación oficial del Módulo 2 (10 preguntas, plataforma Brightspace; resultado 90 %). Los enunciados y opciones se transcriben; los análisis, tablas y notas son elaboración propia con apoyo de IA. El contenido marcado <span class="pill p-compl">Complementario</span> no proviene del material oficial del diplomado.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_THEME = "m1-autoeval-theme";
+
+  /* ── tema ─────────────────────────────────────────── */
+  try{
+    var saved = localStorage.getItem(LS_THEME);
+    if(saved === "dark" || saved === "light"){ document.documentElement.setAttribute("data-theme", saved); }
+  }catch(e){}
+
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    if(!cur){
+      cur = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem(LS_THEME, next); }catch(e){}
+  }
+
+  /* ── quiz ─────────────────────────────────────────── */
+  var qs = Array.prototype.slice.call(document.querySelectorAll(".q"));
+  var state = {};
+
+  function railLink(n){ return document.querySelector('#railq a[data-q="' + n + '"]'); }
+
+  function paint(){
+    var answered = 0, hits = 0;
+    Object.keys(state).forEach(function(k){
+      answered++;
+      if(state[k]) hits++;
+    });
+    var el = document.getElementById("score");
+    var cap = document.getElementById("scorecap");
+    if(el){ el.textContent = hits + " / " + (answered || 0); }
+    if(cap){
+      cap.textContent = answered === 0
+        ? "aún no has respondido"
+        : "aciertos sobre " + answered + " respondida" + (answered === 1 ? "" : "s") + " de 10";
+    }
+  }
+
+  function answer(q, key){
+    var n = q.getAttribute("data-q");
+    if(state.hasOwnProperty(n)) return;           // una sola oportunidad por pregunta
+    var correct = q.getAttribute("data-correct");
+    var good = key === correct;
+    state[n] = good;
+
+    q.classList.add("done");
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      var k = b.getAttribute("data-k");
+      b.disabled = true;
+      if(k === correct){ b.classList.add("is-ok"); }
+      else if(k === key){ b.classList.add("is-bad"); }
+      else { b.classList.add("dim"); }
+    });
+
+    var v = q.querySelector(".verdict");
+    v.hidden = false;
+    v.className = "verdict " + (good ? "ok" : "bad");
+    v.textContent = good
+      ? "Correcto — la respuesta es " + correct + ")"
+      : "Revisa: elegiste " + key + "), la correcta es " + correct + ")";
+
+    var d = q.querySelector("details.why");
+    if(d){ d.open = true; }
+
+    var link = railLink(n);
+    if(link){ link.classList.add(good ? "hit" : "miss"); }
+
+    paint();
+  }
+
+  qs.forEach(function(q){
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      b.addEventListener("click", function(){ answer(q, b.getAttribute("data-k")); });
+    });
+  });
+
+  function reset(){
+    state = {};
+    qs.forEach(function(q){
+      q.classList.remove("done");
+      Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+        b.disabled = false;
+        b.classList.remove("is-ok","is-bad","dim");
+      });
+      var v = q.querySelector(".verdict");
+      v.hidden = true; v.textContent = ""; v.className = "verdict";
+      var d = q.querySelector("details.why");
+      if(d){ d.open = false; }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#railq a"), function(a){
+      a.classList.remove("hit","miss");
+    });
+    paint();
+  }
+
+  function openAll(){
+    Array.prototype.forEach.call(document.querySelectorAll("details"), function(d){ d.open = true; });
+  }
+
+  /* ── copiar prompts ───────────────────────────────── */
+  Array.prototype.forEach.call(document.querySelectorAll(".prompt .copy"), function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.parentNode.querySelector("pre");
+      var txt = pre ? pre.textContent : "";
+      var done = function(){
+        var old = btn.textContent;
+        btn.textContent = "Copiado";
+        setTimeout(function(){ btn.textContent = old; }, 1400);
+      };
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done, function(){});
+          return;
+        }
+      }catch(e){}
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); done();
+      }catch(e2){}
+    });
+  });
+
+  /* ── botones y teclado ────────────────────────────── */
+  ["btn-theme","btn-theme-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", toggleTheme);
+  });
+  ["btn-reset","btn-reset-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", reset);
+  });
+  ["btn-open","btn-open-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", openAll);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    var k = e.key.toLowerCase();
+    if(k === "t"){ toggleTheme(); }
+    else if(k === "r"){ reset(); }
+  });
+
+  paint();
+})();
+</script>
+</body>
+</html>
