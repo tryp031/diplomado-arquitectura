@@ -38,7 +38,7 @@ El mismo `event_id` une la recepción con el envío.
 | **Hasta la llegada a Gmail** | última petición recibida (19:01:54.654) → llegada al buzón (19:01:55) | **entre 0,64 y 1,35 s** |
 
 El panel fecha cada petición cuando la ingesta **responde** (igual que nginx en la versión local). En
-el `Emergency`, eso ocurre después de encolarlo, así que su cifra es la más corta de las tres. Las tres
+el `Emergency`, eso ocurre después de encolarlo, así que su cifra es la más corta. Todas
 cumplen con amplitud el criterio de 15 s.
 
 ## Llegada del correo a Gmail
