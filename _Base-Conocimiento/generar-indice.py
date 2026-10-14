@@ -50,6 +50,8 @@ DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "doming
 # El título propio sirve cuando el <title> no dice qué es desde el índice.
 DESTACADOS = {
     "Modulo 2": [
+        ("Entregables/presentacion-reto2.html",
+         "La presentación oficial del Reto 2 (13 láminas): AWS como solución, desempeño y escalabilidad como atributo, demo en vivo.", "Presentación oficial del Reto 2"),
         ("Aportes/danny/m2-cuaderno-estudio-danny.html",
          "Notas de estudio del módulo con método, matriz de trade-offs, autoevaluación y glosario. Empieza por aquí.", "Cuaderno de estudio del Módulo 2"),
         ("Material-Clase/Actividad-Reto2.html",
