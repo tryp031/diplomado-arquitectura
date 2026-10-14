@@ -67,6 +67,34 @@ insertadas en línea en los `<template>` `svg-ll` y `svg-tb`: si se regeneran, h
 
 ---
 
+## `m2-autoevaluacion-oficial-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-14 |
+| **Módulo** | 2 — Requerimientos y Tácticas de Arquitectura de Software |
+| **Tema** | Las 10 preguntas de la autoevaluación oficial del M2, resueltas y analizadas |
+| **Tipo** | `apunte` — notas de estudio propias, elaboradas con IA |
+| **Fuentes** | **Autoevaluación oficial del M2** (Brightspace, 10 preguntas; enunciados y opciones transcritos; resultado 90 %, 9/10, intento único del 14/10) · Bass, Clements y Kazman (tácticas) · conocimiento complementario marcado como tal en el documento |
+| **Estado** | vigente · ⬜ sin consolidar |
+| **Origen** | `autoevaluacion_M2_material_de_estudio.md`, redactado por Danny con IA tras presentar la autoevaluación. El `.md` no se versiona: este HTML lo reemplaza |
+
+**Qué contiene:** marco conceptual (escenario de calidad, los 4 atributos con sus tácticas, «lento vs.
+caído») · las 10 preguntas en formato interactivo, con el análisis de cada distractora y un recuadro
+«En el Reto 2» que conecta el concepto con lo que construimos · clave plegada · 5 patrones de examen ·
+5 prompts · resumen de 6 puntos. Mismo diseño y script que `m1-autoevaluacion-danny.html`.
+
+**Límites y ambigüedades registradas:**
+- La P10 (Detectar) fue la única incorrecta: se respondió Resistir. El documento lo explica.
+- **P9:** la clave oficial es Confidencialidad, pero con la definición de integridad de Bass («no sujeto
+  a manipulación no autorizada») un argumento por Integridad también es defendible. Se registra como
+  criterio propio; se adopta la clave oficial.
+- No confundir con `m2-autoevaluacion-danny.html` (04/10): ese es un banco de práctica propio, anterior
+  a la autoevaluación oficial.
+
+---
+
 ## `m2-preguntas-encuentro-0610-danny.md` (+ `.html` generado)
 
 | Campo | Valor |
