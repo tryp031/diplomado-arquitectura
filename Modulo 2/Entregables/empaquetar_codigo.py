@@ -68,17 +68,13 @@ LIMPIEZA = {
         ("Criterio reportado del profesor (notas de Freddy, 06/10)",
          "Criterio del profesor (encuentro del 06/10)"),
     ],
-    "aws/ingesta.py": [
-        ("Misma lógica tolerante del sistema local (ver recepcion.py / ingest_app.py del Reto2-Alerta-Flota):",
-         "Misma lógica tolerante del sistema local (local/alerta/ingest_app.py):"),
-        ("Variable de entorno: QUEUE_URL (la URL de la cola SQS de emergencias). Mientras no exista (paso 2,\n"
-         "antes de crear SQS en el paso 3), cualquier Emergency responde 503 a propósito: nunca confirma una\n"
-         "alerta que no quedó guardada en ningún lado. Es el camino de error ya documentado en el diseño, no un\n"
-         "bug de esta prueba.\n",
-         "Variable de entorno: QUEUE_URL (la URL de la cola SQS de emergencias). Si falta o SQS falla, el\n"
-         "Emergency responde 503 a propósito: nunca confirma una alerta que no quedó guardada.\n"),
-        # Solo cambia el texto del error que va al log; la lógica es la misma.
-        ('"QUEUE_URL no configurada todavía (paso 3 pendiente)"', '"QUEUE_URL no configurada"'),
+    # aws/ingesta.py no necesita limpieza: el PR #50 dejó sus docstrings sin referencias internas.
+    "aws/notifier.py": [
+        # Solo cambia el comentario: afirmaba que botocore no reintenta, y no es así. La lógica es la
+        # desplegada en AWS; el aporte de Camilo no se edita (ver aws/README.md, Brechas conocidas).
+        ("# max_attempts=1: el presupuesto de reintentos lo controla este código, no botocore.\n",
+         "# Brecha conocida: max_attempts=1 cuenta reintentos sin el intento inicial, así que botocore\n"
+         "# puede hacer 2 llamadas por intento si SES no responde (ver aws/README.md, Brechas conocidas).\n"),
     ],
 }
 
@@ -121,15 +117,15 @@ def main() -> None:
     if sin_usar:
         sys.exit(f"ERROR: LIMPIEZA apunta a archivos que no entran al ZIP: {sorted(sin_usar)}")
 
-    escapes = []
-    with zipfile.ZipFile(DESTINO, "w", zipfile.ZIP_DEFLATED) as zf:
-        for origen, ruta in sorted(entradas, key=lambda e: e[1]):
-            datos = contenido(origen, ruta)
-            escapes += [f"{ruta}: {p}" for p in PROHIBIDO if p.encode() in datos]
-            zf.writestr(f"{RAIZ_ZIP}/{ruta}", datos)
+    # Todo se valida en memoria antes de abrir el ZIP: si algo falla, el ZIP anterior queda intacto.
+    archivos = [(ruta, contenido(origen, ruta)) for origen, ruta in sorted(entradas, key=lambda e: e[1])]
+    escapes = [f"{ruta}: {p}" for ruta, datos in archivos for p in PROHIBIDO if p.encode() in datos]
     if escapes:
-        DESTINO.unlink()
-        sys.exit("ERROR: notas internas en el paquete (ZIP borrado):\n  " + "\n  ".join(escapes))
+        sys.exit("ERROR: notas internas en el paquete (ZIP sin cambios):\n  " + "\n  ".join(escapes))
+
+    with zipfile.ZipFile(DESTINO, "w", zipfile.ZIP_DEFLATED) as zf:
+        for ruta, datos in archivos:
+            zf.writestr(f"{RAIZ_ZIP}/{ruta}", datos)
     print(f"OK: {DESTINO.name} · {len(entradas)} archivos · {DESTINO.stat().st_size / 1024:.0f} KB")
 
 
