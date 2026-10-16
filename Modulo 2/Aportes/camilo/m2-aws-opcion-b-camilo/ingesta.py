@@ -1,13 +1,17 @@
-"""Lambda de ingesta (paso 2, camino B en AWS).
+"""Lambda de ingesta: valida el evento y encola solo los Emergency.
 
-Misma lógica tolerante del sistema local (ver recepcion.py / ingest_app.py del Reto2-Alerta-Flota):
-solo `type` es obligatorio, decide el flujo; placa faltante -> DESCONOCIDA; `Emergency` sin distinguir
-mayúsculas. Responde en milisegundos, nunca espera al envío del correo.
+SQS (Simple Queue Service) es la cola de AWS donde queda guardada la alerta
+hasta que el notifier la procesa.
 
-Variable de entorno: QUEUE_URL (la URL de la cola SQS de emergencias). Mientras no exista (paso 2,
-antes de crear SQS en el paso 3), cualquier Emergency responde 503 a propósito: nunca confirma una
-alerta que no quedó guardada en ningún lado. Es el camino de error ya documentado en el diseño, no un
-bug de esta prueba.
+Entrada: API Gateway (body JSON con `type`; opcionales `vehicle_plate` y `status`).
+Salida:  200 aceptado, 400 payload inválido, 503 si el Emergency no quedó en SQS.
+Variables de entorno: QUEUE_URL.
+
+Reglas:
+- Solo `type` es obligatorio; `Emergency` se reconoce sin distinguir mayúsculas.
+- Placa ausente o vacía se registra como DESCONOCIDA.
+- Responde sin esperar el correo: el envío lo hace el notifier desde la cola.
+- Nunca se responde 200 a un Emergency que no quedó guardado en SQS.
 """
 import json
 import logging
@@ -71,7 +75,7 @@ def lambda_handler(event, context):
     queue_url = os.environ.get("QUEUE_URL")
     try:
         if not queue_url:
-            raise RuntimeError("QUEUE_URL no configurada todavía (paso 3 pendiente)")
+            raise RuntimeError("QUEUE_URL no está configurada")
         sqs.send_message(
             QueueUrl=queue_url,
             MessageBody=json.dumps(
@@ -84,7 +88,9 @@ def lambda_handler(event, context):
                 ensure_ascii=False,
             ),
         )
-    except Exception as exc:  # preferimos un error visible a confirmar una alerta perdida
+    except Exception as exc:
+        # Cualquier fallo al encolar es 503: es preferible que quien envía reintente
+        # a confirmar una alerta que no quedó guardada.
         _log("EMERGENCY_ENQUEUE_FAILED", **ids, error=f"{type(exc).__name__}: {exc}")
         return _respuesta(503, {"error": "no se pudo registrar la emergencia"})
 

@@ -1,11 +1,19 @@
-"""Lambda notifier (paso 4, camino B en AWS).
+"""Lambda notifier: toma un Emergency de SQS y lo envía por correo con SES.
 
-Consume de SQS (reto2-emergencias, batch size 1), envía el correo por SES con un presupuesto de
-reintentos acotado (sección 6.1 del diseño: 2 intentos, ~5 s cada uno, 1 s de espera, <= 12 s en total),
-y si agota los intentos, manda la alerta a la DLQ explícitamente (en vez de dejar que SQS la reintente
-por visibilidad, que llegaría después de los 15 s de la rúbrica de todas formas).
+SQS (Simple Queue Service): cola de mensajes. SES (Simple Email Service): envío
+de correo de AWS. DLQ (Dead Letter Queue): cola aparte donde se guardan los
+mensajes que no se pudieron enviar, para revisarlos en vez de perderlos.
 
+Entrada: evento de SQS (un mensaje por invocación) con event_id, vehicle_plate,
+         status y received_at.
+Salida:  siempre `batchItemFailures` vacío; los fallos se resuelven aquí, no por
+         visibilidad de SQS.
 Variables de entorno: MAIL_FROM, MAIL_TO, DLQ_URL.
+
+Presupuesto de tiempo: 2 intentos de ~5 segundos cada uno y 1 segundo de espera entre ellos,
+máximo ~12 segundos, para que el correo salga dentro de los 15 segundos.
+Si ambos intentos fallan, el mensaje va a la DLQ de inmediato: dejar que SQS lo
+reintente por visibilidad lo entregaría después de esos 15 segundos.
 """
 import json
 import os
@@ -23,8 +31,8 @@ MAIL_TO = os.environ["MAIL_TO"]
 DLQ_URL = os.environ["DLQ_URL"]
 SUBJECT = "🚨 Alerta de Emergencia 🚨"
 
-# connect_timeout + read_timeout ~5 s por intento, sin reintentos ocultos del SDK (max_attempts=1):
-# el presupuesto de reintentos lo controla este código, no botocore.
+# max_attempts=1: el presupuesto de reintentos lo controla este código, no botocore.
+# connect (2 s) + read (3 s) dan los ~5 s por intento.
 ses = boto3.client("ses", config=Config(connect_timeout=2, read_timeout=3, retries={"max_attempts": 1}))
 sqs = boto3.client("sqs")
 
@@ -79,7 +87,8 @@ def lambda_handler(event, context):
                 _enviar(alerta)
                 enviado = True
                 break
-            except Exception as exc:  # no sabemos qué fallo es transitorio: se reintenta todo
+            except Exception as exc:
+                # No se distingue el tipo de fallo: se reintenta todo una vez.
                 ultimo_error = f"{type(exc).__name__}: {exc}"
                 if intento == 1:
                     _log("EMAIL_RETRY", **ids, attempt=intento, error=ultimo_error, retry_in_s=1)
