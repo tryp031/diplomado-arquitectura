@@ -3,6 +3,7 @@ nivel, cuenta el resultado y registra cada cambio de nivel.
 
 API Gateway (proxy) → handler → Router.atender → InvocadorLambda → reto3-nivel{n}
 """
+import base64
 import json
 import os
 import time
@@ -34,7 +35,11 @@ class Router:
         inicio = self.reloj()
         minuto = int(inicio // 60)
         try:
-            cuerpo = json.loads(evento.get("body") or "{}")
+            crudo = evento.get("body") or "{}"
+            # API Gateway manda el cuerpo en base64 cuando no lo trata como texto (p. ej., sin Content-Type).
+            if evento.get("isBase64Encoded"):
+                crudo = base64.b64decode(crudo).decode("utf-8")
+            cuerpo = json.loads(crudo)
             if not isinstance(cuerpo, dict):
                 raise ValueError("el cuerpo no es un objeto JSON")
         except ValueError:
@@ -104,6 +109,9 @@ class InvocadorLambda:
         datos = json.loads(r["Payload"].read() or b"{}")
         if "FunctionError" in r:
             raise RuntimeError(f"reto3-nivel{nivel}: {datos}")
+        # Una respuesta sin statusCode es una falla del servicio, no un éxito: se cuenta.
+        if not (isinstance(datos, dict) and isinstance(datos.get("statusCode"), int)):
+            raise RuntimeError(f"reto3-nivel{nivel}: respuesta inválida {datos!r}")
         return datos
 
 
@@ -119,7 +127,13 @@ def _desde_entorno() -> Router:
 
 
 def handler(event, context):
+    """Última red: nada sale como un 502 crudo del API Gateway, ni siquiera con mala configuración."""
     global _router
-    if _router is None:
-        _router = _desde_entorno()
-    return _router.atender(event, getattr(context, "aws_request_id", "local"))
+    request_id = getattr(context, "aws_request_id", "local")
+    try:
+        if _router is None:
+            _router = _desde_entorno()
+        return _router.atender(event, request_id)
+    except Exception as e:
+        Observabilidad("router").emitir("FALLA_ROUTER", detalle=repr(e), request_id=request_id)
+        return respuesta(*MENSAJES[N3][True])

@@ -81,7 +81,7 @@ que se convierte en un test):
 | 3,50 s | 1-2-1-3-2-1 | ✅ N1 |
 | 4,00 s | 1-2-1-2-3-2-3-2-1 | ✅ N1 |
 
-**Riesgo R1:** si la latencia media cae por debajo de unos 50 ms, la prueba termina en N2. Con API Gateway, 2 Lambdas
+**Riesgo R1:** si la latencia media cae por debajo de unos **25 ms** (umbral calculado el 18/10 con `test_k6_oficial.correr_k6`, en pasos de 5 ms), la prueba termina en N2. Con API Gateway, 2 Lambdas
 y DynamoDB se esperan entre 50 y 150 ms. **[Supuesto]** que se mide en la primera corrida (§10).
 
 **Respuestas** (cuerpo `{"message": "..."}`, como en las capturas oficiales):
@@ -245,10 +245,11 @@ lo que ya conoce. **[Decisión]**
 
 | Riesgo | Mitigación |
 |---|---|
-| **R1** latencia < 50 ms → la prueba termina en N2 | Medir la latencia en la primera corrida. Si queda por debajo de 50 ms, se documenta como límite del script (140 × 3 s = 420 s exactos, que termina justo en el borde del minuto 7) y se lleva al docente. No se toca el script, y la regla no se «ajusta» para pasar la prueba |
+| **R1** latencia < 25 ms → la prueba termina en N2 | Medir la latencia en la primera corrida. Si queda por debajo de 25 ms, se documenta como límite del script (140 × 3 s = 420 s exactos, que termina justo en el borde del minuto 7) y se lleva al docente. No se toca el script, y la regla no se «ajusta» para pasar la prueba |
 | **R2** diferencias de LocalStack | La corrida oficial es en AWS real |
 | **R3** el docente dice el 27/10 que la recuperación no es escalonada | Se cambia una línea de `reglas.py` y su test (diseño modificable) |
 | **R4** Camilo no puede dar acceso a tiempo | Alternativa: que Camilo despliegue. Último recurso: una cuenta propia en capa gratuita |
+| **R6** subconteo puntual de errores (revisión de código del 18/10) | Si falla el `ADD` final, la petición no se cuenta (solo queda el log `ESTADO_NO_DISPONIBLE`). Una petición que empieza en el segundo 59,9 puede registrar su error después de que se decidió el minuto siguiente. Con 1 petición cada 3 s es despreciable. Se acepta y se documenta, sin código |
 | **R5** desfase de reloj entre k6 y AWS | NTP en los dos lados (<1 s); el k6 se alinea al segundo 00 |
 | **Escalabilidad (10×)** | Un solo ítem `MIN#m` se vuelve *hot key* con miles de peticiones por segundo. Mejora futura: contadores fragmentados o métricas de CloudWatch. Hoy son 20 peticiones por minuto, así que no se justifica **[Decisión]** (YAGNI) |
 
@@ -277,3 +278,8 @@ multi-región · autenticación del API (el k6 no manda credenciales; se declara
 1. ¿La recuperación tiene que ser escalonada (3 → 2 → 1) o vale la regla pura del minuto anterior, que permite 3 → 1?
 2. ¿Se acepta el salto 1 → 3 al degradar (con el script actual ocurre al entrar al minuto 4, después de los 15 errores del minuto 3)?
 3. ¿El envío es individual o grupal? ¿Cuál es la rúbrica de la parte que no es la demo?
+4. **Hallazgo de la corrida en LocalStack (18/10):** con la regla del docente y el script oficial, **no llega ninguna
+   petición con error mientras el sistema está en N3**. Los minutos con errores (1, 3 y 5) van seguidos de minutos sin
+   errores, que son los que quedan en N3. Por eso el mensaje «Nivel 3: Sistema bajo mantenimiento, intente más tarde»
+   no aparece en la corrida, aunque el enunciado lo pide. ¿Basta con demostrarlo aparte (tests y un `curl` manual en el
+   video)?

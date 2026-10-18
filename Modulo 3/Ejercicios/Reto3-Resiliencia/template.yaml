@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Reto 3 — arquitectura resiliente con degradación en 3 niveles (Group 2)
+
+Parameters:
+  Entorno:
+    Type: String
+    AllowedValues: [aws, localstack]
+    Default: aws
+  UmbralDegradado:
+    Type: Number
+    Default: 5
+  UmbralMinimo:
+    Type: Number
+    Default: 10
+
+Conditions:
+  EsAws: !Equals [!Ref Entorno, aws]
+
+Globals:
+  Function:
+    # CodeUri va en cada función: `aws cloudformation package` no resuelve el de Globals
+    # (empaquetaría la carpeta completa, .venv incluido).
+    Runtime: python3.12
+    Architectures: [arm64]
+    MemorySize: 256
+    Timeout: 10
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: reto3-api
+      StageName: prod
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingBurstLimit: 50
+          ThrottlingRateLimit: 25
+
+  TablaEstado:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: reto3-estado
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: pk, AttributeType: S}]
+      KeySchema: [{AttributeName: pk, KeyType: HASH}]
+      TimeToLiveSpecification: {AttributeName: ttl, Enabled: true}
+
+  Nivel1:
+    Type: AWS::Serverless::Function
+    Properties: {FunctionName: reto3-nivel1, Handler: niveles.handler_nivel1, CodeUri: src/}
+  Nivel2:
+    Type: AWS::Serverless::Function
+    Properties: {FunctionName: reto3-nivel2, Handler: niveles.handler_nivel2, CodeUri: src/}
+  Nivel3:
+    Type: AWS::Serverless::Function
+    Properties: {FunctionName: reto3-nivel3, Handler: niveles.handler_nivel3, CodeUri: src/}
+
+  Router:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: reto3-router
+      CodeUri: src/
+      Handler: router.handler
+      Environment:
+        Variables:
+          TABLA: !Ref TablaEstado
+          NIVEL1_FN: !Ref Nivel1
+          NIVEL2_FN: !Ref Nivel2
+          NIVEL3_FN: !Ref Nivel3
+          UMBRAL_DEGRADADO: !Ref UmbralDegradado
+          UMBRAL_MINIMO: !Ref UmbralMinimo
+      Policies:
+        # Solo lo que usa estado.py (DynamoDBCrudPolicy daría también Put/Delete/Scan/Query).
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:BatchGetItem, dynamodb:GetItem, dynamodb:UpdateItem]
+              Resource: !GetAtt TablaEstado.Arn
+        - LambdaInvokePolicy: {FunctionName: !Ref Nivel1}
+        - LambdaInvokePolicy: {FunctionName: !Ref Nivel2}
+        - LambdaInvokePolicy: {FunctionName: !Ref Nivel3}
+      Events:
+        Servicio:
+          Type: Api
+          Properties: {RestApiId: !Ref Api, Path: /service-api, Method: post}
+
+  LogsRouter:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /aws/lambda/reto3-router, RetentionInDays: 14}
+  LogsNivel1:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /aws/lambda/reto3-nivel1, RetentionInDays: 14}
+  LogsNivel2:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /aws/lambda/reto3-nivel2, RetentionInDays: 14}
+  LogsNivel3:
+    Type: AWS::Logs::LogGroup
+    Properties: {LogGroupName: /aws/lambda/reto3-nivel3, RetentionInDays: 14}
+
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Condition: EsAws
+    Properties:
+      DashboardName: reto3-resiliencia
+      DashboardBody: !Sub |
+        {"widgets":[
+          {"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"title":"Nivel actual (1 Full · 2 Degradado · 3 Mínimo)","region":"${AWS::Region}","stat":"Maximum","period":60,"metrics":[["Reto3","NivelActual","servicio","router"]],"yAxis":{"left":{"min":0,"max":3}}}},
+          {"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"title":"Errores y peticiones por minuto","region":"${AWS::Region}","stat":"Sum","period":60,"metrics":[["Reto3","Errores","servicio","router"],["Reto3","Peticiones","servicio","router"]]}},
+          {"type":"metric","x":0,"y":6,"width":12,"height":6,"properties":{"title":"Transiciones de nivel","region":"${AWS::Region}","stat":"Sum","period":60,"metrics":[["Reto3","Transiciones","servicio","router"]]}},
+          {"type":"log","x":12,"y":6,"width":12,"height":6,"properties":{"title":"CAMBIO_NIVEL","region":"${AWS::Region}","query":"SOURCE '/aws/lambda/reto3-router' | filter evento = 'CAMBIO_NIVEL' | fields @timestamp, minuto, de, a, motivo, errores_minuto_anterior | sort @timestamp desc"}}
+        ]}
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod/service-api"
+  ApiId:
+    Value: !Ref Api

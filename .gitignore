@@ -49,3 +49,6 @@ venv/
 # Se versiona el texto extraido (Material-Clase/Tacticas-*.md); los .pptx se bajan de
 # Brightspace (Recursos complementarios) y quedan solo en local.
 **/Material-Clase/*.pptx
+
+# --- Reto 3: artefactos de despliegue ---
+Modulo 3/Ejercicios/Reto3-Resiliencia/.build/

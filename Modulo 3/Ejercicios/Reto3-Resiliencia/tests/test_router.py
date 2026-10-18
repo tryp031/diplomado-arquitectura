@@ -108,3 +108,51 @@ def test_cada_peticion_emite_metricas():
     p = eventos(lineas, "PETICION")[0]
     assert p["NivelActual"] == N1 and p["Errores"] == 1 and p["Peticiones"] == 1
     assert "_aws" in p
+
+
+class _LambdaFalsa:
+    def __init__(self, payload: bytes):
+        self.payload = payload
+
+    def invoke(self, **_):
+        import io
+        return {"Payload": io.BytesIO(self.payload)}
+
+
+def test_respuesta_sin_status_del_nivel_cuenta_como_error():
+    from router import InvocadorLambda
+    invocar = InvocadorLambda({1: "f1", 2: "f2", 3: "f3"}, cliente=_LambdaFalsa(b"null"))
+    r, repo, _, lineas = armar(invocar=invocar)
+    resp = r.atender(evento(), "id")
+    assert resp["statusCode"] == 503
+    assert repo.minutos[T0 // 60]["errores"] == 1
+    assert eventos(lineas, "FALLA_NIVEL")
+
+
+def test_handler_con_mala_configuracion_no_devuelve_502(monkeypatch, capsys):
+    import router
+    monkeypatch.setattr(router, "_router", None)
+    monkeypatch.delenv("TABLA", raising=False)
+    resp = router.handler(evento(), None)
+    assert resp["statusCode"] == 503
+    assert "FALLA_ROUTER" in capsys.readouterr().out
+
+
+def test_item_malformado_es_estado_no_disponible():
+    import pytest
+    from estado import EstadoNoDisponible, RepositorioDynamo
+
+    class _Db:
+        def batch_get_item(self, **_):
+            return {"Responses": {"t": [{"pk": {"S": "MIN#no-numero"}}]}, "UnprocessedKeys": {}}
+
+    with pytest.raises(EstadoNoDisponible):
+        RepositorioDynamo("t", cliente=_Db()).leer_minutos([1])
+
+
+def test_cuerpo_en_base64_se_decodifica():
+    import base64
+    r, *_ = armar()
+    cuerpo = base64.b64encode(json.dumps({"error": True}).encode()).decode()
+    resp = r.atender({"body": cuerpo, "isBase64Encoded": True}, "id")
+    assert mensaje(resp) == "Nivel 1: Operación Full con Error"

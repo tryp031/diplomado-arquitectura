@@ -46,10 +46,13 @@ class RepositorioDynamo:
         if r.get("UnprocessedKeys"):
             raise EstadoNoDisponible("batch_get_item dejó claves sin procesar")
         out = {}
-        for item in r["Responses"].get(self.tabla, []):
-            minuto = int(item["pk"]["S"].split("#", 1)[1])
-            nivel = int(item["nivel"]["N"]) if "nivel" in item else None
-            out[minuto] = RegistroMinuto(nivel=nivel, errores=int(item.get("errores", {"N": "0"})["N"]))
+        try:
+            for item in r["Responses"].get(self.tabla, []):
+                minuto = int(item["pk"]["S"].split("#", 1)[1])
+                nivel = int(item["nivel"]["N"]) if "nivel" in item else None
+                out[minuto] = RegistroMinuto(nivel=nivel, errores=int(item.get("errores", {"N": "0"})["N"]))
+        except (KeyError, ValueError, IndexError) as e:
+            raise EstadoNoDisponible(f"ítem malformado: {e!r}") from e
         return out
 
     def fijar_nivel(self, minuto: int, nivel: int) -> tuple[int, bool]:
@@ -70,9 +73,9 @@ class RepositorioDynamo:
             raise EstadoNoDisponible(str(e)) from e
         try:
             item = self._db.get_item(TableName=self.tabla, Key=_clave(minuto), ConsistentRead=True)["Item"]
-        except (ClientError, BotoCoreError, KeyError) as e:
+            return int(item["nivel"]["N"]), False
+        except (ClientError, BotoCoreError, KeyError, ValueError) as e:
             raise EstadoNoDisponible(str(e)) from e
-        return int(item["nivel"]["N"]), False
 
     def registrar_resultado(self, minuto: int, es_error: bool) -> None:
         try:
