@@ -1,0 +1,11 @@
+# LocalStack 3.8 community: es la última imagen que ya está descargada y que no pide auth token.
+services:
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: reto3-localstack
+    ports: ["127.0.0.1:4566:4566"]
+    environment:
+      - SERVICES=cloudformation,s3,lambda,apigateway,dynamodb,logs,iam,sts,cloudwatch
+      - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

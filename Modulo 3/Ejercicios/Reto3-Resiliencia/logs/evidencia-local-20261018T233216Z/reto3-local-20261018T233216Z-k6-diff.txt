@@ -1,0 +1,5 @@
+--- k6-script-profesor-reto3.js
++++ k6-reto3-local.js
+@@ -57 +57 @@
+-  const url = 'https://6u2da0eye1.execute-api.us-east-2.amazonaws.com/prod/service-api';
++  const url = 'http://localhost:4566/restapis/yn20un5z2r/prod/_user_request_/service-api';

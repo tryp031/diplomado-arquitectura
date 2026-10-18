@@ -80,11 +80,31 @@ Gateway. La alarma es por si alguien deja algo corriendo.
 onetimesecret.com) o un gestor de contraseñas compartido. Mándame además el **ID de la cuenta**: los scripts lo usan
 para no desplegar nunca en otra cuenta por error.
 
+## Paso 4b (opcional): Lectura para el panel de control
+
+El panel (`scripts/panel.sh`) **solo lee**: el estado por minuto de la tabla y los logs de las Lambdas. Si prefieres no
+usar `reto3-deployer` para la demo, crea un usuario **`reto3-panel-lectura`** con esta política
+(**`Reto3-PanelLectura`**):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Sid": "EstadoPorMinuto", "Effect": "Allow", "Action": ["dynamodb:BatchGetItem", "dynamodb:GetItem"],
+     "Resource": "arn:aws:dynamodb:us-east-2:<CUENTA>:table/reto3-estado"},
+    {"Sid": "LogsDeLasLambdas", "Effect": "Allow", "Action": "logs:FilterLogEvents",
+     "Resource": "arn:aws:logs:us-east-2:<CUENTA>:log-group:/aws/lambda/reto3-*:*"}
+  ]
+}
+```
+
+Yo lo configuro como perfil `diplomado-lectura` y lo uso con `PANEL_AWS_PERFIL=diplomado-lectura scripts/panel.sh`.
+
 ## Paso 5: Al cerrar el módulo (después del 03/11)
 
 1. Borrar el stack: CloudFormation → `reto3` → **Delete**. Esto borra las Lambdas, el API, la tabla, los logs y el dashboard.
 2. Vaciar y borrar el bucket `reto3-artefactos-<CUENTA>`.
-3. Borrar el usuario `reto3-deployer` y la política `Reto3-Despliegue`.
+3. Borrar los usuarios `reto3-deployer` y `reto3-panel-lectura` y las políticas `Reto3-Despliegue` y `Reto3-PanelLectura`.
 
 ## Lo que hago yo con eso
 
