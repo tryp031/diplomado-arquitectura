@@ -38,6 +38,8 @@ venv/
 .playwright-mcp/
 *.png
 !**/Logo_*.png
+# Imágenes que forman parte de un enunciado oficial (p. ej. resultados esperados del Reto 3)
+!**/Material-Clase/img/*.png
 
 # --- Empaquetados regenerables ---
 *.zip
