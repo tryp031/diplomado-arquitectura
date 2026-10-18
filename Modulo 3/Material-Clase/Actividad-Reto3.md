@@ -132,9 +132,9 @@ Formato de cada línea: `INFO[<seg>] Minute: <m>, Iteration: <n>, Error: <bool>,
 
 ## Lo que el enunciado NO dice (anotación; no es del curso)
 
-1. **El script de k6 no está adjunto.** «Se proporcionará». En el M2 llegó en el primer encuentro (06/10); aquí el
-   primero es el **27/10**. Sin el script no se conoce: la ventana en que se cuentan los errores, cómo fuerza el
-   fallo (¿un parámetro en la petición?), la tasa real ni qué mensajes valida.
+1. **El script de k6 no está adjunto en la página.** «Se proporcionará». *Actualización 18/10:* Danny lo tenía
+   descargado (fecha del archivo: 13/10). Está en `k6-script-profesor-reto3.js`, sin modificar. Lo que revela está
+   en «Lo que dice el script de k6», más abajo.
 2. **«5 errores o más» ¿en qué ventana?** Acumulados desde el inicio, consecutivos, por minuto o por ventana
    deslizante: cada lectura da un diseño distinto. Tampoco define «indicadores saludables» (3 → 2) ni
    «completamente estables» (2 → 1) con un número.
@@ -161,3 +161,39 @@ Formato de cada línea: `INFO[<seg>] Minute: <m>, Iteration: <n>, Error: <bool>,
     vivo, quien no, entrega video. Aquí no lo distingue.
 11. **«Solo AWS» es explícito** por primera vez (en el M2 estaba implícito). Un diseño local como el del Reto 2 no
     cumple por sí solo.
+
+## Lo que dice el script de k6 (anotación; no es del curso)
+
+Fuente: `k6-script-profesor-reto3.js` (copia byte a byte de `reto3.js`, verificada con SHA-256).
+
+1. **El fallo lo pide el cliente.** Cada `POST` lleva `{"message", "timestamp", "error": true|false}`. El servidor
+   no falla de verdad: debe **tratar `error: true` como un fallo** (las imágenes responden 500) y contarlo.
+2. **Carga fija y baja:** 1 VU, **140 iteraciones**, `sleep(3)` → ≈ 20 peticiones/min. Son **7 «minutos»**, no 6 (el
+   comentario dice «6 minutos × 20» pero 140 = 7 × 20). `maxDuration: 8m`.
+3. **El «minuto» que imprime es por iteración** (`floor(i/20)+1`), no de reloj. Como cada iteración dura 3 s + la
+   latencia, el minuto lógico se va desfasando del minuto real.
+4. **Patrón de errores (35 en total):**
+
+   | Minuto lógico | Iteraciones | Errores |
+   |---|---|---|
+   | 1 | 1–20 | **5** (1–5) |
+   | 2 | 21–40 | 0 |
+   | 3 | 41–60 | **15** (41–55) |
+   | 4 | 61–80 | 0 |
+   | 5 | 81–100 | **15** (81–95). El comentario dice «las primeras 10», pero el código usa `< 15` |
+   | 6–7 | 101–140 | 0 |
+
+   Si el contador fuera acumulado y sin ventana, el minuto 1 llevaría a Nivel 2 y el minuto 3 a Nivel 3, y **nunca
+   se recuperaría**. Por eso los umbrales «5 / 10 errores» **solo tienen sentido con una ventana** (de tiempo o de
+   N peticiones).
+5. **Arranca en el segundo 00 del reloj.** Para que el reloj de k6 coincida con los minutos de reloj del servidor.
+   Es un indicio (**suposición**, no confirmado) de que la solución de referencia cuenta errores **por minuto de
+   reloj**, por ejemplo con métricas o alarmas de CloudWatch de período 1 min. El retraso de evaluación de esas
+   alarmas explicaría por qué las imágenes cambian de nivel «tarde» y por qué aparece Nivel 3 en el minuto 7, sin
+   errores.
+6. **No tiene `checks` ni `thresholds`.** k6 no aprueba ni reprueba nada: el resultado se juzga **leyendo los logs**
+   (como en las imágenes). Los mensajes que devuelva el servidor son, en la práctica, la evidencia.
+7. **La URL apunta al API Gateway del profesor** (`…execute-api.us-east-2…/prod/service-api`). Para correrlo contra
+   nuestro sistema hay que cambiar la URL; igual que en el M2, es el único cambio admisible y conviene declararlo.
+8. El `console.log` de espera vive en el contexto *init*; k6 lo vuelve a ejecutar al final (por eso la imagen 2
+   termina con «Esperando 40 segundos…»). No afecta la prueba.

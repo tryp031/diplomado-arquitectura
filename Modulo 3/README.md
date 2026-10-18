@@ -17,7 +17,7 @@ registro de decisiones (ADR).
 |---|---|
 | Contenidos obligatorios | ✅ 4 Genially transcritos 18/10 (`Material-Clase/Genially-Contenidos-Obligatorios.md`) |
 | Autoevaluación M3 | ⬜ **no abierta** (decisión de Danny) · reglas desconocidas |
-| **Actividad M3** | ✅ enunciado capturado 18/10 (`Material-Clase/Actividad-Reto3.md`) · **Reto 3: arquitectura resiliente con degradación en 3 niveles, solo AWS** · falta el script de k6 |
+| **Actividad M3** | ✅ enunciado capturado 18/10 (`Material-Clase/Actividad-Reto3.md`) · **Reto 3: arquitectura resiliente con degradación en 3 niveles, solo AWS** · ✅ k6 del profesor en `Material-Clase/k6-script-profesor-reto3.js` |
 | Conclusiones · Recursos complementarios | ✅ capturados como texto; 6 decks extraídos |
 
 ## Material oficial
@@ -26,10 +26,12 @@ registro de decisiones (ADR).
 - `Material-Clase/Actividad-Reto3.md`: enunciado del Reto 3 y transcripción de las 2 imágenes de resultados
   esperados (`Material-Clase/img/`). **Leer el bloque «Lo que el enunciado NO dice»**: las imágenes contradicen
   los umbrales del texto.
+- `Material-Clase/k6-script-profesor-reto3.js`: **script de k6 oficial** del Reto 3, sin modificar (archivo del
+  13/10, aportado por Danny el 18/10). 140 peticiones, 1 VU, 35 con `error: true`. Análisis en `Actividad-Reto3.md`.
 - `Material-Clase/Genially-Contenidos-Obligatorios.md`: Diagramación, ADD, Estilos de arquitectura y Análisis de riesgos.
 - `Material-Clase/Tecnicas-{Diagramacion,DisenoADD,ASR-QAW,AnalisisRiesgos,Evaluacion,Decisiones}.md`: texto de
   los 6 decks, con las notas del orador.
 - Los `.pptx` originales están en la misma carpeta **solo en local** (no se versionan, ~40 MB).
 
-> **Falta conseguir:** el **script de k6** del Reto 3 («se proporcionará»), la fecha de cierre real, la rúbrica
+> **Falta conseguir:** la fecha de cierre real, la rúbrica
 > completa (solo la demo muestra 2,5 pts) y si el envío es individual.
