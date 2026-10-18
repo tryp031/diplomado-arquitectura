@@ -28,6 +28,11 @@ registro de decisiones (ADR).
   los umbrales del texto.
 - `Material-Clase/k6-script-profesor-reto3.js`: **script de k6 oficial** del Reto 3, sin modificar (archivo del
   13/10, aportado por Danny el 18/10). 140 peticiones, 1 VU, 35 con `error: true`. Análisis en `Actividad-Reto3.md`.
+- `Material-Clase/Discord-Aclaraciones-Docente.md`: **respuestas del docente en Discord #modulo-3** (18/10).
+  Definen la regla que el enunciado deja abierta: **los errores del minuto anterior deciden el nivel del minuto
+  actual**. Incluyen el diagrama de la sesión (0/5/10/5/0 errores → N1, N1, N2, N3, N2, N1). Está por encima de las
+  imágenes de «Resultados esperados».
+- Diseño del Reto 3 (borrador): `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md`.
 - `Material-Clase/Genially-Contenidos-Obligatorios.md`: Diagramación, ADD, Estilos de arquitectura y Análisis de riesgos.
 - `Material-Clase/Tecnicas-{Diagramacion,DisenoADD,ASR-QAW,AnalisisRiesgos,Evaluacion,Decisiones}.md`: texto de
   los 6 decks, con las notas del orador.
