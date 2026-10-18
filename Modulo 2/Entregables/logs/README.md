@@ -43,6 +43,15 @@ cumplen con amplitud el criterio de 15 s.
 
 ## Llegada del correo a Gmail
 
+### Captura del correo recibido
+
+`correo-recibido-gmail.png`, tomada el 18/10/2026 del buzón del grupo (`grupo2arquitecturasoftware@gmail.com`).
+Muestra el remitente «a través de amazonses.com» (enviado por SES), la hora de llegada (mar, 13 oct, 7:01 p. m.,
+hora Colombia), la placa `RJJ-055` y el mismo `event_id` `ecf23272-82e4-4b40-96cc-0d627c9974bc` de los logs.
+El resaltado amarillo de la placa es de la búsqueda en Gmail, no del correo.
+
+### Cabeceras
+
 Se tomó de las cabeceras del correo recibido (Gmail → «Mostrar original»), mismo `event_id`
 `ecf23272-82e4-4b40-96cc-0d627c9974bc`:
 
