@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reto 3 · Panel de resiliencia</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='15' width='64' height='64' fill='%233157ed'/%3E%3Cpath d='M14 44h10V30H14zM27 44h10V22H27zM40 44h10V14H40z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<header class="barra">
+  <span class="marca"><span class="pin"></span> Reto 3 · Panel de resiliencia <span class="grupo">Group 2</span></span>
+  <div class="seg-ctl" role="radiogroup" aria-label="Entorno">
+    <button role="radio" data-entorno="local" aria-checked="true">LocalStack</button>
+    <button role="radio" data-entorno="aws" aria-checked="false">AWS</button>
+  </div>
+  <code class="url" id="url" title="URL del API Gateway">—</code>
+  <span class="sep"></span>
+  <span class="reloj" id="reloj">--:--</span>
+  <button class="bt" id="bTema" title="Tema claro u oscuro">Tema</button>
+</header>
+
+<div class="aviso pare" id="errorGlobal" hidden></div>
+
+<main class="tablero">
+
+  <!-- Nivel actual -->
+  <section class="card nivel" id="tarjetaNivel" data-nivel="0" aria-live="polite">
+    <span class="et">Nivel del minuto actual · servidor</span>
+    <div class="nivel-g"><span class="n" id="nivelN">—</span><span class="nom" id="nivelNom">sin datos</span></div>
+    <p class="caps" id="nivelCaps">Aún no hay peticiones en este minuto.</p>
+    <dl class="datos">
+      <div><dt>Errores del minuto anterior</dt><dd class="num" id="errPrev">0</dd></div>
+      <div><dt>Errores en este minuto</dt><dd class="num" id="errAct">0</dd></div>
+      <div><dt>Próxima evaluación</dt><dd class="num" id="cuenta">—</dd></div>
+    </dl>
+    <p class="regla">nivel(m) = max(objetivo(errores(m−1)), nivel(m−1) − 1) · ≥ 5 → N2 · ≥ 10 → N3</p>
+  </section>
+
+  <!-- Corrida k6 -->
+  <section class="card">
+    <span class="et">Prueba de carga · k6 oficial sin modificar</span>
+    <div class="fila-bt">
+      <button class="bt prim" id="bK6">▶ Correr k6 oficial</button>
+      <button class="bt" id="bK6Stop" hidden>■ Detener</button>
+    </div>
+    <p class="estado-k6" id="estadoK6">Sin corrida en este entorno.</p>
+    <div class="progreso" aria-hidden="true"><span id="barraK6"></span></div>
+    <p class="num tenue" id="contK6">0 / 140 iteraciones</p>
+    <span class="et mt">Secuencia observada por el cliente</span>
+    <div class="chips" id="secuencia"><span class="vacio">—</span></div>
+    <ul class="checks" id="veredicto">
+      <li data-k="recorrio_3_niveles">Recorrió N1, N2 y N3</li>
+      <li data-k="sin_salto_3_a_1">Sin saltos 3 → 1 al recuperarse</li>
+      <li data-k="termino_en_n1">Terminó en N1 (iteración 140)</li>
+    </ul>
+  </section>
+
+  <!-- Prueba manual -->
+  <section class="card">
+    <span class="et">Prueba manual · misma puerta que el k6</span>
+    <div class="fila-bt">
+      <button class="bt" id="bOk">Enviar petición OK</button>
+      <button class="bt peligro" id="bErr">Enviar petición con error</button>
+    </div>
+    <div class="respuesta" id="respManual"><span class="vacio">Las respuestas aparecen aquí.</span></div>
+    <p class="nota">Sirve para mostrar el mensaje <b>«Nivel 3: Sistema bajo mantenimiento»</b>: con el script oficial, ninguna petición con error cae en un minuto que esté en N3.</p>
+    <div class="fila-bt fin">
+      <button class="bt tenue-bt" id="bReiniciar" title="Borra el estado por minuto (solo LocalStack)">Reiniciar estado</button>
+    </div>
+  </section>
+
+  <!-- Línea de tiempo -->
+  <section class="card ancho">
+    <div class="cab">
+      <span class="et">Línea de tiempo por minuto de reloj · servidor (DynamoDB) frente a cliente (k6)</span>
+      <span class="coh" id="coherencia"></span>
+    </div>
+    <div class="linea" id="linea"><p class="vacio">Sin minutos con tráfico en la ventana observada.</p></div>
+    <p class="leyenda"><i class="l1"></i>N1 Full <i class="l2"></i>N2 Degradado <i class="l3"></i>N3 Mínimo · ✓ el nivel que vio el k6 coincide con el que fijó el servidor</p>
+  </section>
+
+  <!-- Cambios de nivel -->
+  <section class="card medio">
+    <span class="et">Cambios de nivel y fallas · CloudWatch Logs del router</span>
+    <ol class="eventos" id="eventos"><li class="vacio">Sin cambios de nivel registrados.</li></ol>
+  </section>
+
+  <!-- Respuestas del k6 -->
+  <section class="card medio">
+    <span class="et">Últimas respuestas del k6 · cliente</span>
+    <div class="tabox"><table>
+      <thead><tr><th class="n">It.</th><th>Hora</th><th>Error</th><th class="n">Status</th><th>Mensaje</th></tr></thead>
+      <tbody id="respuestas"><tr><td colspan="5" class="vacio">Sin respuestas todavía.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <!-- Evidencia -->
+  <section class="card ancho">
+    <span class="et">Evidencia de la corrida · descargas</span>
+    <div class="descargas">
+      <a class="bt prim" data-tipo="zip">⬇ Todo (ZIP)</a>
+      <a class="bt" data-tipo="k6">Log del k6</a>
+      <a class="bt" data-tipo="servidor">Logs CloudWatch (JSONL)</a>
+      <a class="bt" data-tipo="minutos">Minutos (CSV)</a>
+      <a class="bt" data-tipo="resumen">Resumen (JSON)</a>
+    </div>
+    <p class="nota" id="notaDescargas">Disponible cuando haya una corrida del k6 en este entorno. El ZIP incluye el diff que demuestra que el script oficial solo cambió en la URL.</p>
+  </section>
+
+</main>
+
+<footer class="pie">El panel observa, no mide: la evidencia es la salida del k6 oficial y los logs de CloudWatch. Diseño: <code>docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md</code></footer>
+
+<script src="app.js"></script>
+</body>
+</html>
