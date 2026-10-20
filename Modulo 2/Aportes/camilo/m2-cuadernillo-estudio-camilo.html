@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diplomado Arquitectura de Software y Cloud Computing — Cuadernillo de estudio · Módulo II</title>
+<style>
+  :root{
+    --paper:#e9edf2;
+    --card:#ffffff;
+    --ink:#17212b;
+    --muted:#5b6b7c;
+    --navy:#123252;
+    --navy-2:#1f4e79;
+    --navy-soft:#e2ebf3;
+    --gold:#b2802a;
+    --gold-soft:#f8f1df;
+    --green:#256b47;
+    --green-soft:#e4f1e9;
+    --red:#a33a2b;
+    --red-soft:#faeae7;
+    --line:#d3dbe4;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+    font-size:16.5px;line-height:1.62;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 18px 70px}
+
+  /* ---------- Portada ---------- */
+  header.cover{
+    background:var(--navy);color:#fff;
+    margin:0 -18px 0;padding:44px 32px 34px;
+    border-bottom:4px solid var(--gold);
+  }
+  .cover-inner{max-width:900px;margin:0 auto}
+  .cover .programa{
+    font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px;
+  }
+  .cover h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:normal;font-size:2.2rem;line-height:1.22;margin:0 0 6px;
+    max-width:24ch;
+  }
+  .cover .modulo{
+    font-family:Georgia,serif;font-size:1.32rem;color:#f0d6a0;margin:0 0 18px;
+  }
+  .cover p.lead{margin:0;max-width:62ch;color:#dbe6f0;font-size:1rem}
+
+  /* ---------- Barra de herramientas ---------- */
+  .toolbar{
+    position:sticky;top:0;z-index:20;
+    background:#f4f7faee;backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    margin:0 -18px 22px;padding:9px 18px;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .toolbar .sep{flex:1}
+  .toolbar .ref{font-size:.85rem;color:var(--muted)}
+
+  button{
+    font-family:inherit;font-size:.9rem;font-weight:600;
+    background:var(--navy);color:#fff;border:1px solid var(--navy);
+    border-radius:7px;padding:7px 13px;cursor:pointer;
+  }
+  button:hover{background:var(--navy-2);border-color:var(--navy-2)}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  button.ghost{background:#fff;color:var(--navy);border-color:var(--line)}
+  button.ghost:hover{background:var(--navy-soft);color:var(--navy)}
+
+  /* ---------- Secciones ---------- */
+  details.sec{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);margin:0 0 12px;overflow:hidden;
+  }
+  details.sec > summary{
+    cursor:pointer;list-style:none;padding:15px 18px 15px 16px;
+    display:flex;align-items:center;gap:13px;
+    font-weight:600;font-size:1.04rem;background:#fbfcfd;
+  }
+  details.sec > summary::-webkit-details-marker{display:none}
+  details.sec[open] > summary{border-bottom:1px solid var(--line)}
+  summary:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+  .num{
+    flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+    background:var(--navy-soft);color:var(--navy);
+    font-size:.88rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  details.sec[open] .num{background:var(--navy);color:#fff}
+  .chev{margin-left:auto;color:var(--muted);transition:transform .15s}
+  details.sec[open] .chev{transform:rotate(90deg)}
+  .body{padding:6px 24px 24px}
+
+  h2{
+    font-family:Georgia,serif;font-weight:normal;
+    color:var(--navy);font-size:1.28rem;margin:22px 0 8px;
+  }
+  h3{font-size:1.02rem;color:var(--navy-2);margin:18px 0 4px}
+  p{margin:9px 0;max-width:72ch}
+  ul,ol{padding-left:22px;margin:9px 0;max-width:72ch}
+  li{margin:4px 0}
+
+  .box{
+    padding:13px 16px;border-radius:8px;margin:14px 0;
+    background:var(--navy-soft);border-left:4px solid var(--navy-2);
+  }
+  .box.ejemplo{background:var(--gold-soft);border-left-color:var(--gold)}
+  .box.clave{background:var(--green-soft);border-left-color:var(--green)}
+  .box .rot{font-weight:700;color:var(--navy);display:block;margin-bottom:2px;font-size:.92rem}
+  .box.ejemplo .rot{color:#8a6318}
+  .box.clave .rot{color:var(--green)}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95rem}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;color:var(--navy);font-weight:600}
+  tbody tr:nth-child(even){background:#fafbfd}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(236px,1fr));gap:12px;margin:14px 0}
+  .card{border:1px solid var(--line);border-radius:8px;padding:13px 15px;background:#fff}
+  .card h4{margin:0 0 4px;font-size:.98rem;color:var(--navy)}
+  .card p{margin:0;font-size:.94rem}
+
+  .attr{border-left:3px solid var(--navy-soft);padding:2px 0 2px 15px;margin:18px 0}
+  .attr h3{margin:0 0 2px}
+  .pregunta{
+    display:inline-block;background:#fff;border:1px dashed var(--navy-2);
+    color:var(--navy-2);border-radius:20px;padding:3px 13px;
+    font-size:.92rem;font-style:italic;margin:4px 0 6px;
+  }
+
+  .small{font-size:.9rem;color:var(--muted)}
+  .instr{
+    background:#fbfcfd;border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:8px;padding:13px 16px;margin:14px 0;font-size:.95rem;
+  }
+  .instr b{color:var(--navy)}
+
+  /* ---------- Casos prácticos ---------- */
+  .caso{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0;background:#fff}
+  .caso .rotulo{font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:.02em}
+  .caso .ctx{color:var(--muted);font-size:.93rem;margin:5px 0 7px}
+  .caso .preg{font-weight:600;margin:0 0 10px}
+  .caso .resp{
+    display:none;margin-top:11px;padding:11px 14px;
+    background:var(--green-soft);border-left:4px solid var(--green);border-radius:6px;font-size:.95rem;
+  }
+  .caso .resp.show{display:block}
+  .caso .resp b{color:var(--green)}
+
+  /* ---------- Emparejamiento ---------- */
+  .match th:first-child{width:56px;text-align:center}
+  .match td:first-child{text-align:center}
+  .match select{
+    font-family:inherit;font-size:.95rem;padding:5px 7px;
+    border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);width:68px;
+  }
+  .match select:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+  tr.ok{background:var(--green-soft)!important}
+  tr.bad{background:var(--red-soft)!important}
+  .mark{font-weight:700;font-size:.9rem}
+  .mark.ok{color:var(--green)}
+  .mark.bad{color:var(--red)}
+  .leyenda{background:#fbfcfd;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .leyenda ul{columns:2;column-gap:28px;margin:6px 0 0;padding-left:20px;font-size:.95rem}
+  @media(max-width:620px){.leyenda ul{columns:1}}
+
+  /* ---------- Quiz ---------- */
+  .bloque{font-family:Georgia,serif;color:var(--navy);font-size:1.1rem;margin:26px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--navy-soft)}
+  .q{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:11px 0;background:#fff}
+  .q.ok{border-color:#9ecab2;background:var(--green-soft)}
+  .q.bad{border-color:#e0b0a7;background:var(--red-soft)}
+  .q .enun{font-weight:600;margin:0 0 9px}
+  .q .enun .n{color:var(--navy-2);margin-right:5px}
+  .q label{display:block;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:.97rem;max-width:72ch}
+  .q label:hover{background:#f1f5f9}
+  .q input{margin-right:8px}
+  .fb{display:none;margin-top:9px;padding:9px 12px;border-radius:6px;font-size:.92rem;background:#fff;border-left:4px solid var(--navy-2)}
+  .fb.show{display:block}
+  .barra{
+    position:sticky;bottom:0;background:#f4f7faee;backdrop-filter:blur(6px);
+    border-top:1px solid var(--line);padding:11px 0;margin-top:18px;
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  }
+  .score{font-weight:700;color:var(--navy);font-size:1rem}
+  .score .pct{color:var(--gold)}
+
+  .resumen li{margin:7px 0}
+  .cadena{
+    font-family:Georgia,serif;font-size:1.02rem;color:var(--navy);
+    background:var(--navy-soft);border-radius:8px;padding:14px 16px;margin:14px 0;line-height:1.9;
+  }
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+
+  @media print{
+    body{background:#fff;font-size:11pt}
+    .toolbar,.barra,button,.chev{display:none!important}
+    header.cover{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 14px}
+    .cover h1,.cover .modulo{color:#000}
+    .cover .programa,.cover p.lead{color:#333}
+    details.sec{break-inside:avoid;border-color:#999}
+    details.sec > summary{background:#fff}
+    .num{background:#fff;color:#000;border:1px solid #000}
+    .caso .resp{display:block!important}
+    .fb{display:block!important}
+  }
+</style>
+</head>
+
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <p class="programa">Pontificia Universidad Javeriana Cali</p>
+    <h1>Diplomado Arquitectura de Software y Cloud Computing</h1>
+    <p class="modulo">Cuadernillo de estudio — Módulo II</p>
+    <p class="lead">Requerimientos de calidad, ASR y tácticas de arquitectura. Material organizado para estudiar por partes, descubrir las respuestas antes de leerlas y practicar con casos reales. Cada sección se abre y se cierra de forma independiente.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="toolbar">
+  <button class="ghost" onclick="abrirTodo(true)">Abrir todo</button>
+  <button class="ghost" onclick="abrirTodo(false)">Cerrar todo</button>
+  <button class="ghost" onclick="window.print()">Imprimir</button>
+  <span class="sep"></span>
+  <span class="ref">Módulo II · ASR, escenarios y tácticas por atributo</span>
+</div>
+
+<!-- ============ 0 ============ -->
+<details class="sec" open>
+  <summary><span class="num">0</span> Cómo estudiar este cuadernillo <span class="chev">›</span></summary>
+  <div class="body">
+    <p>La ruta va de lo conceptual a lo aplicado. Recórrela en orden la primera vez; después usa las secciones 13 a 15 como repaso activo.</p>
+    <div class="grid">
+      <div class="card"><h4>1. Comprender</h4><p>Lee qué problema resuelve cada atributo y cada táctica.</p></div>
+      <div class="card"><h4>2. Clasificar</h4><p>Ubica cada táctica en su familia: detectar, recuperar, prevenir, controlar demanda…</p></div>
+      <div class="card"><h4>3. Descubrir</h4><p>Resuelve los casos <em>antes</em> de revelar la respuesta.</p></div>
+      <div class="card"><h4>4. Aplicar</h4><p>Reconoce las tácticas en un sistema real: el Reto 2.</p></div>
+    </div>
+    <div class="box clave">
+      <span class="rot">Regla de oro</span>
+      No memorices listas de nombres. Para cada táctica aprende tres cosas: <b>qué falla o qué presión atiende</b>, <b>qué atributo mejora</b> y <b>qué te cuesta</b>.
+    </div>
+    <div class="box">
+      <span class="rot">Qué es del curso y qué no</span>
+      El contenido de las secciones 1 a 9 sale del material oficial del módulo (los cuatro Genially, el video de Seguridad y los cinco decks de tácticas, basados en Bass, Clements y Kazman). Lo que es aporte propio —la sección 10 (confusiones), la 11 (costos) y la 12 (el Reto 2)— está identificado como tal.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 1 ============ -->
+<details class="sec">
+  <summary><span class="num">1</span> Requerimientos de calidad y ASR <span class="chev">›</span></summary>
+  <div class="body">
+    <h2>No basta con que la funcionalidad exista</h2>
+    <p>Los <b>requerimientos de calidad</b> (también llamados no funcionales) acompañan a los funcionales y les agregan condiciones sobre <i>cómo</i> se comporta el sistema: tiempo de respuesta, disponibilidad, seguridad, confiabilidad.</p>
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo del material</span>
+      Al pulsar «Confirmar pago» se debe procesar la transacción financiera. Pero además se espera que sea <b>rápido</b> (menos de 10 s, incluso 1 s), que funcione <b>el 99,9 % del tiempo</b>, que solo lo ejecute un usuario <b>autorizado</b>, que proteja los datos y que sea compatible con <b>cualquier entidad financiera</b>.
+    </div>
+
+    <h2>¿Qué es un ASR?</h2>
+    <p>Un <b>ASR</b> (<i>Architecturally Significant Requirement</i>, requerimiento arquitecturalmente significativo) es un requerimiento de calidad con tanto impacto que condiciona la estructura del sistema desde el inicio. No todos pesan lo mismo: algunos definen la arquitectura y otros pueden descartarse según el contexto, pero <b>nunca deben quedar sin analizar</b>.</p>
+
+    <h3>Preguntas guía para reconocer un ASR</h3>
+    <table>
+      <thead><tr><th>Pregunta</th><th>Qué busca aclarar</th></tr></thead>
+      <tbody>
+        <tr><td>¿Qué actor está asociado?</td><td>Puede ser un usuario, un componente o un servicio externo.</td></tr>
+        <tr><td>¿Qué evento lo desencadena?</td><td>Un clic, una solicitud externa, una actualización automática.</td></tr>
+        <tr><td>¿Bajo qué circunstancias ocurre?</td><td>Carga máxima, fallos del sistema, procesos simultáneos.</td></tr>
+        <tr><td>¿Qué respuesta espera el actor?</td><td>Rapidez, seguridad, acceso continuo.</td></tr>
+        <tr><td>¿Qué atributos de calidad están implicados?</td><td>Rendimiento, disponibilidad, escalabilidad, seguridad, mantenibilidad…</td></tr>
+        <tr><td>¿Qué elementos de la arquitectura se afectan?</td><td>Bases de datos, servicios, infraestructura, protocolos.</td></tr>
+        <tr><td>¿Es una acción crítica o en tiempo real?</td><td>Transacciones sensibles, operaciones que no admiten espera.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>La regla de priorización del curso</h2>
+    <p>El material la ilustra con un ejemplo simplificado (un sistema que responde un «ping» con un «pong»): el atributo se <b>prioriza por lo que el enunciado exige</b> y lo demás se documenta como no priorizado, sin ignorarlo.</p>
+    <table>
+      <thead><tr><th>Atributo</th><th>Valor del escenario</th><th>Prioridad</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Latencia</td><td>Respuesta esperada: 1 ms</td><td><b>Alta</b></td><td>El reto la especificó desde el inicio.</td></tr>
+        <tr><td>Seguridad</td><td>Datos y mecanismos sin cifrar</td><td>Baja</td><td>No se tuvo en cuenta; en entornos reales sería una omisión grave.</td></tr>
+        <tr><td>Disponibilidad</td><td>Meta de 90 %</td><td>Baja</td><td>No se explicitó en el reto; la arquitectura no se diseñó pensando en ella.</td></tr>
+      </tbody>
+    </table>
+    <div class="box">
+      <span class="rot">Nuestro Reto 1</span>
+      El ping-pong es el ejemplo didáctico del curso. Nuestro Reto 1 fue el de latencia mínima (un clasificador de hosts), pero siguió la misma lógica: la latencia era el atributo exigido por el enunciado y, por eso, el prioritario.
+    </div>
+    <div class="box clave">
+      <span class="rot">Idea clave</span>
+      Un atributo con prioridad baja no significa «irrelevante»: significa «no es el eje de este diseño». Esa decisión debe quedar escrita y justificada.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 2 ============ -->
+<details class="sec">
+  <summary><span class="num">2</span> El escenario de calidad <span class="chev">›</span></summary>
+  <div class="body">
+    <p>Un requerimiento como «debe ser rápido» no se puede diseñar ni verificar. El <b>escenario de calidad</b> lo vuelve concreto: quién hace qué, en qué condición, qué debe pasar y cómo se mide.</p>
+
+    <h2>Las partes del escenario</h2>
+    <table>
+      <thead><tr><th>Parte</th><th>Pregunta que responde</th><th>Ejemplo del curso (ping-pong)</th></tr></thead>
+      <tbody>
+        <tr><td><b>Fuente / actor</b></td><td>¿Quién genera el estímulo?</td><td>Cliente</td></tr>
+        <tr><td><b>Estímulo</b></td><td>¿Qué evento llega?</td><td>Un ping</td></tr>
+        <tr><td><b>Ambiente / entorno</b></td><td>¿En qué estado está el sistema?</td><td>Operación normal</td></tr>
+        <tr><td><b>Artefacto</b></td><td>¿Qué parte del sistema recibe el estímulo?</td><td>Servidor local</td></tr>
+        <tr><td><b>Respuesta</b></td><td>¿Qué debe hacer el sistema?</td><td>Responder con un pong</td></tr>
+        <tr><td><b>Medida de respuesta</b></td><td>¿Cómo se verifica?</td><td>1 ms (unidad: segundos), prioridad alta</td></tr>
+      </tbody>
+    </table>
+    <p class="small">El material usa «actor» y «respuesta esperada»; el libro de Bass usa «fuente» y separa «respuesta» de «medida de respuesta». Son las mismas piezas. Al documentar, usa un solo vocabulario.</p>
+
+    <h2>Tres estados de operación</h2>
+    <div class="grid">
+      <div class="card"><h4>Normal</h4><p>El sistema trabaja en condiciones óptimas, sin aumento de carga.</p></div>
+      <div class="card"><h4>Estrés o alta carga</h4><p>El sistema opera a su máxima capacidad por un volumen alto de solicitudes.</p></div>
+      <div class="card"><h4>Mínima o degradada</h4><p>Funcionalidades reducidas a las más vitales.</p></div>
+    </div>
+    <p>El escenario siempre debe decir <b>en cuál de estos estados</b> se mide la respuesta.</p>
+
+    <div class="box ejemplo">
+      <span class="rot">Ejemplo bien formado (Desempeño)</span>
+      «500 usuarios inician 2.000 solicitudes en un intervalo de 30 segundos, en condiciones normales de funcionamiento. El sistema procesa todas las solicitudes con una latencia promedio de dos segundos.»
+      <br><span class="small">Tiene fuente (usuarios), estímulo (2.000 solicitudes), ambiente (30 s, normal), respuesta (procesar todas) y medida (2 s de latencia promedio).</span>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 3 ============ -->
+<details class="sec">
+  <summary><span class="num">3</span> ADD: diseño basado en atributos <span class="chev">›</span></summary>
+  <div class="body">
+    <p>El <b>ADD</b> (<i>Attribute-Driven Design</i>) es el método que convierte los drivers arquitectónicos en estructuras. Los <b>drivers</b> son los ASR más la funcionalidad primaria, las restricciones, las preocupaciones y el propósito del diseño.</p>
+
+    <h2>Los siete pasos</h2>
+    <table>
+      <thead><tr><th>Paso</th><th>Qué se hace</th></tr></thead>
+      <tbody>
+        <tr><td><b>1</b></td><td>Revisar las entradas: propósito, requisitos funcionales primarios, escenarios de calidad primarios, restricciones y preocupaciones.</td></tr>
+        <tr><td><b>2</b></td><td>Establecer el objetivo de la iteración seleccionando los drivers que se atenderán.</td></tr>
+        <tr><td><b>3</b></td><td>Elegir uno o más elementos del sistema para refinar.</td></tr>
+        <tr><td><b>4</b></td><td>Elegir conceptos de diseño (tácticas, patrones, arquitecturas de referencia, componentes externos) que satisfagan los drivers.</td></tr>
+        <tr><td><b>5</b></td><td>Instanciar elementos, asignar responsabilidades y definir interfaces.</td></tr>
+        <tr><td><b>6</b></td><td>Bosquejar las vistas y registrar las decisiones de diseño con su justificación.</td></tr>
+        <tr><td><b>7</b></td><td>Analizar el diseño actual y revisar si se cumplió el objetivo de la iteración.</td></tr>
+      </tbody>
+    </table>
+    <div class="box">
+      <span class="rot">Dónde se toman las decisiones</span>
+      Las decisiones importantes se toman principalmente en los pasos <b>4</b> y <b>5</b>. En el paso <b>6</b> se registran, incluidos los <i>trade-offs</i> relevantes.
+    </div>
+    <div class="box ejemplo">
+      <span class="rot">¿Cuándo dejar de iterar?</span>
+      «Deje que el riesgo sea su guía»: al menos deben haberse atendido los drivers de mayor prioridad, o el diseño debe ser «suficientemente bueno» para satisfacerlos. Iterar sobre todos los drivers casi nunca es posible por tiempo o recursos.
+    </div>
+    <p>Antes de empezar conviene fijar el <b>alcance</b> del sistema: qué queda dentro, qué fuera y con qué entidades externas interactúa. Se representa con un diagrama de contexto.</p>
+  </div>
+</details>
+
+<!-- ============ 4 ============ -->
+<details class="sec">
+  <summary><span class="num">4</span> Tácticas y patrones <span class="chev">›</span></summary>
+  <div class="body">
+    <p>Una <b>táctica</b> es una decisión de diseño puntual dirigida a mejorar <i>un</i> atributo de calidad. Son la «caja de herramientas» del arquitecto: permiten resolver problemas comunes y predecir cómo se comportará el sistema.</p>
+    <div class="box ejemplo">
+      <span class="rot">La metáfora del edificio</span>
+      Un edificio puede verse imponente, pero lo sostienen los cimientos y la estructura interna. De igual modo, un sistema puede verse bien, pero las tácticas son las que le dan estabilidad, seguridad, extensibilidad y rendimiento.
+    </div>
+
+    <h2>Táctica frente a patrón</h2>
+    <table>
+      <thead><tr><th></th><th>Táctica</th><th>Patrón</th></tr></thead>
+      <tbody>
+        <tr><td><b>Alcance</b></td><td>Una decisión específica sobre un atributo.</td><td>Un paquete de decisiones con estructura propia.</td></tr>
+        <tr><td><b>Relación</b></td><td>Los patrones se construyen combinando tácticas.</td><td>Ejemplo: <i>throttling</i> empaqueta la táctica de gestionar solicitudes de trabajo.</td></tr>
+        <tr><td><b>Ejemplo</b></td><td>Retry, cifrar datos, introducir concurrencia.</td><td>Circuit breaker, load balancer, blue/green.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Cómo se organiza cada atributo</h2>
+    <p>Cada atributo del módulo se estudia con la misma secuencia: <b>definición → escenario general → escenario concreto → tácticas → patrones (con beneficios y <i>trade-offs</i>)</b>. En las secciones siguientes se sigue ese orden.</p>
+    <div class="cadena">
+      ASR → escenario de calidad → táctica → patrón → trade-off aceptado
+    </div>
+  </div>
+</details>
+
+<!-- ============ 5 ============ -->
+<details class="sec">
+  <summary><span class="num">5</span> Disponibilidad <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="attr">
+      <div class="pregunta">¿Está listo para trabajar cuando se necesita?</div>
+      <p>Es la propiedad del software de estar disponible para realizar su tarea, y la capacidad de <b>enmascarar o reparar defectos</b> para que no se conviertan en fallas, de modo que la interrupción acumulada no exceda un valor requerido en un intervalo dado.</p>
+    </div>
+
+    <h2>Defecto, error, falla</h2>
+    <table>
+      <thead><tr><th>Término</th><th>Qué es</th></tr></thead>
+      <tbody>
+        <tr><td><b>Defecto</b> (<i>fault</i>)</td><td>La causa de una falla. Puede ser interno o externo al sistema.</td></tr>
+        <tr><td><b>Error</b></td><td>Estado intermedio entre que ocurre el defecto y que aparece la falla.</td></tr>
+        <tr><td><b>Falla</b> (<i>failure</i>)</td><td>Desviación del sistema respecto de su especificación, <b>visible externamente</b>. Para determinarla hace falta un observador externo.</td></tr>
+      </tbody>
+    </table>
+    <p>Los defectos se pueden <b>prevenir, tolerar, eliminar o pronosticar</b>. Las tácticas buscan que el defecto no llegue a ser falla.</p>
+    <div class="box ejemplo">
+      <span class="rot">Escenario concreto del material</span>
+      Un servidor de una granja de servidores falla durante la operación normal; el sistema informa al operador y continúa funcionando sin tiempo de inactividad.
+    </div>
+
+    <h2>Relación con otros atributos</h2>
+    <ul>
+      <li><b>Seguridad:</b> un ataque de denegación de servicio está diseñado para dejar el sistema no disponible.</li>
+      <li><b>Rendimiento:</b> puede ser difícil distinguir un sistema caído de uno extremadamente lento.</li>
+    </ul>
+    <div class="box">
+      <span class="rot">Ojo con la palabra «seguridad»</span>
+      El material cierra diciendo que la disponibilidad se relaciona con la seguridad «que evita que el sistema entre en un estado peligroso». Eso describe <i>safety</i> (seguridad funcional o física), no <i>security</i> (seguridad de la información). La traducción al español fusiona los dos sentidos. <span class="small">(Conocimiento complementario.)</span>
+    </div>
+
+    <h2>Las tácticas: detectar, recuperar, prevenir</h2>
+
+    <h3>Detectar fallas</h3>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Monitor</b></td><td>Componente que vigila la salud de procesadores, procesos, E/S, memoria y red; orquesta las demás tácticas de detección.</td></tr>
+        <tr><td><b>Ping/Echo</b></td><td>El monitor envía una solicitud y espera el eco dentro de un umbral de tiempo; si no llega, el componente se declara fallido.</td></tr>
+        <tr><td><b>Heartbeat</b></td><td>Intercambio periódico de mensajes. La diferencia con ping/echo es <b>quién inicia</b>: en heartbeat el propio componente avisa que está vivo.</td></tr>
+        <tr><td><b>Timestamp</b></td><td>Marca de tiempo o número de secuencia para detectar eventos fuera de orden en sistemas distribuidos.</td></tr>
+        <tr><td><b>Condition monitoring</b></td><td>Verifica condiciones o supuestos de diseño (por ejemplo, <i>checksums</i>); el monitor debe ser simple.</td></tr>
+        <tr><td><b>Sanity checking</b></td><td>Verifica que una operación o salida sea razonable, sobre todo en las interfaces.</td></tr>
+        <tr><td><b>Voting</b></td><td>Compara resultados de varias fuentes que deberían coincidir y decide cuál usar.</td></tr>
+        <tr><td><b>Exception detection</b></td><td>Detecta condiciones que alteran el flujo normal: excepciones del sistema, rango de parámetros, tipado de parámetros, <i>timeout</i>.</td></tr>
+        <tr><td><b>Self-test</b></td><td>El componente (o un monitor) ejecuta procedimientos para comprobar que funciona correctamente.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Recuperarse de fallas</h3>
+    <p><b>Preparación y reparación</b></p>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Redundant spare</b></td><td>Componentes duplicados que toman el trabajo si falla el principal. Base de los patrones de repuesto caliente, tibio y frío.</td></tr>
+        <tr><td><b>Rollback</b></td><td>Volver a un buen estado anterior conocido (un punto de control) al detectar una falla.</td></tr>
+        <tr><td><b>Exception handling</b></td><td>Manejar la excepción en vez de colapsar: desde códigos de error hasta clases de excepción con origen y causa, para enmascarar o reparar.</td></tr>
+        <tr><td><b>Software upgrade</b></td><td>Actualizar en servicio sin afectarlo: parche de función, parche de clase o ISSU (actualización en servicio sin impacto).</td></tr>
+        <tr><td><b>Retry</b></td><td>Supone que el error es transitorio y reintenta. <b>Debe fijarse un límite</b> de reintentos antes de declarar un error permanente.</td></tr>
+        <tr><td><b>Ignore faulty behavior</b></td><td>Ignorar los mensajes de una fuente que se determina falsa (por ejemplo, un sensor que falla).</td></tr>
+        <tr><td><b>Graceful degradation</b></td><td>Mantener las funciones más críticas y descartar las menos críticas ante la falla de componentes.</td></tr>
+        <tr><td><b>Reconfiguration</b></td><td>Reasignar responsabilidades a los recursos que siguen funcionando.</td></tr>
+      </tbody>
+    </table>
+    <p><b>Reintroducción</b> (volver a poner en servicio un componente reparado)</p>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Shadow</b></td><td>Operar el componente reparado en «modo oculto» un tiempo antes de devolverle el rol activo, verificando su comportamiento.</td></tr>
+        <tr><td><b>State resynchronization</b></td><td>Sincronizar el estado del componente activo y el de reserva, que se comparan periódicamente.</td></tr>
+        <tr><td><b>Escalating restart</b> y <b>Nonstop forwarding</b></td><td>Aparecen en el árbol de tácticas del deck, pero el deck no las desarrolla en texto.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Prevenir fallas</h3>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Removal from service</b></td><td>Sacar temporalmente un componente de servicio y reiniciarlo para eliminar fallas latentes (fugas de memoria, fragmentación). También llamado rejuvenecimiento o reinicio terapéutico.</td></tr>
+        <tr><td><b>Transactions</b></td><td>Semántica ACID para que los mensajes asíncronos entre componentes sean atómicos, coherentes, aislados y duraderos; típicamente con compromiso en dos fases (2PC).</td></tr>
+        <tr><td><b>Predictive model</b></td><td>Un modelo combinado con un monitor predice fallas a partir de métricas (longitud de colas, cruce de umbrales).</td></tr>
+        <tr><td><b>Exception prevention</b></td><td>Técnicas para que no ocurran excepciones: código de corrección de errores, punteros inteligentes, envoltorios.</td></tr>
+        <tr><td><b>Increase competence set</b></td><td>Diseñar el componente para manejar más casos como parte de su funcionamiento normal en vez de lanzar una excepción.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Patrones de disponibilidad</h2>
+    <table>
+      <thead><tr><th>Patrón</th><th>Qué hace</th><th>Beneficio</th><th>Costo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Active redundancy</b> (hot spare)</td><td>Todos los nodos reciben y procesan las mismas entradas en paralelo.</td><td>Relevo en milisegundos.</td><td>El mayor costo de ejecución.</td></tr>
+        <tr><td><b>Passive redundancy</b> (warm spare)</td><td>Solo el activo procesa; envía actualizaciones de estado periódicas al repuesto.</td><td>Punto medio de costo y recuperación.</td><td>Estado del repuesto solo débilmente acoplado.</td></tr>
+        <tr><td><b>Spare</b> (cold spare)</td><td>El repuesto está apagado hasta la conmutación por error, y luego se enciende y reinicia.</td><td>El menor costo.</td><td>Recuperación lenta; no sirve para alta disponibilidad.</td></tr>
+        <tr><td><b>TMR</b> (redundancia modular triple)</td><td>Tres componentes hacen lo mismo y un votante decide la salida (mayoría o promedio).</td><td>Simple; no importa qué causa la discrepancia.</td><td>Replicar más sube el costo; tres es el punto óptimo.</td></tr>
+        <tr><td><b>Circuit breaker</b></td><td>Corta el ciclo de reintentos cuando considera que hay una falla; las invocaciones siguientes regresan de inmediato.</td><td>Evita que la falla se propague en cascada.</td><td>Timeout mal elegido: largo agrega latencia, corto dispara el circuito sin necesidad.</td></tr>
+        <tr><td><b>Process pairs</b></td><td>Puntos de control y reversión: la copia ya está revisada y lista.</td><td>Respaldo en estado seguro.</td><td>—</td></tr>
+        <tr><td><b>Forward error recovery</b></td><td>Avanzar hacia un estado deseable con correcciones integradas (redundancia de datos).</td><td>No exige volver atrás ni reintentar.</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="box clave">
+      <span class="rot">Trade-off central de la redundancia</span>
+      Tiempo de recuperación contra costo de mantener el repuesto actualizado: el repuesto caliente es el más caro y el más rápido; el frío, el más barato y el más lento.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 6 ============ -->
+<details class="sec">
+  <summary><span class="num">6</span> Desempeño <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="attr">
+      <div class="pregunta">¿Cumple los requisitos de tiempo?</div>
+      <p>«Se trata de tiempo.» Es la capacidad del sistema para cumplir sus requisitos de tiempo, sabiendo que toda operación toma tiempo.</p>
+    </div>
+
+    <h2>Cuánto tarda cada cosa</h2>
+    <table>
+      <thead><tr><th>Operación</th><th>Orden de magnitud</th></tr></thead>
+      <tbody>
+        <tr><td>Un cálculo</td><td>Miles de nanosegundos</td></tr>
+        <tr><td>Acceso a disco (sólido o giratorio)</td><td>Decenas de milisegundos</td></tr>
+        <tr><td>Red dentro del mismo centro de datos</td><td>Cientos de microsegundos</td></tr>
+        <tr><td>Red intercontinental</td><td>Más de 100 milisegundos</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Concurrencia</h2>
+    <p>La concurrencia son las operaciones que ocurren en paralelo. Aparece cada vez que el sistema crea un subproceso, atiende a varios usuarios a la vez o se ejecuta en más de un procesador o núcleo. Es uno de los conceptos más importantes para un arquitecto.</p>
+
+    <h2>Escenario general: cómo se mide</h2>
+    <ul>
+      <li><b>Latencia:</b> tiempo de respuesta (máximo, mínimo, media, mediana).</li>
+      <li><b>Rendimiento</b> (<i>throughput</i>): número o porcentaje de solicitudes satisfechas en un intervalo.</li>
+      <li><b>Solicitudes no satisfechas:</b> número o porcentaje.</li>
+      <li><b>Jitter:</b> variación del tiempo de respuesta.</li>
+      <li><b>Uso de un recurso</b> de cómputo.</li>
+    </ul>
+    <p>El estímulo puede ser periódico, esporádico o estocástico, y el ambiente puede ser normal, de pico, de sobrecarga o degradado.</p>
+
+    <h2>Por qué tarda una respuesta</h2>
+    <div class="grid">
+      <div class="card"><h4>Tiempo de procesamiento</h4><p>El sistema trabaja y consume recursos: CPU, almacenamiento, ancho de banda, memoria, hilos y búferes.</p></div>
+      <div class="card"><h4>Tiempo bloqueado</h4><p>No puede avanzar: hay <b>contención</b> de un recurso, el recurso no está <b>disponible</b>, o depende de <b>otro cálculo</b> que aún no termina.</p></div>
+    </div>
+
+    <h2>Las tácticas: dos grandes familias</h2>
+    <h3>Controlar la demanda de recursos</h3>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gestionar la llegada de eventos</b></td><td>Fijar un SLA con la tasa máxima de eventos aceptada: «procesaré X eventos por unidad de tiempo con respuesta Y». Obliga al sistema y al cliente.</td></tr>
+        <tr><td><b>Gestionar la frecuencia de muestreo</b></td><td>Reducir la frecuencia con que se reciben los estímulos; se paga con fidelidad.</td></tr>
+        <tr><td><b>Limitar la respuesta al evento</b></td><td>Si los eventos llegan más rápido de lo que se procesan, se ponen en cola o se descartan, y se procesa hasta una tasa máxima.</td></tr>
+        <tr><td><b>Priorizar eventos</b></td><td>Atender primero los más importantes; ignorar los de baja prioridad consume recursos mínimos.</td></tr>
+        <tr><td><b>Reducir la sobrecarga computacional</b></td><td>Reducir la indirección, coubicar recursos de comunicación, limpieza periódica.</td></tr>
+        <tr><td><b>Tiempos de ejecución acotados</b></td><td>Poner un límite al tiempo que se usa para responder; el costo suele ser menor precisión.</td></tr>
+        <tr><td><b>Aumentar la eficiencia</b></td><td>Mejorar los algoritmos de las zonas críticas.</td></tr>
+      </tbody>
+    </table>
+    <h3>Gestionar recursos</h3>
+    <table>
+      <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td><b>Aumentar recursos</b></td><td>Procesadores más rápidos, más memoria, redes más veloces; a menudo la mejora inmediata más económica.</td></tr>
+        <tr><td><b>Introducir concurrencia</b></td><td>Procesar en paralelo para reducir el tiempo bloqueado.</td></tr>
+        <tr><td><b>Múltiples copias de cómputo</b></td><td>Réplicas del servicio con un balanceador de carga que reparte el trabajo.</td></tr>
+        <tr><td><b>Múltiples copias de datos</b></td><td>Replicación y almacenamiento en caché; mantener las copias coherentes es responsabilidad del sistema.</td></tr>
+        <tr><td><b>Tamaños de cola limitados</b></td><td>Limitar el número de llegadas en cola; exige definir qué pasa cuando la cola se desborda.</td></tr>
+        <tr><td><b>Programar recursos</b></td><td>Cuando hay contención, decidir el orden: FIFO, prioridad fija, importancia semántica o prioridad dinámica (<i>round robin</i>, <i>earliest-deadline-first</i>).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Patrones de desempeño</h2>
+    <table>
+      <thead><tr><th>Patrón</th><th>Qué hace</th><th>Beneficio</th><th>Costo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Service mesh</b></td><td>Un <i>sidecar</i> acompaña a cada microservicio y maneja la comunicación, el monitoreo y la seguridad.</td><td>Separa la lógica de negocio de los aspectos transversales; menos latencia de red.</td><td>Más procesos y más consumo; no todas las funciones se usan siempre.</td></tr>
+        <tr><td><b>Load balancer</b></td><td>Único punto de contacto que reparte las solicitudes entre un grupo de proveedores.</td><td>La falla de un servidor es invisible; latencia más baja y predecible; fácil agregar servidores.</td><td>El algoritmo debe ser muy rápido; es cuello de botella y punto único de falla potencial.</td></tr>
+        <tr><td><b>Throttling</b></td><td>Un regulador decide si una solicitud entrante se atiende.</td><td>Los servicios nunca se sobrecargan; se mantienen en su «punto óptimo».</td><td>La lógica debe ser muy rápida; si la demanda excede siempre la capacidad, los búferes crecen o se pierden solicitudes.</td></tr>
+        <tr><td><b>Map-reduce</b></td><td>Orden y análisis distribuido y paralelo de un conjunto grande de datos.</td><td>Aprovecha el paralelismo; la falla de una instancia tiene poco impacto.</td><td>No se justifica con datos pequeños; difícil con particiones desiguales o múltiples reducciones.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<!-- ============ 7 ============ -->
+<details class="sec">
+  <summary><span class="num">7</span> Seguridad <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="attr">
+      <div class="pregunta">¿Está protegido frente a accesos no autorizados, sin negar el acceso a quien sí está autorizado?</div>
+      <p>Medida de la capacidad del sistema para proteger datos e información del acceso no autorizado, proporcionando acceso a las personas y sistemas autorizados. Un <b>ataque</b> es una acción contra un sistema con intención de causar daño: acceder a datos, modificarlos o negar el servicio a usuarios legítimos.</p>
+    </div>
+
+    <h2>Las tres características (CIA)</h2>
+    <div class="grid">
+      <div class="card"><h4>Confidencialidad</h4><p>Los datos o servicios están protegidos contra el acceso no autorizado. Un pirata no puede ver tu declaración de impuestos en un sistema del gobierno.</p></div>
+      <div class="card"><h4>Integridad</h4><p>Los datos o servicios no se manipulan sin autorización. Tu calificación no cambia desde que el profesor la asignó.</p></div>
+      <div class="card"><h4>Disponibilidad</h4><p>El sistema está disponible para el uso legítimo. Un ataque de denegación de servicio no te impide comprar un libro en línea.</p></div>
+    </div>
+
+    <h2>Privacidad, PII y GDPR</h2>
+    <p>La <b>privacidad</b> consiste en limitar el acceso a la información: qué información se limita y a quién se permite el acceso. La información que debe mantenerse privada es la <b>PII</b> (<i>Personally Identifiable Information</i>, información de identificación personal): nombre, número de seguro social, fecha y lugar de nacimiento, datos biométricos, y cualquier dato vinculable a una persona como información médica, educativa, financiera o laboral. En la Unión Europea está consagrada en el <b>GDPR</b>, y otras jurisdicciones tienen regulaciones similares.</p>
+    <div class="box">
+      <span class="rot">Una errata del video</span>
+      En la transcripción automática del video aparece «PI»; es <b>PII</b>. El reconocimiento de voz se comió una letra.
+    </div>
+
+    <div class="box ejemplo">
+      <span class="rot">Escenario concreto del material</span>
+      Un empleado descontento, en una ubicación remota, intenta modificar incorrectamente la tabla de tasas de pago durante la operación normal. Se detecta el acceso no autorizado, el sistema mantiene un registro de auditoría y los datos correctos se restauran en un día.
+    </div>
+    <table>
+      <thead><tr><th>Parte</th><th>En el escenario</th></tr></thead>
+      <tbody>
+        <tr><td>Fuente</td><td>Empleado descontento, interno, en ubicación remota</td></tr>
+        <tr><td>Estímulo</td><td>Intento de modificar datos sin autorización</td></tr>
+        <tr><td>Artefacto</td><td>La tabla de tasas de pago</td></tr>
+        <tr><td>Ambiente</td><td>Operación normal</td></tr>
+        <tr><td>Respuesta</td><td>Detectar el acceso y registrar auditoría</td></tr>
+        <tr><td>Medida</td><td>Datos correctos restaurados en un día</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Las cuatro familias de tácticas</h2>
+    <p>Salen de la analogía con la seguridad física de un edificio: acceso limitado (vallas, puntos de control), detección de intrusos (insignias), disuasión (guardias), capacidad de reacción (cierre automático de puertas) y recuperación (copia fuera del sitio).</p>
+    <div class="box">
+      <span class="rot">Un nombre distinto en el video</span>
+      El video llama a la primera familia «identificar»; el deck y el libro la llaman <b>detectar</b>. Es la misma. La disuasión del edificio se lee como parte de <i>resistir</i>.
+    </div>
+
+    <h3>Detectar ataques</h3>
+    <ul>
+      <li><b>Detectar intrusión:</b> compara el tráfico o los patrones de solicitud con firmas conocidas de comportamiento malicioso.</li>
+      <li><b>Detectar denegación de servicio:</b> compara el patrón del tráfico con perfiles históricos de ataques DoS.</li>
+      <li><b>Verificar la integridad del mensaje:</b> sumas de verificación o valores <i>hash</i> en mensajes, archivos y configuraciones.</li>
+      <li><b>Detectar anomalías en la entrega de mensajes:</b> tiempos o conexiones anormales que sugieren un ataque de intermediario.</li>
+    </ul>
+    <h3>Resistir ataques</h3>
+    <ul>
+      <li><b>Identificar actores:</b> saber quién o qué origina cada entrada externa.</li>
+      <li><b>Autenticar actores:</b> garantizar que el actor es quien dice ser (contraseñas, certificados, doble factor, biometría, CAPTCHA).</li>
+      <li><b>Autorizar actores:</b> garantizar que un actor ya autenticado tiene derecho a acceder o modificar un dato o servicio (control de acceso).</li>
+      <li><b>Acceso limitado:</b> reducir los puntos de acceso y el tipo de tráfico permitido; minimiza la superficie de ataque (por ejemplo, una DMZ entre dos <i>firewalls</i>).</li>
+      <li><b>Limitar la exposición:</b> reducir los datos o servicios accesibles desde un solo punto, para que un ataque comprometa menos. Es una defensa pasiva.</li>
+      <li><b>Cifrar datos:</b> simétrico o asimétrico; protege los datos persistentes y los enlaces de comunicación.</li>
+      <li><b>Entidades separadas:</b> separación física, máquinas virtuales o <i>air gap</i>; separar datos sensibles de los no sensibles.</li>
+      <li><b>Validar entrada:</b> filtrar, canonicalizar y desinfectar; principal defensa contra inyección SQL y <i>cross-site scripting</i>.</li>
+      <li><b>Cambiar la configuración de credenciales predeterminadas.</b></li>
+    </ul>
+    <h3>Reaccionar a ataques</h3>
+    <ul>
+      <li><b>Revocar el acceso</b> a recursos sensibles mientras dure el ataque, incluso a usuarios normalmente legítimos.</li>
+      <li><b>Restringir el inicio de sesión</b> tras intentos fallidos repetidos; a veces se duplica el tiempo de bloqueo.</li>
+      <li><b>Informar a los actores</b> relevantes (operadores, personal, sistemas) cuando se detecta un ataque.</li>
+    </ul>
+    <h3>Recuperarse de ataques</h3>
+    <ul>
+      <li><b>Auditoría:</b> registro de acciones del usuario y del sistema, para rastrear al atacante y crear mejores defensas.</li>
+      <li><b>No repudio:</b> el remitente no puede negar haber enviado el mensaje ni el destinatario haberlo recibido (firmas digitales, terceros de confianza).</li>
+    </ul>
+
+    <h2>Patrones de seguridad</h2>
+    <table>
+      <thead><tr><th>Patrón</th><th>Qué hace</th><th>Beneficio</th><th>Costo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Intercepting validator</b></td><td>Un envoltorio entre el origen y el destino de los mensajes; sobre todo útil cuando el origen es externo.</td><td>Cubre buena parte de las tácticas de detección en un solo paquete.</td><td>Un intermediario cuesta rendimiento y hay que mantener sus patrones actualizados.</td></tr>
+        <tr><td><b>Intrusion prevention system (IPS)</b></td><td>Elemento independiente que analiza actividad sospechosa: si es aceptable la permite; si no, la previene y la denuncia.</td><td>Cubre la mayoría de las tácticas de detectar y reaccionar.</td><td>Base de patrones siempre actualizada; costo de rendimiento; un IPS comercial puede no ajustarse del todo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<!-- ============ 8 ============ -->
+<details class="sec">
+  <summary><span class="num">8</span> Interoperabilidad <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="attr">
+      <div class="pregunta">¿Puede interactuar con otros sistemas y que se entiendan?</div>
+      <p>Capacidad de un sistema para interactuar eficazmente con otros, sin importar las diferencias de tecnologías, lenguajes, plataformas o protocolos. No basta con comunicarse: la información debe ser <b>entendida y procesada</b> por el receptor.</p>
+    </div>
+
+    <div class="box ejemplo">
+      <span class="rot">Escenario concreto del material (sector salud)</span>
+      Un hospital quiere que su sistema de gestión de pacientes se integre con facturación, laboratorios externos y el portal de citas. Un laboratorio externo envía los resultados de un paciente en formato <b>HL7</b>; el sistema del hospital los interpreta sin ajustes manuales, los almacena en menos de <b>2 segundos</b>, los integra sin errores al perfil correcto y notifica al médico responsable.
+    </div>
+    <table>
+      <thead><tr><th>Parte</th><th>En el escenario</th></tr></thead>
+      <tbody>
+        <tr><td>Fuente</td><td>Sistema de laboratorio externo</td></tr>
+        <tr><td>Estímulo</td><td>Solicitud de transferencia de datos en formato HL7</td></tr>
+        <tr><td>Artefacto</td><td>Sistema de gestión de pacientes del hospital</td></tr>
+        <tr><td>Ambiente</td><td>Operación normal, red local con conexión segura a internet</td></tr>
+        <tr><td>Respuesta</td><td>Almacenar los resultados y notificar al médico</td></tr>
+        <tr><td>Medida</td><td>&lt; 2 s; cumplimiento de HL7 sin ajustes manuales; precisión en el perfil del paciente</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Las tres categorías de tácticas</h2>
+    <div class="grid">
+      <div class="card"><h4>Descubrir servicios</h4><p>Cómo los sistemas encuentran y acceden a los servicios en un entorno distribuido.</p></div>
+      <div class="card"><h4>Orquestar</h4><p>Cómo se coordinan varios servicios para completar una tarea compleja.</p></div>
+      <div class="card"><h4>Adaptar la interfaz</h4><p>Cómo se diseñan y adaptan las interfaces para sistemas heterogéneos.</p></div>
+    </div>
+    <table>
+      <thead><tr><th>Categoría</th><th>Táctica</th><th>Idea</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3"><b>Orquestar</b></td><td>Control centralizado</td><td>Un componente central (un orquestador) controla la secuencia de interacciones del flujo de trabajo.</td></tr>
+        <tr><td>Control descentralizado</td><td>Los propios servicios participan en la coordinación según reglas predefinidas.</td></tr>
+        <tr><td>Monitoreo y gestión del flujo</td><td>Monitorear y ajustar dinámicamente la ejecución de los flujos según el entorno.</td></tr>
+        <tr><td rowspan="3"><b>Adaptar la interfaz</b></td><td>Transformación de datos</td><td>Convertir datos de un formato a otro para que sistemas con especificaciones distintas se comuniquen.</td></tr>
+        <tr><td>Adaptadores</td><td>Componentes que traducen entre interfaces o protocolos incompatibles.</td></tr>
+        <tr><td>Interfaces estandarizadas</td><td>Diseñar interfaces que sigan estándares comunes para garantizar la interoperabilidad desde el principio.</td></tr>
+      </tbody>
+    </table>
+    <div class="box">
+      <span class="rot">Lo que el material no resuelve</span>
+      El Genially de interoperabilidad conserva el marcador de borrador «AQUí va la imagen» (dos veces) y repite al final un bloque de ADD que no tiene relación con el tema. Para el detalle de «descubrir servicios» no hay texto en la transcripción: es contenido que está en las láminas.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 9 ============ -->
+<details class="sec">
+  <summary><span class="num">9</span> Usabilidad y desplegabilidad (recursos complementarios) <span class="chev">›</span></summary>
+  <div class="body">
+    <p class="small">Aparecen como decks en «Recursos complementarios»; no figuran en el texto de los contenidos obligatorios ni en las conclusiones del módulo.</p>
+
+    <h2>Usabilidad</h2>
+    <div class="attr">
+      <div class="pregunta">¿Qué tan fácil es para el usuario hacer lo que quiere?</div>
+      <p>Qué tan fácil es realizar una tarea deseada y qué soporte da el sistema. Se mide con tiempo de tarea, número de errores, tiempo de aprendizaje, satisfacción o proporción de operaciones exitosas. Ejemplo del material: el usuario descarga una app y la usa productivamente tras 2 minutos de experimentación.</p>
+    </div>
+    <table>
+      <thead><tr><th>Familia</th><th>Tácticas</th></tr></thead>
+      <tbody>
+        <tr><td><b>Soportar la iniciativa del usuario</b></td><td><b>Cancelar</b> (el sistema debe estar escuchando y liberar los recursos), <b>deshacer</b> (guardar estado para restaurar), <b>pausar/reanudar</b>, <b>agregar</b> (aplicar una operación a un grupo).</td></tr>
+        <tr><td><b>Soportar la iniciativa del sistema</b></td><td>Mantener el <b>modelo de tareas</b> (anticipar qué intenta el usuario), el <b>modelo de usuario</b> (su conocimiento y comportamiento) y el <b>modelo del sistema</b> (por ejemplo, una barra de progreso).</td></tr>
+      </tbody>
+    </table>
+    <p><b>Patrones:</b> <i>Model-View-Controller</i> (separa el modelo de las vistas; agrega algo de latencia y complejidad), <i>Observer</i> (notifica a las vistas los cambios; riesgo de fuga de memoria si no se desregistran) y <i>Memento</i> (implementa «deshacer» con instantáneas de estado; puede consumir mucha memoria).</p>
+
+    <h2>Desplegabilidad</h2>
+    <div class="attr">
+      <div class="pregunta">¿Se puede desplegar y revertir con tiempo y esfuerzo predecibles?</div>
+      <p>Propiedad del software que indica que puede desplegarse en un entorno, y revertirse si no cumple su especificación, dentro de un tiempo y esfuerzo predecible y aceptable. Interesa que los despliegues sean <b>granulares, controlables y eficientes</b>.</p>
+    </div>
+    <table>
+      <thead><tr><th>Familia</th><th>Tácticas</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gestionar el <i>pipeline</i> de despliegue</b></td><td><b>Scale rollouts</b> (desplegar gradualmente a subconjuntos de usuarios), <b>roll back</b>, <b>script deployment commands</b> (los scripts se tratan como código).</td></tr>
+        <tr><td><b>Gestionar el sistema desplegado</b></td><td><b>Manage service interactions</b> (varias versiones a la vez), <b>package dependencies</b> (contenedores, <i>pods</i> o máquinas virtuales), <b>feature toggle</b> (interruptor para apagar una función sin redesplegar).</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>Patrón</th><th>Idea</th><th>Costo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Microservicios</b></td><td>Servicios pequeños, desplegables de forma independiente, que se comunican solo por mensajes.</td><td>Más sobrecarga de red, dificultad con transacciones complejas, control intelectual del conjunto.</td></tr>
+        <tr><td><b>Blue/green</b></td><td>Se crean N instancias nuevas y se cambia el DNS o el descubrimiento hacia ellas; las viejas se eliminan al final.</td><td>Hasta 2N instancias; si el error aparece tarde, volver puede tardar.</td></tr>
+        <tr><td><b>Rolling upgrade</b></td><td>Se reemplazan instancias una a una.</td><td>N + 1 instancias; durante la transición conviven dos versiones (inconsistencia temporal, desajuste de interfaz).</td></tr>
+        <tr><td><b>Canary testing</b></td><td>La nueva versión se prueba en producción con un grupo pequeño de usuarios.</td><td>Requiere planificación y recursos y una estrategia para evaluar resultados.</td></tr>
+        <tr><td><b>A/B testing</b></td><td>Experimento con usuarios reales para ver qué alternativa da mejores resultados de negocio.</td><td>Una de las alternativas se descarta; hay que definir las clases de usuario de antemano.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<!-- ============ 10 ============ -->
+<details class="sec">
+  <summary><span class="num">10</span> Diferencias que suelen confundir <span class="chev">›</span></summary>
+  <div class="body">
+    <p class="small">Aporte propio, construido a partir del material del módulo para estudiar las parejas que más se mezclan.</p>
+    <table>
+      <thead><tr><th>Pareja</th><th>Cómo distinguirlas</th></tr></thead>
+      <tbody>
+        <tr><td>Defecto · error · falla</td><td>El defecto es la causa; el error, el estado intermedio; la falla, lo que ve un observador externo.</td></tr>
+        <tr><td>Heartbeat · ping/echo</td><td>Ambas detectan fallas. En ping/echo pregunta el monitor; en heartbeat avisa el propio componente.</td></tr>
+        <tr><td>Disponibilidad · desempeño</td><td>Un sistema que responde en 14 segundos está disponible, pero su desempeño es malo. Ojo: a veces no se sabe si está caído o solo lento.</td></tr>
+        <tr><td>Retry · circuit breaker</td><td>Retry reintenta; el <i>circuit breaker</i> decide cuándo dejar de reintentar para no propagar la falla en cascada.</td></tr>
+        <tr><td>Repuesto caliente · tibio · frío</td><td>Caliente: procesa lo mismo en paralelo. Tibio: recibe estado periódico. Frío: apagado hasta que hace falta.</td></tr>
+        <tr><td>Rollback · graceful degradation</td><td>Rollback vuelve a un estado anterior; la degradación elegante sigue adelante con menos funciones.</td></tr>
+        <tr><td>Limitar la respuesta · limitar la cola</td><td>Una controla a qué ritmo se procesa; la otra, cuántos eventos pueden esperar. Suelen combinarse.</td></tr>
+        <tr><td>Throttling · load balancer</td><td>Throttling regula cuánto entra; el balanceador reparte lo que ya entró entre varias instancias.</td></tr>
+        <tr><td>Autenticar · autorizar</td><td>Autenticar: ¿eres quien dices ser? Autorizar: ¿tienes permiso para esto?</td></tr>
+        <tr><td>Confidencialidad · privacidad</td><td>La confidencialidad protege los datos del acceso no autorizado; la privacidad decide qué información (PII) se limita y a quién.</td></tr>
+        <tr><td>Acceso limitado · limitar la exposición</td><td>El primero reduce los puntos de acceso; el segundo reduce cuánto se pierde si uno se compromete.</td></tr>
+        <tr><td>Blue/green · rolling upgrade</td><td>Blue/green: una versión activa a la vez, 2N instancias. Rolling: ambas versiones conviven, N + 1.</td></tr>
+        <tr><td>Canary · A/B</td><td>Canary prueba la <i>calidad</i> de una versión con pocos usuarios; A/B compara <i>alternativas</i> por resultado de negocio.</td></tr>
+        <tr><td>Táctica · patrón</td><td>La táctica es una decisión puntual; el patrón empaqueta varias.</td></tr>
+        <tr><td>Interoperar · comunicarse</td><td>Comunicarse es enviar; interoperar exige que el receptor entienda y procese.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<!-- ============ 11 ============ -->
+<details class="sec">
+  <summary><span class="num">11</span> Cada táctica cuesta algo <span class="chev">›</span></summary>
+  <div class="body">
+    <p>No existe una táctica gratuita. Cada una mejora un atributo a costa de otra cosa; eso es lo que se justifica en una decisión de arquitectura.</p>
+    <div class="box clave">
+      <span class="rot">Frase para recordar</span>
+      Si no puedes decir <b>a costa de qué</b> adoptas una táctica, todavía no la entiendes.
+    </div>
+    <table>
+      <thead><tr><th>Táctica o patrón</th><th>Ganas</th><th>A costa de</th></tr></thead>
+      <tbody>
+        <tr><td>Repuesto caliente</td><td>Recuperación en milisegundos</td><td>El costo más alto</td></tr>
+        <tr><td>Repuesto frío</td><td>El costo más bajo</td><td>Recuperación lenta</td></tr>
+        <tr><td>Retry</td><td>Supera errores transitorios</td><td>Hay que limitar los intentos; sin límite se agota al invocador</td></tr>
+        <tr><td>Circuit breaker</td><td>Corta la propagación en cascada</td><td>Un timeout mal elegido da falsos positivos o latencia innecesaria</td></tr>
+        <tr><td>Votación (TMR)</td><td>Decide sin saber la causa de la discrepancia</td><td>Triplicar componentes</td></tr>
+        <tr><td>Acotar tiempos de ejecución</td><td>Respuesta predecible</td><td>Menor precisión del resultado</td></tr>
+        <tr><td>Reducir la frecuencia de muestreo</td><td>Menos carga</td><td>Menor fidelidad de los datos</td></tr>
+        <tr><td>Limitar la cola</td><td>Controla los recursos usados</td><td>Hay que decidir qué hacer con lo que se desborda</td></tr>
+        <tr><td>Throttling</td><td>El servicio nunca se sobrecarga</td><td>Búferes grandes o solicitudes perdidas si la demanda excede la capacidad</td></tr>
+        <tr><td>Load balancer</td><td>Falla invisible y latencia predecible</td><td>Cuello de botella y punto único de falla potencial</td></tr>
+        <tr><td>Service mesh</td><td>Separa los aspectos transversales</td><td>Más procesos y más consumo</td></tr>
+        <tr><td>Intercepting validator / IPS</td><td>Cubre muchas tácticas de detección en un paquete</td><td>Costo de rendimiento y mantenimiento de los patrones</td></tr>
+        <tr><td>Cifrar datos</td><td>Confidencialidad aun en enlaces sin control de acceso</td><td>Costo de cómputo y gestión de claves</td></tr>
+        <tr><td>Blue/green</td><td>Reemplazo completo sin parar el servicio</td><td>2N instancias</td></tr>
+        <tr><td>Canary</td><td>Poca exposición a un defecto grave</td><td>Planificación y recursos adicionales</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Los costos de repuestos, retry, circuit breaker, TMR, throttling, load balancer, service mesh, validator, IPS, blue/green y canary están en los decks del curso. «Cifrar datos» (costo de cómputo y gestión de claves) es conocimiento complementario.</p>
+  </div>
+</details>
+
+<!-- ============ 12 ============ -->
+<details class="sec">
+  <summary><span class="num">12</span> El Reto 2 visto con las tácticas <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="box">
+      <span class="rot">Aplicación propia, no material del curso</span>
+      Esta sección usa lo aprendido para leer la solución del Reto 2 (alerta de flota vehicular). Las cifras son las de la ejecución oficial en AWS (región us-east-2, 13/10/2026).
+    </div>
+
+    <h2>El ASR del reto</h2>
+    <p>El enunciado exige recibir <b>1000 eventos en 30 segundos</b> con el 100 % procesado, enviar el correo del <code>Emergency</code> en menos de 15 s (ahí está el puntaje completo) y respetar dos topes: 15 peticiones por segundo en el API Gateway y 10 instancias simultáneas. Por lo que pide el enunciado, el atributo priorizado es el <b>desempeño</b>; la disponibilidad entra al servicio de una restricción: no perder un <code>Emergency</code>.</p>
+
+    <h2>Qué táctica es cada pieza</h2>
+    <table>
+      <thead><tr><th>Táctica</th><th>Dónde está en la solución</th><th>Atributo</th></tr></thead>
+      <tbody>
+        <tr><td>Gestionar la llegada de eventos</td><td>API Gateway, stage <code>prod</code>: rate 15 y burst 2000. El burst absorbe la ráfaga de 1000.</td><td>Desempeño</td></tr>
+        <tr><td>Limitar la respuesta al evento</td><td>La ingesta responde 200 y encola solo los <code>Emergency</code> en SQS; el correo sale aparte.</td><td>Desempeño</td></tr>
+        <tr><td>Tiempos de ejecución acotados</td><td>Timeouts de SES (2 s de conexión y 3 s de lectura) y de Lambda.</td><td>Desempeño</td></tr>
+        <tr><td>Introducir concurrencia</td><td>Varias instancias de Lambda en paralelo.</td><td>Desempeño</td></tr>
+        <tr><td>Programar recursos (cupo fijo)</td><td>Concurrencia reservada: 10 para la ingesta y 2 para el notifier.</td><td>Desempeño</td></tr>
+        <tr><td>Retry con límite</td><td>El notifier hace 2 intentos (hasta ~12 s en total) y luego manda el mensaje a la DLQ.</td><td>No perder</td></tr>
+        <tr><td>Detección y manejo de excepciones</td><td>Si SQS falla, la ingesta responde 503; nunca confirma un 200 de algo que no guardó.</td><td>No perder</td></tr>
+        <tr><td>Reintroducción</td><td>Visibilidad de SQS de 90 s y <i>redrive</i> (máx. 3): si el notifier muere, el mensaje vuelve a la cola.</td><td>No perder</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Un punto que se suele malinterpretar</h2>
+    <div class="box ejemplo">
+      <span class="rot">«Reservada 10» no significa «llegó a 10»</span>
+      La concurrencia reservada es el <b>cupo</b> dimensionado para el peor escenario (los 10 VUs de k6), no un número que se llena solo. En la ejecución oficial el pico real de la ingesta fue de <b>6 instancias</b> simultáneas, y en total se usaron 8 (6 de ingesta más 2 del notifier). Las dos cifras son ciertas: una es el tope configurado y la otra, lo medido.
+    </div>
+
+    <h2>Qué se midió</h2>
+    <ul>
+      <li>1000 de 1000 peticiones aceptadas, 0 rechazadas por el límite de tasa.</li>
+      <li>1 evento <code>Emergency</code>, 1 correo enviado al primer intento, 0 mensajes en la DLQ.</li>
+      <li>0,756 s desde la recepción del <code>Emergency</code> hasta el envío del correo (<code>EMAIL_SENT</code>), muy por debajo de los 15 s.</li>
+    </ul>
+    <div class="box">
+      <span class="rot">Ejercicio</span>
+      Elige una de las tácticas de la tabla y responde: ¿qué falla o qué presión atiende?, ¿qué atributo mejora? y ¿a costa de qué? Por ejemplo, para «retry con límite» el costo es que, si ambos intentos fallan, el correo va a la DLQ y no sale dentro de la banda de 15 s: se prefiere eso a seguir reintentando sin límite.
+    </div>
+  </div>
+</details>
+
+<!-- ============ 13 ============ -->
+<details class="sec">
+  <summary><span class="num">13</span> Casos prácticos <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> Cada caso describe una situación concreta. Lee el contexto, identifica la táctica, el patrón o el atributo que está en juego y escríbelo antes de pulsar <b>Ver respuesta</b>. Si dudas entre dos, apunta ambos: reconocer la relación también forma parte del ejercicio.
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 1 · Monitoreo de servicios</div>
+      <p class="ctx">Un monitor consulta cada 5 segundos a cada servicio. Si un servicio no devuelve respuesta dentro de 2 segundos, lo marca como caído.</p>
+      <p class="preg">¿Qué táctica de disponibilidad es y de qué familia?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Ping/Echo</b>, de la familia <b>detectar fallas</b>. El monitor inicia la verificación y el umbral de 2 s es lo que define el «tiempo de espera agotado». Si fuera el propio servicio quien avisara periódicamente que está vivo, sería <i>heartbeat</i>.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 2 · API para terceros</div>
+      <p class="ctx">Un cliente externo comienza a enviar 5.000 peticiones por segundo. El contrato con los clientes dice que el servicio atiende hasta 100 por segundo con respuesta en menos de 1 segundo.</p>
+      <p class="preg">¿Qué táctica de desempeño respalda ese contrato y qué patrón la empaqueta?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Gestionar la llegada de eventos</b> mediante un SLA (controlar la demanda de recursos). El patrón que la empaqueta es el <b>throttling</b>: un regulador decide si se atiende la solicitud. El SLA obliga a las dos partes: el servicio debe responder y el cliente no puede exceder la tasa.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 3 · Pagos con un tercero</div>
+      <p class="ctx">El servicio de tarjetas de un tercero deja de responder. El sistema de pagos reintenta sin parar; sus hilos se agotan y la caída se propaga al resto de los servicios.</p>
+      <p class="preg">¿Qué patrón falta y por qué el retry solo no basta?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp">Falta un <b>circuit breaker</b>. Retry supone un error transitorio y necesita un límite; sin él, los reintentos infinitos vuelven inútil al invocador y la falla se propaga en cascada. El circuit breaker corta el ciclo y hace que las invocaciones siguientes regresen de inmediato hasta que se restablezca. Costo: elegir mal el <i>timeout</i> genera falsos positivos o latencia innecesaria.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 4 · Servidor de respaldo</div>
+      <p class="ctx">Dos nodos reciben y procesan exactamente las mismas entradas en paralelo. Cuando el principal falla, el otro toma el control en milisegundos.</p>
+      <p class="preg">¿Qué patrón es y cuál es su trade-off?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Active redundancy (repuesto caliente)</b>, derivado de la táctica <i>redundant spare</i>. Da la recuperación más rápida, pero tiene el <b>costo más alto</b>: se mantiene un repuesto con estado idéntico. El trade-off de la familia es tiempo de recuperación contra costo de mantener el repuesto actualizado.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 5 · Sector salud</div>
+      <p class="ctx">Un laboratorio externo envía resultados en formato HL7 y el sistema del hospital usa otro formato interno. Hay que integrarlos sin ajustes manuales.</p>
+      <p class="preg">¿Qué atributo y qué tácticas aplican?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Interoperabilidad</b>, categoría <b>adaptar la interfaz</b>: <b>transformación de datos</b> (convertir de un formato a otro) y <b>adaptadores</b> que traduzcan entre interfaces incompatibles; a futuro, <b>interfaces estandarizadas</b>. Recuerda que no basta con comunicarse: el receptor debe entender y procesar.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 6 · Nómina</div>
+      <p class="ctx">Un empleado intenta modificar la tabla de tasas de pago. El intento se detecta, el sistema conserva el registro de qué usuario lo hizo y desde dónde, y los datos correctos se restauran en un día.</p>
+      <p class="preg">¿Qué táctica permite reconstruir lo ocurrido y a qué familia pertenece?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Auditoría</b>, de la familia <b>recuperarse de ataques</b>: mantener el registro de acciones del usuario y del sistema para rastrear al atacante y crear mejores defensas. Lo emparenta con <i>no repudio</i>, que impide negar el envío o la recepción de un mensaje.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 7 · Formulario web</div>
+      <p class="ctx">Un atacante escribe código SQL en el campo «nombre» de un formulario y logra leer registros de otros usuarios.</p>
+      <p class="preg">¿Qué táctica faltó?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Validar entrada</b> (resistir ataques): filtrar, canonicalizar y desinfectar lo que entra. Es la principal defensa contra la inyección SQL y el <i>cross-site scripting</i>. Un <i>intercepting validator</i> puede implementarla como un envoltorio entre el origen y el destino de los mensajes.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 8 · Servicio con fuga de memoria</div>
+      <p class="ctx">Un servicio acumula pequeñas fugas de memoria y, tras varios días, termina cayéndose. El equipo decide reiniciarlo cada noche.</p>
+      <p class="preg">¿Qué táctica aplican y de qué familia?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Removal from service</b> (retiro del servicio, también llamado rejuvenecimiento o reinicio terapéutico), de la familia <b>prevenir fallas</b>: se saca el componente de servicio y se restablece antes de que los defectos latentes se acumulen hasta producir una falla.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 9 · Lanzamiento de una versión</div>
+      <p class="ctx">Antes de liberar una nueva versión a todos, el equipo la expone al 5 % de los usuarios reales, monitorea los resultados y, si todo va bien, amplía el porcentaje.</p>
+      <p class="preg">¿Qué patrón de despliegue es y qué ventaja tiene?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Canary testing</b> (reemplazo parcial del servicio). Los usuarios reales «explotan» el software de formas que las pruebas simuladas no logran, y se minimiza el número de usuarios expuestos a un defecto grave. Diferencia con A/B: canary prueba la <i>calidad</i> de una versión; A/B compara <i>alternativas</i> según resultados de negocio.</div>
+    </div>
+
+    <div class="caso">
+      <div class="rotulo">Caso 10 · Priorizar atributos</div>
+      <p class="ctx">El enunciado de un reto exige responder en menos de 15 segundos bajo una ráfaga de 1000 eventos. No menciona cifrado de datos ni una meta de disponibilidad.</p>
+      <p class="preg">¿Qué prioridad se le da a cada atributo y qué se hace con los que no se priorizan?</p>
+      <button class="ghost" onclick="verResp(this)">Ver respuesta</button>
+      <div class="resp"><b>Desempeño: prioridad alta</b>, porque el enunciado lo exige. Seguridad y disponibilidad: <b>prioridad baja</b> en este diseño. Pero no se ignoran: se <b>documentan como no priorizados</b>, con la justificación. Es exactamente la regla del curso: el atributo se prioriza por lo que el enunciado exige y lo demás se registra.</div>
+    </div>
+
+    <div class="barra">
+      <button onclick="todasResp(true)">Ver todas las respuestas</button>
+      <button class="ghost" onclick="todasResp(false)">Ocultar todas</button>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 14 ============ -->
+<details class="sec">
+  <summary><span class="num">14</span> Empareja táctica y familia <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> A la izquierda tienes diez familias de tácticas identificadas con una letra. En la tabla, las tácticas aparecen <b>en orden distinto</b>. Escoge en cada fila la letra de la familia que le corresponde y pulsa <b>Calificar emparejamiento</b>. Resuelve primero de memoria; solo después vuelve a las secciones 5 a 8 para verificar.
+    </div>
+
+    <div class="leyenda">
+      <b>Familias</b>
+      <ul>
+        <li><b>A.</b> Detectar fallas (disponibilidad)</li>
+        <li><b>B.</b> Recuperarse de fallas (disponibilidad)</li>
+        <li><b>C.</b> Prevenir fallas (disponibilidad)</li>
+        <li><b>D.</b> Controlar la demanda de recursos (desempeño)</li>
+        <li><b>E.</b> Gestionar recursos (desempeño)</li>
+        <li><b>F.</b> Detectar ataques (seguridad)</li>
+        <li><b>G.</b> Resistir ataques (seguridad)</li>
+        <li><b>H.</b> Reaccionar a ataques (seguridad)</li>
+        <li><b>I.</b> Recuperarse de ataques (seguridad)</li>
+        <li><b>J.</b> Adaptar la interfaz (interoperabilidad)</li>
+      </ul>
+    </div>
+
+    <table class="match" id="tablaMatch">
+      <thead><tr><th>Letra</th><th>Táctica</th><th style="width:96px">Resultado</th></tr></thead>
+      <tbody>
+        <tr data-ok="E"><td><select aria-label="Letra para la táctica 1"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Mantener múltiples copias de cómputo detrás de un balanceador de carga</td><td></td></tr>
+        <tr data-ok="H"><td><select aria-label="Letra para la táctica 2"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Restringir el inicio de sesión tras intentos fallidos repetidos</td><td></td></tr>
+        <tr data-ok="A"><td><select aria-label="Letra para la táctica 3"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Heartbeat: el propio componente avisa periódicamente que está vivo</td><td></td></tr>
+        <tr data-ok="I"><td><select aria-label="Letra para la táctica 4"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Auditoría: registrar las acciones para rastrear al atacante</td><td></td></tr>
+        <tr data-ok="D"><td><select aria-label="Letra para la táctica 5"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Gestionar la llegada de eventos fijando un SLA de tasa máxima</td><td></td></tr>
+        <tr data-ok="C"><td><select aria-label="Letra para la táctica 6"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Removal from service: reinicio terapéutico del componente</td><td></td></tr>
+        <tr data-ok="J"><td><select aria-label="Letra para la táctica 7"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Transformación de datos y adaptadores entre formatos</td><td></td></tr>
+        <tr data-ok="G"><td><select aria-label="Letra para la táctica 8"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Cifrar datos persistentes y de comunicación</td><td></td></tr>
+        <tr data-ok="B"><td><select aria-label="Letra para la táctica 9"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Graceful degradation: mantener las funciones más críticas</td><td></td></tr>
+        <tr data-ok="F"><td><select aria-label="Letra para la táctica 10"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option><option value="H">H</option><option value="I">I</option><option value="J">J</option></select></td><td>Detectar intrusión comparando con firmas de comportamiento malicioso</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="barra">
+      <button onclick="calificarMatch()">Calificar emparejamiento</button>
+      <button class="ghost" onclick="reiniciarMatch()">Reiniciar</button>
+      <span class="score" id="scoreMatch"></span>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 15 ============ -->
+<details class="sec">
+  <summary><span class="num">15</span> Quiz final: 20 preguntas <span class="chev">›</span></summary>
+  <div class="body">
+    <div class="instr">
+      <b>Cómo trabajar esta sección.</b> Selecciona una opción por pregunta y pulsa <b>Calificar quiz</b>. El cuestionario cubre los ejes del módulo: ASR y escenarios, disponibilidad, desempeño, seguridad, interoperabilidad y despliegue. Al calificar verás la retroalimentación de cada pregunta.
+    </div>
+
+    <form id="quiz">
+
+      <p class="bloque">Requerimientos, ASR y escenarios</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">1.</span> ¿Qué es un ASR?</p>
+        <label><input type="radio" name="q1" value="a"> Un requisito funcional más dentro del backlog.</label>
+        <label><input type="radio" name="q1" value="b"> Un requerimiento de calidad con tanto impacto que condiciona la estructura del sistema desde el inicio.</label>
+        <label><input type="radio" name="q1" value="c"> Un tipo de patrón de diseño.</label>
+        <label><input type="radio" name="q1" value="d"> Un documento de pruebas de aceptación.</label>
+        <div class="fb">ASR = <i>Architecturally Significant Requirement</i>. Algunos requerimientos de calidad definen la estructura desde el principio y deben tratarse con especial cuidado.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">2.</span> En el ejemplo ping-pong del material del curso, ¿por qué la latencia tiene prioridad alta y la seguridad prioridad baja?</p>
+        <label><input type="radio" name="q2" value="a"> Porque la seguridad nunca importa en sistemas pequeños.</label>
+        <label><input type="radio" name="q2" value="b"> Porque el profesor la eligió al azar.</label>
+        <label><input type="radio" name="q2" value="c"> Porque la latencia se especificó en el enunciado y la seguridad no se tuvo en cuenta.</label>
+        <label><input type="radio" name="q2" value="d"> Porque la latencia es siempre más importante que cualquier otro atributo.</label>
+        <div class="fb">El atributo se prioriza por lo que el enunciado exige. La seguridad queda documentada como no priorizada, no como irrelevante.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">3.</span> ¿Qué parte del escenario de calidad indica cómo se verifica que la respuesta es correcta?</p>
+        <label><input type="radio" name="q3" value="a"> La fuente.</label>
+        <label><input type="radio" name="q3" value="b"> El estímulo.</label>
+        <label><input type="radio" name="q3" value="c"> El artefacto.</label>
+        <label><input type="radio" name="q3" value="d"> La medida de respuesta.</label>
+        <div class="fb">La medida de respuesta (por ejemplo, 1 ms o 2 s de latencia promedio) es lo que permite comprobar el escenario.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">4.</span> El estado de operación «estrés o alta carga» se define como…</p>
+        <label><input type="radio" name="q4" value="a"> Operación en condiciones óptimas, sin aumento de carga.</label>
+        <label><input type="radio" name="q4" value="b"> El sistema opera a su máxima capacidad por un volumen alto de solicitudes.</label>
+        <label><input type="radio" name="q4" value="c"> El sistema trabaja solo con las funciones más vitales.</label>
+        <label><input type="radio" name="q4" value="d"> El sistema está apagado para mantenimiento.</label>
+        <div class="fb">Los tres estados son normal, estrés o alta carga y mínima o degradada.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">5.</span> En el método ADD, ¿en qué pasos se toman principalmente las decisiones de diseño?</p>
+        <label><input type="radio" name="q5" value="a"> En el 1 y el 2.</label>
+        <label><input type="radio" name="q5" value="b"> En el 3 y el 6.</label>
+        <label><input type="radio" name="q5" value="c"> En el 4 y el 5.</label>
+        <label><input type="radio" name="q5" value="d"> Solo en el 7.</label>
+        <div class="fb">El paso 4 elige conceptos de diseño y el 5 instancia elementos, asigna responsabilidades y define interfaces. El 6 las registra con su justificación.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">6.</span> ¿Cuál es la diferencia entre una táctica y un patrón?</p>
+        <label><input type="radio" name="q6" value="a"> La táctica es una decisión puntual sobre un atributo; el patrón empaqueta varias decisiones.</label>
+        <label><input type="radio" name="q6" value="b"> Son sinónimos.</label>
+        <label><input type="radio" name="q6" value="c"> El patrón es siempre más pequeño que la táctica.</label>
+        <label><input type="radio" name="q6" value="d"> Las tácticas son solo de seguridad y los patrones solo de desempeño.</label>
+        <div class="fb">Por ejemplo, el patrón <i>throttling</i> empaqueta la táctica de gestionar solicitudes de trabajo.</div>
+      </div>
+
+      <p class="bloque">Disponibilidad</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">7.</span> ¿Qué es una falla (<i>failure</i>) según el material?</p>
+        <label><input type="radio" name="q7" value="a"> La causa de un problema dentro del sistema.</label>
+        <label><input type="radio" name="q7" value="b"> La desviación del sistema respecto de su especificación, visible externamente.</label>
+        <label><input type="radio" name="q7" value="c"> Un estado intermedio interno entre dos operaciones.</label>
+        <label><input type="radio" name="q7" value="d"> Un ataque de denegación de servicio.</label>
+        <div class="fb">El defecto es la causa; el error, el estado intermedio; la falla, lo que ve un observador externo.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">8.</span> ¿Qué diferencia a heartbeat de ping/echo?</p>
+        <label><input type="radio" name="q8" value="a"> Heartbeat solo funciona en redes locales.</label>
+        <label><input type="radio" name="q8" value="b"> Ping/echo no usa umbral de tiempo.</label>
+        <label><input type="radio" name="q8" value="c"> Heartbeat es una táctica de prevención.</label>
+        <label><input type="radio" name="q8" value="d"> Quién inicia la verificación: en ping/echo el monitor, en heartbeat el propio componente.</label>
+        <div class="fb">Ambas son tácticas de detección. La diferencia está en quién tiene la responsabilidad de iniciar la verificación de estado.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">9.</span> ¿Qué táctica supone que el error es transitorio y exige fijar un límite de intentos?</p>
+        <label><input type="radio" name="q9" value="a"> Retry.</label>
+        <label><input type="radio" name="q9" value="b"> Rollback.</label>
+        <label><input type="radio" name="q9" value="c"> Shadow.</label>
+        <label><input type="radio" name="q9" value="d"> Voting.</label>
+        <div class="fb">Debe establecerse un límite de reintentos antes de declarar un error permanente.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">10.</span> ¿Cuál de estos patrones se adapta mal a requisitos de alta disponibilidad por su lenta recuperación?</p>
+        <label><input type="radio" name="q10" value="a"> Active redundancy (repuesto caliente).</label>
+        <label><input type="radio" name="q10" value="b"> Passive redundancy (repuesto tibio).</label>
+        <label><input type="radio" name="q10" value="c"> Cold spare (repuesto frío).</label>
+        <label><input type="radio" name="q10" value="d"> TMR.</label>
+        <div class="fb">El repuesto frío está apagado hasta la conmutación por error; su alto tiempo medio de reparación no sirve para alta disponibilidad.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">11.</span> ¿Para qué sirve un circuit breaker?</p>
+        <label><input type="radio" name="q11" value="a"> Para cifrar los mensajes entre servicios.</label>
+        <label><input type="radio" name="q11" value="b"> Para cortar el ciclo de reintentos cuando el sistema está lidiando con una falla y evitar que se propague.</label>
+        <label><input type="radio" name="q11" value="c"> Para repartir la carga entre varias instancias.</label>
+        <label><input type="radio" name="q11" value="d"> Para registrar los accesos de los usuarios.</label>
+        <div class="fb">Hasta que se restablezca el circuito, las invocaciones siguientes regresan de inmediato sin transmitir la solicitud.</div>
+      </div>
+
+      <p class="bloque">Desempeño</p>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">12.</span> ¿Cuáles son los dos contribuyentes básicos al tiempo de respuesta?</p>
+        <label><input type="radio" name="q12" value="a"> Latencia de red y latencia de disco.</label>
+        <label><input type="radio" name="q12" value="b"> Número de usuarios y número de servidores.</label>
+        <label><input type="radio" name="q12" value="c"> Tiempo de procesamiento y tiempo bloqueado.</label>
+        <label><input type="radio" name="q12" value="d"> Disponibilidad y escalabilidad.</label>
+        <div class="fb">El sistema o está trabajando para responder (procesamiento) o está bloqueado por contención, indisponibilidad de un recurso o dependencia de otro cálculo.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">13.</span> ¿Cuál de estas tácticas pertenece a «controlar la demanda de recursos»?</p>
+        <label><input type="radio" name="q13" value="a"> Limitar la respuesta al evento (poner en cola o descartar).</label>
+        <label><input type="radio" name="q13" value="b"> Mantener múltiples copias de cómputo.</label>
+        <label><input type="radio" name="q13" value="c"> Introducir concurrencia.</label>
+        <label><input type="radio" name="q13" value="d"> Aumentar los recursos.</label>
+        <div class="fb">Las otras tres son tácticas de «gestionar recursos».</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">14.</span> ¿Cuál es un costo del patrón throttling?</p>
+        <label><input type="radio" name="q14" value="a"> Elimina la posibilidad de escalar.</label>
+        <label><input type="radio" name="q14" value="b"> Obliga a cifrar todos los mensajes.</label>
+        <label><input type="radio" name="q14" value="c"> Requiere siempre dos versiones del servicio.</label>
+        <label><input type="radio" name="q14" value="d"> Si la demanda excede regularmente la capacidad, los búferes deben ser muy grandes o se pierden solicitudes.</label>
+        <div class="fb">Además, su lógica debe ser muy rápida y puede ser difícil agregarlo a un sistema con clientes y servidores muy acoplados.</div>
+      </div>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">15.</span> Un balanceador de carga puede convertirse en…</p>
+        <label><input type="radio" name="q15" value="a"> Un repuesto frío.</label>
+        <label><input type="radio" name="q15" value="b"> Un cuello de botella o punto único de falla.</label>
+        <label><input type="radio" name="q15" value="c"> Un mecanismo de cifrado.</label>
+        <label><input type="radio" name="q15" value="d"> Un patrón de despliegue.</label>
+        <div class="fb">Por eso a menudo se replica, e incluso se balancea su propia carga.</div>
+      </div>
+
+      <p class="bloque">Seguridad</p>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">16.</span> ¿Cuáles son las tres características con que se caracteriza la seguridad?</p>
+        <label><input type="radio" name="q16" value="a"> Confidencialidad, integridad y disponibilidad.</label>
+        <label><input type="radio" name="q16" value="b"> Autenticación, autorización y auditoría.</label>
+        <label><input type="radio" name="q16" value="c"> Detectar, resistir y reaccionar.</label>
+        <label><input type="radio" name="q16" value="d"> Privacidad, portabilidad y usabilidad.</label>
+        <div class="fb">Las otras opciones son tácticas o conceptos distintos. Detectar, resistir, reaccionar y recuperarse son las familias de tácticas.</div>
+      </div>
+
+      <div class="q" data-ok="c">
+        <p class="enun"><span class="n">17.</span> ¿Qué táctica es la principal defensa contra la inyección SQL y el cross-site scripting?</p>
+        <label><input type="radio" name="q17" value="a"> Cifrar datos.</label>
+        <label><input type="radio" name="q17" value="b"> Auditoría.</label>
+        <label><input type="radio" name="q17" value="c"> Validar entrada.</label>
+        <label><input type="radio" name="q17" value="d"> Entidades separadas.</label>
+        <div class="fb">Limpiar y verificar la entrada es una importante línea de defensa inicial.</div>
+      </div>
+
+      <div class="q" data-ok="d">
+        <p class="enun"><span class="n">18.</span> La auditoría y el no repudio pertenecen a la familia…</p>
+        <label><input type="radio" name="q18" value="a"> Detectar ataques.</label>
+        <label><input type="radio" name="q18" value="b"> Resistir ataques.</label>
+        <label><input type="radio" name="q18" value="c"> Reaccionar a ataques.</label>
+        <label><input type="radio" name="q18" value="d"> Recuperarse de ataques.</label>
+        <div class="fb">Sirven para rastrear a un atacante y para que nadie pueda negar su participación en una transacción.</div>
+      </div>
+
+      <p class="bloque">Interoperabilidad y despliegue</p>
+
+      <div class="q" data-ok="b">
+        <p class="enun"><span class="n">19.</span> ¿Qué táctica de interoperabilidad convierte datos de un formato a otro?</p>
+        <label><input type="radio" name="q19" value="a"> Control centralizado.</label>
+        <label><input type="radio" name="q19" value="b"> Transformación de datos.</label>
+        <label><input type="radio" name="q19" value="c"> Descubrimiento de servicios.</label>
+        <label><input type="radio" name="q19" value="d"> Monitoreo del flujo.</label>
+        <div class="fb">Pertenece a la categoría de adaptar la interfaz, junto con los adaptadores y las interfaces estandarizadas.</div>
+      </div>
+
+      <div class="q" data-ok="a">
+        <p class="enun"><span class="n">20.</span> ¿Cuál patrón de reemplazo completo puede llegar a usar 2N instancias?</p>
+        <label><input type="radio" name="q20" value="a"> Blue/green.</label>
+        <label><input type="radio" name="q20" value="b"> Rolling upgrade.</label>
+        <label><input type="radio" name="q20" value="c"> Canary testing.</label>
+        <label><input type="radio" name="q20" value="d"> A/B testing.</label>
+        <div class="fb">Rolling upgrade usa N + 1. Canary y A/B son de reemplazo parcial.</div>
+      </div>
+
+    </form>
+
+    <div class="barra">
+      <button onclick="calificarQuiz()">Calificar quiz</button>
+      <button class="ghost" onclick="reiniciarQuiz()">Reiniciar</button>
+      <span class="score" id="scoreQuiz"></span>
+    </div>
+  </div>
+</details>
+
+<!-- ============ 16 ============ -->
+<details class="sec">
+  <summary><span class="num">16</span> Resumen de cinco minutos <span class="chev">›</span></summary>
+  <div class="body">
+    <ul class="resumen">
+      <li><b>ASR</b> = requerimiento de calidad que condiciona la arquitectura. Se prioriza por lo que el enunciado exige; el resto se documenta como no priorizado.</li>
+      <li><b>Escenario de calidad</b> = fuente, estímulo, ambiente, artefacto, respuesta y medida. Sin medida no se puede verificar.</li>
+      <li><b>ADD</b>: 7 pasos; las decisiones se toman en el 4 y el 5 y se registran en el 6.</li>
+      <li><b>Disponibilidad:</b> defecto → error → falla. Tácticas: <b>detectar</b>, <b>recuperar</b> (preparar y reparar, reintroducir) y <b>prevenir</b>.</li>
+      <li><b>Desempeño:</b> «se trata de tiempo». Tácticas: <b>controlar la demanda</b> (llegada, respuesta, prioridad, tiempos acotados) y <b>gestionar recursos</b> (concurrencia, copias, colas, programación).</li>
+      <li><b>Seguridad:</b> confidencialidad, integridad, disponibilidad. Tácticas: <b>detectar</b>, <b>resistir</b>, <b>reaccionar</b>, <b>recuperarse</b>.</li>
+      <li><b>Interoperabilidad:</b> descubrir servicios, orquestar, adaptar la interfaz. No basta con comunicarse: hay que entender.</li>
+      <li><b>Toda táctica cuesta algo.</b> Una decisión de arquitectura dice qué se gana y a costa de qué.</li>
+    </ul>
+    <div class="cadena">
+      ASR → escenario de calidad → táctica → patrón → trade-off aceptado → decisión registrada
+    </div>
+  </div>
+</details>
+
+<footer>
+  Diplomado Arquitectura de Software y Cloud Computing · Cuadernillo de estudio, Módulo II.
+  Material de apoyo para el estudio; la fuente oficial son los recursos del aula.
+</footer>
+
+</div>
+
+<script>
+  var LETRAS = ["A","B","C","D","E","F","G","H","I","J"];
+
+  function abrirTodo(abrir){
+    document.querySelectorAll("details.sec").forEach(function(d){ d.open = abrir; });
+  }
+
+  /* ---- Casos prácticos ---- */
+  function verResp(btn){
+    var r = btn.parentNode.querySelector(".resp");
+    var visible = r.classList.toggle("show");
+    btn.textContent = visible ? "Ocultar respuesta" : "Ver respuesta";
+  }
+  function todasResp(mostrar){
+    document.querySelectorAll(".caso").forEach(function(c){
+      var r = c.querySelector(".resp");
+      var b = c.querySelector("button");
+      if(!r || !b) return;
+      r.classList.toggle("show", mostrar);
+      b.textContent = mostrar ? "Ocultar respuesta" : "Ver respuesta";
+    });
+  }
+
+  /* ---- Emparejamiento ---- */
+
+  function calificarMatch(){
+    var filas = document.querySelectorAll("#tablaMatch tbody tr");
+    var aciertos = 0, sinResponder = 0;
+    filas.forEach(function(tr){
+      var sel = tr.querySelector("select");
+      var celda = tr.cells[2];
+      tr.classList.remove("ok","bad");
+      if(!sel.value){ sinResponder++; celda.innerHTML = '<span class="mark">Sin responder</span>'; return; }
+      if(sel.value === tr.dataset.ok){
+        aciertos++;
+        tr.classList.add("ok");
+        celda.innerHTML = '<span class="mark ok">Correcto</span>';
+      }else{
+        tr.classList.add("bad");
+        celda.innerHTML = '<span class="mark bad">Es ' + tr.dataset.ok + '</span>';
+      }
+    });
+    var pct = Math.round(aciertos / filas.length * 100);
+    var msg = "Resultado: " + aciertos + " de " + filas.length + ' <span class="pct">(' + pct + '%)</span>';
+    if(sinResponder) msg += ' <span class="small">· ' + sinResponder + " sin responder</span>";
+    document.getElementById("scoreMatch").innerHTML = msg;
+  }
+
+  function reiniciarMatch(){
+    document.querySelectorAll("#tablaMatch tbody tr").forEach(function(tr){
+      tr.classList.remove("ok","bad");
+      tr.querySelector("select").value = "";
+      tr.cells[2].innerHTML = "";
+    });
+    document.getElementById("scoreMatch").innerHTML = "";
+  }
+
+  /* ---- Quiz ---- */
+  function calificarQuiz(){
+    var preguntas = document.querySelectorAll("#quiz .q");
+    var aciertos = 0, sinResponder = 0;
+    preguntas.forEach(function(q, i){
+      var elegido = q.querySelector('input[type=radio]:checked');
+      q.classList.remove("ok","bad");
+      var fb = q.querySelector(".fb");
+      fb.classList.add("show");
+      if(!elegido){
+        sinResponder++;
+        q.classList.add("bad");
+        fb.innerHTML = "<b>Sin responder.</b> Respuesta correcta: opción " +
+          q.dataset.ok.toUpperCase() + ". " + fb.dataset.txt;
+        return;
+      }
+      if(elegido.value === q.dataset.ok){
+        aciertos++;
+        q.classList.add("ok");
+        fb.innerHTML = "<b>Correcto.</b> " + fb.dataset.txt;
+      }else{
+        q.classList.add("bad");
+        fb.innerHTML = "<b>Incorrecto.</b> La respuesta es la opción " +
+          q.dataset.ok.toUpperCase() + ". " + fb.dataset.txt;
+      }
+    });
+    var pct = Math.round(aciertos / preguntas.length * 100);
+    var msg = "Resultado: " + aciertos + " de " + preguntas.length + ' <span class="pct">(' + pct + '%)</span>';
+    if(sinResponder) msg += ' <span class="small">· ' + sinResponder + " sin responder</span>";
+    document.getElementById("scoreQuiz").innerHTML = msg;
+    preguntas[0].scrollIntoView({behavior:"smooth", block:"center"});
+  }
+
+  function reiniciarQuiz(){
+    document.querySelectorAll("#quiz .q").forEach(function(q){
+      q.classList.remove("ok","bad");
+      var fb = q.querySelector(".fb");
+      fb.classList.remove("show");
+      fb.innerHTML = fb.dataset.txt;
+    });
+    document.getElementById("quiz").reset();
+    document.getElementById("scoreQuiz").innerHTML = "";
+  }
+
+  /* Guarda el texto original de cada retroalimentación */
+  document.querySelectorAll("#quiz .fb").forEach(function(fb){
+    fb.dataset.txt = fb.innerHTML.trim();
+  });
+</script>
+
+</body>
+</html>

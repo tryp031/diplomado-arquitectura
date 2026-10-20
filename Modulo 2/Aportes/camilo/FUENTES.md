@@ -78,3 +78,29 @@ el local desplegado en docker».
   que pide la rúbrica (envío de k6 → correo recibido en Gmail) — el documento mismo dice qué falta para
   cerrarla (el "Mostrar original" de un correo real en Gmail).
 - No se ha revisado en equipo; conviene que Danny y Freddy la lean antes de usarla en la exposición real.
+
+---
+
+## `m2-cuadernillo-estudio-camilo.html` — Cuadernillo de estudio del Módulo 2
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA |
+| **Fecha de recepción** | 2026-10-19 |
+| **Módulo** | 2 — Requerimientos de calidad, ASR y tácticas de arquitectura |
+| **Tema** | Cuadernillo interactivo de estudio del M2, mismo formato del cuadernillo del M1 |
+| **Tipo** | `investigacion` — documento derivado, elaborado con IA; **no es material oficial** |
+| **Fuentes** | Material oficial del M2 en `Material-Clase/`: los 4 Genially, el video de Seguridad, los 5 decks de tácticas y el enunciado del Reto 2 · Bass, Clements, Kazman, *Software Architecture in Practice* 4ª ed. (citado por los decks) |
+| **Estado** | recibido · ⬜ sin consolidar |
+
+**Qué contiene:** 17 secciones plegables: ASR y escenario de calidad, ADD, tácticas y patrones de
+disponibilidad, desempeño, seguridad e interoperabilidad, usabilidad y desplegabilidad (complementarios),
+confusiones frecuentes, costo de cada táctica, el Reto 2 leído con las tácticas, 10 casos con respuesta
+oculta, un emparejamiento de 10 tácticas con su familia y un quiz de 20 preguntas.
+
+**Límites:**
+- Las secciones 10 (confusiones), 11 (costos) y 12 (Reto 2) son aporte propio, no del curso; el texto lo dice.
+- Las cifras de la sección 12 son las de la ejecución oficial del 13/10/2026 en AWS (us-east-2).
+- El deck de Interoperabilidad solo llega como transcripción plana: «descubrir servicios» no tiene detalle.
+- Convive con `../danny/m2-cuaderno-estudio-danny.md` (notas en prosa); este es la versión interactiva.
+- Las preguntas del quiz son propias; no reproducen la autoevaluación oficial de Brightspace.
