@@ -322,7 +322,7 @@
         <tr><td><b>Medida de respuesta</b></td><td>¿Cómo se verifica?</td><td>1 ms (unidad: segundos), prioridad alta</td></tr>
       </tbody>
     </table>
-    <p class="small">El material usa «actor» y «respuesta esperada»; el libro de Bass usa «fuente» y separa «respuesta» de «medida de respuesta». Son las mismas piezas. Al documentar, usa un solo vocabulario.</p>
+    <p class="small">El material usa «actor» y «respuesta esperada»; el libro de Bass usa «fuente» y separa «respuesta» de «medida de respuesta». Son las mismas piezas. Al documentar, usa un solo vocabulario. <span class="small">(Conocimiento complementario.)</span></p>
 
     <h2>Tres estados de operación</h2>
     <div class="grid">
@@ -335,7 +335,7 @@
     <div class="box ejemplo">
       <span class="rot">Ejemplo bien formado (Desempeño)</span>
       «500 usuarios inician 2.000 solicitudes en un intervalo de 30 segundos, en condiciones normales de funcionamiento. El sistema procesa todas las solicitudes con una latencia promedio de dos segundos.»
-      <br><span class="small">Tiene fuente (usuarios), estímulo (2.000 solicitudes), ambiente (30 s, normal), respuesta (procesar todas) y medida (2 s de latencia promedio).</span>
+      <br><span class="small">Tiene fuente (usuarios), estímulo (2.000 solicitudes en 30 s), artefacto (el sistema, implícito), ambiente (condiciones normales), respuesta (procesar todas) y medida (2 s de latencia promedio).</span>
     </div>
   </div>
 </details>
@@ -549,11 +549,12 @@
 
     <h2>Las tácticas: dos grandes familias</h2>
     <h3>Controlar la demanda de recursos</h3>
+    <p>Las dos primeras filas son formas de una táctica padre: <b>gestionar solicitudes de trabajo</b>, que consiste en reducir la cantidad de solicitudes que ingresan al sistema.</p>
     <table>
       <thead><tr><th>Táctica</th><th>Idea</th></tr></thead>
       <tbody>
-        <tr><td><b>Gestionar la llegada de eventos</b></td><td>Fijar un SLA con la tasa máxima de eventos aceptada: «procesaré X eventos por unidad de tiempo con respuesta Y». Obliga al sistema y al cliente.</td></tr>
-        <tr><td><b>Gestionar la frecuencia de muestreo</b></td><td>Reducir la frecuencia con que se reciben los estímulos; se paga con fidelidad.</td></tr>
+        <tr><td><b>Gestionar la llegada de eventos</b> <span class="small">(forma de gestionar solicitudes de trabajo)</span></td><td>Fijar un SLA con la tasa máxima de eventos aceptada: «procesaré X eventos por unidad de tiempo con respuesta Y». Obliga al sistema y al cliente.</td></tr>
+        <tr><td><b>Gestionar la frecuencia de muestreo</b> <span class="small">(forma de gestionar solicitudes de trabajo)</span></td><td>Reducir la frecuencia con que se reciben los estímulos; se paga con fidelidad.</td></tr>
         <tr><td><b>Limitar la respuesta al evento</b></td><td>Si los eventos llegan más rápido de lo que se procesan, se ponen en cola o se descartan, y se procesa hasta una tasa máxima.</td></tr>
         <tr><td><b>Priorizar eventos</b></td><td>Atender primero los más importantes; ignorar los de baja prioridad consume recursos mínimos.</td></tr>
         <tr><td><b>Reducir la sobrecarga computacional</b></td><td>Reducir la indirección, coubicar recursos de comunicación, limpieza periódica.</td></tr>
@@ -607,7 +608,7 @@
     <p>La <b>privacidad</b> consiste en limitar el acceso a la información: qué información se limita y a quién se permite el acceso. La información que debe mantenerse privada es la <b>PII</b> (<i>Personally Identifiable Information</i>, información de identificación personal): nombre, número de seguro social, fecha y lugar de nacimiento, datos biométricos, y cualquier dato vinculable a una persona como información médica, educativa, financiera o laboral. En la Unión Europea está consagrada en el <b>GDPR</b>, y otras jurisdicciones tienen regulaciones similares.</p>
     <div class="box">
       <span class="rot">Una errata del video</span>
-      En la transcripción automática del video aparece «PI»; es <b>PII</b>. El reconocimiento de voz se comió una letra.
+      En la transcripción automática del video aparece «PI»; es <b>PII</b>. El reconocimiento de voz se comió una letra. <span class="small">(Conocimiento complementario.)</span>
     </div>
 
     <div class="box ejemplo">
@@ -630,7 +631,7 @@
     <p>Salen de la analogía con la seguridad física de un edificio: acceso limitado (vallas, puntos de control), detección de intrusos (insignias), disuasión (guardias), capacidad de reacción (cierre automático de puertas) y recuperación (copia fuera del sitio).</p>
     <div class="box">
       <span class="rot">Un nombre distinto en el video</span>
-      El video llama a la primera familia «identificar»; el deck y el libro la llaman <b>detectar</b>. Es la misma. La disuasión del edificio se lee como parte de <i>resistir</i>.
+      El video llama a la primera familia «identificar»; el deck y el libro la llaman <b>detectar</b>. Es la misma. La disuasión del edificio se lee como parte de <i>resistir</i>. <span class="small">(Conocimiento complementario.)</span>
     </div>
 
     <h3>Detectar ataques</h3>
@@ -719,7 +720,7 @@
     </table>
     <div class="box">
       <span class="rot">Lo que el material no resuelve</span>
-      El Genially de interoperabilidad conserva el marcador de borrador «AQUí va la imagen» (dos veces) y repite al final un bloque de ADD que no tiene relación con el tema. Para el detalle de «descubrir servicios» no hay texto en la transcripción: es contenido que está en las láminas.
+      El Genially de interoperabilidad conserva el marcador de borrador «AQUí va la imagen» (dos veces) y repite al final un bloque de ADD que no tiene relación con el tema. Para el detalle de «descubrir servicios» no hay texto en la transcripción: es contenido que está en las láminas. <span class="small">(Conocimiento complementario.)</span>
     </div>
   </div>
 </details>
@@ -804,7 +805,7 @@
     <p>No existe una táctica gratuita. Cada una mejora un atributo a costa de otra cosa; eso es lo que se justifica en una decisión de arquitectura.</p>
     <div class="box clave">
       <span class="rot">Frase para recordar</span>
-      Si no puedes decir <b>a costa de qué</b> adoptas una táctica, todavía no la entiendes.
+      Si no puedes decir <b>a costa de qué</b> adoptas una táctica, todavía no la entiendes. <span class="small">(Conocimiento complementario.)</span>
     </div>
     <table>
       <thead><tr><th>Táctica o patrón</th><th>Ganas</th><th>A costa de</th></tr></thead>
@@ -840,7 +841,7 @@
     </div>
 
     <h2>El ASR del reto</h2>
-    <p>El enunciado exige recibir <b>1000 eventos en 30 segundos</b> con el 100 % procesado, enviar el correo del <code>Emergency</code> en menos de 15 s (ahí está el puntaje completo) y respetar dos topes: 15 peticiones por segundo en el API Gateway y 10 instancias simultáneas. Por lo que pide el enunciado, el atributo priorizado es el <b>desempeño</b>; la disponibilidad entra al servicio de una restricción: no perder un <code>Emergency</code>.</p>
+    <p>El enunciado exige recibir <b>1000 eventos en 30 segundos</b> con el 100 % procesado, enviar el correo del <code>Emergency</code> en menos de 15 s (ahí está el puntaje completo) y respetar dos topes: 15 peticiones por segundo en el API Gateway y 10 instancias simultáneas. El documento técnico entregado prioriza <b>desempeño y escalabilidad</b> (la escalabilidad es el medio para sostener el desempeño bajo la ráfaga), con una restricción que no se negocia: no perder un <code>Emergency</code>. La disponibilidad entra al servicio de esa restricción; no es el atributo priorizado.</p>
 
     <h2>Qué táctica es cada pieza</h2>
     <table>
@@ -848,30 +849,31 @@
       <tbody>
         <tr><td>Gestionar la llegada de eventos</td><td>API Gateway, stage <code>prod</code>: rate 15 y burst 2000. El burst absorbe la ráfaga de 1000.</td><td>Desempeño</td></tr>
         <tr><td>Limitar la respuesta al evento</td><td>La ingesta responde 200 y encola solo los <code>Emergency</code> en SQS; el correo sale aparte.</td><td>Desempeño</td></tr>
-        <tr><td>Tiempos de ejecución acotados</td><td>Timeouts de SES (2 s de conexión y 3 s de lectura) y de Lambda.</td><td>Desempeño</td></tr>
-        <tr><td>Introducir concurrencia</td><td>Varias instancias de Lambda en paralelo.</td><td>Desempeño</td></tr>
-        <tr><td>Programar recursos (cupo fijo)</td><td>Concurrencia reservada: 10 para la ingesta y 2 para el notifier.</td><td>Desempeño</td></tr>
-        <tr><td>Retry con límite</td><td>El notifier hace 2 intentos (hasta ~12 s en total) y luego manda el mensaje a la DLQ.</td><td>No perder</td></tr>
+        <tr><td>Tiempos de ejecución acotados</td><td>Timeouts de SES (2 s de conexión y 3 s de lectura) y de Lambda. El documento técnico los rotula así; en el deck, limitar el tiempo de cálculo es otra cosa, y un <i>timeout</i> es <i>exception detection</i> (sección 5).</td><td>Desempeño</td></tr>
+        <tr><td>Introducir concurrencia</td><td>Varias instancias de Lambda en paralelo.</td><td>Escalabilidad</td></tr>
+        <tr><td>Programar recursos (cupo fijo)</td><td>Concurrencia reservada: 10 para la ingesta y 2 para el notifier. <b>Brecha declarada:</b> 10 + 2 = 12 supera el tope de 10 instancias del enunciado (ver el recuadro de abajo).</td><td>Escalabilidad</td></tr>
+        <tr><td>Retry con límite</td><td>El notifier hace 2 intentos y luego manda el mensaje a la DLQ. Si SES <i>rechaza</i> el correo, son ≈12 s en total. <b>Brecha declarada:</b> si SES <i>no responde</i>, los reintentos ocultos del SDK (botocore) llevan el peor caso a ≈23 s; la Lambda se corta antes de enviar a la DLQ y el correo llega tarde, por la visibilidad de SQS y el <i>redrive</i>.</td><td>No perder</td></tr>
         <tr><td>Detección y manejo de excepciones</td><td>Si SQS falla, la ingesta responde 503; nunca confirma un 200 de algo que no guardó.</td><td>No perder</td></tr>
-        <tr><td>Reintroducción</td><td>Visibilidad de SQS de 90 s y <i>redrive</i> (máx. 3): si el notifier muere, el mensaje vuelve a la cola.</td><td>No perder</td></tr>
+        <tr><td>Reintroducción</td><td>Visibilidad de SQS de 90 s y <i>redrive</i> (máx. 3): si el notifier muere, el mensaje vuelve a la cola. «Reintroducción» es el rótulo del documento técnico; en el deck significa <i>shadow</i> y resincronización de estado, y esto se parece más a un <i>retry</i>.</td><td>No perder</td></tr>
       </tbody>
     </table>
 
     <h2>Un punto que se suele malinterpretar</h2>
     <div class="box ejemplo">
       <span class="rot">«Reservada 10» no significa «llegó a 10»</span>
-      La concurrencia reservada es el <b>cupo</b> dimensionado para el peor escenario (los 10 VUs de k6), no un número que se llena solo. En la ejecución oficial el pico real de la ingesta fue de <b>6 instancias</b> simultáneas, y en total se usaron 8 (6 de ingesta más 2 del notifier). Las dos cifras son ciertas: una es el tope configurado y la otra, lo medido.
+      La concurrencia reservada es el <b>cupo</b> dimensionado para el peor escenario (los 10 VUs de k6), no un número que se llena solo. En la ejecución oficial el pico real de la ingesta fue de <b>6 instancias</b> simultáneas, y en total se usaron 8 (6 de ingesta más 2 del notifier). Las dos cifras son ciertas: una es el tope configurado y la otra, lo medido.<br><b>Pero el tope configurado es una brecha.</b> 10 + 2 = 12 está por encima de las 10 instancias que permite el enunciado. Lo medido (8) cumple; lo configurado no. El equipo la declaró en el README del empaque, y la corrección propuesta es bajar la ingesta a 8 (8 + 2 = 10).
     </div>
 
     <h2>Qué se midió</h2>
     <ul>
       <li>1000 de 1000 peticiones aceptadas, 0 rechazadas por el límite de tasa.</li>
       <li>1 evento <code>Emergency</code>, 1 correo enviado al primer intento, 0 mensajes en la DLQ.</li>
-      <li>0,756 s desde la recepción del <code>Emergency</code> hasta el envío del correo (<code>EMAIL_SENT</code>), muy por debajo de los 15 s.</li>
+      <li>0,644 s desde la última petición de k6 hasta el envío del correo (<code>EMAIL_SENT</code>): es la métrica de la rúbrica. Desde la recepción del <code>Emergency</code> hasta el envío son 0,756 s.</li>
+      <li>Entre 0,64 y 1,35 s hasta la llegada del correo a Gmail. Todo muy por debajo de los 15 s.</li>
     </ul>
     <div class="box">
       <span class="rot">Ejercicio</span>
-      Elige una de las tácticas de la tabla y responde: ¿qué falla o qué presión atiende?, ¿qué atributo mejora? y ¿a costa de qué? Por ejemplo, para «retry con límite» el costo es que, si ambos intentos fallan, el correo va a la DLQ y no sale dentro de la banda de 15 s: se prefiere eso a seguir reintentando sin límite.
+      Elige una de las tácticas de la tabla y responde: ¿qué falla o qué presión atiende?, ¿qué atributo mejora? y ¿a costa de qué? Por ejemplo, para «retry con límite» el costo es que, si ambos intentos fallan, el correo va a la DLQ y no sale dentro de la banda de 15 s: se prefiere eso a seguir reintentando sin límite. Y ojo con el peor caso: con los reintentos ocultos del SDK (≈23 s si SES no responde), el límite real es mayor que el de 2 intentos.
     </div>
   </div>
 </details>
@@ -1014,7 +1016,7 @@
     <div class="barra">
       <button onclick="calificarMatch()">Calificar emparejamiento</button>
       <button class="ghost" onclick="reiniciarMatch()">Reiniciar</button>
-      <span class="score" id="scoreMatch"></span>
+      <span class="score" id="scoreMatch" aria-live="polite"></span>
     </div>
   </div>
 </details>
@@ -1224,7 +1226,7 @@
     <div class="barra">
       <button onclick="calificarQuiz()">Calificar quiz</button>
       <button class="ghost" onclick="reiniciarQuiz()">Reiniciar</button>
-      <span class="score" id="scoreQuiz"></span>
+      <span class="score" id="scoreQuiz" aria-live="polite"></span>
     </div>
   </div>
 </details>
@@ -1356,6 +1358,20 @@
     document.getElementById("quiz").reset();
     document.getElementById("scoreQuiz").innerHTML = "";
   }
+
+  /* Letra visible en cada opción, para ubicar «la opción C» */
+  document.querySelectorAll("#quiz .q").forEach(function(q){
+    q.querySelectorAll("label").forEach(function(l, i){
+      var sp = document.createElement("b");
+      sp.className = "letra";
+      sp.textContent = LETRAS[i] + ") ";
+      l.appendChild(document.createTextNode(""));
+      l.insertBefore(sp, l.childNodes[1]);
+    });
+  });
+
+  /* Al imprimir, abrir todas las secciones */
+  window.addEventListener("beforeprint", function(){ abrirTodo(true); });
 
   /* Guarda el texto original de cada retroalimentación */
   document.querySelectorAll("#quiz .fb").forEach(function(fb){

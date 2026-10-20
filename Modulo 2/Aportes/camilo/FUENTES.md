@@ -101,6 +101,6 @@ oculta, un emparejamiento de 10 tácticas con su familia y un quiz de 20 pregunt
 **Límites:**
 - Las secciones 10 (confusiones), 11 (costos) y 12 (Reto 2) son aporte propio, no del curso; el texto lo dice.
 - Las cifras de la sección 12 son las de la ejecución oficial del 13/10/2026 en AWS (us-east-2).
-- El deck de Interoperabilidad solo llega como transcripción plana: «descubrir servicios» no tiene detalle.
+- El Genially P5 de Interoperabilidad solo llega como transcripción plana: «descubrir servicios» no tiene detalle.
 - Convive con `../danny/m2-cuaderno-estudio-danny.md` (notas en prosa); este es la versión interactiva.
 - Las preguntas del quiz son propias; no reproducen la autoevaluación oficial de Brightspace.
