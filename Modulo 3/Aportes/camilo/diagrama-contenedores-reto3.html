@@ -13,203 +13,132 @@ p.sub { color:#5b6b7c; margin:0 0 14px; font-size:14.5px; }
 <h2>Vista general (zoom-out)</h2>
 <p class="sub">Así se ve el sistema completo desde afuera, con la aplicación de AWS colapsada en una caja. DynamoDB y CloudWatch son servicios de AWS: el panel lee de ellos, no de la aplicación.</p>
 <div class="card"><svg width="1260" height="595" viewBox="0 0 1260 595" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#123252"/></marker>
-<marker id="ahD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b7c"/></marker>
-</defs>
-
-<!-- Persona -->
-<circle cx="60" cy="215" r="20" fill="#5b6b7c"/>
-<path d="M30,287 Q30,245 60,245 Q90,245 90,287 Z" fill="#5b6b7c"/>
+<defs><filter id="sh1" x="-6%" y="-6%" width="112%" height="125%"><feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0b2540" flood-opacity="0.16"/></filter><marker id="aN1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#123252"/></marker><marker id="aG1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b7c"/></marker><marker id="aV1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f8f5b"/></marker></defs>
+<circle cx="60" cy="215" r="20" fill="#2f8f5b"/><path d="M30,287 Q30,245 60,245 Q90,245 90,287 Z" fill="#2f8f5b"/>
 <text x="60" y="313" text-anchor="middle" font-size="14" font-weight="700" fill="#17212b">Persona</text>
-<text x="60" y="331" text-anchor="middle" font-size="12.5" fill="#5b6b7c">opera el panel y</text>
-<text x="60" y="348" text-anchor="middle" font-size="12.5" fill="#5b6b7c">lanza la prueba</text>
-<line x1="98" y1="260" x2="140" y2="260" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS)"/>
-<text x="119" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1f4e79">opera</text>
+<text x="60" y="331" text-anchor="middle" font-size="13" fill="#64748b">opera el panel y</text>
+<text x="60" y="348" text-anchor="middle" font-size="13" fill="#64748b">lanza la prueba</text>
+<line x1="98" y1="260" x2="140" y2="260" stroke="#123252" stroke-width="2.2" marker-end="url(#aN1)"/>
+<text x="119" y="248" text-anchor="middle" font-size="12.5" font-weight="700" fill="#123252">opera</text>
+<rect x="145" y="40" width="345" height="480" rx="12" fill="#e9f0f9" stroke="#9fb6d3" stroke-width="1.6" stroke-dasharray="7 5"/><text x="165" y="72" font-size="15" font-weight="700" fill="#2c6fae" letter-spacing="0.4">PLANO DE CONTROL</text><text x="165" y="92" font-size="12.5" font-style="italic" fill="#64748b">k6 y panel de estado, los dos construidos</text>
+<g filter="url(#sh1)"><rect x="165" y="125" width="305" height="125" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="165" y="125" width="305" height="36" rx="10" fill="#123252"/><rect x="165" y="147" width="305" height="14" fill="#123252"/></g><text x="317.5" y="150" text-anchor="middle" font-size="15.5" font-weight="700" fill="#ffffff">k6 oficial</text><text x="317.5" y="185" text-anchor="middle" font-size="13.5" fill="#3f5a61">genera la carga de prueba</text>
+<text x="317.5" y="206" text-anchor="middle" font-size="13" fill="#64748b">1 VU · 140 iteraciones · 7 minutos</text>
+<text x="317.5" y="227" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">solo cambia la URL</text>
 
-<!-- Plano PANEL DE CONTROL -->
-<rect x="145" y="40" width="345" height="480" rx="12" fill="#eef2f7" stroke="#9aa5b1" stroke-width="1.6" stroke-dasharray="7 5"/>
-<text x="165" y="72" font-size="15" font-weight="700" fill="#4a5568" letter-spacing="0.4">PANEL DE CONTROL</text>
-<text x="165" y="92" font-size="12.5" font-style="italic" fill="#64748b">k6 y panel de estado, los dos construidos</text>
+<g filter="url(#sh1)"><rect x="165" y="340" width="305" height="150" rx="10" fill="#ffffff" stroke="#2c6fae" stroke-width="1.8"/><rect x="165" y="340" width="305" height="36" rx="10" fill="#2c6fae"/><rect x="165" y="362" width="305" height="14" fill="#2c6fae"/></g><text x="317.5" y="365" text-anchor="middle" font-size="15.5" font-weight="700" fill="#ffffff">Panel de estado</text><text x="317.5" y="400" text-anchor="middle" font-size="13.5" fill="#3f5a61">lee DynamoDB y logs (boto3)</text>
+<text x="317.5" y="421" text-anchor="middle" font-size="13" fill="#64748b">nivel por minuto y logs de cambios</text>
+<text x="317.5" y="442" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">exporta la evidencia de la corrida</text>
+<text x="317.5" y="463" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">y puede enviar una petición a mano</text>
 
-<rect x="165" y="125" width="305" height="125" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
-<rect x="165" y="125" width="305" height="42" rx="10" fill="#123252"/>
-<rect x="165" y="153" width="305" height="14" fill="#123252"/>
-<text x="317" y="153" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">k6 oficial</text>
-<text x="317" y="193" text-anchor="middle" font-size="13.5" fill="#3f5a61">genera la carga de prueba</text>
-<text x="317" y="214" text-anchor="middle" font-size="13" fill="#64748b">1 VU · 140 iteraciones · 7 minutos</text>
-<text x="317" y="234" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">solo cambia la URL</text>
+<rect x="590" y="40" width="650" height="480" rx="12" fill="#fcf2dc" stroke="#d6b062" stroke-width="1.6" stroke-dasharray="7 5"/><text x="610" y="72" font-size="15" font-weight="700" fill="#a96f0a" letter-spacing="0.4">AWS · US-EAST-2</text>
+<g filter="url(#sh1)"><rect x="620" y="115" width="590" height="125" rx="10" fill="#ffffff" stroke="#c58a1a" stroke-width="1.8"/><rect x="620" y="115" width="590" height="36" rx="10" fill="#c58a1a"/><rect x="620" y="137" width="590" height="14" fill="#c58a1a"/></g><text x="915.0" y="140" text-anchor="middle" font-size="15.5" font-weight="700" fill="#ffffff">Aplicación resiliente</text><text x="915.0" y="175" text-anchor="middle" font-size="13.5" fill="#3f5a61">API Gateway → Lambda router → Lambdas de nivel 1, 2 y 3</text>
+<text x="915.0" y="196" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a3d">✓ validada en AWS</text>
+<text x="915.0" y="217" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">detalle en la siguiente figura</text>
 
-<rect x="165" y="340" width="305" height="150" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
-<rect x="165" y="340" width="305" height="42" rx="10" fill="#123252"/>
-<rect x="165" y="368" width="305" height="14" fill="#123252"/>
-<text x="317" y="368" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Panel de estado</text>
-<text x="317" y="408" text-anchor="middle" font-size="13.5" fill="#3f5a61">lee DynamoDB y logs (boto3)</text>
-<text x="317" y="430" text-anchor="middle" font-size="13" fill="#64748b">nivel por minuto y logs de cambios</text>
-<text x="317" y="452" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">exporta la evidencia de la corrida</text>
-<text x="317" y="468" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">y puede enviar una petición a mano</text>
+<g filter="url(#sh1)"><path d="M620,358 a135.0,13 0 0 1 270,0 v99 a135.0,13 0 0 1 -270,0 z" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><ellipse cx="755.0" cy="358" rx="135.0" ry="13" fill="#e8eef6" stroke="#123252" stroke-width="1.8"/></g><text x="755.0" y="391" text-anchor="middle" font-size="15.5" font-weight="700" fill="#17212b">DynamoDB</text><text x="755.0" y="413" text-anchor="middle" font-size="13.5" fill="#3f5a61">reto3-estado</text>
+<text x="755.0" y="434" text-anchor="middle" font-size="13" fill="#64748b">errores y nivel de cada minuto</text>
+<text x="755.0" y="455" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">estado compartido</text>
 
-<!-- Plano AWS -->
-<rect x="590" y="40" width="650" height="480" rx="12" fill="#fdf6e8" stroke="#c9a35e" stroke-width="1.6" stroke-dasharray="7 5"/>
-<text x="610" y="72" font-size="15" font-weight="700" fill="#8a6318" letter-spacing="0.4">AWS · US-EAST-2</text>
+<g filter="url(#sh1)"><rect x="940" y="345" width="270" height="125" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="940" y="345" width="270" height="36" rx="10" fill="#123252"/><rect x="940" y="367" width="270" height="14" fill="#123252"/></g><text x="1075.0" y="370" text-anchor="middle" font-size="15.5" font-weight="700" fill="#ffffff">CloudWatch</text><text x="1075.0" y="405" text-anchor="middle" font-size="13.5" fill="#3f5a61">logs, métricas y dashboard</text>
+<text x="1075.0" y="426" text-anchor="middle" font-size="13" fill="#64748b">evento CAMBIO_NIVEL</text>
+<text x="1075.0" y="447" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">dashboard reto3-resiliencia</text>
 
-<rect x="620" y="115" width="590" height="125" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
-<rect x="620" y="115" width="590" height="42" rx="10" fill="#123252"/>
-<rect x="620" y="143" width="590" height="14" fill="#123252"/>
-<text x="915" y="143" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Aplicación resiliente</text>
-<text x="915" y="184" text-anchor="middle" font-size="13.5" fill="#3f5a61">API Gateway → Lambda router → Lambdas de nivel 1, 2 y 3</text>
-<text x="915" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#2b6a4b">✓ validada en LocalStack</text>
-<text x="915" y="228" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">detalle en la siguiente figura</text>
-
-<rect x="620" y="345" width="270" height="115" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
-<rect x="620" y="345" width="270" height="40" rx="10" fill="#123252"/>
-<rect x="620" y="371" width="270" height="14" fill="#123252"/>
-<text x="755" y="371" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">DynamoDB</text>
-<text x="755" y="410" text-anchor="middle" font-size="13.5" fill="#3f5a61">reto3-estado</text>
-<text x="755" y="431" text-anchor="middle" font-size="13" fill="#64748b">errores y nivel de cada minuto</text>
-<text x="755" y="450" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">estado compartido</text>
-
-<rect x="940" y="345" width="270" height="115" rx="10" fill="#fff" stroke="#123252" stroke-width="1.8"/>
-<rect x="940" y="345" width="270" height="40" rx="10" fill="#123252"/>
-<rect x="940" y="371" width="270" height="14" fill="#123252"/>
-<text x="1075" y="371" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">CloudWatch</text>
-<text x="1075" y="410" text-anchor="middle" font-size="13.5" fill="#3f5a61">logs, métricas y dashboard</text>
-<text x="1075" y="431" text-anchor="middle" font-size="13" fill="#64748b">evento CAMBIO_NIVEL</text>
-<text x="1075" y="450" text-anchor="middle" font-size="12" font-style="italic" fill="#b45309">dashboard pendiente en AWS real</text>
-
-<!-- Flechas -->
-<line x1="470" y1="187" x2="618" y2="187" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS)"/>
-<text x="544" y="156" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1f4e79">HTTPS POST</text>
+<line x1="470" y1="187" x2="618" y2="187" stroke="#123252" stroke-width="2.2" marker-end="url(#aN1)"/>
+<text x="544" y="156" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2c6fae">HTTPS POST</text>
 <text x="544" y="172" text-anchor="middle" font-size="11.5" fill="#64748b">≈ 20 por min</text>
-
-<line x1="755" y1="240" x2="755" y2="343" stroke="#123252" stroke-width="2" marker-end="url(#ahS)" marker-start="url(#ahS)"/>
-<text x="768" y="296" font-size="12" font-weight="700" fill="#1f4e79">lee y cuenta</text>
-<line x1="1075" y1="240" x2="1075" y2="343" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ahD)"/>
-<text x="1088" y="296" font-size="12" font-weight="700" fill="#4a5568">logs y métricas</text>
-
-<line x1="470" y1="400" x2="618" y2="400" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ahD)"/>
-<text x="544" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#4a5568">boto3</text>
-<path d="M470,440 H520 V492 H1075 V462" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" fill="none" marker-end="url(#ahD)"/>
-<text x="800" y="484" text-anchor="middle" font-size="12" font-weight="700" fill="#4a5568">boto3 · solo logs</text>
-<path d="M470,360 H575 V226 H618" stroke="#123252" stroke-width="2" fill="none" marker-end="url(#ahS)"/>
-<text x="567" y="300" text-anchor="end" font-size="12" font-weight="700" fill="#1f4e79">petición</text>
-<text x="567" y="315" text-anchor="end" font-size="12" font-weight="700" fill="#1f4e79">a mano</text>
-
+<line x1="755" y1="240" x2="755" y2="343" stroke="#123252" stroke-width="2.2" marker-end="url(#aN1)" marker-start="url(#aN1)"/>
+<text x="768" y="296" text-anchor="start" font-size="12" font-weight="700" fill="#2c6fae">lee y cuenta</text>
+<line x1="1075" y1="240" x2="1075" y2="343" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#aG1)"/>
+<text x="1088" y="296" text-anchor="start" font-size="12" font-weight="700" fill="#4a5568">logs y métricas</text>
+<line x1="470" y1="410" x2="618" y2="410" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#aG1)"/>
+<text x="544" y="398" text-anchor="middle" font-size="12" font-weight="700" fill="#4a5568">boto3</text>
+<path d="M470,452 H520 V500 H1075 V472" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" fill="none" marker-end="url(#aG1)"/>
+<text x="800" y="492" text-anchor="middle" font-size="12" font-weight="700" fill="#4a5568">boto3 · solo logs</text>
+<path d="M470,360 H575 V226 H618" stroke="#123252" stroke-width="2" fill="none" marker-end="url(#aN1)"/>
+<text x="567" y="300" text-anchor="end" font-size="12" font-weight="700" fill="#2c6fae">petición</text>
+<text x="567" y="315" text-anchor="end" font-size="12" font-weight="700" fill="#2c6fae">a mano</text>
 <text x="640" y="552" text-anchor="middle" font-size="13" font-style="italic" fill="#5b6b7c">El recorrido que se mide es Persona → k6 → AWS. El panel lee DynamoDB y los logs de CloudWatch; además puede enviar una petición a mano</text>
 <text x="640" y="571" text-anchor="middle" font-size="13" font-style="italic" fill="#5b6b7c">al API Gateway (que cuenta en el estado) y, solo en LocalStack, reiniciar el estado.</text>
 </svg></div>
 
 <h2>Diagrama de contenedores (detalle de AWS)</h2>
-<p class="sub">El color indica el estado real de cada pieza: verde = validado con el k6 oficial en LocalStack; ámbar = pendiente de confirmar en AWS real; gris = actor externo. El «qué hace» va debajo de cada caja.</p>
+<p class="sub">Marino = servicios de AWS del sistema; dorado = el router, que decide el nivel; verde = el estado compartido (DynamoDB). «✓ AWS» marca lo validado con el k6 oficial en AWS (corridas del 21 y 22/10/2026). El «qué hace» va debajo de cada caja.</p>
 <div class="card"><svg width="1120" height="845" viewBox="0 0 1120 845" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<marker id="ahS2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#123252"/></marker>
-<marker id="ahD2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b7c"/></marker>
-</defs>
-<rect x="215" y="16" width="885" height="745" rx="14" fill="#fdf6e8" stroke="#c9a35e" stroke-width="1.6" stroke-dasharray="7 5"/>
-<text x="235" y="44" font-size="15" font-weight="700" fill="#8a6318" letter-spacing="0.3">AWS · US-EAST-2</text>
-<rect x="15" y="70" width="175" height="110" rx="10" fill="#f1f3f6" stroke="#5b6b7c" stroke-width="1.8"/>
-<text x="102.5" y="97" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">k6 oficial</text>
-<text x="102.5" y="122" text-anchor="middle" font-size="13" fill="#3f5a61">1 VU · 140 iteraciones</text>
-<text x="102.5" y="143" text-anchor="middle" font-size="13" fill="#3f5a61">≈ 20 peticiones por minuto</text>
-<text x="102" y="200" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="102" dy="0">Qué hace: envía una petición</tspan>
-<tspan x="102" dy="15">cada 3 s durante 7 min;</tspan>
-<tspan x="102" dy="15">en los minutos 1, 3 y 5</tspan>
-<tspan x="102" dy="15">manda errores (error: true)</tspan>
-</text>
-<rect x="240" y="70" width="200" height="110" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="340.0" y="97" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">API Gateway</text>
-<text x="340.0" y="122" text-anchor="middle" font-size="13" fill="#3f5a61">REST · stage prod</text>
-<text x="340.0" y="143" text-anchor="middle" font-size="13" fill="#3f5a61">POST /service-api</text>
-<text x="340.0" y="164" text-anchor="middle" font-size="13" font-weight="700" fill="#2b6a4b">✓ LocalStack</text>
-<text x="340" y="200" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="340" dy="0">Qué hace: punto de entrada único;</tspan>
-<tspan x="340" dy="15">pasa cada petición</tspan>
-<tspan x="340" dy="15">al router por proxy</tspan>
-</text>
-<rect x="500" y="70" width="270" height="130" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="635.0" y="97" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">Lambda reto3-router</text>
-<text x="635.0" y="122" text-anchor="middle" font-size="13" fill="#3f5a61">nivel(m) = f(nivel(m−1), errores(m−1))</text>
-<text x="635.0" y="143" text-anchor="middle" font-size="13" fill="#3f5a61">≥ 5 errores → N2 · ≥ 10 → N3</text>
-<text x="635.0" y="164" text-anchor="middle" font-size="13" fill="#3f5a61">degrada de golpe, recupera de a un nivel *</text>
-<text x="635.0" y="188" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">sin DynamoDB responde N3 (falla segura)</text>
-<rect x="850" y="70" width="220" height="110" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="960.0" y="97" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">DynamoDB</text>
-<text x="960.0" y="122" text-anchor="middle" font-size="13" fill="#3f5a61">reto3-estado</text>
-<text x="960.0" y="143" text-anchor="middle" font-size="13" fill="#3f5a61">un ítem por minuto</text>
-<text x="960.0" y="164" text-anchor="middle" font-size="13" font-weight="700" fill="#2b6a4b">✓ LocalStack</text>
-<text x="960" y="200" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="960" dy="0">Qué hace: guarda errores, peticiones y</tspan>
-<tspan x="960" dy="15">nivel de cada minuto: el</tspan>
-<tspan x="960" dy="15">estado compartido entre</tspan>
-<tspan x="960" dy="15">instancias de Lambda</tspan>
-</text>
-<line x1="190" y1="125" x2="238" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)"/>
-<line x1="440" y1="125" x2="498" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)"/>
-<text x="469" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f4e79">proxy</text>
-<line x1="770" y1="125" x2="848" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)" marker-start="url(#ahS2)"/>
-<text x="809" y="113" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1f4e79">lee y cuenta</text>
-<rect x="250" y="340" width="220" height="100" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="360.0" y="367" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">reto3-nivel1 · Full</text>
-<text x="360.0" y="392" text-anchor="middle" font-size="13" fill="#3f5a61">200 «Nivel 1: OK»</text>
-<text x="360.0" y="413" text-anchor="middle" font-size="13" fill="#3f5a61">500 con error</text>
-<text x="360" y="465" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="360" dy="0">Qué hace: valida, registra, analiza</tspan>
-<tspan x="360" dy="15">riesgo y notifica (simulado)</tspan>
-</text>
-<line x1="580" y1="200" x2="360" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)"/>
-<rect x="525" y="340" width="220" height="100" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="635.0" y="367" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">reto3-nivel2 · Degradado</text>
-<text x="635.0" y="392" text-anchor="middle" font-size="13" fill="#3f5a61">200 «Nivel 2: OK»</text>
-<text x="635.0" y="413" text-anchor="middle" font-size="13" fill="#3f5a61">500 con error</text>
-<text x="635" y="465" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="635" dy="0">Qué hace: solo valida y registra;</tspan>
-<tspan x="635" dy="15">análisis y notificación diferidos</tspan>
-</text>
-<line x1="635" y1="200" x2="635" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)"/>
-<rect x="800" y="340" width="220" height="100" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="910.0" y="367" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">reto3-nivel3 · Mínimo</text>
-<text x="910.0" y="392" text-anchor="middle" font-size="13" fill="#3f5a61">200 «Operación al mínimo»</text>
-<text x="910.0" y="413" text-anchor="middle" font-size="13" fill="#3f5a61">503 mantenimiento</text>
-<text x="910" y="465" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="910" dy="0">Qué hace: no procesa; responde</tspan>
-<tspan x="910" dy="15">el mensaje de mantenimiento</tspan>
-</text>
-<line x1="690" y1="200" x2="910" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#ahS2)"/>
-<text x="650" y="262" text-anchor="start" font-size="11.5" font-weight="700" fill="#1f4e79">invoca (síncrono)</text>
-<text x="650" y="277" text-anchor="start" font-size="11.5" fill="#64748b">según el nivel del minuto</text>
+<defs><filter id="sh2" x="-6%" y="-6%" width="112%" height="125%"><feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0b2540" flood-opacity="0.16"/></filter><marker id="aN2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#123252"/></marker><marker id="aG2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b7c"/></marker><marker id="aV2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f8f5b"/></marker></defs>
+<rect x="215" y="16" width="885" height="745" rx="12" fill="#fcf2dc" stroke="#d6b062" stroke-width="1.6" stroke-dasharray="7 5"/><text x="235" y="48" font-size="15" font-weight="700" fill="#a96f0a" letter-spacing="0.4">AWS · US-EAST-2</text>
+<g filter="url(#sh2)"><rect x="15" y="70" width="175" height="110" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="15" y="70" width="175" height="36" rx="10" fill="#123252"/><rect x="15" y="92" width="175" height="14" fill="#123252"/></g><text x="102.5" y="95" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">k6 oficial</text><text x="102.5" y="130" text-anchor="middle" font-size="13.5" fill="#3f5a61">1 VU · 140 iteraciones</text>
+<text x="102.5" y="151" text-anchor="middle" font-size="13.5" fill="#3f5a61">≈ 20 peticiones por minuto</text>
+
+<text x="102" y="200" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="102" dy="0">Qué hace: envía una petición</tspan><tspan x="102" dy="15">cada 3 s durante 7 min;</tspan><tspan x="102" dy="15">en los minutos 1, 3 y 5</tspan><tspan x="102" dy="15">manda errores (error: true)</tspan></text>
+
+<g filter="url(#sh2)"><rect x="240" y="70" width="200" height="110" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="240" y="70" width="200" height="36" rx="10" fill="#123252"/><rect x="240" y="92" width="200" height="14" fill="#123252"/></g><text x="340.0" y="95" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">API Gateway</text><text x="340.0" y="130" text-anchor="middle" font-size="13.5" fill="#3f5a61">REST · stage prod</text>
+<text x="340.0" y="151" text-anchor="middle" font-size="13.5" fill="#3f5a61">POST /service-api</text>
+<text x="340.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a3d">✓ AWS</text>
+
+<text x="340" y="200" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="340" dy="0">Qué hace: punto de entrada único;</tspan><tspan x="340" dy="15">pasa cada petición</tspan><tspan x="340" dy="15">al router por proxy</tspan></text>
+
+<g filter="url(#sh2)"><rect x="500" y="70" width="270" height="130" rx="10" fill="#ffffff" stroke="#c58a1a" stroke-width="1.8"/><rect x="500" y="70" width="270" height="36" rx="10" fill="#c58a1a"/><rect x="500" y="92" width="270" height="14" fill="#c58a1a"/></g><text x="635.0" y="95" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">Lambda reto3-router</text><text x="635.0" y="130" text-anchor="middle" font-size="13.5" fill="#3f5a61">nivel(m) = f(nivel(m−1), errores(m−1))</text>
+<text x="635.0" y="151" text-anchor="middle" font-size="13.5" fill="#3f5a61">≥ 5 errores → N2 · ≥ 10 → N3</text>
+<text x="635.0" y="172" text-anchor="middle" font-size="13.5" fill="#3f5a61">degrada de golpe, recupera de a un nivel *</text>
+<text x="635.0" y="193" text-anchor="middle" font-size="12" font-style="italic" fill="#64748b">sin DynamoDB responde N3 (falla segura)</text>
+
+<g filter="url(#sh2)"><path d="M850,75 a110.0,13 0 0 1 220,0 v99 a110.0,13 0 0 1 -220,0 z" fill="#e3f3e8" stroke="#2f8f5b" stroke-width="1.8"/><ellipse cx="960.0" cy="75" rx="110.0" ry="13" fill="#c9e8d4" stroke="#2f8f5b" stroke-width="1.8"/></g><text x="960.0" y="108" text-anchor="middle" font-size="15.5" font-weight="700" fill="#17212b">DynamoDB</text><text x="960.0" y="130" text-anchor="middle" font-size="13.5" fill="#3f5a61">reto3-estado</text>
+<text x="960.0" y="151" text-anchor="middle" font-size="13.5" fill="#3f5a61">un ítem por minuto</text>
+<text x="960.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a3d">✓ AWS</text>
+
+<text x="960" y="212" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="960" dy="0">Qué hace: guarda errores, peticiones y</tspan><tspan x="960" dy="15">nivel de cada minuto: el</tspan><tspan x="960" dy="15">estado compartido entre</tspan><tspan x="960" dy="15">instancias de Lambda</tspan></text>
+
+<line x1="190" y1="125" x2="238" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)"/>
+<line x1="440" y1="125" x2="498" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)"/>
+<text x="469" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2c6fae">proxy</text>
+<line x1="770" y1="125" x2="848" y2="125" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)" marker-start="url(#aN2)"/>
+<text x="809" y="113" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2c6fae">lee y cuenta</text>
+<g filter="url(#sh2)"><rect x="250" y="340" width="220" height="100" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="250" y="340" width="220" height="36" rx="10" fill="#123252"/><rect x="250" y="362" width="220" height="14" fill="#123252"/></g><text x="360.0" y="365" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">reto3-nivel1 · Full</text><text x="360.0" y="400" text-anchor="middle" font-size="13.5" fill="#3f5a61">200 «Nivel 1: OK»</text>
+<text x="360.0" y="421" text-anchor="middle" font-size="13.5" fill="#3f5a61">500 con error</text>
+
+<text x="360" y="465" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="360" dy="0">Qué hace: valida, registra, analiza</tspan><tspan x="360" dy="15">riesgo y notifica (simulado)</tspan></text>
+
+<g filter="url(#sh2)"><rect x="525" y="340" width="220" height="100" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="525" y="340" width="220" height="36" rx="10" fill="#123252"/><rect x="525" y="362" width="220" height="14" fill="#123252"/></g><text x="635.0" y="365" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">reto3-nivel2 · Degradado</text><text x="635.0" y="400" text-anchor="middle" font-size="13.5" fill="#3f5a61">200 «Nivel 2: OK»</text>
+<text x="635.0" y="421" text-anchor="middle" font-size="13.5" fill="#3f5a61">500 con error</text>
+
+<text x="635" y="465" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="635" dy="0">Qué hace: solo valida y registra;</tspan><tspan x="635" dy="15">análisis y notificación diferidos</tspan></text>
+
+<g filter="url(#sh2)"><rect x="800" y="340" width="220" height="100" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="800" y="340" width="220" height="36" rx="10" fill="#123252"/><rect x="800" y="362" width="220" height="14" fill="#123252"/></g><text x="910.0" y="365" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">reto3-nivel3 · Mínimo</text><text x="910.0" y="400" text-anchor="middle" font-size="13.5" fill="#3f5a61">200 «Operación al mínimo»</text>
+<text x="910.0" y="421" text-anchor="middle" font-size="13.5" fill="#3f5a61">503 mantenimiento</text>
+
+<text x="910" y="465" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="910" dy="0">Qué hace: no procesa; responde</tspan><tspan x="910" dy="15">el mensaje de mantenimiento</tspan></text>
+
+<line x1="580" y1="200" x2="360" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)"/>
+<line x1="635" y1="200" x2="635" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)"/>
+<line x1="690" y1="200" x2="910" y2="338" stroke="#123252" stroke-width="2.2" marker-end="url(#aN2)"/>
+<text x="650" y="262" text-anchor="start" font-size="11.5" font-weight="700" fill="#2c6fae">invoca (síncrono)</text>
+<text x="650" y="277" font-size="11.5" fill="#64748b">según el nivel del minuto</text>
 <line x1="360" y1="506" x2="360" y2="540" stroke="#5b6b7c" stroke-width="1.6" stroke-dasharray="5 4"/>
 <line x1="635" y1="506" x2="635" y2="540" stroke="#5b6b7c" stroke-width="1.6" stroke-dasharray="5 4"/>
 <line x1="910" y1="506" x2="910" y2="540" stroke="#5b6b7c" stroke-width="1.6" stroke-dasharray="5 4"/>
 <line x1="360" y1="540" x2="910" y2="540" stroke="#5b6b7c" stroke-width="1.6" stroke-dasharray="5 4"/>
-<line x1="497" y1="540" x2="497" y2="588" stroke="#5b6b7c" stroke-width="1.7" stroke-dasharray="5 4" marker-end="url(#ahD2)"/>
+<line x1="497" y1="540" x2="497" y2="588" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#aG2)"/>
 <text x="515" y="562" font-size="11.5" font-style="italic" fill="#5b6b7c">logs de las 4 Lambdas</text>
-<rect x="385" y="590" width="225" height="90" rx="10" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.8"/>
-<text x="497.5" y="617" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">CloudWatch Logs</text>
-<text x="497.5" y="642" text-anchor="middle" font-size="13" fill="#3f5a61">un grupo por Lambda</text>
-<text x="497.5" y="663" text-anchor="middle" font-size="13" font-weight="700" fill="#2b6a4b">✓ LocalStack</text>
-<text x="497" y="705" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="497" dy="0">Qué hace: guarda cada</tspan>
-<tspan x="497" dy="15">CAMBIO_NIVEL con su motivo:</tspan>
-<tspan x="497" dy="15">la evidencia del video</tspan>
-</text>
-<rect x="690" y="590" width="225" height="90" rx="10" fill="#fff7e6" stroke="#c9a35e" stroke-width="1.8"/>
-<text x="802.5" y="617" text-anchor="middle" font-size="14.5" font-weight="700" fill="#17212b">Métricas y dashboard</text>
-<text x="802.5" y="642" text-anchor="middle" font-size="13" fill="#3f5a61">EMF · reto3-resiliencia</text>
-<text x="802.5" y="663" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309">pendiente en AWS real</text>
-<text x="802" y="705" text-anchor="middle" font-size="12" fill="#3f5a61">
-<tspan x="802" dy="0">Qué hace: dibuja el nivel en el tiempo y</tspan>
-<tspan x="802" dy="15">los errores por minuto</tspan>
-</text>
-<line x1="610" y1="635" x2="688" y2="635" stroke="#5b6b7c" stroke-width="1.7" stroke-dasharray="5 4" marker-end="url(#ahD2)"/>
+<g filter="url(#sh2)"><rect x="385" y="590" width="225" height="90" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="385" y="590" width="225" height="36" rx="10" fill="#123252"/><rect x="385" y="612" width="225" height="14" fill="#123252"/></g><text x="497.5" y="615" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">CloudWatch Logs</text><text x="497.5" y="650" text-anchor="middle" font-size="13.5" fill="#3f5a61">un grupo por Lambda</text>
+<text x="497.5" y="671" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a3d">✓ AWS</text>
+
+<text x="497" y="705" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="497" dy="0">Qué hace: guarda cada</tspan><tspan x="497" dy="15">CAMBIO_NIVEL con su motivo:</tspan><tspan x="497" dy="15">la evidencia del video</tspan></text>
+
+<g filter="url(#sh2)"><rect x="690" y="590" width="225" height="90" rx="10" fill="#ffffff" stroke="#123252" stroke-width="1.8"/><rect x="690" y="590" width="225" height="36" rx="10" fill="#123252"/><rect x="690" y="612" width="225" height="14" fill="#123252"/></g><text x="802.5" y="615" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">Métricas y dashboard</text><text x="802.5" y="650" text-anchor="middle" font-size="13.5" fill="#3f5a61">EMF · reto3-resiliencia</text>
+<text x="802.5" y="671" text-anchor="middle" font-size="13" font-weight="700" fill="#1f7a3d">✓ AWS</text>
+
+<text x="802" y="705" text-anchor="middle" font-size="12" fill="#3f5a61"><tspan x="802" dy="0">Qué hace: dibuja el nivel en el tiempo y</tspan><tspan x="802" dy="15">los errores por minuto</tspan></text>
+
+<line x1="610" y1="635" x2="688" y2="635" stroke="#5b6b7c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#aG2)"/>
 <text x="649" y="625" text-anchor="middle" font-size="11.5" font-style="italic" fill="#5b6b7c">EMF</text>
-<rect x="15" y="790" width="16" height="16" rx="3" fill="#ecf8f0" stroke="#2b6a4b" stroke-width="1.6"/>
-<text x="39" y="803" font-size="13" fill="#3f5a61">Validado en LocalStack con el k6 oficial</text>
-<rect x="400" y="790" width="16" height="16" rx="3" fill="#fff7e6" stroke="#c9a35e" stroke-width="1.6"/>
-<text x="424" y="803" font-size="13" fill="#3f5a61">Pendiente: solo se confirma en AWS real</text>
-<rect x="770" y="790" width="16" height="16" rx="3" fill="#f1f3f6" stroke="#5b6b7c" stroke-width="1.6"/>
-<text x="794" y="803" font-size="13" fill="#3f5a61">Actor externo</text>
+<rect x="15" y="790" width="16" height="16" rx="3" fill="#ffffff" stroke="#123252" stroke-width="1.8"/>
+<text x="39" y="803" font-size="13" fill="#3f5a61">Servicio de AWS del sistema</text>
+<rect x="270" y="790" width="16" height="16" rx="3" fill="#fff4d6" stroke="#c58a1a" stroke-width="1.8"/>
+<text x="294" y="803" font-size="13" fill="#3f5a61">Router: decide el nivel</text>
+<rect x="480" y="790" width="16" height="16" rx="3" fill="#e3f3e8" stroke="#2f8f5b" stroke-width="1.8"/>
+<text x="504" y="803" font-size="13" fill="#3f5a61">Estado compartido</text>
+<text x="680" y="803" font-size="13" font-weight="700" fill="#1f7a3d">✓ AWS</text>
+<text x="727" y="803" font-size="13" fill="#3f5a61">validado en AWS con el k6 oficial</text>
 <text x="15" y="832" font-size="12.5" font-style="italic" fill="#5b6b7c">* Recuperar de a un nivel por minuto es una decisión nuestra, por confirmar con el docente el 27/10.</text>
 </svg></div>
 </body></html>

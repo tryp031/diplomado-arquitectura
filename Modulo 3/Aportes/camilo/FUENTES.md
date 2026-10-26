@@ -18,14 +18,15 @@
 (k6 oficial y panel de estado) frente a AWS, con DynamoDB y CloudWatch dentro del plano de AWS. El panel lee
 DynamoDB y los logs de CloudWatch, y además puede enviar una petición a mano al API Gateway. La segunda es el
 detalle de AWS: API Gateway, Lambda router, las tres Lambdas de nivel, DynamoDB y CloudWatch, con el «qué hace»
-bajo cada caja y una leyenda de estado.
+bajo cada caja y una leyenda de colores.
 
 **Límites:**
 - Dibuja el diseño de Danny; no lo modifica ni lo valida. Si el diseño cambia (por ejemplo, tras el encuentro
   del 27/10), hay que actualizar los diagramas.
-- El color indica el estado de validación: **verde** = validado con el k6 oficial en **LocalStack**;
-  **ámbar** = pendiente de confirmar en AWS real (métricas EMF y dashboard); **gris** = actor externo.
-  Todavía **no hay corrida en AWS real**.
+- **Actualización 2026-10-25.** Las figuras se rehicieron con una paleta corta: marino = servicios de AWS del sistema, dorado = el router que
+  decide el nivel, verde = el estado compartido (DynamoDB). La marca «✓ AWS» indica lo validado con el k6 oficial en **AWS real** (corridas del
+  21 y 22/10/2026; ver la sección 11 del informe de avance, ficha más abajo). La versión anterior usaba el color como estado de validación
+  (verde = LocalStack, ámbar = pendiente en AWS real); esa versión se reemplaza.
 - **Decisión por confirmar:** recuperar de a un nivel por minuto es decisión del equipo, pendiente de confirmar
   con el docente el 27/10 (riesgo R3 de la spec). Por eso la regla se escribe `nivel(m) = f(nivel(m−1), errores(m−1))`
   y no solo en función de los errores.
@@ -58,3 +59,44 @@ bajo cada caja y una leyenda de estado.
 - **Se confirma en la primera corrida en AWS real**, revisando la duración de inicio (`Init Duration`) en los logs y
   si hay 503 en la primera petición o en el tramo final en N1. Si aparece, se reevalúa: subir el `read_timeout` o
   agregar un calentador que invoque directo los niveles.
+
+**Actualización 2026-10-25 (medición en AWS real).** Lo que el análisis dejaba como riesgo se midió en las corridas del 21 y 22/10:
+- Arranque en frío del router: 257 ms de arranque y 1.386 ms de ejecución en la primera petición. Cada Lambda de nivel arrancó en unos 80 ms
+  (máximo 81 a 84 ms) y ejecuta en unos 2 ms. El k6 vio un máximo de 2,12 s, en esa primera petición.
+- El resumen del k6 dio 140 de 140 iteraciones y 35 respuestas fallidas, que son los 5 + 15 + 15 errores del script: **no hubo fallas
+  inesperadas ni 503 por arranque en frío**. El riesgo del N1 que se enfría no se materializó: su arranque (~80 ms) está muy por debajo del
+  `read_timeout` de 3 s.
+- La decisión se mantiene: no hay calentador automático. Se calientan a mano las cuatro Lambdas justo antes de una carga (una prueba de cada nivel
+  desde la consola y tres o cuatro peticiones sin error al API). Esas peticiones aparecen en CloudWatch; se excluyen acotando el rango de tiempo.
+- Pendiente: la **medición oficial** de entrega, con calentamiento previo, el log y el `diff` del k6 guardados.
+
+## `m3-informe-arquitectura-reto3-avance-camilo.docx`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA. Documento del Grupo 2 sobre el diseño de Daniel Mazo |
+| **Fecha de recepción** | 2026-10-25 |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | Informe de arquitectura del Reto 3, versión de avance: atributos de calidad, tácticas, decisiones, opciones consideradas, modelo C4, despliegue en AWS y resultados de las corridas de prueba |
+| **Tipo** | `investigacion` — borrador de un entregable; **no es material oficial** y todavía no pasó por `Consolidado/` |
+| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (código, `template.yaml`, README, panel) · `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md` · `Modulo 3/Material-Clase/Actividad-Reto3.md`, `Discord-Aclaraciones-Docente.md` y `k6-script-profesor-reto3.js` · `Modulo 2/Entregables/documento-tecnico/informe_arquitectura_reto2_alerta_flota_grupo2.docx` (modelo de formato) · corridas en AWS del 21 y 22/10/2026 (resumen de k6 y CloudWatch Logs Insights, copiados en la sesión de trabajo; **no se guardaron los logs completos del k6**) |
+| **Estado** | borrador · ⬜ sin consolidar |
+
+**Qué contiene:** el informe de 13 secciones más un glosario, con las dos figuras del modelo C4 (las del diagrama de arriba). Compara la
+arquitectura adoptada (router con estado en DynamoDB) con otra opción (una sola función) y registra los resultados de las corridas de prueba.
+
+**Límites:**
+- **La medición oficial está pendiente.** La sección 11 son resultados de **corridas de prueba** (21 y 22/10/2026). Falta la corrida de entrega,
+  con calentamiento previo y con el log completo y el `diff` del k6 guardados. Los dos resultados vienen de corridas distintas (los cambios de
+  nivel, del 21/10; el resumen de k6 y los tiempos, del 22/10) y hay que unificarlos con la corrida oficial.
+- **Sigue el formato del informe del Módulo 2** (`informe_arquitectura_reto2_alerta_flota_grupo2.docx`): resumen ejecutivo, atributos de
+  calidad, tácticas, decisiones, contrato HTTP, opciones, plano de control, C4, despliegue, resultados, disponibilidad y glosario.
+- **No contempla material del Módulo 3.** Las tácticas y el análisis salen del Módulo 2 y de conocimiento complementario; no usa los contenidos
+  de `Material-Clase` del Módulo 3 (Genially de estilos, técnicas ASR/QAW, ADD, análisis de riesgos y evaluación). Si se quiere incorporarlos,
+  es un cambio aparte.
+- **Decisiones nuestras, por confirmar con el docente el 27/10:** la ventana (minuto de reloj), la recuperación de a un nivel por minuto y si el
+  ruteo debe ocurrir dentro de API Gateway. El script oficial no produce la secuencia 1-2-3-3-2-1 que dijo el docente (produce 1-2-1-3-2-3-2-1);
+  queda registrado en la sección 13.
+- **Pendiente de validar en AWS:** el panel leyendo AWS con el usuario de solo lectura, y los widgets del dashboard (la versión final no se
+  verificó). No incluye el video ni la exportación a PDF que pide el enunciado.
+- La tabla de contenido del Word se actualiza en Word (clic derecho → Actualizar campo).
