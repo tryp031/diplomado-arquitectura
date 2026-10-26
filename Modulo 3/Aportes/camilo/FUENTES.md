@@ -79,7 +79,7 @@ bajo cada caja y una leyenda de colores.
 | **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
 | **Tema** | Informe de arquitectura del Reto 3, versión de avance: atributos de calidad, tácticas, decisiones, opciones consideradas, modelo C4, despliegue en AWS y resultados de las corridas de prueba |
 | **Tipo** | `investigacion` — borrador de un entregable; **no es material oficial** y todavía no pasó por `Consolidado/` |
-| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (código, `template.yaml`, README, panel) · `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md` · `Modulo 3/Material-Clase/Actividad-Reto3.md`, `Discord-Aclaraciones-Docente.md` y `k6-script-profesor-reto3.js` · `Modulo 2/Entregables/documento-tecnico/informe_arquitectura_reto2_alerta_flota_grupo2.docx` (modelo de formato) · corridas en AWS del 21 y 22/10/2026 (resumen de k6 y CloudWatch Logs Insights, copiados en la sesión de trabajo; **no se guardaron los logs completos del k6**) · precios de lista de AWS (API Gateway, Lambda, DynamoDB y CloudWatch), consultados en octubre de 2026 |
+| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (código, `template.yaml`, README, panel) · `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md` · `Modulo 3/Material-Clase/Actividad-Reto3.md`, `Discord-Aclaraciones-Docente.md` y `k6-script-profesor-reto3.js` · `Modulo 2/Entregables/documento-tecnico/informe_arquitectura_reto2_alerta_flota_grupo2.docx` (modelo de formato) · corridas en AWS del 21 y 22/10/2026 (resumen de k6 y CloudWatch Logs Insights, copiados en la sesión de trabajo; **no se guardaron los logs completos del k6**) |
 | **Estado** | borrador · ⬜ sin consolidar |
 
 **Qué contiene:** el informe de 13 secciones más un glosario, con las dos figuras del modelo C4 (las del diagrama de arriba). Compara la
@@ -94,8 +94,6 @@ arquitectura adoptada (router con estado en DynamoDB) con otra opción (una sola
 - **No contempla material del Módulo 3.** Las tácticas y el análisis salen del Módulo 2 y de conocimiento complementario; no usa los contenidos
   de `Material-Clase` del Módulo 3 (Genially de estilos, técnicas ASR/QAW, ADD, análisis de riesgos y evaluación). Si se quiere incorporarlos,
   es un cambio aparte.
-- **Costos estimados, no medidos:** precios de lista de us-east-1 (se asumen iguales en us-east-2), sin la calculadora de AWS; el tamaño de los
-  logs por petición es una estimación.
 - **Decisiones nuestras, por confirmar con el docente el 27/10:** la ventana (minuto de reloj), la recuperación de a un nivel por minuto y si el
   ruteo debe ocurrir dentro de API Gateway. El script oficial no produce la secuencia 1-2-3-3-2-1 que dijo el docente (produce 1-2-1-3-2-3-2-1);
   queda registrado en la sección 13.
