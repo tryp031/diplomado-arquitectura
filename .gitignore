@@ -52,3 +52,5 @@ venv/
 
 # --- Reto 3: artefactos de despliegue ---
 Modulo 3/Ejercicios/Reto3-Resiliencia/.build/
+# Credenciales de solo lectura del panel (igual que en el Reto 2). NUNCA se suben.
+Modulo 3/Ejercicios/Reto3-Resiliencia/.env.aws

@@ -197,6 +197,35 @@ def test_aws_sin_perfil_es_solo_cliente(tmp_path):
             e.minutos(1, 2)
 
 
+def test_aws_lee_credenciales_de_env_aws(tmp_path, monkeypatch):
+    from panel import entornos as ent
+    (tmp_path / ".build").mkdir()
+    (tmp_path / ".build" / "url-aws.txt").write_text("https://api/prod/service-api\n")
+    (tmp_path / ".env.aws").write_text("# comentario\nAWS_ACCESS_KEY_ID=AKIAPRUEBA\nAWS_SECRET_ACCESS_KEY='secreto'\n")
+    creadas = []
+    sesion_real = ent.boto3.Session
+    monkeypatch.setattr(ent.boto3, "Session", lambda **kw: creadas.append(kw) or sesion_real(**kw))
+    assert ent.aws(tmp_path, None).lectura
+    assert creadas == [{"aws_access_key_id": "AKIAPRUEBA", "aws_secret_access_key": "secreto", "region_name": "us-east-2"}]
+
+
+def test_aws_env_aws_incompleto_se_rechaza(tmp_path):
+    from panel import entornos as ent
+    (tmp_path / ".env.aws").write_text("AWS_ACCESS_KEY_ID=AKIAPRUEBA\n")
+    with pytest.raises(ent.EntornoNoDisponible, match="incompleto"):
+        ent.aws(tmp_path, None)
+
+
+def test_aws_ignora_las_llaves_del_shell(tmp_path, monkeypatch):
+    """Sin .env.aws ni perfil, una llave exportada en la terminal NO habilita la lectura."""
+    from panel import entornos as ent
+    (tmp_path / ".build").mkdir()
+    (tmp_path / ".build" / "url-aws.txt").write_text("https://api/prod/service-api\n")
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "AKIACORPORATIVA")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "x")
+    assert not ent.aws(tmp_path, None).lectura
+
+
 def test_access_denied_es_sin_lectura(tmp_path):
     import boto3
     from botocore.stub import Stubber

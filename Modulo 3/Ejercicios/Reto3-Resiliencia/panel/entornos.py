@@ -4,9 +4,11 @@ Es de SOLO LECTURA en los dos entornos. La única escritura es «Reiniciar estad
 solo en LocalStack. El panel entra al sistema por la misma puerta que el k6: la URL del API Gateway.
 
 Guarda de cuenta: en la máquina de Danny el perfil `default` de ~/.aws es corporativo. El
-entorno AWS exige un perfil con nombre explícito y nunca usa la cadena de credenciales por defecto.
-Sin perfil, el entorno AWS queda en modo «solo cliente»: corre el k6 y las peticiones manuales
-contra la URL, y no lee nada del servidor.
+entorno AWS nunca usa la cadena de credenciales por defecto. Las credenciales salen, en este orden:
+un perfil con nombre explícito (`PANEL_AWS_PERFIL`) o el archivo `.env.aws` de la carpeta del reto
+(gitignored, igual que en el Reto 2). Se lee el ARCHIVO, no las variables del shell, para no tomar
+por accidente una llave exportada de otra cuenta. Sin ninguno de los dos, el entorno AWS queda en
+modo «solo cliente»: corre el k6 y las peticiones manuales contra la URL, y no lee nada del servidor.
 """
 from __future__ import annotations
 
@@ -152,14 +154,35 @@ def localstack(raiz: Path, endpoint: str = "http://localhost:4566") -> Entorno:
     return Entorno("local", sesion, raiz / ".build" / "url-localstack.txt", endpoint=endpoint, permite_reinicio=True)
 
 
+def leer_env_aws(archivo: Path) -> dict[str, str]:
+    """`CLAVE=valor` por línea; ignora comentarios y líneas vacías. Sin el archivo, {}."""
+    if not archivo.is_file():
+        return {}
+    valores = {}
+    for linea in archivo.read_text().splitlines():
+        linea = linea.strip()
+        if linea and not linea.startswith("#") and "=" in linea:
+            clave, valor = linea.split("=", 1)
+            valores[clave.strip()] = valor.strip().strip('"').strip("'")
+    return valores
+
+
 def aws(raiz: Path, perfil: str | None) -> Entorno:
-    """Sin perfil: modo solo cliente (la URL sale de .build/url-aws.txt). Con `default`: se rechaza."""
+    """Perfil explícito > `.env.aws` > solo cliente (la URL sale de .build/url-aws.txt). `default` se rechaza."""
     archivo_url = raiz / ".build" / "url-aws.txt"
     if perfil == "default":
         raise EntornoNoDisponible("el perfil «default» de esta máquina es corporativo: use un perfil del equipo")
     if not perfil:
+        env = leer_env_aws(raiz / ".env.aws")
+        if env:
+            llave, secreto = env.get("AWS_ACCESS_KEY_ID"), env.get("AWS_SECRET_ACCESS_KEY")
+            if not (llave and secreto):
+                raise EntornoNoDisponible(".env.aws incompleto: faltan AWS_ACCESS_KEY_ID o AWS_SECRET_ACCESS_KEY")
+            sesion = boto3.Session(aws_access_key_id=llave, aws_secret_access_key=secreto,
+                                   region_name=env.get("AWS_REGION", REGION))
+            return Entorno("aws", sesion, archivo_url)
         return Entorno("aws", None, archivo_url,
-                       motivo_sin_lectura="sin PANEL_AWS_PERFIL: el panel solo ve lo que ve el k6 (cliente)")
+                       motivo_sin_lectura="sin .env.aws ni PANEL_AWS_PERFIL: el panel solo ve lo que ve el k6 (cliente)")
     try:
         return Entorno("aws", boto3.Session(profile_name=perfil, region_name=REGION), archivo_url)
     except ProfileNotFound as e:
