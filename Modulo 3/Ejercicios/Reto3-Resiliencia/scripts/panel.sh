@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Panel de control del Reto 3 en http://localhost:8030
-#   scripts/panel.sh                                   # solo LocalStack
-#   PANEL_AWS_PERFIL=diplomado-lectura scripts/panel.sh   # habilita el switch AWS (perfil de solo lectura)
+#   scripts/panel.sh                                   # con .env.aws: switch AWS con lectura (como el Reto 2)
+#   PANEL_AWS_PERFIL=<perfil> scripts/panel.sh           # alternativa: perfil de solo lectura de ~/.aws
 # Nunca usa el perfil `default`: en esta máquina es corporativo.
 set -euo pipefail
 cd "$(dirname "$0")/.."

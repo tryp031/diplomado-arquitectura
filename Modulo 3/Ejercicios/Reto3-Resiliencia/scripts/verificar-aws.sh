@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
 # Chequeo previo a la corrida oficial en AWS. Solo lee: no invoca ni modifica nada.
-#   AWS_PROFILE=reto3-panel-lectura scripts/verificar-aws.sh
+#   scripts/verificar-aws.sh                                  # usa .env.aws (como el Reto 2)
+#   AWS_PROFILE=<perfil-solo-lectura> scripts/verificar-aws.sh  # o un perfil de ~/.aws
 # Verifica que el despliegue a mano (consola) quedó con el código y la regla de este repo:
 #   1. reto3-router tiene PERMANENCIA_MINUTOS, UMBRAL_DEGRADADO y UMBRAL_MINIMO esperados.
 #   2. Las cuatro Lambdas tienen el mismo código (CodeSha256): comparten src/.
 #   3. La tabla reto3-estado está activa.
 # Sale con 1 si algo no cuadra: en ese caso NO se corre el k6 oficial.
 set -euo pipefail
-[[ -n "${AWS_PROFILE:-}" && "$AWS_PROFILE" != "default" ]] || {
-  echo "ABORTO: use AWS_PROFILE con el perfil de solo lectura del equipo (nunca default)" >&2; exit 1; }
+cd "$(dirname "$0")/.."
+if [[ -z "${AWS_PROFILE:-}" && -f .env.aws ]]; then
+  # Solo las tres variables del archivo; cualquier llave ya exportada en el shell se descarta.
+  unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+  set -a; source .env.aws; set +a
+  [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]] || {
+    echo "ABORTO: .env.aws incompleto (faltan AWS_ACCESS_KEY_ID o AWS_SECRET_ACCESS_KEY)" >&2; exit 1; }
+elif [[ -z "${AWS_PROFILE:-}" || "$AWS_PROFILE" == "default" ]]; then
+  echo "ABORTO: cree .env.aws (copie .env.aws.example) o use AWS_PROFILE con un perfil de solo lectura (nunca default)" >&2
+  exit 1
+fi
 export AWS_REGION=us-east-2
 PERMANENCIA="${PERMANENCIA_ESPERADA:-2}"
 fallas=0

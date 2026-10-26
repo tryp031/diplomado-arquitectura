@@ -35,16 +35,20 @@ scripts/correr-k6.sh aws
 ```
 El script aborta si el perfil no es `diplomado` o si la cuenta no coincide. **Nunca** despliegues con `default`.
 
-**Antes de la corrida oficial** (el despliegue en AWS es a mano, por consola), comprobar con el perfil de solo lectura:
+**Credenciales de lectura (igual que en el Reto 2):** `cp .env.aws.example .env.aws` y pegar la llave del usuario
+`reto3-panel-lectura`. El archivo está en `.gitignore` y no toca `~/.aws`. El panel y `verificar-aws.sh` lo leen solos.
+
+**Antes de la corrida oficial** (el despliegue en AWS es a mano, por consola), comprobar con la llave de lectura:
 ```bash
-AWS_PROFILE=reto3-panel-lectura scripts/verificar-aws.sh   # PERMANENCIA_MINUTOS, umbrales, mismo código en las 4 Lambdas
+scripts/verificar-aws.sh   # PERMANENCIA_MINUTOS, umbrales, mismo código en las 4 Lambdas
 ```
 Si no dice «listo», no se corre el k6 oficial.
 
 ## Panel de control
 ```bash
 scripts/panel.sh                                      # http://localhost:8030, contra LocalStack
-PANEL_AWS_PERFIL=<perfil-solo-lectura> scripts/panel.sh  # AWS con lectura del servidor
+scripts/panel.sh                                      # con .env.aws, el switch AWS también lee el servidor
+PANEL_AWS_PERFIL=<perfil-solo-lectura> scripts/panel.sh  # AWS con lectura del servidor  # alternativa: perfil de ~/.aws
 ```
 - **AWS sin perfil = modo «solo cliente».** Con la URL en `.build/url-aws.txt`, el panel corre el k6 y las peticiones
   manuales, y verifica la regla con los errores que ve el propio k6. Si el perfil no tiene permisos (AccessDenied),
