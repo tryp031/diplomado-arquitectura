@@ -35,6 +35,12 @@ scripts/correr-k6.sh aws
 ```
 El script aborta si el perfil no es `diplomado` o si la cuenta no coincide. **Nunca** despliegues con `default`.
 
+**Antes de la corrida oficial** (el despliegue en AWS es a mano, por consola), comprobar con el perfil de solo lectura:
+```bash
+AWS_PROFILE=reto3-panel-lectura scripts/verificar-aws.sh   # PERMANENCIA_MINUTOS, umbrales, mismo código en las 4 Lambdas
+```
+Si no dice «listo», no se corre el k6 oficial.
+
 ## Panel de control
 ```bash
 scripts/panel.sh                                      # http://localhost:8030, contra LocalStack
