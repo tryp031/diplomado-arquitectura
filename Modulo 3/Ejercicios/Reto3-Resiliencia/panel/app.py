@@ -22,12 +22,14 @@ from pydantic import BaseModel
 
 from panel import entornos as ent
 from panel.evidencia import coherencia, como_csv, como_jsonl, resumen_coherencia, zip_evidencia
-from panel.k6 import EjecutorK6
+from panel.k6 import EjecutorK6, guion
+from reglas import Umbrales
 
 RAIZ = Path(__file__).resolve().parents[1]
 ESTATICOS = Path(__file__).parent / "static"
 OFICIAL = RAIZ.parents[1] / "Material-Clase" / "k6-script-profesor-reto3.js"
 GRACIA_MS = 60_000
+REGLA = Umbrales()  # la misma que despliega template.yaml por defecto (5 / 10 / permanencia 2)
 VENTANA_SIN_CORRIDA_MIN = 12
 
 
@@ -75,9 +77,11 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
         try:
             minutos = e.minutos(desde_min, hasta_min)
             eventos = e.eventos_clave(desde_min * 60_000)
-            return {"minutos": minutos, "eventos": eventos[::-1][:40], "error": None}
+            return {"minutos": minutos, "eventos": eventos[::-1][:40], "error": None, "lectura": True, "motivo": None}
+        except ent.SinLectura as err:  # no es una falla: el panel sigue con la mirada del cliente
+            return {"minutos": [], "eventos": [], "error": None, "lectura": False, "motivo": str(err)}
         except ent.EntornoNoDisponible as err:
-            return {"minutos": [], "eventos": [], "error": str(err)}
+            return {"minutos": [], "eventos": [], "error": str(err), "lectura": True, "motivo": None}
 
     @app.get("/api/estado")
     async def estado() -> dict[str, Any]:
@@ -93,12 +97,16 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
             "entorno": {"activo": e.nombre, "url": e.url, "aws_disponible": "aws" in entornos,
                         "aws_motivo": motivo_aws, "permite_reinicio": e.permite_reinicio},
             "reloj": {"minuto": ent.iso_minuto(ahora), "segundos_a_proximo": 60 - int(time.time() % 60)},
+            "regla": {"degradado": REGLA.degradado, "minimo": REGLA.minimo, "permanencia": REGLA.permanencia},
             "nivel": {"actual": actual_srv["nivel"] if actual_srv else None,
+                      "degradado_en": ent.iso_minuto(actual_srv["degradado_en"])
+                      if actual_srv and actual_srv.get("degradado_en") is not None else None,
                       "errores_minuto_anterior": anterior["errores"] if anterior else 0,
                       "errores_minuto_actual": actual_srv["errores"] if actual_srv else 0},
             "servidor": servidor,
             "coherencia": {"filas": filas, **resumen_coherencia(filas)},
             "k6": corrida,
+            "guion": guion(REGLA, k6.iteraciones if k6.entorno == actual["entorno"] else []),
         }
 
     @app.post("/api/entorno")
@@ -173,11 +181,18 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
     def _archivos() -> dict[str, str]:
         v = ventana_corrida()
         e = activo()
-        registros = e.registros(v[0], v[1])
-        minutos = e.minutos(v[0] // 60_000, v[1] // 60_000)
-        filas = coherencia(k6.iteraciones, minutos)
+        try:
+            registros = e.registros(v[0], v[1])
+            minutos = e.minutos(v[0] // 60_000, v[1] // 60_000)
+            sin_lectura = None
+        except ent.SinLectura as err:  # la evidencia del cliente sigue valiendo sola
+            registros, minutos, sin_lectura = [], [], str(err)
+        filas = coherencia(k6.iteraciones, minutos, REGLA)
         resumen = {k: val for k, val in k6.resumen(ultimas=0).items() if k != "ultimas"}
         resumen.update({"coherencia_cliente_servidor": resumen_coherencia(filas),
+                        "regla": {"degradado": REGLA.degradado, "minimo": REGLA.minimo,
+                                  "permanencia": REGLA.permanencia},
+                        "servidor_sin_lectura": sin_lectura,
                         "generado": datetime.now(timezone.utc).isoformat(),
                         "nota": "Evidencia exportada por el panel. El log del k6 es la salida cruda del script oficial; "
                                 "el diff muestra que solo cambió la URL."})
