@@ -14,8 +14,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from estado import RegistroMinuto
+from reglas import Umbrales, decision_para
+
 URL_PROFESOR = "https://6u2da0eye1.execute-api.us-east-2.amazonaws.com/prod/service-api"
 TOTAL_ITERACIONES = 140
+# Docente (Discord, 18/09/2026): «siempre vas a ver nivel 1-2-3-3-2-1». Comprimida: 1-2-3-2-1.
+SECUENCIA_ESPERADA = [1, 2, 3, 2, 1]
+# Errores que pide el script oficial en cada uno de sus 7 minutos (minutos 1, 3 y 5: < 5, < 15, < 15).
+ERRORES_DEL_GUION = (5, 0, 15, 0, 15, 0, 0)
 
 _LINEA = re.compile(
     r'time="(?P<ts>[^"]+)".*?msg="Minute: (?P<minuto>\d+), Iteration: (?P<it>\d+), '
@@ -75,6 +82,26 @@ def secuencia(niveles: list[int | None]) -> list[int]:
     for n in niveles:
         if n is not None and (not out or out[-1] != n):
             out.append(n)
+    return out
+
+
+def guion(u: Umbrales, iteraciones: list[Iteracion]) -> list[dict[str, Any]]:
+    """El plan del k6 oficial minuto a minuto: errores pedidos, nivel que predice la regla y lo observado.
+
+    El minuto 8 es la cola: las últimas iteraciones caen ahí por la latencia acumulada (riesgo R1).
+    """
+    registros: dict[int, RegistroMinuto] = {}
+    vistos: dict[int, list[int]] = {}
+    for it in iteraciones:
+        if it.nivel is not None:
+            vistos.setdefault(it.minuto_logico, []).append(it.nivel)
+    out = []
+    for m, errores in enumerate(ERRORES_DEL_GUION + (0,), start=1):
+        d = decision_para(m, registros, u)
+        registros[m] = RegistroMinuto(nivel=d.nivel, errores=errores, degradado_en=d.degradado_en)
+        niveles = vistos.get(m, [])
+        out.append({"minuto": m, "errores": errores, "nivel_esperado": d.nivel, "cola": m > len(ERRORES_DEL_GUION),
+                    "niveles_vistos": secuencia(niveles), "iteraciones": len(niveles)})
     return out
 
 
@@ -145,8 +172,9 @@ class EjecutorK6:
         """Lo que ve un entorno en el que no se corrió el k6."""
         return {"estado": "inactivo", "entorno": None, "url": None, "error": None, "inicio": None, "fin": None,
                 "hechas": 0, "total": TOTAL_ITERACIONES, "esperando_segundo_00": False, "secuencia": [],
-                "veredicto": {"recorrio_3_niveles": False, "termino_en_n1": False, "sin_salto_3_a_1": True,
-                              "completa": False},
+                "veredicto": {"recorrio_3_niveles": False, "termino_en_n1": False, "sin_saltos": True,
+                              "secuencia_esperada": False, "completa": False},
+                "secuencia_esperada": SECUENCIA_ESPERADA,
                 "ultimas": []}
 
     def resumen(self, ultimas: int = 30) -> dict[str, Any]:
@@ -163,8 +191,11 @@ class EjecutorK6:
             "veredicto": {
                 "recorrio_3_niveles": {1, 2, 3} <= set(sec),
                 "termino_en_n1": completa and bool(niveles) and niveles[-1] == 1,
-                "sin_salto_3_a_1": all(not (a == 3 and b == 1) for a, b in zip(sec, sec[1:])),
+                # Ni 1 → 3 al degradar ni 3 → 1 al recuperar: «si te salta es problema del sistema».
+                "sin_saltos": all(abs(a - b) == 1 for a, b in zip(sec, sec[1:])),
+                "secuencia_esperada": completa and sec == SECUENCIA_ESPERADA,
                 "completa": completa,
             },
+            "secuencia_esperada": SECUENCIA_ESPERADA,
             "ultimas": [asdict(i) for i in self.iteraciones[-ultimas:]][::-1],
         }

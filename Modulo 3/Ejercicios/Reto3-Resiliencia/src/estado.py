@@ -16,6 +16,7 @@ class EstadoNoDisponible(Exception):
 class RegistroMinuto:
     nivel: int | None
     errores: int
+    degradado_en: int | None = None  # minuto en que se entró degradando al nivel vigente
 
 
 TTL_SEGUNDOS = 24 * 3600
@@ -50,20 +51,29 @@ class RepositorioDynamo:
             for item in r["Responses"].get(self.tabla, []):
                 minuto = int(item["pk"]["S"].split("#", 1)[1])
                 nivel = int(item["nivel"]["N"]) if "nivel" in item else None
-                out[minuto] = RegistroMinuto(nivel=nivel, errores=int(item.get("errores", {"N": "0"})["N"]))
+                degradado_en = int(item["degradado_en"]["N"]) if "degradado_en" in item else None
+                out[minuto] = RegistroMinuto(nivel=nivel, errores=int(item.get("errores", {"N": "0"})["N"]),
+                                             degradado_en=degradado_en)
         except (KeyError, ValueError, IndexError) as e:
             raise EstadoNoDisponible(f"ítem malformado: {e!r}") from e
         return out
 
-    def fijar_nivel(self, minuto: int, nivel: int) -> tuple[int, bool]:
-        """Escribe el nivel del minuto solo si nadie lo hizo antes. Devuelve (nivel vigente, ¿lo escribí yo?)."""
+    def fijar_nivel(self, minuto: int, nivel: int, degradado_en: int | None = None) -> tuple[int, bool]:
+        """Escribe el nivel del minuto solo si nadie lo hizo antes. Devuelve (nivel vigente, ¿lo escribí yo?).
+
+        `degradado_en` va en la misma escritura condicional: el nivel y su permanencia no se separan.
+        """
+        expresion, valores = "SET nivel = :n, #ttl = if_not_exists(#ttl, :t)", {":n": {"N": str(nivel)}, ":t": self._ttl()}
+        if degradado_en is not None:
+            expresion += ", degradado_en = :d"
+            valores[":d"] = {"N": str(degradado_en)}
         try:
             self._db.update_item(
                 TableName=self.tabla, Key=_clave(minuto),
-                UpdateExpression="SET nivel = :n, #ttl = if_not_exists(#ttl, :t)",
+                UpdateExpression=expresion,
                 ConditionExpression="attribute_not_exists(nivel)",
                 ExpressionAttributeNames={"#ttl": "ttl"},
-                ExpressionAttributeValues={":n": {"N": str(nivel)}, ":t": self._ttl()},
+                ExpressionAttributeValues=valores,
             )
             return nivel, True
         except ClientError as e:

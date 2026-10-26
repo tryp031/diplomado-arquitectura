@@ -281,7 +281,7 @@ body.con-notas .notas{display:block}
   <button class="bt" id="bTema" title="Tecla T">Tema</button>
 </div>
 <div class="progreso" id="progreso"></div>
-<div class="draft">BORRADOR · datos simulados</div>
+<div class="draft">BORRADOR v2 · LocalStack medido · falta la corrida oficial en AWS</div>
 
 <main id="main">
 
@@ -298,7 +298,7 @@ body.con-notas .notas{display:block}
     </div>
     <div class="notas">
       <span class="tag">Notas</span>
-      <p><b>Borrador del 18/10.</b> Las cifras de la línea de tiempo salen de la reproducción del k6 oficial en los tests, con una latencia supuesta de 0,2 s por petición. <b>No son una corrida real.</b> Se reemplazan cuando haya corrida en AWS.</p>
+      <p><b>Borrador v2 del 26/10.</b> La línea de tiempo es la corrida del k6 oficial en <b>LocalStack</b> del 23/10, con la regla de permanencia (ADR-001). Los tiempos de AWS salen del informe de avance de Camilo (corridas de prueba del 21 y 22/10, con la regla anterior). Se reemplazan por la corrida oficial en AWS después del redespliegue.</p>
       <p>Orden de las pautas: decisiones → restricciones → atributos → tácticas → arquitectura. El atributo priorizado se adelanta en una frase en la lámina 2, porque el docente pidió en el M1 que la presentación abriera con él.</p>
     </div>
   </div>
@@ -315,7 +315,7 @@ body.con-notas .notas{display:block}
       <div class="card"><span class="et">Carga del k6 oficial</span><span class="g">140</span><small>peticiones, 1 usuario, una cada 3 s. Unos 7 min.</small></div>
       <div class="card"><span class="et">Errores pedidos por minuto</span><span class="g" style="font-size:22px">5·0·15·0·15·0·0</span><small>El cliente los pide con <code>"error": true</code>.</small></div>
       <div class="card"><span class="et">Umbrales</span><span class="g">5 / 10</span><small>errores → Nivel 2 / Nivel 3.</small></div>
-      <div class="card acento"><span class="et">Criterio de éxito</span><span class="g" style="font-size:22px">1 → 2 → 3 → 1</span><small>Pasar por los 3 niveles y <b>terminar en Nivel 1</b>.</small></div>
+      <div class="card acento"><span class="et">Criterio de éxito</span><span class="g" style="font-size:22px">1 → 2 → 3 → 2 → 1</span><small>Pasar por los 3 niveles <b>sin saltos</b> y <b>terminar en Nivel 1</b>.</small></div>
     </div>
     <p class="fuente">Fuente: enunciado de la Actividad M3 · <code>k6-script-profesor-reto3.js</code></p>
     <div class="notas">
@@ -334,15 +334,15 @@ body.con-notas .notas{display:block}
       <thead><tr><th>Decisión</th><th>Por qué</th><th>Costo</th></tr></thead>
       <tbody>
         <tr class="destaca"><td>Errores del <b>minuto anterior</b> deciden el nivel</td><td>Es la regla que dio el docente. Hace al sistema predecible y auditable por minuto</td><td>Reacciona hasta 60 s tarde</td></tr>
-        <tr><td>Se degrada <b>de golpe</b>, se recupera <b>de a un nivel</b></td><td>Protege rápido y se recupera con prudencia (3 → 2 → 1, como pide el enunciado)</td><td>Recuperarse de N3 toma 2 minutos sanos</td></tr>
+        <tr><td>Se degrada <b>de golpe</b>, se <b>sostiene 2 min</b> y se recupera <b>de a un nivel</b></td><td>Protege rápido y evita la oscilación entre niveles (histéresis, ADR-001). Con el k6 oficial da 1-2-3-2-1</td><td>Opera degradado un minuto más de lo estricto. Se aparta del diagrama de la sesión en la ventana 4-5</td></tr>
         <tr><td><b>Router</b> detrás del API Gateway</td><td>El gateway no enruta de forma nativa según un estado. Patrón <i>Gateway Routing</i></td><td>Un salto más entre Lambdas, de decenas de ms</td></tr>
         <tr><td>Estado en <b>DynamoDB</b>, no en memoria</td><td>Las instancias de Lambda no comparten memoria: sin esto, cada una tiene su propio nivel</td><td>Una lectura y una escritura más por petición</td></tr>
         <tr><td><b>3 Lambdas</b>, una por nivel</td><td>«3 servicios diferentes». Se despliegan y escalan cada uno por su lado</td><td>Más piezas que operar</td></tr>
         <tr><td><b>Falla segura</b> hacia el Nivel 3</td><td>Si no se conoce la salud, se opera al mínimo en vez de devolver un 502</td><td>Una caída de DynamoDB deja todo en N3</td></tr>
-        <tr><td>Infraestructura como código (<b>SAM</b>)</td><td>Reproducible y viaja en el ZIP. Corrige la brecha del Reto 2</td><td>Curva de aprendizaje</td></tr>
+        <tr><td>Infraestructura como código (<b>SAM</b>)</td><td>Reproducible y viaja en el ZIP. Es la fuente de verdad de nombres y valores</td><td>En AWS se desplegó <b>a mano por consola</b> con esos nombres: hay que mantenerlos alineados a mano (brecha declarada)</td></tr>
       </tbody>
     </table></div>
-    <p class="fuente">Fuente: diseño del Reto 3, §3 y §4</p>
+    <p class="fuente">Fuente: diseño del Reto 3, §3 y §4 · ADR-001 · informe de avance de Camilo, §10</p>
     <div class="notas">
       <span class="tag">Notas</span>
       <p>Si el tiempo es corto, se cuentan solo las dos primeras filas. Son las que deciden si el sistema aprueba el reto.</p>
@@ -355,28 +355,30 @@ body.con-notas .notas{display:block}
   <div class="caja">
     <span class="kicker">01 · La decisión central</span>
     <h2>Una regla de una línea, aclarada por el docente</h2>
-    <pre class="dib">nivel(m) = max( objetivo(errores(m − 1)) ,  nivel(m − 1) − 1 )
-
-objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto de reloj</pre>
+    <pre class="dib">meta = objetivo(errores(m − 1))        objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 si no
+si meta > nivel(m − 1)  →  nivel(m) = meta                       (degrada de inmediato)
+si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 1 nivel por minuto</pre>
     <div class="rej d2">
       <div class="card acento"><span class="et">Lo dijo el docente (Discord, 17 y 18/09/2026)</span>
         <small style="color:var(--ink)">«Se cuenta la cantidad de errores en el minuto que ya pasó para determinar qué respuesta doy en el minuto actual».
         Con 10 o más, «se pasa de inmediato» al Nivel 3.</small></div>
       <div class="card"><span class="et">Lo decidimos nosotros</span>
-        <small style="color:var(--ink)">La recuperación baja <b>un nivel por minuto</b>. Sin esta regla, con el script oficial el sistema saltaría de 3 a 1, y el enunciado pide pasar de 3 a 2 y de 2 a 1.</small></div>
+        <small style="color:var(--ink)">Tras degradar, el nivel se <b>sostiene 2 minutos</b> y después baja <b>un nivel por minuto</b>. Es histéresis contra el <i>flapping</i>, como el cooldown de un autoscaler. Sin ella, el k6 oficial da 1-2-1-3-2-3-2-1: salta de 1 a 3 y oscila, que es lo que el docente llama «problema del sistema».</small></div>
     </div>
     <div class="tabox"><table>
       <thead><tr><th>Diagrama de la sesión: minuto</th><th class="n">0-1</th><th class="n">1-2</th><th class="n">2-3</th><th class="n">3-4</th><th class="n">4-5</th><th class="n">5-6</th></tr></thead>
       <tbody>
         <tr><td>Errores del cliente</td><td class="n">0</td><td class="n">5</td><td class="n">10</td><td class="n">5</td><td class="n">0</td><td class="n">0</td></tr>
-        <tr class="destaca"><td>Nivel con nuestra regla</td><td class="n">1</td><td class="n">1</td><td class="n">2</td><td class="n">3</td><td class="n">2</td><td class="n">1</td></tr>
+        <tr><td>Nivel del diagrama</td><td class="n">1</td><td class="n">1</td><td class="n">2</td><td class="n">3</td><td class="n">2</td><td class="n">1</td></tr>
+        <tr class="destaca"><td>Nivel con nuestra regla</td><td class="n">1</td><td class="n">1</td><td class="n">2</td><td class="n">3</td><td class="n"><b>3</b></td><td class="n">2</td></tr>
       </tbody>
     </table></div>
-    <div class="aviso ojo"><p><b>Contradicción registrada.</b> Las capturas de «Resultados esperados» muestran una oscilación N3 ↔ N1 sin errores, que es compatible con un estado <b>no compartido</b> entre instancias. Seguimos el texto y al docente, no las imágenes. Le preguntamos el 27/10.</p></div>
-    <p class="fuente">Fuente: <code>Discord-Aclaraciones-Docente.md</code> §3–§5 · tests <code>test_reglas.py::test_diagrama_de_la_sesion</code></p>
+    <div class="aviso ojo"><p><b>Desviación declarada.</b> En la ventana 4-5 la permanencia sostiene N3 donde el diagrama muestra N2. Es el precio de no oscilar con el script oficial, y el parámetro <code>PermanenciaMinutos=1</code> vuelve a la regla anterior sin tocar el código. Le preguntamos al docente el 27/10.</p></div>
+    <p class="fuente">Fuente: <code>Discord-Aclaraciones-Docente.md</code> §3–§5 · <code>docs/ADR/ADR-001-permanencia-minima-tras-degradar.md</code> · <code>test_reglas.py</code></p>
     <div class="notas">
       <span class="tag">Notas</span>
-      <p>Ésta es la lámina que más defiende la nota: muestra que no adivinamos la regla. La fuente es el docente, y nuestra parte está separada y justificada.</p>
+      <p>Ésta es la lámina que más defiende la nota: muestra que no adivinamos la regla. La fuente es el docente, y nuestra parte (la permanencia) está separada, justificada y es reversible con un parámetro.</p>
+      <p>Si preguntan por el «1-2-3-3-2-1»: con el k6 oficial (5/0/15/0/15/0/0) ninguna regla que mire solo el minuto anterior lo produce, porque los minutos 2 y 4 están limpios. Las cuatro opciones están comparadas en el ADR-001.</p>
     </div>
   </div>
 </section>
@@ -419,8 +421,8 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
         <tr><td><b>Estímulo</b></td><td>10 o más peticiones fallidas en un minuto de reloj</td></tr>
         <tr><td><b>Artefacto</b></td><td>El servicio <code>/service-api</code> completo</td></tr>
         <tr><td><b>Entorno</b></td><td>Operación normal con un pico de errores</td></tr>
-        <tr><td><b>Respuesta</b></td><td>Pasa a Nivel 3 en el minuto siguiente, sigue respondiendo y se recupera de a un nivel</td></tr>
-        <tr class="destaca"><td><b>Medida</b></td><td>100 % de las peticiones con respuesta · vuelta a Nivel 1 en ≤ 2 minutos sin errores</td></tr>
+        <tr><td><b>Respuesta</b></td><td>Pasa a Nivel 3 en el minuto siguiente, sigue respondiendo, se sostiene 2 min y se recupera de a un nivel</td></tr>
+        <tr class="destaca"><td><b>Medida</b></td><td>100 % de las peticiones con respuesta · ningún salto de nivel · vuelta a Nivel 1 dos minutos sanos después de cumplida la permanencia</td></tr>
       </tbody>
     </table></div>
     <div class="aviso pare"><p><b>Lo que sacrificamos:</b> capacidades en N2 y N3 (análisis de riesgo y notificación diferidos) · latencia por el estado compartido · tiempo de reacción (hasta 60 s).</p></div>
@@ -443,6 +445,7 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
         <tr><td><b>Reconfiguration</b></td><td>Recuperar</td><td>El router reasigna las peticiones al servicio del nivel vigente</td></tr>
         <tr><td><b>Exception handling</b></td><td>Recuperar</td><td>Toda falla termina en un mensaje claro, nunca en un 502 crudo</td></tr>
         <tr><td>Reintroducción gradual (análoga a <b>Shadow</b>)</td><td>Reintroducir</td><td>Se sube un nivel por minuto sano antes de devolver todas las capacidades</td></tr>
+        <tr><td>Histéresis (permanencia mínima)</td><td>Reintroducir</td><td>El nivel degradado se sostiene 2 min antes de empezar a recuperar (ADR-001)</td></tr>
         <tr><td>Patrón <b>Circuit breaker</b> con 3 estados</td><td>Patrón</td><td>N1 ≈ cerrado · N2 ≈ semiabierto · N3 ≈ abierto, con ventana por minuto</td></tr>
       </tbody>
     </table></div>
@@ -496,7 +499,7 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
         <text x="425" y="248" text-anchor="end" class="t-s">lee · ADD · Put condicional</text>
         <text x="435" y="112" text-anchor="middle" class="t-s">invoca solo el nivel vigente</text>
       </svg>
-      <figcaption><b>Despliegue:</b> todo es una sola plantilla SAM. Se corre igual en LocalStack (desarrollo) y en AWS us-east-2 (corrida oficial).
+      <figcaption><b>Despliegue:</b> una sola plantilla SAM, desplegada en LocalStack (desarrollo). En AWS us-east-2 se crearon a mano por consola los mismos recursos, con los mismos nombres y valores (Python 3.12, arm64, 256 MB, stage <code>prod</code> con 25 r/s y ráfaga de 50).
         El estado vive en <b>un ítem por minuto</b>: los errores se suman con <code>ADD</code> atómico, y el nivel se fija una sola vez (gana la primera instancia que escribe).</figcaption>
     </figure>
     <div class="notas"><span class="tag">Notas</span><p>¿Por qué no enruta el API Gateway directamente? Porque no puede consultar DynamoDB para decidir. El router es el «Gateway Routing» que lo complementa. Es la decisión más discutible, y por eso se nombra.</p></div>
@@ -527,9 +530,9 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
         <path class="flecha" d="M175 95Q450 -40 725 95" marker-end="url(#fl2)"/>
         <text x="450" y="22" text-anchor="middle" class="mono t-warn" style="font-size:13px">≥ 10 errores · salto inmediato</text>
         <path class="flecha verde" d="M710 185Q610 230 510 185" marker-end="url(#fl2)"/>
-        <text x="610" y="240" text-anchor="middle" class="mono t-green" style="font-size:13px">minuto con &lt; 10</text>
+        <text x="610" y="240" text-anchor="middle" class="mono t-green" style="font-size:13px">&lt; 10 y ya pasaron 2 min</text>
         <path class="flecha verde" d="M390 185Q290 230 190 185" marker-end="url(#fl2)"/>
-        <text x="290" y="240" text-anchor="middle" class="mono t-green" style="font-size:13px">minuto con &lt; 5</text>
+        <text x="290" y="240" text-anchor="middle" class="mono t-green" style="font-size:13px">&lt; 5 y ya pasaron 2 min</text>
         <text x="450" y="285" text-anchor="middle" class="t-s">se evalúa una vez por minuto de reloj, con los errores del minuto anterior · nunca 3 → 1</text>
       </svg>
       <figcaption><b>Respuestas:</b> N1 <code>200 Nivel 1: OK</code> / <code>500 … Full con Error</code> · N2 <code>200 Nivel 2: OK</code> / <code>500 … Operación Limitada</code> ·
@@ -539,25 +542,49 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
   </div>
 </section>
 
-<!-- ═══ 10 · Línea de tiempo (simulada) ═══ -->
+<!-- ═══ 10 · Línea de tiempo (LocalStack, medida) ═══ -->
 <section class="lamina">
   <div class="caja">
     <span class="kicker">05 · Arquitectura · cómo se comporta con el k6</span>
-    <h2>La corrida esperada, minuto a minuto</h2>
-    <div class="linea" role="img" aria-label="Minutos 0 a 7: niveles 1, 2, 1, 3, 2, 3, 2, 1">
+    <h2>La corrida, minuto a minuto: 1 → 2 → 3 → 2 → 1</h2>
+    <div class="linea" role="img" aria-label="Minutos 0 a 7: niveles 1, 2, 2, 3, 3, 3, 2, 1">
       <div class="seg l1"><b>N1</b><span>min 0</span><i>5 err</i></div>
       <div class="seg l2"><b>N2</b><span>min 1</span><i>0</i></div>
-      <div class="seg l1"><b>N1</b><span>min 2</span><i>15 err</i></div>
+      <div class="seg l2"><b>N2</b><span>min 2</span><i>15 err</i></div>
       <div class="seg l3"><b>N3</b><span>min 3</span><i>0</i></div>
-      <div class="seg l2"><b>N2</b><span>min 4</span><i>14 err</i></div>
-      <div class="seg l3"><b>N3</b><span>min 5</span><i>1 err</i></div>
+      <div class="seg l3"><b>N3</b><span>min 4</span><i>15 err</i></div>
+      <div class="seg l3"><b>N3</b><span>min 5</span><i>0</i></div>
       <div class="seg l2"><b>N2</b><span>min 6</span><i>0</i></div>
       <div class="seg l1"><b>N1</b><span>min 7</span><i>0</i></div>
     </div>
-    <p>Recorre los tres niveles <b>dos veces</b>, se degrada y se recupera en los dos sentidos y <b>termina en Nivel 1</b>. Los errores de un minuto se reflejan en el nivel del siguiente.</p>
-    <div class="aviso ojo"><p><b>Simulado, no medido.</b> Sale de <code>test_k6_oficial.py</code>: las 140 iteraciones del script oficial, con 3 s de espera + 0,2 s de latencia supuesta. Los minutos son de reloj; el «minuto» que imprime el k6 es lógico y se va desfasando.</p></div>
-    <div class="aviso pare"><p><b>Riesgo R1.</b> Con latencia casi nula (3,00 s exactos por iteración) la prueba termina justo en el borde del minuto 7, todavía en <b>Nivel 2</b>. Esperamos 50–150 ms en AWS. Se mide en la primera corrida.</p></div>
-    <div class="notas"><span class="tag">Notas</span><p>En la versión final, esta lámina se reemplaza por la captura del dashboard y el log real. La secuencia simulada es <code>1-2-1-3-2-3-2-1</code>.</p></div>
+    <p>Recorre los tres niveles <b>sin saltos</b>, <b>termina en Nivel 1</b> y el cliente ve en cada minuto el mismo nivel que fijó el servidor (<b>8 de 8</b>). Los 15 errores del minuto 4 caen en N3: el mensaje «Sistema bajo mantenimiento» aparece <b>15 veces</b>.</p>
+    <div class="aviso ojo"><p><b>Medido en LocalStack</b> (23/10, k6 oficial con solo la URL cambiada, 140/140 iteraciones, latencia media de 88 ms). Evidencia: <code>logs/evidencia-local-20261023T010346Z/</code>. En AWS las corridas de prueba fueron con la regla anterior y dieron 1-2-1-3-2-3-2-1: falta la corrida oficial después del redespliegue.</p></div>
+    <div class="aviso pare"><p><b>Riesgo R1.</b> Con latencia casi nula (3,00 s exactos por iteración) la prueba termina justo en el borde del último minuto, todavía en <b>Nivel 2</b>. En AWS la latencia media fue de 169 ms, lejos del umbral de ~25 ms.</p></div>
+    <div class="notas"><span class="tag">Notas</span><p>En la versión final, esta lámina se reemplaza por la corrida oficial en AWS: la captura del panel, el log del k6 y los eventos <code>CAMBIO_NIVEL</code> de CloudWatch.</p></div>
+  </div>
+</section>
+
+<!-- ═══ 11 · Lo medido en AWS ═══ -->
+<section class="lamina">
+  <div class="caja">
+    <span class="kicker">Evidencia · AWS us-east-2</span>
+    <h2>En AWS responde todo, y el costo del arranque en frío es una sola petición</h2>
+    <div class="rej d4">
+      <div class="card bien"><span class="et">Iteraciones</span><span class="g">140/140</span><small>35 fallidas = los 5 + 15 + 15 errores que pide el script. <b>Ninguna falla inesperada.</b></small></div>
+      <div class="card"><span class="et">Latencia k6</span><span class="g" style="font-size:22px">169 / 180 ms</span><small>Promedio y p95. El servidor aporta unos 55 ms; el resto es red y API Gateway.</small></div>
+      <div class="card"><span class="et">Router en caliente</span><span class="g" style="font-size:22px">25–40 ms</span><small>Es el costo del salto extra. Cada Lambda de nivel tarda unos 2 ms.</small></div>
+      <div class="card acento"><span class="et">Arranque en frío</span><span class="g" style="font-size:22px">2,12 s</span><small>Solo la primera petición (router: 257 ms de arranque + 1.386 ms). Niveles: ~80 ms.</small></div>
+    </div>
+    <div class="tabox prosa"><table>
+      <thead><tr><th>Decisión que tomamos con estos datos</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td><b>No</b> se agrega un calentador automático (EventBridge)</td><td>Con 140 peticiones el efecto es de una sola petición y está muy por debajo del timeout de 3 s. Antes de la corrida se calientan a mano las 4 Lambdas</td></tr>
+        <tr><td>El router en caliente justifica el salto extra</td><td>25–40 ms por petición a cambio de aislar las fallas de cada nivel y cumplir «un servicio por nivel»</td></tr>
+      </tbody>
+    </table></div>
+    <div class="aviso ojo"><p><b>Corridas de prueba</b> del 21 y 22/10, con la regla anterior y sin el log completo del k6. Los tiempos no dependen de la regla; la secuencia de niveles sí, y sale de la corrida oficial.</p></div>
+    <p class="fuente">Fuente: informe de avance de Camilo (<code>Aportes/camilo/m3-informe-arquitectura-reto3-avance-camilo.docx</code>), §10.2, §11.2 y §11.3 · CloudWatch Logs Insights sobre las líneas REPORT</p>
+    <div class="notas"><span class="tag">Notas</span><p>Esta lámina la presenta Camilo: él hizo el despliegue y la medición en AWS.</p></div>
   </div>
 </section>
 
@@ -573,6 +600,7 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
         <tr><td>La Lambda del nivel falla o tarda más de 3 s</td><td>Responde con el mensaje de N3 y <b>cuenta el error</b></td><td>La salud se observa, no se supone</td></tr>
         <tr><td>Dos instancias deciden el mismo minuto</td><td>La escritura condicional deja un solo ganador y las dos usan su nivel</td><td>Evita la oscilación de las capturas oficiales</td></tr>
         <tr><td>El SDK reintenta por debajo</td><td>Desactivado (<code>total_max_attempts = 1</code>)</td><td>Lección del Reto 2: los reintentos ocultos alargan el peor caso</td></tr>
+        <tr><td>CloudWatch no está disponible</td><td>Sigue respondiendo; se pierde la visibilidad mientras dure</td><td>El estado vive en DynamoDB, no en los logs</td></tr>
       </tbody>
     </table></div>
     <div class="notas"><span class="tag">Notas</span><p>Cada fila tiene un test en <code>test_router.py</code>. Esta lámina responde la pregunta típica del docente: «¿y si se cae el componente que decide?».</p></div>
@@ -585,15 +613,16 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
     <span class="kicker">Evidencia · estado del borrador</span>
     <h2>Lo que ya está probado y lo que falta</h2>
     <div class="rej d3">
-      <div class="card bien"><span class="et">Hecho</span><span class="g" style="font-size:22px">Diseño + plan</span><small>Regla verificada contra el diagrama de la sesión. 50 tests del plan en verde, incluida la reproducción de las 140 iteraciones.</small></div>
-      <div class="card"><span class="et">Siguiente</span><span class="g" style="font-size:22px">LocalStack</span><small>La misma plantilla SAM y el k6 oficial, cambiando solo la URL.</small></div>
-      <div class="card mal"><span class="et">Pendiente</span><span class="g" style="font-size:22px">AWS real</span><small>Hace falta el acceso de Camilo (usuario de mínimo privilegio). Ahí se hacen la corrida oficial, el dashboard y el video.</small></div>
+      <div class="card bien"><span class="et">Hecho</span><span class="g" style="font-size:22px">LocalStack + AWS</span><small>Código con 87 tests. LocalStack: 1-2-3-2-1, 8/8 coherentes. AWS desplegado por Camilo y probado con el k6. El usuario de lectura del panel ya lee DynamoDB y CloudWatch (26/10).</small></div>
+      <div class="card"><span class="et">Siguiente</span><span class="g" style="font-size:22px">Redesplegar</span><small>Subir el código del router con la permanencia y la variable <code>PERMANENCIA_MINUTOS=2</code>. Hoy AWS corre la regla anterior.</small></div>
+      <div class="card mal"><span class="et">Pendiente</span><span class="g" style="font-size:22px">Corrida oficial</span><small>Calentar, correr el k6 desde el panel contra AWS, guardar el ZIP de evidencia. Después: video de 5 min y PDF (cierre el 03/11).</small></div>
     </div>
     <h3>Preguntas para el encuentro del 27/10</h3>
     <div class="tabox prosa"><table><tbody>
-      <tr><td>1</td><td>¿La recuperación tiene que ser escalonada (3 → 2 → 1), o vale la regla pura del minuto anterior?</td></tr>
-      <tr><td>2</td><td>¿Se acepta el salto 1 → 3 al degradar? Con el script ocurre después del minuto 3.</td></tr>
-      <tr><td>3</td><td>¿La entrega es individual o grupal? ¿Cuánto pesan el código y el documento?</td></tr>
+      <tr><td>1</td><td>¿Se acepta la permanencia de 2 min aunque se aparte del diagrama de la sesión en la ventana 4-5?</td></tr>
+      <tr><td>2</td><td>Con el k6 oficial (5/0/15/0/15/0/0) no se puede producir 1-2-3-3-2-1 mirando solo el minuto anterior. ¿Vale 1-2-3-2-1?</td></tr>
+      <tr><td>3</td><td>¿El ruteo tiene que ocurrir dentro del propio API Gateway, o vale el router detrás de él?</td></tr>
+      <tr><td>4</td><td>¿La ventana es el minuto de reloj? ¿La entrega es individual o grupal?</td></tr>
     </tbody></table></div>
     <div class="notas"><span class="tag">Notas</span><p>Esta lámina no va en la versión final: es para revisarla con el equipo.</p></div>
   </div>
@@ -604,9 +633,9 @@ objetivo(e) = N3 si e ≥ 10 · N2 si e ≥ 5 · N1 en otro caso      m = minuto
   <div class="caja">
     <div class="portada">
       <span class="kicker">Cierre</span>
-      <h2 style="color:#fff">Responder siempre, aunque sea con menos: se degrada de golpe y se recupera de a un nivel</h2>
+      <h2 style="color:#fff">Responder siempre, aunque sea con menos: se degrada de golpe, se sostiene y se recupera de a un nivel</h2>
       <p class="lede" style="color:#ffffffd9">API Gateway → router con estado compartido en DynamoDB → tres servicios por nivel. Cada cambio de nivel queda en CloudWatch con su motivo.</p>
-      <p style="margin-top:18px">Riesgos declarados: latencia casi nula termina en N2 (R1) · LocalStack no valida IAM ni latencias (R2) · la recuperación escalonada depende de la respuesta del docente (R3) · una sola clave por minuto no escala a 10× (mejora futura).</p>
+      <p style="margin-top:18px">Riesgos declarados: latencia casi nula termina en N2 (R1) · la permanencia y la recuperación escalonada dependen de la respuesta del docente (R3, reversible con un parámetro) · el despliegue a mano en AWS puede desalinearse de la plantilla SAM · una sola clave por minuto no escala a 10× (mejora futura).</p>
     </div>
     <div class="notas"><span class="tag">Notas</span><p>Evidencia que acompañará la entrega: ZIP con código y plantilla, PDF técnico, video MP4 de 5 min como máximo con el k6, el log y el dashboard.</p></div>
   </div>

@@ -42,6 +42,10 @@ milisegundos de latencia para consultar el estado compartido.»* **[Decisión]**
 
 ## 3. La regla de niveles
 
+> **Actualización 22/10/2026:** la recuperación ahora tiene una **permanencia mínima de 2 minutos tras degradar**
+> (`Modulo 3/Ejercicios/Reto3-Resiliencia/docs/ADR/ADR-001-permanencia-minima-tras-degradar.md`). Con el k6 oficial la
+> secuencia pasa de 1-2-1-3-2-3-2-1 a **1-2-3-2-1**. Lo que sigue es el diseño del 18/10; no se reescribe.
+
 **Fuente principal:** respuesta del docente del 17/09/2026: «se cuentan los errores del minuto que ya pasó para
 determinar la respuesta del minuto actual». Es coherente con el diagrama de la sesión (`Discord-Aclaraciones-Docente.md` §3 y §5). **[Curso]**
 

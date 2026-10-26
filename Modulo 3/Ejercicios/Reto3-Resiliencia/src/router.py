@@ -13,7 +13,7 @@ from typing import Callable
 from estado import EstadoNoDisponible
 from niveles import MENSAJES, respuesta
 from observabilidad import Observabilidad
-from reglas import MEMORIA_MINUTOS, N3, Umbrales, nivel_para
+from reglas import N3, Umbrales, decision_para, memoria_minutos, nivel_para
 
 Invocar = Callable[[int, dict], dict]
 
@@ -72,14 +72,14 @@ class Router:
         return resultado
 
     def _nivel_del_minuto(self, minuto: int, request_id: str) -> int:
-        # Se leen el minuto actual y los anteriores que pueden influir (MEMORIA_MINUTOS + 1 para el nivel previo).
-        registros = self.repo.leer_minutos([minuto - k for k in range(MEMORIA_MINUTOS + 2)])
+        # Se leen el minuto actual y los anteriores que pueden influir (+1 para el nivel previo).
+        registros = self.repo.leer_minutos([minuto - k for k in range(memoria_minutos(self.u) + 2)])
         actual = registros.get(minuto)
         if actual is not None and actual.nivel is not None:
             return actual.nivel
 
-        nuevo = nivel_para(minuto, registros, self.u)
-        vigente, lo_decidi = self.repo.fijar_nivel(minuto, nuevo)
+        nuevo = decision_para(minuto, registros, self.u)
+        vigente, lo_decidi = self.repo.fijar_nivel(minuto, nuevo.nivel, nuevo.degradado_en)
         if lo_decidi:
             anterior = registros.get(minuto - 1)
             previo = anterior.nivel if anterior and anterior.nivel is not None else nivel_para(minuto - 1, registros, self.u)
@@ -88,7 +88,8 @@ class Router:
                     "CAMBIO_NIVEL", minuto=_iso(minuto), de=previo, a=vigente,
                     motivo="degradacion" if vigente > previo else "recuperacion",
                     errores_minuto_anterior=anterior.errores if anterior else 0,
-                    umbrales={"degradado": self.u.degradado, "minimo": self.u.minimo},
+                    umbrales={"degradado": self.u.degradado, "minimo": self.u.minimo,
+                              "permanencia": self.u.permanencia},
                     request_id=request_id, metricas={"Transiciones": 1},
                 )
         return vigente
@@ -122,7 +123,8 @@ def _desde_entorno() -> Router:
     from estado import RepositorioDynamo
     funciones = {n: os.environ[f"NIVEL{n}_FN"] for n in (1, 2, 3)}
     umbrales = Umbrales(degradado=int(os.environ.get("UMBRAL_DEGRADADO", 5)),
-                        minimo=int(os.environ.get("UMBRAL_MINIMO", 10)))
+                        minimo=int(os.environ.get("UMBRAL_MINIMO", 10)),
+                        permanencia=int(os.environ.get("PERMANENCIA_MINUTOS", 2)))
     return Router(RepositorioDynamo(os.environ["TABLA"]), InvocadorLambda(funciones), umbrales)
 
 

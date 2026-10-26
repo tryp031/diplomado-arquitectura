@@ -59,8 +59,43 @@ def test_coherencia_cliente_servidor():
                {"minuto": m + 2, "nivel": 3, "errores": 0, "peticiones": 1}]  # el cliente vio N1: no coincide
     filas = coherencia(its, minutos)
     assert [f["coincide"] for f in filas] == [True, True, False]
-    assert resumen_coherencia(filas) == {"minutos": 3, "coinciden": 2, "todo_coincide": False}
-    assert como_csv(filas).splitlines()[1] == "2026-10-18 23:09,1,5,1,1,1-1,si"
+    assert resumen_coherencia(filas) == {"minutos": 3, "coinciden": 2, "todo_coincide": False,
+                                         # sin errores la regla predice N1 siempre: el N2 del cliente no la cumple
+                                         "minutos_regla": 3, "coinciden_regla": 2, "regla_se_cumple": False}
+    assert como_csv(filas).splitlines()[1] == "2026-10-18 23:09,1,5,1,1,1-1,si,0,1,si"
+
+
+def _itk(minuto_utc, n, status=200, i=1):
+    ts = datetime(2026, 10, 18, 23, minuto_utc, 5, tzinfo=timezone.utc).isoformat()
+    return Iteracion(ts=ts, minuto_logico=1, iteracion=i, error=status >= 500, status=status,
+                     mensaje=f"Nivel {n}: x", nivel=n)
+
+
+def test_la_regla_se_verifica_solo_con_el_cliente():
+    # Minuto 0: 5 errores en N1 → minuto 1: N2 → minuto 2 (permanencia): N2 → minuto 3: N1.
+    its = [_itk(0, 1, 500)] * 5 + [_itk(0, 1)] + [_itk(1, 2)] + [_itk(2, 2)] + [_itk(3, 1)]
+    filas = coherencia(its, [])
+    assert [f["nivel_regla"] for f in filas] == [1, 2, 2, 1]
+    assert [f["errores_cliente"] for f in filas] == [5, 0, 0, 0]
+    r = resumen_coherencia(filas)
+    assert r["regla_se_cumple"] and r["minutos_regla"] == 4 and r["minutos"] == 0
+
+
+def test_la_regla_detecta_un_salto():
+    # Si el sistema hubiera recuperado sin permanencia, el minuto 2 en N1 no cumple la regla.
+    its = [_itk(0, 1, 500)] * 5 + [_itk(1, 2), _itk(2, 1)]
+    filas = coherencia(its, [])
+    assert [f["coincide_regla"] for f in filas] == [True, True, False]
+
+
+def test_veredicto_de_secuencia():
+    k6 = EjecutorK6(OFICIAL, Path("/tmp"), Path("/tmp"))
+    k6.iteraciones = [_itk(0, n, i=i) for i, n in enumerate([1] * 20 + [2] * 40 + [3] * 60 + [2] * 18 + [1] * 2)]
+    v = k6.resumen()["veredicto"]
+    assert v["sin_saltos"] and v["secuencia_esperada"] and v["termino_en_n1"]
+    k6.iteraciones = [_itk(0, n, i=i) for i, n in enumerate([1] * 20 + [2] * 20 + [1] * 20 + [3] * 80)]
+    v = k6.resumen()["veredicto"]
+    assert not v["sin_saltos"] and not v["secuencia_esperada"]
 
 
 class EntornoFalso:
@@ -147,6 +182,59 @@ def test_no_cambia_de_entorno_con_k6_corriendo(cliente):
 
 def test_aws_rechaza_el_perfil_default(tmp_path):
     from panel import entornos as ent
-    for perfil in (None, "", "default"):
-        with pytest.raises(ent.EntornoNoDisponible):
-            ent.aws(tmp_path, perfil)
+    with pytest.raises(ent.EntornoNoDisponible):
+        ent.aws(tmp_path, "default")
+
+
+def test_aws_sin_perfil_es_solo_cliente(tmp_path):
+    from panel import entornos as ent
+    (tmp_path / ".build").mkdir()
+    (tmp_path / ".build" / "url-aws.txt").write_text("https://api/prod/service-api\n")
+    for perfil in (None, ""):
+        e = ent.aws(tmp_path, perfil)
+        assert e.url == "https://api/prod/service-api" and not e.lectura
+        with pytest.raises(ent.SinLectura):
+            e.minutos(1, 2)
+
+
+def test_access_denied_es_sin_lectura(tmp_path):
+    import boto3
+    from botocore.stub import Stubber
+    from panel import entornos as ent
+    e = ent.Entorno("aws", boto3.Session(aws_access_key_id="x", aws_secret_access_key="x", region_name="us-east-2"),
+                    tmp_path / "url.txt")
+    with Stubber(e._db) as s:
+        s.add_client_error("batch_get_item", service_error_code="AccessDeniedException")
+        with pytest.raises(ent.SinLectura):
+            e.minutos(1, 1)
+
+
+def test_estado_en_modo_solo_cliente(tmp_path):
+    from panel import entornos as ent
+    from panel.app import crear_app
+
+    class SoloCliente(EntornoFalso):
+        def minutos(self, desde, hasta):
+            raise ent.SinLectura("sin permiso")
+
+    k6 = EjecutorK6(OFICIAL, tmp_path / ".build", tmp_path / "logs")
+    c = TestClient(crear_app(entornos={"local": SoloCliente()}, k6=k6))
+    s = c.get("/api/estado").json()
+    assert s["servidor"]["lectura"] is False and s["servidor"]["error"] is None
+    assert s["regla"] == {"degradado": 5, "minimo": 10, "permanencia": 2}
+
+
+def test_guion_del_k6_oficial():
+    from panel.k6 import guion
+    from reglas import Umbrales
+    g = guion(Umbrales(), [])
+    assert [x["errores"] for x in g] == [5, 0, 15, 0, 15, 0, 0, 0]
+    assert [x["nivel_esperado"] for x in g] == [1, 2, 2, 3, 3, 3, 2, 1]
+    assert g[-1]["cola"] and not g[0]["cola"]
+
+
+def test_guion_coincide_con_el_script(tmp_path):
+    # El guion no puede divergir del script del profesor: se recalcula con su misma fórmula.
+    from conftest import k6_error
+    from panel.k6 import ERRORES_DEL_GUION
+    assert tuple(sum(k6_error(m * 20 + i) for i in range(20)) for m in range(7)) == ERRORES_DEL_GUION

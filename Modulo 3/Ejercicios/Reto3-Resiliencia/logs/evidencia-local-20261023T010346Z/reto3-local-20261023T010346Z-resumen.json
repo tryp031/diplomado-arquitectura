@@ -1,0 +1,48 @@
+{
+  "estado": "terminado",
+  "entorno": "local",
+  "url": "http://localhost:4566/restapis/9vvn0docb8/prod/_user_request_/service-api",
+  "error": null,
+  "inicio": "2026-10-23T01:03:46.853743+00:00",
+  "fin": "2026-10-23T01:12:00.786000+00:00",
+  "hechas": 140,
+  "total": 140,
+  "esperando_segundo_00": false,
+  "secuencia": [
+    1,
+    2,
+    3,
+    2,
+    1
+  ],
+  "veredicto": {
+    "recorrio_3_niveles": true,
+    "termino_en_n1": true,
+    "sin_saltos": true,
+    "secuencia_esperada": true,
+    "completa": true
+  },
+  "secuencia_esperada": [
+    1,
+    2,
+    3,
+    2,
+    1
+  ],
+  "coherencia_cliente_servidor": {
+    "minutos": 8,
+    "coinciden": 8,
+    "todo_coincide": true,
+    "minutos_regla": 8,
+    "coinciden_regla": 8,
+    "regla_se_cumple": true
+  },
+  "regla": {
+    "degradado": 5,
+    "minimo": 10,
+    "permanencia": 2
+  },
+  "servidor_sin_lectura": null,
+  "generado": "2026-10-23T01:12:37.162500+00:00",
+  "nota": "Evidencia exportada por el panel. El log del k6 es la salida cruda del script oficial; el diff muestra que solo cambió la URL."
+}

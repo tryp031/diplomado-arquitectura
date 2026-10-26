@@ -1,8 +1,9 @@
 # Reto 3: arquitectura resiliente (Group 2)
 
 API Gateway → `reto3-router` → `reto3-nivel{1,2,3}`, con el estado en DynamoDB. **El nivel de cada minuto de reloj se
-decide con los errores del minuto anterior**: ≥ 10 → N3 y ≥ 5 → N2. Se degrada de inmediato y se recupera un nivel
-por minuto. Diseño completo: `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md`.
+decide con los errores del minuto anterior**: ≥ 10 → N3 y ≥ 5 → N2. Se degrada de inmediato. Tras degradar, el nivel
+se sostiene **2 minutos** y luego se recupera de a un nivel por minuto (`docs/ADR/ADR-001`, 22/10). Con el k6 oficial
+la secuencia es **1-2-3-2-1**. Diseño completo: `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md`.
 
 ## Pruebas (sin AWS)
 ```bash
@@ -37,8 +38,15 @@ El script aborta si el perfil no es `diplomado` o si la cuenta no coincide. **Nu
 ## Panel de control
 ```bash
 scripts/panel.sh                                      # http://localhost:8030, contra LocalStack
-PANEL_AWS_PERFIL=<perfil-solo-lectura> scripts/panel.sh  # habilita el switch AWS
+PANEL_AWS_PERFIL=<perfil-solo-lectura> scripts/panel.sh  # AWS con lectura del servidor
 ```
+- **AWS sin perfil = modo «solo cliente».** Con la URL en `.build/url-aws.txt`, el panel corre el k6 y las peticiones
+  manuales, y verifica la regla con los errores que ve el propio k6. Si el perfil no tiene permisos (AccessDenied),
+  pasa lo mismo y el panel lo dice en un aviso, no como un error.
+- **Guion del script**: los 7 minutos del k6 (5/0/15/0/15/0/0 errores), el nivel que predice la regla y el que
+  respondió el sistema, minuto a minuto.
+- **Gráfica por minuto de reloj**: el nivel del servidor, el de la regla y el del cliente, y debajo los errores con los
+  umbrales. Tiene tooltip y una vista de tabla.
 - **Nivel del minuto actual**, leído del servidor (DynamoDB): errores del minuto anterior y del actual, y la cuenta
   regresiva hasta la próxima evaluación.
 - **▶ Correr k6 oficial**: la misma garantía que `correr-k6.sh`. Copia el script con la URL cambiada, verifica que
@@ -58,7 +66,20 @@ primero hay que descargar la evidencia**, porque en LocalStack el redespliegue p
 ## Qué cambia en el k6 oficial
 Solo la URL. `correr-k6.sh` lo verifica con `diff` y guarda el diff en `.build/`.
 
+## Corridas del 22/10/2026 (permanencia de 2 min, ADR-001)
+
+| Entorno | Regla desplegada | Secuencia | Evidencia |
+|---|---|---|---|
+| LocalStack | permanencia 2 | **1-2-3-2-1**: 8/8 minutos con cliente = servidor = regla, 15 respuestas 503 «mantenimiento» | `logs/evidencia-local-20261023T010346Z/` |
+| AWS (Camilo) | la anterior | 1-2-1-3-2-3-2-1, latencia media de 178 ms | `logs/k6-aws-20261023T010353Z.log` |
+
+AWS **hay que redesplegarlo** con este código. El usuario `user-boto3-solo-lectura` del Reto 2 no tiene la política
+`Reto3-PanelLectura` (AccessDenied en DynamoDB y Logs), así que el panel funciona en modo solo cliente hasta que se
+agregue.
+
 ## Corrida del k6 oficial en LocalStack (18/10/2026, 18:09–18:16 COT)
+
+> Histórica: es la regla anterior a ADR-001.
 
 Log: `logs/k6-localstack-20261018T230825Z.log` (140/140 iteraciones, 7 min 10 s). El diff con el script oficial es
 solo la línea `const url`.
