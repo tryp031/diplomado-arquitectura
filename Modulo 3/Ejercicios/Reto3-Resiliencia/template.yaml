@@ -13,6 +13,11 @@ Parameters:
   UmbralMinimo:
     Type: Number
     Default: 10
+  PermanenciaMinutos:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    Description: Minutos que se sostiene un nivel al que se entró degradando (1 = recuperar al minuto siguiente)
 
 Conditions:
   EsAws: !Equals [!Ref Entorno, aws]
@@ -71,6 +76,7 @@ Resources:
           NIVEL3_FN: !Ref Nivel3
           UMBRAL_DEGRADADO: !Ref UmbralDegradado
           UMBRAL_MINIMO: !Ref UmbralMinimo
+          PERMANENCIA_MINUTOS: !Ref PermanenciaMinutos
       Policies:
         # Solo lo que usa estado.py (DynamoDBCrudPolicy daría también Put/Delete/Scan/Query).
         - Statement:

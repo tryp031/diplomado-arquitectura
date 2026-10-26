@@ -52,16 +52,20 @@ def test_errores_del_minuto_anterior_degradan_y_se_registra_el_cambio():
     assert cambio[0]["motivo"] == "degradacion" and cambio[0]["errores_minuto_anterior"] == 10
 
 
-def test_recuperacion_escalonada():
+def test_recuperacion_con_permanencia_de_2_minutos():
     r, repo, reloj, lineas = armar()
     for _ in range(10):
         r.atender(evento(error=True), "id")
     niveles_vistos = []
-    for _ in range(3):
+    for _ in range(4):
         reloj.t += 60
         niveles_vistos.append(mensaje(r.atender(evento(), "id")))
-    assert niveles_vistos == ["Nivel 3: Operación al mínimo", "Nivel 2: OK", "Nivel 1: OK"]
-    assert [c["motivo"] for c in eventos(lineas, "CAMBIO_NIVEL")] == ["degradacion", "recuperacion", "recuperacion"]
+    assert niveles_vistos == ["Nivel 3: Operación al mínimo", "Nivel 3: Operación al mínimo", "Nivel 2: OK",
+                              "Nivel 1: OK"]
+    cambios = eventos(lineas, "CAMBIO_NIVEL")
+    assert [c["motivo"] for c in cambios] == ["degradacion", "recuperacion", "recuperacion"]
+    assert cambios[0]["umbrales"]["permanencia"] == 2
+    assert repo.minutos[T0 // 60 + 1]["degradado_en"] == T0 // 60 + 1
 
 
 def test_falla_de_estado_responde_n3_mantenimiento():

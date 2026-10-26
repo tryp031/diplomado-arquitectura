@@ -29,13 +29,14 @@ def test_recorre_los_3_niveles_y_termina_en_n1(paso):
     secuencia, mensajes = correr_k6(paso)
     assert {1, 2, 3} <= set(secuencia)
     assert mensajes[-1] == "Nivel 1: OK"
-    # Nunca se recupera saltando niveles.
-    assert all(not (a == 3 and b == 1) for a, b in zip(secuencia, secuencia[1:]))
+    # Ni se recupera saltando niveles ni salta de 1 a 3 (docente, 18/09/2026: «si te salta es problema del sistema»).
+    assert all(abs(a - b) == 1 for a, b in zip(secuencia, secuencia[1:]))
 
 
 def test_secuencia_con_latencia_tipica_de_aws():
+    # Lo que el docente dice que se debe ver: sube a N3, se sostiene y baja de a uno.
     secuencia, _ = correr_k6(3.2)
-    assert secuencia == [1, 2, 1, 3, 2, 3, 2, 1]
+    assert secuencia == [1, 2, 3, 2, 1]
 
 
 def test_riesgo_r1_latencia_cero_termina_en_n2():

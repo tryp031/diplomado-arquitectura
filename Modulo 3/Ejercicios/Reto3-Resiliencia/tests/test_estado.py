@@ -31,6 +31,24 @@ def test_fijar_nivel_gana(cliente):
     assert RepositorioDynamo(TABLA, cliente=c, reloj=lambda: 0).fijar_nivel(10, 3) == (3, True)
 
 
+def test_fijar_nivel_guarda_el_minuto_de_degradacion_en_la_misma_escritura(cliente):
+    c, s = cliente
+    s.add_response("update_item", {}, {
+        "TableName": TABLA, "Key": {"pk": {"S": "MIN#10"}},
+        "UpdateExpression": "SET nivel = :n, #ttl = if_not_exists(#ttl, :t), degradado_en = :d",
+        "ConditionExpression": "attribute_not_exists(nivel)", "ExpressionAttributeNames": {"#ttl": "ttl"},
+        "ExpressionAttributeValues": {":n": {"N": "3"}, ":t": {"N": "86400"}, ":d": {"N": "10"}}})
+    assert RepositorioDynamo(TABLA, cliente=c, reloj=lambda: 0).fijar_nivel(10, 3, degradado_en=10) == (3, True)
+
+
+def test_leer_minutos_con_degradacion(cliente):
+    c, s = cliente
+    s.add_response("batch_get_item", {"Responses": {TABLA: [
+        {"pk": {"S": "MIN#10"}, "nivel": {"N": "3"}, "errores": {"N": "0"}, "degradado_en": {"N": "9"}},
+    ]}, "UnprocessedKeys": {}})
+    assert RepositorioDynamo(TABLA, cliente=c).leer_minutos([10]) == {10: RegistroMinuto(3, 0, degradado_en=9)}
+
+
 def test_fijar_nivel_pierde_la_carrera_y_lee_al_ganador(cliente):
     c, s = cliente
     s.add_client_error("update_item", service_error_code="ConditionalCheckFailedException")

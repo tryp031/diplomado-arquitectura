@@ -36,16 +36,18 @@ class RepositorioMemoria:
         from estado import RegistroMinuto
         self._revisar()
         return {
-            m: RegistroMinuto(nivel=d.get("nivel"), errores=d.get("errores", 0))
+            m: RegistroMinuto(nivel=d.get("nivel"), errores=d.get("errores", 0), degradado_en=d.get("degradado_en"))
             for m, d in self.minutos.items() if m in minutos
         }
 
-    def fijar_nivel(self, minuto, nivel):
+    def fijar_nivel(self, minuto, nivel, degradado_en=None):
         self._revisar()
         item = self.minutos.setdefault(minuto, {})
         if "nivel" in item:
             return item["nivel"], False
         item["nivel"] = nivel
+        if degradado_en is not None:
+            item["degradado_en"] = degradado_en
         return nivel, True
 
     def registrar_resultado(self, minuto, es_error):
