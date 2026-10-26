@@ -12,10 +12,10 @@ nivel y al final. Se dice en voz alta que el video está acelerado, para no dar 
 
 ## Antes de grabar (checklist)
 
-1. `AWS_PROFILE=reto3-panel-lectura scripts/verificar-aws.sh` → «listo». Si falla, **no se graba**.
+1. `scripts/verificar-aws.sh` (lee `.env.aws`) → «listo». Si falla, **no se graba**.
 2. Calentar las 4 Lambdas (una prueba por nivel en la consola y 3 o 4 peticiones sin error). Esperar a que empiece un
    minuto nuevo, para que el calentamiento no cuente errores en el minuto de la corrida.
-3. `PANEL_AWS_PERFIL=reto3-panel-lectura scripts/panel.sh` → http://localhost:8030 en el switch **AWS**.
+3. `scripts/panel.sh` → http://localhost:8030 en el switch **AWS**.
 4. Grabar la pantalla con el panel y una terminal visibles. La consola de CloudWatch, en otra pestaña.
 
 ## Guion
