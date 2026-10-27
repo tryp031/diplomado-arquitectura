@@ -75,28 +75,29 @@ bajo cada caja y una leyenda de colores.
 | Campo | Valor |
 |---|---|
 | **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA. Documento del Grupo 2 sobre el diseño de Daniel Mazo |
-| **Fecha de recepción** | 2026-10-25 |
+| **Fecha de recepción** | 2026-10-25 (primera versión) · 2026-10-27 (actualización con la corrida oficial) |
 | **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
-| **Tema** | Informe de arquitectura del Reto 3, versión de avance: atributos de calidad, tácticas, decisiones, opciones consideradas, modelo C4, despliegue en AWS y resultados de las corridas de prueba |
+| **Tema** | Informe de arquitectura del Reto 3: atributos de calidad, restricciones, matriz de riesgos, tácticas, decisiones, opciones consideradas, modelo C4, despliegue en AWS y resultados de la **corrida oficial del 26/10/2026** |
 | **Tipo** | `investigacion` — borrador de un entregable; **no es material oficial** y todavía no pasó por `Consolidado/` |
-| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (código, `template.yaml`, README, panel) · `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md` · `Modulo 3/Material-Clase/Actividad-Reto3.md`, `Discord-Aclaraciones-Docente.md` y `k6-script-profesor-reto3.js` · `Modulo 2/Entregables/documento-tecnico/informe_arquitectura_reto2_alerta_flota_grupo2.docx` (modelo de formato) · corridas en AWS del 21 y 22/10/2026 (resumen de k6 y CloudWatch Logs Insights, copiados en la sesión de trabajo; **no se guardaron los logs completos del k6**) |
+| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (código, `template.yaml`, README, panel) · `Modulo 3/Material-Clase/Actividad-Reto3.md`, `Discord-Aclaraciones-Docente.md` y `k6-script-profesor-reto3.js` · `Modulo 2/Entregables/documento-tecnico/informe_arquitectura_reto2_alerta_flota_grupo2.docx` (modelo de formato) · `Modulo 3/Aportes/danny/m3-presentacion-reto3-danny.html` (matriz de riesgos, modificabilidad, restricciones y tácticas con nombre) · **evidencia de la corrida oficial** en `Modulo 3/Ejercicios/Reto3-Resiliencia/logs/evidencia-aws-20261027T004938Z/` (log del k6, diff, minutos, resumen y eventos del servidor), de donde salen las Figuras 3 y 4 |
 | **Estado** | borrador · ⬜ sin consolidar |
 
-**Qué contiene:** el informe de 13 secciones más un glosario, con las dos figuras del modelo C4 (las del diagrama de arriba). Compara la
-arquitectura adoptada (router con estado en DynamoDB) con otra opción (una sola función) y registra los resultados de las corridas de prueba.
+**Qué contiene:** el informe con las dos figuras del modelo C4 (las del diagrama de arriba) y dos figuras nuevas hechas con la corrida oficial
+(nivel y errores por minuto; latencia del router por minuto). Compara la arquitectura adoptada (router con estado en DynamoDB) con otra opción
+(una sola función), incorpora la permanencia mínima de 2 minutos tras degradar y cierra con una conclusión.
+
+**Qué cambia frente a la primera versión (PR #58):**
+- Resultados de la **corrida oficial** (140 de 140 peticiones, secuencia 1-2-3-2-1, 8 de 8 minutos coherentes) en lugar de las corridas de prueba.
+- Se agregan la matriz de riesgos (sección 2.2), las restricciones (2.1), el atributo de modificabilidad, las tácticas con nombre y la analogía con un circuit breaker.
+- Se quita el ADR del texto, la sección de límites y preguntas pendientes y la tabla de tiempos por función de la primera versión.
+- Los comentarios de Daniel sobre el PR #58 se aplicaron: la regla con permanencia, el pie de la Figura 2 y la cita del Discord.
 
 **Límites:**
-- **La medición oficial está pendiente.** La sección 11 son resultados de **corridas de prueba** (21 y 22/10/2026). Falta la corrida de entrega,
-  con calentamiento previo y con el log completo y el `diff` del k6 guardados. Los dos resultados vienen de corridas distintas (los cambios de
-  nivel, del 21/10; el resumen de k6 y los tiempos, del 22/10) y hay que unificarlos con la corrida oficial.
-- **Sigue el formato del informe del Módulo 2** (`informe_arquitectura_reto2_alerta_flota_grupo2.docx`): resumen ejecutivo, atributos de
-  calidad, tácticas, decisiones, contrato HTTP, opciones, plano de control, C4, despliegue, resultados, disponibilidad y glosario.
-- **No contempla material del Módulo 3.** Las tácticas y el análisis salen del Módulo 2 y de conocimiento complementario; no usa los contenidos
-  de `Material-Clase` del Módulo 3 (Genially de estilos, técnicas ASR/QAW, ADD, análisis de riesgos y evaluación). Si se quiere incorporarlos,
-  es un cambio aparte.
-- **Decisiones nuestras, por confirmar con el docente el 27/10:** la ventana (minuto de reloj), la recuperación de a un nivel por minuto y si el
-  ruteo debe ocurrir dentro de API Gateway. El script oficial no produce la secuencia 1-2-3-3-2-1 que dijo el docente (produce 1-2-1-3-2-3-2-1);
-  queda registrado en la sección 13.
-- **Pendiente de validar en AWS:** el panel leyendo AWS con el usuario de solo lectura, y los widgets del dashboard (la versión final no se
-  verificó). No incluye el video ni la exportación a PDF que pide el enunciado.
+- **Las Figuras 1 y 2 siguen mostrando la regla anterior** («recupera de a un nivel»), sin la permanencia. Están pendientes de rehacer.
+- **No usa todo el material del Módulo 3.** La matriz de riesgos y las tácticas con nombre vienen de la presentación de Daniel; no se incorporaron el escenario de calidad completo de ADD, el nivel de componentes de C4 ni la secuencia UML.
+- **Las calificaciones de la matriz de riesgos son una primera versión**, pendientes de validar en consenso entre los tres integrantes.
+- **Decisiones nuestras, por confirmar con el docente el 27/10:** la ventana (minuto de reloj), la permanencia de 2 minutos y si el ruteo debe ocurrir dentro de API Gateway. El docente dijo que se vería 1-2-3-3-2-1; el sistema produjo 1-2-3-2-1.
+- **El documento y la presentación de Daniel no coinciden en dos puntos:** si el despliegue se hizo con infraestructura como código o a mano (el Word dice que a mano) y la latencia del router (la presentación dice 34 ms; el Word, 37 ms medidos).
+- El arranque en frío (sección 10.2) usa cifras de una corrida de prueba anterior, no de la oficial.
+- No incluye el video ni la exportación a PDF que pide el enunciado.
 - La tabla de contenido del Word se actualiza en Word (clic derecho → Actualizar campo).
