@@ -82,10 +82,10 @@ Solo la URL. `correr-k6.sh` lo verifica con `diff` y guarda el diff en `.build/`
 |---|---|---|---|
 | LocalStack | permanencia 2 | **1-2-3-2-1**: 8/8 minutos con cliente = servidor = regla, 15 respuestas 503 «mantenimiento» | `logs/evidencia-local-20261023T010346Z/` |
 | AWS (Camilo) | la anterior | 1-2-1-3-2-3-2-1, latencia media de 178 ms | `logs/k6-aws-20261023T010353Z.log` |
+| **AWS, corrida oficial (26/10, 19:49 COT)** | permanencia 2 | **1-2-3-2-1**: 140/140, 8/8 minutos con cliente = servidor = regla, 4 `CAMBIO_NIVEL`, latencia media de 167 ms (p95 215 ms) | `logs/evidencia-aws-20261027T004938Z/` |
 
-AWS **hay que redesplegarlo** con este código. El usuario `user-boto3-solo-lectura` del Reto 2 no tiene la política
-`Reto3-PanelLectura` (AccessDenied en DynamoDB y Logs), así que el panel funciona en modo solo cliente hasta que se
-agregue.
+AWS se redesplegó el 26/10 con este código y `PERMANENCIA_MINUTOS=2`. La corrida oficial se hizo desde el panel, con la
+llave de solo lectura de `.env.aws` (`reto3-panel-lectura`), en modo «Cliente + servidor».
 
 ## Corrida del k6 oficial en LocalStack (18/10/2026, 18:09–18:16 COT)
 
