@@ -606,7 +606,7 @@ body.con-notas .notas{display:block}
       <div class="card dec"><span class="dn">3</span><b>Un router detrás del API Gateway</b><p>El gateway no sabe enrutar según un estado. El router decide y llama solo al servicio del nivel vigente.</p></div>
       <div class="card dec"><span class="dn">4</span><b>Estado compartido en DynamoDB</b><p>Las instancias de Lambda no comparten memoria. Con el estado en DynamoDB, todas responden el mismo nivel.</p></div>
       <div class="card dec"><span class="dn">5</span><b>Ante la duda, Nivel 3</b><p>Si el estado no se puede leer o un servicio falla, respondemos al mínimo con un mensaje claro, nunca con un error crudo.</p></div>
-      <div class="card dec"><span class="dn">6</span><b>Una plantilla como contrato</b><p>La plantilla SAM fija nombres, permisos y parámetros. Se validó en LocalStack y AWS se desplegó a mano por consola con esos mismos valores.</p></div>
+      <div class="card dec"><span class="dn">6</span><b>Infraestructura como código</b><p>Toda la arquitectura vive en una plantilla: nombres, permisos y parámetros en un solo lugar.</p></div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Si el tiempo es corto, se cuentan la 1 y la 2: son las que deciden si el sistema aprueba el reto. La 2 es nuestra y se puede revertir con un parámetro, sin tocar el código.</p>
