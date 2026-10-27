@@ -177,7 +177,7 @@ class EjecutorK6:
                 "secuencia_esperada": SECUENCIA_ESPERADA,
                 "ultimas": []}
 
-    def resumen(self, ultimas: int = 30) -> dict[str, Any]:
+    def resumen(self, ultimas: int = TOTAL_ITERACIONES) -> dict[str, Any]:
         niveles = [i.nivel for i in self.iteraciones]
         sec = secuencia(niveles)
         completa = len(self.iteraciones) == TOTAL_ITERACIONES

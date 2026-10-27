@@ -205,7 +205,7 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
         }
 
     @app.get("/api/descargas/{tipo}")
-    async def descargar(tipo: Literal["k6", "servidor", "minutos", "resumen", "zip"]):
+    async def descargar(tipo: Literal["k6", "servidor", "minutos", "zip"]):
         if ventana_corrida() is None:
             return _sin_corrida()
         try:
@@ -214,7 +214,7 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
             return JSONResponse({"error": str(err)}, status_code=503)
         if tipo == "zip":
             return _adjunto(zip_evidencia(archivos), _nombre("evidencia", "zip"), "application/zip")
-        ext = {"k6": "log", "servidor": "jsonl", "minutos": "csv", "resumen": "json"}[tipo]
+        ext = {"k6": "log", "servidor": "jsonl", "minutos": "csv"}[tipo]
         nombre = _nombre(tipo, ext)
         return _adjunto(archivos[nombre], nombre, "text/plain; charset=utf-8")
 

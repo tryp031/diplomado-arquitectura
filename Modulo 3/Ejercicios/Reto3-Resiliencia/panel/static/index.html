@@ -15,17 +15,17 @@
 <header class="barra">
   <div class="marca">
     <span class="logo" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span><b>Reto 3 · Resiliencia en 3 niveles</b><small>Group 2 · Arquitectura de Software y Cloud · PUJ Cali</small></span>
+    <span><b>Reto 3 · Resiliencia en 3 niveles</b><small>Group 2 · PUJ Cali</small></span>
   </div>
   <div class="seg-ctl" role="radiogroup" aria-label="Entorno">
     <button role="radio" data-entorno="local" aria-checked="true">LocalStack</button>
     <button role="radio" data-entorno="aws" aria-checked="false">AWS</button>
   </div>
-  <span class="modo" id="modo" title="Qué puede ver el panel">—</span>
-  <code class="url" id="url" title="URL del API Gateway">—</code>
+  <span class="modo" id="modo">—</span>
+  <code class="url" id="url">—</code>
   <span class="sep"></span>
-  <span class="reloj" id="reloj" aria-label="Hora local">--:--:--</span>
-  <button class="bt icono" id="bTema" title="Cambiar tema claro u oscuro" aria-label="Cambiar tema">◐</button>
+  <span class="reloj num" id="reloj">--:--:--</span>
+  <button class="bt icono" id="bTema" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
 </header>
 
 <div class="aviso pare" id="errorGlobal" role="alert" hidden></div>
@@ -33,23 +33,20 @@
 
 <main class="tablero">
 
-  <!-- ═══ Nivel actual ═══ -->
-  <section class="card hero" id="tarjetaNivel" data-nivel="0" aria-live="polite">
+  <!-- ═══ 1 · Ahora: nivel vigente ═══ -->
+  <section class="card nivel" id="tarjetaNivel" data-nivel="0" aria-live="polite">
     <div class="cab">
       <span class="et">Nivel del minuto actual</span>
-      <span class="fuente" id="nivelFuente">—</span>
+      <span class="chip-s" id="nivelFuente">—</span>
     </div>
-    <div class="hero-cuerpo">
-      <div class="escalera" id="escalera" aria-label="Niveles de operación">
+    <div class="nivel-cuerpo">
+      <div class="escalera" aria-label="Niveles de operación">
         <div class="peldano" data-n="3"><b>N3</b><span><strong>Mínimo</strong><small>No procesa: operación al mínimo o mantenimiento</small></span></div>
         <div class="peldano" data-n="2"><b>N2</b><span><strong>Degradado</strong><small>Valida y registra · difiere análisis y notificación</small></span></div>
         <div class="peldano" data-n="1"><b>N1</b><span><strong>Full</strong><small>Valida, registra, analiza riesgo y notifica</small></span></div>
       </div>
-      <div class="anillo">
-        <svg viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="pista" cx="60" cy="60" r="52"/>
-          <circle class="arco" id="arco" cx="60" cy="60" r="52"/>
-        </svg>
+      <div class="anillo" title="Segundos para que el router evalúe el minuto siguiente">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="pista" cx="60" cy="60" r="52"/><circle class="arco" id="arco" cx="60" cy="60" r="52"/></svg>
         <div class="anillo-txt"><span class="num" id="cuenta">--</span><small>s para la<br>evaluación</small></div>
       </div>
     </div>
@@ -64,139 +61,140 @@
     </div>
   </section>
 
-  <!-- ═══ Arquitectura viva ═══ -->
-  <section class="card arq">
+  <!-- ═══ 2 · Flujo en vivo + petición manual ═══ -->
+  <section class="card flujo-card">
     <div class="cab">
-      <span class="et">Arquitectura en vivo</span>
-      <span class="chip-regla" id="reglaTxt">≥ 5 → N2 · ≥ 10 → N3 · permanencia 2 min</span>
+      <span class="et">Flujo en vivo</span>
+      <span class="chip-s" id="reglaTxt">≥ 5 → N2 · ≥ 10 → N3 · permanencia 2 min</span>
     </div>
-    <svg class="diagrama" id="diagrama" viewBox="0 0 640 270" role="img" aria-labelledby="diagTit">
-      <title id="diagTit">Cliente → API Gateway → Router → Lambda del nivel activo, con el estado en DynamoDB</title>
-      <defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="punta"/></marker></defs>
-      <path class="via" id="v1" d="M98 135 H138" marker-end="url(#pt)"/>
-      <path class="via" id="v2" d="M274 135 H312" marker-end="url(#pt)"/>
-      <path class="via nv" data-n="1" d="M418 135 C450 135 450 222 484 222" marker-end="url(#pt)"/>
-      <path class="via nv" data-n="2" d="M418 135 H484" marker-end="url(#pt)"/>
-      <path class="via nv" data-n="3" d="M418 135 C450 135 450 48 484 48" marker-end="url(#pt)"/>
-      <path class="via tenue" d="M365 160 V198" marker-end="url(#pt)" marker-start="url(#pt)"/>
-      <circle class="flujo" id="flujo" r="5" cx="0" cy="0"/>
-      <g class="nodo cli"><rect x="10" y="108" width="88" height="54" rx="12"/><text x="54" y="131">k6 · panel</text><text x="54" y="149" class="sub">cliente</text></g>
-      <g class="nodo"><rect x="138" y="108" width="136" height="54" rx="12"/><text x="206" y="131">API Gateway</text><text x="206" y="149" class="sub">REST · /service-api</text></g>
-      <g class="nodo"><rect x="312" y="108" width="106" height="54" rx="12"/><text x="365" y="131">λ router</text><text x="365" y="149" class="sub">decide el nivel</text></g>
-      <g class="nodo db"><rect x="297" y="198" width="136" height="54" rx="12"/><text x="365" y="221">DynamoDB</text><text x="365" y="239" class="sub">nivel y errores/min</text></g>
-      <g class="nodo nv" data-n="3"><rect x="484" y="22" width="146" height="52" rx="12"/><text x="557" y="44">λ nivel 3</text><text x="557" y="61" class="sub">Mínimo</text></g>
-      <g class="nodo nv" data-n="2"><rect x="484" y="109" width="146" height="52" rx="12"/><text x="557" y="131">λ nivel 2</text><text x="557" y="148" class="sub">Degradado</text></g>
-      <g class="nodo nv" data-n="1"><rect x="484" y="196" width="146" height="52" rx="12"/><text x="557" y="218">λ nivel 1</text><text x="557" y="235" class="sub">Full</text></g>
+    <svg class="diagrama" id="diagrama" viewBox="0 0 860 300" role="img" aria-labelledby="diagTit">
+      <title id="diagTit">Cliente → API Gateway → router → Lambda del nivel activo; el router lee y escribe el estado en DynamoDB</title>
+      <defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="punta"/></marker></defs>
+      <path class="via" id="v1" d="M120 120 H176" marker-end="url(#pt)"/>
+      <path class="via" id="v2" d="M330 120 H386" marker-end="url(#pt)"/>
+      <path class="via db" id="vDb" d="M458 150 V206" marker-end="url(#pt)" marker-start="url(#pt)"/>
+      <path class="via nv" data-n="3" d="M530 120 C580 120 580 44 636 44" marker-end="url(#pt)"/>
+      <path class="via nv" data-n="2" d="M530 120 H636" marker-end="url(#pt)"/>
+      <path class="via nv" data-n="1" d="M530 120 C580 120 580 196 636 196" marker-end="url(#pt)"/>
+      <g class="nodo cli" id="nCli"><rect x="10" y="90" width="110" height="60" rx="14"/><text x="65" y="116">Cliente</text><text x="65" y="135" class="sub">k6 · panel</text></g>
+      <g class="nodo" id="nGw"><rect x="176" y="90" width="154" height="60" rx="14"/><text x="253" y="116">API Gateway</text><text x="253" y="135" class="sub">POST /service-api</text></g>
+      <g class="nodo" id="nRouter"><rect x="386" y="90" width="144" height="60" rx="14"/><text x="458" y="116">λ router</text><text x="458" y="135" class="sub">decide el nivel</text></g>
+      <g class="nodo dbn" id="nDb"><rect x="380" y="206" width="156" height="60" rx="14"/><text x="458" y="232">DynamoDB</text><text x="458" y="251" class="sub">estado por minuto</text></g>
+      <g class="nodo nv" data-n="3"><rect x="636" y="16" width="214" height="56" rx="14"/><text x="660" y="40" class="izq">λ nivel 3 · Mínimo</text><text x="660" y="58" class="sub izq cuenta-nv">0 peticiones</text></g>
+      <g class="nodo nv" data-n="2"><rect x="636" y="92" width="214" height="56" rx="14"/><text x="660" y="116" class="izq">λ nivel 2 · Degradado</text><text x="660" y="134" class="sub izq cuenta-nv">0 peticiones</text></g>
+      <g class="nodo nv" data-n="1"><rect x="636" y="168" width="214" height="56" rx="14"/><text x="660" y="192" class="izq">λ nivel 1 · Full</text><text x="660" y="210" class="sub izq cuenta-nv">0 peticiones</text></g>
+      <g id="capaPuntos"></g>
     </svg>
-    <p class="nota">El router lee los errores del minuto anterior y fija el nivel del minuto con una escritura condicional: todas las instancias responden lo mismo. Se degrada de inmediato y, tras degradar, el nivel se sostiene 2 minutos antes de bajar de a uno.</p>
+    <div class="flujo-pie">
+      <div class="ultimo-ev" id="ultimoEv"><span class="vacio">Sin cambios de nivel todavía.</span></div>
+      <div class="manual">
+        <span class="et">Petición manual</span>
+        <div class="fila-bt">
+          <button class="bt" id="bOk">Enviar OK</button>
+          <button class="bt peligro" id="bErr">Enviar con error</button>
+          <button class="bt tenue-bt" id="bReiniciar" title="Borra el estado por minuto (solo LocalStack)">Reiniciar estado</button>
+        </div>
+        <div class="resp-manual" id="respManual"></div>
+      </div>
+    </div>
+    <p class="leyenda-flujo"><span><i class="dot l1"></i>petición OK, color del nivel que respondió</span><span><i class="dot err"></i>petición con error</span><span><i class="dot dbd"></i>lectura / escritura del estado</span></p>
   </section>
 
-  <!-- ═══ Corrida k6 ═══ -->
+  <!-- ═══ 3 · Corrida del k6 oficial ═══ -->
   <section class="card ancho">
-    <div class="cab">
-      <span class="et">Prueba de carga · k6 oficial del docente, solo cambia la URL</span>
-      <div class="fila-bt sin-m">
-        <button class="bt prim" id="bK6">▶ Correr k6 oficial</button>
+    <div class="k6-barra">
+      <div class="k6-accion">
+        <button class="bt prim grande" id="bK6">▶ Correr k6 oficial</button>
         <button class="bt" id="bK6Stop" hidden>■ Detener</button>
+      </div>
+      <div class="k6-prog">
+        <div class="k6-prog-cab"><span class="estado-k6" id="estadoK6">Sin corrida en este entorno.</span><span class="num" id="contK6">0 / 140</span></div>
+        <div class="progreso" aria-hidden="true"><span id="barraK6"></span></div>
+      </div>
+      <div class="secs">
+        <div><span class="et">Observada</span><div class="chips" id="secuencia"><span class="vacio">—</span></div></div>
+        <div><span class="et">Esperada</span><div class="chips" id="secEsperada"></div></div>
       </div>
     </div>
     <div class="k6-cuerpo">
-      <div class="k6-estado">
-        <p class="estado-k6" id="estadoK6">Sin corrida en este entorno.</p>
-        <div class="progreso" aria-hidden="true"><span id="barraK6"></span></div>
-        <p class="num tenue" id="contK6">0 / 140 iteraciones</p>
-        <div class="secs">
-          <div><span class="et">Observada</span><div class="chips" id="secuencia"><span class="vacio">—</span></div></div>
-          <div><span class="et">Esperada (docente)</span><div class="chips" id="secEsperada"></div></div>
-        </div>
-        <ul class="checks" id="veredicto">
-          <li data-k="recorrio_3_niveles">Recorrió N1, N2 y N3</li>
-          <li data-k="sin_saltos">Sin saltos de nivel (ni 1 → 3 ni 3 → 1)</li>
-          <li data-k="secuencia_esperada">Secuencia 1-2-3-2-1</li>
-          <li data-k="termino_en_n1">Terminó en N1 (iteración 140)</li>
-        </ul>
-      </div>
       <div class="guion">
         <span class="et">Guion del script · minuto a minuto</span>
         <div class="guion-grid" id="guion"></div>
-        <p class="leyenda-g"><span><i class="cua iny"></i>errores que inyecta el k6</span><span><i class="cua esp"></i>nivel que predice la regla</span><span><i class="cua obs"></i>nivel que respondió el sistema</span></p>
+        <p class="leyenda-g"><span><b class="num">5</b> errores que inyecta el k6</span><span><i class="cua esp"></i>nivel que predice la regla</span><span><i class="cua obs"></i>nivel que respondió</span></p>
       </div>
+      <ul class="checks" id="veredicto">
+        <li data-k="recorrio_3_niveles">Recorrió N1, N2 y N3</li>
+        <li data-k="sin_saltos">Sin saltos (ni 1 → 3 ni 3 → 1)</li>
+        <li data-k="secuencia_esperada">Secuencia 1-2-3-2-1</li>
+        <li data-k="termino_en_n1">Terminó en N1</li>
+      </ul>
     </div>
   </section>
 
-  <!-- ═══ Línea de tiempo ═══ -->
+  <!-- ═══ 4 · Línea de tiempo ═══ -->
   <section class="card ancho">
     <div class="cab">
       <span class="et">Línea de tiempo por minuto de reloj</span>
-      <div class="cab-der">
-        <span class="coh" id="cohRegla"></span>
-        <span class="coh" id="coherencia"></span>
-        <button class="bt chico" id="bTabla" aria-pressed="false">Ver tabla</button>
-      </div>
+      <div class="cab-der"><span class="coh" id="cohRegla"></span><span class="coh" id="coherencia"></span></div>
     </div>
-    <div class="leyenda" id="leyenda">
-      <span><i class="ln srv"></i>Servidor (DynamoDB)</span>
-      <span><i class="ln reg"></i>Regla (predicción con los errores del k6)</span>
-      <span><i class="pt"></i>Cliente (lo que respondió al k6)</span>
+    <div class="leyenda">
+      <span><i class="ln srv"></i>Nivel en DynamoDB</span>
+      <span><i class="ln reg"></i>Nivel que predice la regla</span>
+      <span><i class="pt"></i>Nivel que respondió al k6</span>
+      <span><i class="cua errb"></i>Errores</span>
+      <span><i class="cua okb"></i>Peticiones OK</span>
     </div>
     <div class="grafica" id="grafica">
       <svg id="svgNivel" class="svg-nivel" role="img" aria-label="Nivel por minuto"></svg>
-      <svg id="svgErr" class="svg-err" role="img" aria-label="Errores por minuto"></svg>
+      <svg id="svgPet" class="svg-pet" role="img" aria-label="Peticiones y errores por minuto"></svg>
       <div class="tip" id="tip" hidden></div>
-      <p class="vacio centro" id="graficaVacia">Sin minutos con tráfico en la ventana observada. Corra el k6 o envíe peticiones manuales.</p>
-    </div>
-    <div class="tabox" id="tablaMin" hidden><table>
-      <thead><tr><th>Minuto</th><th class="n">Errores</th><th class="n">Peticiones</th><th>Servidor</th><th>Regla</th><th>Cliente</th><th>Iteraciones</th></tr></thead>
-      <tbody id="filasMin"></tbody>
-    </table></div>
-  </section>
-
-  <!-- ═══ Eventos ═══ -->
-  <section class="card medio">
-    <span class="et">Cambios de nivel y fallas · CloudWatch Logs del router</span>
-    <ol class="eventos" id="eventos"><li class="vacio">Sin cambios de nivel registrados.</li></ol>
-  </section>
-
-  <!-- ═══ Respuestas ═══ -->
-  <section class="card medio">
-    <span class="et">Últimas respuestas del k6 · cliente</span>
-    <div class="tabox"><table>
-      <thead><tr><th class="n">It.</th><th>Hora</th><th>Error</th><th class="n">Status</th><th>Mensaje</th></tr></thead>
-      <tbody id="respuestas"><tr><td colspan="5" class="vacio">Sin respuestas todavía.</td></tr></tbody>
-    </table></div>
-  </section>
-
-  <!-- ═══ Prueba manual ═══ -->
-  <section class="card tercio">
-    <span class="et">Prueba manual · misma puerta que el k6</span>
-    <div class="fila-bt">
-      <button class="bt" id="bOk">Enviar OK</button>
-      <button class="bt peligro" id="bErr">Enviar con error</button>
-    </div>
-    <div class="respuesta" id="respManual"><span class="vacio">Las respuestas aparecen aquí.</span></div>
-    <p class="nota">Muestra <b>«Nivel 3: Sistema bajo mantenimiento»</b>, que el script oficial nunca produce: ninguna de sus peticiones con error cae en un minuto en N3.</p>
-    <div class="fila-bt fin">
-      <button class="bt tenue-bt" id="bReiniciar" title="Borra el estado por minuto (solo LocalStack)">Reiniciar estado</button>
+      <p class="vacio centro" id="graficaVacia">Sin minutos con tráfico. Corra el k6 o envíe peticiones manuales.</p>
     </div>
   </section>
 
-  <!-- ═══ Evidencia ═══ -->
-  <section class="card dos-tercios">
-    <span class="et">Evidencia de la corrida · descargas</span>
-    <div class="descargas">
-      <a class="bt prim" data-tipo="zip">⬇ Todo (ZIP)</a>
-      <a class="bt" data-tipo="k6">Log del k6</a>
-      <a class="bt" data-tipo="servidor">Logs CloudWatch (JSONL)</a>
-      <a class="bt" data-tipo="minutos">Minutos (CSV)</a>
-      <a class="bt" data-tipo="resumen">Resumen (JSON)</a>
+  <!-- ═══ 5 · Datos crudos ═══ -->
+  <section class="card ancho">
+    <div class="cab">
+      <div class="pestanas" role="tablist" aria-label="Datos">
+        <button role="tab" aria-selected="true" data-p="pResp">Respuestas del k6 <span class="cnt" id="cntResp">0</span></button>
+        <button role="tab" aria-selected="false" data-p="pDb">Ítems en DynamoDB <span class="cnt" id="cntDb">0</span></button>
+        <button role="tab" aria-selected="false" data-p="pEv">Eventos CloudWatch <span class="cnt" id="cntEv">0</span></button>
+        <button role="tab" aria-selected="false" data-p="pMin">Coherencia por minuto</button>
+      </div>
+      <div class="descargas">
+        <span class="et">Evidencia</span>
+        <a class="bt chico prim" data-tipo="zip">⬇ ZIP</a>
+        <a class="bt chico" data-tipo="k6">Log k6</a>
+        <a class="bt chico" data-tipo="servidor">CloudWatch</a>
+        <a class="bt chico" data-tipo="minutos">CSV</a>
+      </div>
     </div>
-    <p class="nota" id="notaDescargas">Disponible cuando haya una corrida del k6 en este entorno.</p>
-    <p class="nota">El panel <b>observa, no mide</b>. La evidencia es la salida cruda del k6 oficial, con el diff que demuestra que solo cambió la URL, y los logs de CloudWatch. Si hay que redesplegar, primero se descarga.</p>
+    <p class="nota" id="notaDescargas"></p>
+
+    <div class="panel-p" id="pResp" role="tabpanel">
+      <div class="tabox"><table>
+        <thead><tr><th class="n">It.</th><th>Hora</th><th>Error</th><th class="n">Status</th><th>Mensaje</th></tr></thead>
+        <tbody id="respuestas"></tbody>
+      </table></div>
+    </div>
+    <div class="panel-p" id="pDb" role="tabpanel" hidden>
+      <div class="tabox"><table>
+        <thead><tr><th>pk</th><th>Minuto</th><th>Nivel</th><th class="n">Peticiones</th><th class="n">Errores</th><th>Degradó en</th><th>Expira (ttl)</th></tr></thead>
+        <tbody id="filasDb"></tbody>
+      </table></div>
+    </div>
+    <div class="panel-p" id="pEv" role="tabpanel" hidden>
+      <ol class="eventos" id="eventos"></ol>
+    </div>
+    <div class="panel-p" id="pMin" role="tabpanel" hidden>
+      <div class="tabox"><table>
+        <thead><tr><th>Minuto</th><th class="n">Errores</th><th class="n">Peticiones</th><th>DynamoDB</th><th>Regla</th><th>Cliente</th><th>Iteraciones</th></tr></thead>
+        <tbody id="filasMin"></tbody>
+      </table></div>
+    </div>
   </section>
 
 </main>
-
-<footer class="pie">Diseño: <code>docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md</code> · Regla de permanencia: <code>Reto3-Resiliencia/docs/ADR/ADR-001-permanencia-minima-tras-degradar.md</code></footer>
 
 <script src="app.js"></script>
 </body>
