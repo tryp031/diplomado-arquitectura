@@ -1,0 +1,5 @@
+--- k6-script-profesor-reto3.js
++++ k6-reto3-aws.js
+@@ -57 +57 @@
+-  const url = 'https://6u2da0eye1.execute-api.us-east-2.amazonaws.com/prod/service-api';
++  const url = 'https://chcrdwyl0d.execute-api.us-east-2.amazonaws.com/prod/service-api';

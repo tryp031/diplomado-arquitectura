@@ -1,0 +1,48 @@
+{
+  "estado": "terminado",
+  "entorno": "aws",
+  "url": "https://chcrdwyl0d.execute-api.us-east-2.amazonaws.com/prod/service-api",
+  "error": null,
+  "inicio": "2026-10-27T00:49:38.923105+00:00",
+  "fin": "2026-10-27T00:58:00.107583+00:00",
+  "hechas": 140,
+  "total": 140,
+  "esperando_segundo_00": false,
+  "secuencia": [
+    1,
+    2,
+    3,
+    2,
+    1
+  ],
+  "veredicto": {
+    "recorrio_3_niveles": true,
+    "termino_en_n1": true,
+    "sin_saltos": true,
+    "secuencia_esperada": true,
+    "completa": true
+  },
+  "secuencia_esperada": [
+    1,
+    2,
+    3,
+    2,
+    1
+  ],
+  "coherencia_cliente_servidor": {
+    "minutos": 8,
+    "coinciden": 8,
+    "todo_coincide": true,
+    "minutos_regla": 8,
+    "coinciden_regla": 8,
+    "regla_se_cumple": true
+  },
+  "regla": {
+    "degradado": 5,
+    "minimo": 10,
+    "permanencia": 2
+  },
+  "servidor_sin_lectura": null,
+  "generado": "2026-10-27T01:25:57.170981+00:00",
+  "nota": "Evidencia exportada por el panel. El log del k6 es la salida cruda del script oficial; el diff muestra que solo cambió la URL."
+}
