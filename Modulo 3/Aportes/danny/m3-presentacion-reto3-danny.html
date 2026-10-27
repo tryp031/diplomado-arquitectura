@@ -153,6 +153,12 @@ tbody tr:last-child td{border-bottom:0}
 /* La columna numerica se alinea a la derecha en TODA la columna, encabezado incluido:
    si el `th` queda a la izquierda y el dato a la derecha, la cifra se lee corrida
    respecto de su propio titulo. */
+/* `nowrap` sirve a las tablas de cifras. Las de texto (`.prosa`) tienen que partir la
+   línea: con nowrap, la tabla de Decisiones medía el doble de la lámina y la tercera
+   columna quedaba fuera de pantalla, escondida tras el scroll horizontal. */
+.tabox.prosa table{table-layout:fixed; font-size:14px}
+.tabox.prosa th,.tabox.prosa td{white-space:normal; vertical-align:top; line-height:1.42; padding:10px 14px}
+.caja.ancha{max-width:1180px}
 th.n,td.n{text-align:right}
 td.n{font-family:var(--mono); font-variant-numeric:tabular-nums}
 td.m{font-family:var(--mono); font-variant-numeric:tabular-nums}
@@ -269,6 +275,42 @@ body.con-notas .notas{display:block}
 .seg.l2{background:var(--warn-soft); border-color:var(--warn)} .seg.l2 b{color:var(--warn)}
 .seg.l3{background:var(--red-soft); border-color:var(--red)} .seg.l3 b{color:var(--red)}
 @media (max-width:640px){ .linea{grid-template-columns:repeat(4,1fr)} }
+
+/* ══ Matriz de riesgos (TecnicasAnalisisRiesgos.pptx) ══
+ * Impacto × probabilidad, cada uno de 1 a 3: 1-2 bajo · 3-4 medio · 6-9 alto.
+ * El texto («alto», «medio», «bajo») acompaña al color, como pide el material para el
+ * blanco y negro y el daltonismo. */
+.rk{display:inline-block; font-family:var(--mono); font-weight:600; font-size:12.5px; white-space:nowrap;
+  padding:2px 8px; border-radius:7px; border:1.5px solid}
+.rk.b{background:var(--green-soft); border-color:var(--green); color:var(--green)}
+.rk.m{background:var(--warn-soft); border-color:var(--warn); color:var(--warn)}
+.rk.a{background:var(--red-soft); border-color:var(--red); color:var(--red)}
+.proceso{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:6px 0 4px; max-width:none; font-size:13.5px; color:var(--muted)}
+.proceso b{color:var(--ink)}
+
+/* ══ Pantallas bajas (proyector 1280×720, pantalla compartida) ══
+ * A 720 px de alto, siete láminas se salían por abajo. Aquí se recorta el aire
+ * vertical, no el contenido. */
+@media (min-width:821px) and (max-height:820px){
+  .lamina{padding:18px 24px 40px}
+  .kicker{margin-bottom:8px; padding:4px 11px}
+  h2{font-size:clamp(23px,2.7vw,31px); margin-bottom:10px}
+  h3{margin:12px 0 6px; font-size:16px}
+  p{margin-bottom:8px} p.lede{font-size:16.5px}
+  .rej{margin:10px 0; gap:10px}
+  .card{padding:12px 14px} .card small{margin-top:5px; font-size:12.5px}
+  .card .g{font-size:clamp(20px,2.6vw,28px)}
+  .tabox{margin:10px 0}
+  .tabox.prosa table{font-size:13px}
+  .tabox.prosa th,.tabox.prosa td{padding:6px 12px; line-height:1.35}
+  th,td{padding:7px 13px}
+  .aviso{padding:9px 14px; margin:10px 0; font-size:13.5px}
+  pre.dib{font-size:12px; padding:12px 16px; margin:10px 0}
+  .dgfig{margin:10px 0 4px} .dgfig svg{max-height:52vh}
+  .dgfig figcaption{padding:8px 14px; font-size:12px}
+  .linea{margin:12px 0} .seg{padding:8px 6px}
+  .fuente{margin-top:4px}
+}
 </style>
 </head>
 <body>
@@ -276,7 +318,7 @@ body.con-notas .notas{display:block}
 <div class="barra">
   <span class="marca"><span class="pin"></span> Reto 3 · Arquitectura resiliente · Group 2</span>
   <span class="sep"></span>
-  <span class="cuenta"><span id="actual">1</span>/<span id="total">13</span></span>
+  <span class="cuenta"><span id="actual">1</span>/<span id="total">15</span></span>
   <button class="bt" id="bNotas" aria-pressed="false" title="Tecla N">Notas</button>
   <button class="bt" id="bTema" title="Tecla T">Tema</button>
 </div>
@@ -311,10 +353,9 @@ body.con-notas .notas{display:block}
     <h2>Priorizamos la <span style="color:var(--blue)">disponibilidad</span>: responder siempre, aunque sea con menos</h2>
     <p class="lede">Un servicio financiero que se cae en el pico pierde millones. Preferimos que <b>siga respondiendo con menos capacidades</b> a que falle por completo.
       <b>A costa de</b> funcionalidad en los niveles 2 y 3, de algunos milisegundos por consultar un estado compartido, y de reaccionar al minuto siguiente y no al instante.</p>
-    <div class="rej d4">
+    <div class="rej d3">
       <div class="card"><span class="et">Carga del k6 oficial</span><span class="g">140</span><small>peticiones, 1 usuario, una cada 3 s. Unos 7 min.</small></div>
       <div class="card"><span class="et">Errores pedidos por minuto</span><span class="g" style="font-size:22px">5·0·15·0·15·0·0</span><small>El cliente los pide con <code>"error": true</code>.</small></div>
-      <div class="card"><span class="et">Umbrales</span><span class="g">5 / 10</span><small>errores → Nivel 2 / Nivel 3.</small></div>
       <div class="card acento"><span class="et">Criterio de éxito</span><span class="g" style="font-size:22px">1 → 2 → 3 → 2 → 1</span><small>Pasar por los 3 niveles <b>sin saltos</b> y <b>terminar en Nivel 1</b>.</small></div>
     </div>
     <p class="fuente">Fuente: enunciado de la Actividad M3 · <code>k6-script-profesor-reto3.js</code></p>
@@ -327,25 +368,27 @@ body.con-notas .notas{display:block}
 
 <!-- ═══ 3 · Decisiones ═══ -->
 <section class="lamina">
-  <div class="caja">
-    <span class="kicker">01 · Decisiones de arquitectura</span>
-    <h2>Cada decisión tiene su porqué y su costo</h2>
+  <div class="caja ancha">
+    <span class="kicker">01 · Decisiones de arquitectura · formato ADR</span>
+    <h2>Cada decisión con su porqué, su costo y cómo se comprueba</h2>
     <div class="tabox prosa"><table>
-      <thead><tr><th>Decisión</th><th>Por qué</th><th>Costo</th></tr></thead>
+      <colgroup><col style="width:23%"><col style="width:31%"><col style="width:22%"><col style="width:24%"></colgroup>
+      <thead><tr><th>Decisión</th><th>Por qué · técnico y negocio</th><th>Consecuencia</th><th>Cumplimiento</th></tr></thead>
       <tbody>
-        <tr class="destaca"><td>Errores del <b>minuto anterior</b> deciden el nivel</td><td>Es la regla que dio el docente. Hace al sistema predecible y auditable por minuto</td><td>Reacciona hasta 60 s tarde</td></tr>
-        <tr><td>Se degrada <b>de golpe</b>, se <b>sostiene 2 min</b> y se recupera <b>de a un nivel</b></td><td>Protege rápido y evita la oscilación entre niveles (histéresis, ADR-001). Con el k6 oficial da 1-2-3-2-1</td><td>Opera degradado un minuto más de lo estricto. Se aparta del diagrama de la sesión en la ventana 4-5</td></tr>
-        <tr><td><b>Router</b> detrás del API Gateway</td><td>El gateway no enruta de forma nativa según un estado. Patrón <i>Gateway Routing</i></td><td>Un salto más entre Lambdas, de decenas de ms</td></tr>
-        <tr><td>Estado en <b>DynamoDB</b>, no en memoria</td><td>Las instancias de Lambda no comparten memoria: sin esto, cada una tiene su propio nivel</td><td>Una lectura y una escritura más por petición</td></tr>
-        <tr><td><b>3 Lambdas</b>, una por nivel</td><td>«3 servicios diferentes». Se despliegan y escalan cada uno por su lado</td><td>Más piezas que operar</td></tr>
-        <tr><td><b>Falla segura</b> hacia el Nivel 3</td><td>Si no se conoce la salud, se opera al mínimo en vez de devolver un 502</td><td>Una caída de DynamoDB deja todo en N3</td></tr>
-        <tr><td>Infraestructura como código (<b>SAM</b>)</td><td>Reproducible y viaja en el ZIP. Es la fuente de verdad de nombres y valores</td><td>En AWS se desplegó <b>a mano por consola</b> con esos nombres: hay que mantenerlos alineados a mano (brecha declarada)</td></tr>
+        <tr class="destaca"><td>Usaremos los errores del <b>minuto anterior</b> para fijar el nivel</td><td>Es la regla del docente. Un nivel por minuto es <b>auditable</b>, algo que un servicio financiero necesita</td><td>Reacciona hasta 60 s tarde</td><td><code>test_reglas.py</code> · panel: regla cumplida en 8/8 min</td></tr>
+        <tr><td>Tras degradar, <b>sostendremos el nivel 2 min</b> y bajaremos de a uno (ADR-001, aceptada)</td><td>Evita la oscilación entre niveles. Para el cliente, el servicio <b>no se prende y apaga</b></td><td>Un minuto más degradado. Se aparta del diagrama de la sesión en la ventana 4-5</td><td>Parámetro <code>PermanenciaMinutos</code> · test del diagrama de la sesión</td></tr>
+        <tr><td>Pondremos un <b>router</b> detrás del API Gateway (<i>Gateway Routing</i>)</td><td>El gateway no enruta según un estado. Cada nivel queda aislado: si uno falla, no tumba a los otros</td><td>+25–40 ms por petición (medido en AWS)</td><td><code>test_router.py</code> · log <code>CAMBIO_NIVEL</code> con su motivo</td></tr>
+        <tr><td>Guardaremos el estado en <b>DynamoDB</b> con escritura condicional</td><td>Las Lambdas no comparten memoria. Así <b>todos los clientes ven el mismo nivel</b> en el mismo minuto</td><td>Una lectura y una escritura más; DynamoDB pasa a ser dependencia crítica</td><td>Test de carrera entre dos routers · cliente = servidor en 8/8 min</td></tr>
+        <tr><td>Fallaremos <b>hacia el Nivel 3</b>, sin reintentos ocultos (timeout 3 s)</td><td>Sin salud conocida, se opera al mínimo. El cliente <b>nunca recibe un 502 crudo</b>. Lección del M2: los reintentos alargan el peor caso</td><td>Una caída de DynamoDB deja todo en N3</td><td><code>total_max_attempts = 1</code> · tests de estado no disponible</td></tr>
+        <tr><td>Tendremos la infraestructura en <b>SAM</b> como fuente de verdad</td><td>Reproducible y viaja en el ZIP: <b>redesplegar cuesta minutos</b>, no una tarde de consola</td><td>AWS se montó a mano: puede desalinearse (hoy corre la regla anterior)</td><td><code>scripts/verificar-aws.sh</code>: variables y hash del código</td></tr>
       </tbody>
     </table></div>
-    <p class="fuente">Fuente: diseño del Reto 3, §3 y §4 · ADR-001 · informe de avance de Camilo, §10</p>
+    <p class="fuente">Estructura del ADR (decisión, justificación técnica y de negocio, consecuencias, cumplimiento): <code>Material-Clase/TecnicasDecisiones.pptx</code> · Fuente de las decisiones: diseño del Reto 3, §3 y §4 · ADR-001 · informe de Camilo, §10–§11</p>
     <div class="notas">
       <span class="tag">Notas</span>
       <p>Si el tiempo es corto, se cuentan solo las dos primeras filas. Son las que deciden si el sistema aprueba el reto.</p>
+      <p>La columna <b>Cumplimiento</b> es la sección que el material recomienda agregar al ADR: cómo se comprueba que la decisión se respeta. Aquí casi todo está automatizado (tests y el chequeo de AWS), que es lo que el material llama una <i>fitness function</i>. La fila de los «3 servicios, uno por nivel» salió de esta tabla porque es una restricción del enunciado, no una decisión nuestra: está en la lámina de restricciones.</p>
+      <p>Las decisiones se escriben en voz afirmativa («usaremos…»), como recomienda el material, para que se lean como decisiones y no como opiniones.</p>
     </div>
   </div>
 </section>
@@ -389,6 +432,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
     <span class="kicker">02 · Restricciones</span>
     <h2>Lo que no se negocia</h2>
     <div class="tabox prosa"><table>
+      <colgroup><col style="width:34%"><col style="width:48%"><col style="width:18%"></colgroup>
       <thead><tr><th>Restricción</th><th>Qué implica en el diseño</th><th>Origen</th></tr></thead>
       <tbody>
         <tr><td>Solo servicios de AWS</td><td>API Gateway, Lambda, DynamoDB, CloudWatch y SAM</td><td>Enunciado</td></tr>
@@ -416,6 +460,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
     </div>
     <h3>Escenario de calidad (disponibilidad)</h3>
     <div class="tabox prosa"><table>
+      <colgroup><col style="width:16%"><col style="width:84%"></colgroup>
       <tbody>
         <tr><td><b>Fuente</b></td><td>Clientes y servicios internos que fallan</td></tr>
         <tr><td><b>Estímulo</b></td><td>10 o más peticiones fallidas en un minuto de reloj</td></tr>
@@ -425,8 +470,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
         <tr class="destaca"><td><b>Medida</b></td><td>100 % de las peticiones con respuesta · ningún salto de nivel · vuelta a Nivel 1 dos minutos sanos después de cumplida la permanencia</td></tr>
       </tbody>
     </table></div>
-    <div class="aviso pare"><p><b>Lo que sacrificamos:</b> capacidades en N2 y N3 (análisis de riesgo y notificación diferidos) · latencia por el estado compartido · tiempo de reacción (hasta 60 s).</p></div>
-    <div class="notas"><span class="tag">Notas</span><p>Las seis partes del escenario son las del método del curso (ASR/QAW). La medida se comprueba en el log de la corrida.</p></div>
+    <div class="notas"><span class="tag">Notas</span><p><b>Lo que sacrificamos</b> (ya dicho en la lámina 2, se repite de palabra): capacidades en N2 y N3 (análisis de riesgo y notificación diferidos) · latencia por el estado compartido · tiempo de reacción (hasta 60 s).</p><p>Las seis partes del escenario son las del método del curso (ASR/QAW). La medida se comprueba en el log de la corrida.</p></div>
   </div>
 </section>
 
@@ -436,6 +480,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
     <span class="kicker">04 · Tácticas de arquitectura</span>
     <h2>Detectar, degradar, reintroducir</h2>
     <div class="tabox prosa"><table>
+      <colgroup><col style="width:34%"><col style="width:14%"><col style="width:52%"></colgroup>
       <thead><tr><th>Táctica (deck de Disponibilidad)</th><th>Categoría</th><th>Dónde vive</th></tr></thead>
       <tbody>
         <tr><td><b>Monitor</b></td><td>Detectar</td><td>El router observa el resultado de cada petición</td></tr>
@@ -557,7 +602,8 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
       <div class="seg l2"><b>N2</b><span>min 6</span><i>0</i></div>
       <div class="seg l1"><b>N1</b><span>min 7</span><i>0</i></div>
     </div>
-    <p>Recorre los tres niveles <b>sin saltos</b>, <b>termina en Nivel 1</b> y el cliente ve en cada minuto el mismo nivel que fijó el servidor (<b>8 de 8</b>). Los 15 errores del minuto 4 caen en N3: el mensaje «Sistema bajo mantenimiento» aparece <b>15 veces</b>.</p>
+    <p>Recorre los tres niveles <b>sin saltos</b>, <b>termina en Nivel 1</b> y el cliente ve en cada minuto el mismo nivel que fijó el servidor (<b>8 de 8</b>). Los 15 errores del minuto 4 caen en N3: el mensaje «Sistema bajo mantenimiento» aparece <b>15 veces</b>.
+      Peticiones por minuto: <span class="num">19 · 19 · 20 · 20 · 19 · 20 · 19 · 4</span>; el regreso a N1 lo ven solo las <b>4 últimas</b>.</p>
     <div class="aviso ojo"><p><b>Medido en LocalStack</b> (23/10, k6 oficial con solo la URL cambiada, 140/140 iteraciones, latencia media de 88 ms). Evidencia: <code>logs/evidencia-local-20261023T010346Z/</code>. En AWS las corridas de prueba fueron con la regla anterior y dieron 1-2-1-3-2-3-2-1: falta la corrida oficial después del redespliegue.</p></div>
     <div class="aviso pare"><p><b>Riesgo R1.</b> Con latencia casi nula (3,00 s exactos por iteración) la prueba termina justo en el borde del último minuto, todavía en <b>Nivel 2</b>. En AWS la latencia media fue de 169 ms, lejos del umbral de ~25 ms.</p></div>
     <div class="notas"><span class="tag">Notas</span><p>En la versión final, esta lámina se reemplaza por la corrida oficial en AWS: la captura del panel, el log del k6 y los eventos <code>CAMBIO_NIVEL</code> de CloudWatch.</p></div>
@@ -576,6 +622,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
       <div class="card acento"><span class="et">Arranque en frío</span><span class="g" style="font-size:22px">2,12 s</span><small>Solo la primera petición (router: 257 ms de arranque + 1.386 ms). Niveles: ~80 ms.</small></div>
     </div>
     <div class="tabox prosa"><table>
+      <colgroup><col style="width:36%"><col style="width:64%"></colgroup>
       <thead><tr><th>Decisión que tomamos con estos datos</th><th>Por qué</th></tr></thead>
       <tbody>
         <tr><td><b>No</b> se agrega un calentador automático (EventBridge)</td><td>Con 140 peticiones el efecto es de una sola petición y está muy por debajo del timeout de 3 s. Antes de la corrida se calientan a mano las 4 Lambdas</td></tr>
@@ -588,12 +635,13 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
   </div>
 </section>
 
-<!-- ═══ 11 · Fallas propias ═══ -->
+<!-- ═══ 12 · Fallas propias ═══ -->
 <section class="lamina">
   <div class="caja">
     <span class="kicker">05 · Arquitectura · cuando lo que falla es la arquitectura</span>
     <h2>¿Y si falla el propio mecanismo de resiliencia?</h2>
     <div class="tabox prosa"><table>
+      <colgroup><col style="width:28%"><col style="width:40%"><col style="width:32%"></colgroup>
       <thead><tr><th>Falla</th><th>Qué hace el sistema</th><th>Por qué</th></tr></thead>
       <tbody>
         <tr><td>DynamoDB no responde</td><td>Responde <code>503 Nivel 3: … mantenimiento</code> y registra <code>ESTADO_NO_DISPONIBLE</code></td><td>Sin salud conocida, se opera al mínimo (falla segura)</td></tr>
@@ -607,18 +655,50 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
   </div>
 </section>
 
-<!-- ═══ 12 · Evidencia y pendientes ═══ -->
+<!-- ═══ 13 · Análisis de riesgos ═══ -->
+<section class="lamina">
+  <div class="caja ancha">
+    <span class="kicker">06 · Análisis de riesgos</span>
+    <h2>Seis riesgos calificados y mitigados: de 33 a 15 puntos</h2>
+    <p class="proceso"><span><b>Matriz:</b> impacto × probabilidad, de 1 a 3 cada uno</span>
+      <span class="rk b">1–2 bajo</span><span class="rk m">3–4 medio</span><span class="rk a">6–9 alto</span>
+      <span>· <b>Pasos:</b> identificar → calificar en consenso → mitigar</span></p>
+    <div class="tabox prosa"><table>
+      <colgroup><col style="width:29%"><col style="width:13%"><col style="width:12%"><col style="width:34%"><col style="width:12%"></colgroup>
+      <thead><tr><th>Riesgo</th><th>Dimensión</th><th>Antes I×P</th><th>Cómo lo resolvimos</th><th>Ahora I×P</th></tr></thead>
+      <tbody>
+        <tr class="destaca"><td>AWS queda desalineado de la plantilla porque se desplegó a mano. <b>Ya ocurrió:</b> hoy corre la regla anterior</td><td>Despliegue</td><td><span class="rk a">3×3 = 9</span></td><td><code>verificar-aws.sh</code> compara variables y hash del código antes de la corrida oficial. Falta el redespliegue</td><td><span class="rk m">3×1 = 3</span></td></tr>
+        <tr><td>Dos instancias del router fijan niveles distintos en el mismo minuto</td><td>Integridad del estado</td><td><span class="rk a">3×2 = 6</span></td><td>Escritura condicional en DynamoDB: gana la primera y las demás leen su nivel. Hay un test de carrera</td><td><span class="rk m">3×1 = 3</span></td></tr>
+        <tr><td>Los reintentos ocultos del SDK alargan el peor caso</td><td>Rendimiento</td><td><span class="rk a">2×3 = 6</span></td><td><code>total_max_attempts = 1</code> y timeout de 3 s. Es la lección medida en el Reto 2</td><td><span class="rk b">2×1 = 2</span></td></tr>
+        <tr><td>El docente no acepta la permanencia de 2 min</td><td>Requisito</td><td><span class="rk a">3×2 = 6</span></td><td><code>PermanenciaMinutos=1</code> vuelve a la regla anterior sin tocar código. Se pregunta el 27/10</td><td><span class="rk b">1×2 = 2</span></td></tr>
+        <tr><td>DynamoDB no responde: el estado es un punto único de falla</td><td>Disponibilidad</td><td><span class="rk m">3×1 = 3</span></td><td>Falla segura: responde N3 (503) y registra <code>ESTADO_NO_DISPONIBLE</code>. Nunca un 502</td><td><span class="rk b">2×1 = 2</span></td></tr>
+        <tr><td>Con latencia casi nula, la prueba termina en N2 (R1)</td><td>Rendimiento</td><td><span class="rk m">3×1 = 3</span></td><td>Se acepta: en AWS la latencia es de 169 ms, lejos del umbral de ~25 ms. La regla no se ajusta para pasar</td><td><span class="rk m">3×1 = 3</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="fuente">Riesgos bajos y aceptados, filtrados de la lámina: desfase de reloj (R5), subconteo puntual (R6), diferencias de LocalStack (R2) y <i>hot key</i> a 10× (mejora futura). Fuente: diseño del Reto 3 §10 · revisión de código del 18/10 · método: <code>Material-Clase/TecnicasAnalisisRiesgos.pptx</code></p>
+    <div class="notas">
+      <span class="tag">Notas</span>
+      <p>El método es el del material: matriz de impacto × probabilidad, evaluación de riesgos y lluvia de riesgos (identificación individual, consenso y mitigación). La lámina está <b>filtrada</b>, como recomienda el material para presentar: solo los riesgos que pasaron por medio o alto.</p>
+      <p><b>Antes de la versión final:</b> la calificación I×P es una propuesta de Danny. Falta el consenso con Freddy y Camilo, que es el paso colaborativo de la lluvia de riesgos.</p>
+      <p>El riesgo acumulado baja de 33 a 15. El más alto que queda (3, medio) es el despliegue manual, y depende del redespliegue de Camilo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 14 · Evidencia y pendientes ═══ -->
 <section class="lamina">
   <div class="caja">
     <span class="kicker">Evidencia · estado del borrador</span>
     <h2>Lo que ya está probado y lo que falta</h2>
     <div class="rej d3">
-      <div class="card bien"><span class="et">Hecho</span><span class="g" style="font-size:22px">LocalStack + AWS</span><small>Código con 87 tests. LocalStack: 1-2-3-2-1, 8/8 coherentes. AWS desplegado por Camilo y probado con el k6. El usuario de lectura del panel ya lee DynamoDB y CloudWatch (26/10).</small></div>
+      <div class="card bien"><span class="et">Hecho</span><span class="g" style="font-size:22px">LocalStack + AWS</span><small>Código con 90 tests. LocalStack: 1-2-3-2-1, 8/8 coherentes. AWS desplegado por Camilo y probado con el k6. El usuario de lectura del panel ya lee DynamoDB y CloudWatch (26/10).</small></div>
       <div class="card"><span class="et">Siguiente</span><span class="g" style="font-size:22px">Redesplegar</span><small>Subir el código del router con la permanencia y la variable <code>PERMANENCIA_MINUTOS=2</code>. Hoy AWS corre la regla anterior.</small></div>
       <div class="card mal"><span class="et">Pendiente</span><span class="g" style="font-size:22px">Corrida oficial</span><small>Calentar, correr el k6 desde el panel contra AWS, guardar el ZIP de evidencia. Después: video de 5 min y PDF (cierre el 03/11).</small></div>
     </div>
     <h3>Preguntas para el encuentro del 27/10</h3>
-    <div class="tabox prosa"><table><tbody>
+    <div class="tabox prosa"><table>
+      <colgroup><col style="width:5%"><col style="width:95%"></colgroup>
+      <tbody>
       <tr><td>1</td><td>¿Se acepta la permanencia de 2 min aunque se aparte del diagrama de la sesión en la ventana 4-5?</td></tr>
       <tr><td>2</td><td>Con el k6 oficial (5/0/15/0/15/0/0) no se puede producir 1-2-3-3-2-1 mirando solo el minuto anterior. ¿Vale 1-2-3-2-1?</td></tr>
       <tr><td>3</td><td>¿El ruteo tiene que ocurrir dentro del propio API Gateway, o vale el router detrás de él?</td></tr>
@@ -628,7 +708,7 @@ si meta < nivel(m − 1)  →  se sostiene 2 min desde que degradó; luego baja 
   </div>
 </section>
 
-<!-- ═══ 13 · Cierre ═══ -->
+<!-- ═══ 15 · Cierre ═══ -->
 <section class="lamina">
   <div class="caja">
     <div class="portada">
