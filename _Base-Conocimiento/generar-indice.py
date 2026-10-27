@@ -20,6 +20,13 @@ import urllib.parse
 from datetime import date, datetime
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
+
+
+def relativa(ruta):
+    """Ruta relativa a la raíz, siempre con «/». En Windows, str(Path) usa «\\»: rompe los href
+    y las expresiones que buscan «Modulo N/» (el índice quedaba con 24 documentos)."""
+    return pathlib.PurePosixPath(ruta.relative_to(RAIZ).as_posix())
+
 sys.path.insert(0, str(RAIZ / "_Base-Conocimiento"))
 try:
     from estilo import CSS_INDICE, pagina
@@ -254,7 +261,7 @@ def main():
     for ruta in sorted(RAIZ.rglob("*.html")):
         if not ruta.is_file() or any(p in EXCLUIR for p in ruta.parts):
             continue
-        rel = ruta.relative_to(RAIZ)
+        rel = relativa(ruta)
         if rel.name == "INDICE.html":
             continue
         tipo, autor = clasifica(rel)
@@ -265,7 +272,7 @@ def main():
                      "tipo": tipo, "autor": autor, "mod": modulo_de(rel)})
     # PDF oficiales que viven en Material-Clase (p. ej. el enunciado de un reto)
     for ruta in sorted(RAIZ.glob("Modulo */Material-Clase/*.pdf")):
-        rel = ruta.relative_to(RAIZ)
+        rel = relativa(ruta)
         docs.append({"rel": rel, "titulo": nombre_legible(rel) + " (PDF original)", "desc": "",
                      "tipo": "oficial", "autor": None, "mod": modulo_de(rel)})
 
@@ -301,7 +308,7 @@ def main():
         guias = []
         for f in [RAIZ / mod / "README.md", *sorted((RAIZ / mod / "Temario").glob("*.md"))]:
             if f.is_file():
-                rel = f.relative_to(RAIZ)
+                rel = relativa(f)
                 t = f.stem.replace("-", " ")
                 for ln in f.read_text(encoding="utf-8", errors="replace").split("\n"):
                     if ln.startswith("# "):
@@ -370,7 +377,7 @@ def main():
     # ADR-000 es la PLANTILLA, no una decision: no va en el listado de decisiones.
     adr = [a for a in adr if not a.stem.startswith("ADR-000")]
     for a in adr:
-        rel = a.relative_to(RAIZ)
+        rel = relativa(a)
         titulo = a.stem.replace("-", " ")
         primera = ""
         for ln in a.read_text(encoding="utf-8", errors="replace").split("\n"):
@@ -395,7 +402,7 @@ def main():
         for c in claves:
             f = reto / c
             if f.is_file():
-                rel = f.relative_to(RAIZ)
+                rel = relativa(f)
                 t2.append(tarjeta(rel, c, "", "pdf" if c.endswith(".pdf") else "md"))
         if t2:
             sec("reto-m1", "Reto de Latencia Mínima — documentos",
