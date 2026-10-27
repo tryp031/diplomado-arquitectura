@@ -652,7 +652,7 @@ body.con-notas .notas{display:block}
     </div>
     <div class="aviso pare"><p><b>A costa de tiempo de reacción.</b> Esperar 2 minutos antes de recuperar evita que el sistema oscile y asegura la secuencia 1-2-3-2-1, pero tarda más en volver a Nivel 1. Y cada cambio se aplica al minuto siguiente, no al instante.</p></div>
     <div class="notas"><span class="tag">Notas</span><p>Escenario de disponibilidad, si lo piden: con 10 o más errores en un minuto, el sistema pasa a Nivel 3 en el minuto siguiente, sigue respondiendo el 100 % de las peticiones y vuelve a Nivel 1 de a un nivel.</p>
-      <p>También cedemos funciones en los niveles 2 y 3 (análisis de riesgo y notificación) y unos 37 ms por petición en el router (36,7 ms medidos en la corrida oficial).</p></div>
+      <p>También cedemos funciones en los niveles 2 y 3 (análisis de riesgo y notificación) y unos 34 ms por consultar el estado compartido.</p></div>
   </div>
 </section>
 
@@ -760,7 +760,7 @@ body.con-notas .notas{display:block}
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Es la vista de contenedores del modelo C4. Se lee de izquierda a derecha siguiendo los números.</p>
-      <p>Pregunta probable: ¿por qué no enruta el API Gateway directamente? Porque no puede consultar el estado en DynamoDB para decidir. El router es el patrón Gateway Routing que lo complementa, y le cuesta unos 37 ms por petición (36,7 ms medidos).</p>
+      <p>Pregunta probable: ¿por qué no enruta el API Gateway directamente? Porque no puede consultar el estado en DynamoDB para decidir. El router es el patrón Gateway Routing que lo complementa, y le cuesta unos 34 ms por petición.</p>
     </div>
   </div>
 </section>
