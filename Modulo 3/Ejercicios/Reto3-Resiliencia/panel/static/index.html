@@ -73,17 +73,17 @@
     <svg class="diagrama" id="diagrama" viewBox="0 0 640 270" role="img" aria-labelledby="diagTit">
       <title id="diagTit">Cliente → API Gateway → Router → Lambda del nivel activo, con el estado en DynamoDB</title>
       <defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="punta"/></marker></defs>
-      <path class="via" id="v1" d="M98 135 H150" marker-end="url(#pt)"/>
-      <path class="via" id="v2" d="M262 135 H312" marker-end="url(#pt)"/>
+      <path class="via" id="v1" d="M98 135 H138" marker-end="url(#pt)"/>
+      <path class="via" id="v2" d="M274 135 H312" marker-end="url(#pt)"/>
       <path class="via nv" data-n="1" d="M418 135 C450 135 450 222 484 222" marker-end="url(#pt)"/>
       <path class="via nv" data-n="2" d="M418 135 H484" marker-end="url(#pt)"/>
       <path class="via nv" data-n="3" d="M418 135 C450 135 450 48 484 48" marker-end="url(#pt)"/>
       <path class="via tenue" d="M365 160 V198" marker-end="url(#pt)" marker-start="url(#pt)"/>
       <circle class="flujo" id="flujo" r="5" cx="0" cy="0"/>
       <g class="nodo cli"><rect x="10" y="108" width="88" height="54" rx="12"/><text x="54" y="131">k6 · panel</text><text x="54" y="149" class="sub">cliente</text></g>
-      <g class="nodo"><rect x="150" y="108" width="112" height="54" rx="12"/><text x="206" y="131">API Gateway</text><text x="206" y="149" class="sub">REST · /service-api</text></g>
+      <g class="nodo"><rect x="138" y="108" width="136" height="54" rx="12"/><text x="206" y="131">API Gateway</text><text x="206" y="149" class="sub">REST · /service-api</text></g>
       <g class="nodo"><rect x="312" y="108" width="106" height="54" rx="12"/><text x="365" y="131">λ router</text><text x="365" y="149" class="sub">decide el nivel</text></g>
-      <g class="nodo db"><rect x="306" y="198" width="118" height="54" rx="12"/><text x="365" y="221">DynamoDB</text><text x="365" y="239" class="sub">nivel y errores/min</text></g>
+      <g class="nodo db"><rect x="297" y="198" width="136" height="54" rx="12"/><text x="365" y="221">DynamoDB</text><text x="365" y="239" class="sub">nivel y errores/min</text></g>
       <g class="nodo nv" data-n="3"><rect x="484" y="22" width="146" height="52" rx="12"/><text x="557" y="44">λ nivel 3</text><text x="557" y="61" class="sub">Mínimo</text></g>
       <g class="nodo nv" data-n="2"><rect x="484" y="109" width="146" height="52" rx="12"/><text x="557" y="131">λ nivel 2</text><text x="557" y="148" class="sub">Degradado</text></g>
       <g class="nodo nv" data-n="1"><rect x="484" y="196" width="146" height="52" rx="12"/><text x="557" y="218">λ nivel 1</text><text x="557" y="235" class="sub">Full</text></g>

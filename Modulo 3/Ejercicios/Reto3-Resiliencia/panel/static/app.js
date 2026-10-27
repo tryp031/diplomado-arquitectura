@@ -179,7 +179,8 @@
     sN.style.display = sE.style.display = filas.length ? '' : 'none';
     pintarTabla(filas);
     if (!filas.length) return;
-    var W = $('grafica').clientWidth, IZQ = 44, DER = 10, hN = 220, hE = 120;
+    // hN y hE son las alturas de .svg-nivel y .svg-err en estilos.css: cambian juntas.
+    var W = $('grafica').clientWidth, IZQ = 44, DER = 10, hN = 228, hE = 140;
     var ancho = (W - IZQ - DER) / filas.length;
     var x = function (i) { return IZQ + i * ancho; };
     var yN = function (n) { return {1: 180, 2: 112, 3: 44}[n]; };
@@ -216,7 +217,8 @@
     // Errores: una sola escala; umbrales como líneas de referencia.
     var errores = filas.map(function (f) { return lectura ? f.errores : f.errores_cliente; });
     var tope = Math.max(15, Math.max.apply(null, errores)), base = hE - 18;
-    var yE = function (e) { return base - (e / tope) * (base - 14); };
+    // 26 px libres arriba: la cifra de la barra más alta queda dentro del SVG y no pisa las horas de la gráfica de niveles.
+    var yE = function (e) { return base - (e / tope) * (base - 26); };
     [[r.degradado, 'u2', 'N2'], [r.minimo, 'u3', 'N3']].forEach(function (u) {
       sE.appendChild(sv('line', {class: 'umbral ' + u[1], x1: IZQ, x2: W - DER, y1: yE(u[0]), y2: yE(u[0])}));
       sE.appendChild(sv('text', {class: 'lbl', x: IZQ - 6, y: yE(u[0]) + 4, 'text-anchor': 'end'}, u[0]));

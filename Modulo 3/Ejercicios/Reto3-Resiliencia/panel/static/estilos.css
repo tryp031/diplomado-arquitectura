@@ -64,7 +64,9 @@ code,.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .modo.total{background:var(--ok-s); color:var(--ok)}
 .modo.cliente{background:var(--n2-s); color:var(--ink-2)}
 .modo.cliente::before{content:"◑ "} .modo.total::before{content:"● "}
-.url{font-size:12px; color:var(--muted); max-width:46ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+/* flex-basis 0: la URL no cuenta para partir la barra en dos líneas; se recorta con «…» y
+   el valor completo queda en el title. */
+.url{font-size:12px; color:var(--muted); flex:1 1 0; min-width:0; max-width:46ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .sep{flex:1}
 .reloj{font-family:var(--mono); font-size:13px; color:var(--muted)}
 
@@ -203,7 +205,7 @@ code,.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .leyenda .pt{width:10px; height:10px; border-radius:50%; background:var(--surface); border:2.5px solid var(--ink-2)}
 .grafica{position:relative}
 .grafica svg{display:block; width:100%; overflow:visible}
-.svg-nivel{height:220px} .svg-err{height:120px; margin-top:6px}
+.svg-nivel{height:228px} .svg-err{height:140px; margin-top:10px}
 .grafica .banda{opacity:.55}
 .grafica .banda.l1{fill:var(--n1-s)} .grafica .banda.l2{fill:var(--n2-s)} .grafica .banda.l3{fill:var(--n3-s)}
 .grafica .eje{fill:var(--muted); font:500 11px var(--mono)}
@@ -220,6 +222,8 @@ code,.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .grafica .umbral.u2{stroke:var(--n2)} .grafica .umbral.u3{stroke:var(--n3)}
 .grafica .lbl{font:600 10.5px var(--mono); fill:var(--muted)}
 .grafica .val{font:600 11px var(--mono); fill:var(--ink-2); text-anchor:middle}
+/* Halo del color de la tarjeta: las líneas de umbral pasan por detrás de las cifras sin tacharlas. */
+.grafica .val,.grafica .lbl,.grafica .eje{paint-order:stroke; stroke:var(--surface); stroke-width:4px; stroke-linejoin:round}
 .grafica .ahora-l{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 3}
 .grafica .hit{fill:transparent; cursor:crosshair}
 .grafica .hit:hover,.grafica .hit:focus{fill:color-mix(in srgb, var(--ink) 5%, transparent); outline:none}
