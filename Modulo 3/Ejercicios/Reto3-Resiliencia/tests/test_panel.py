@@ -168,10 +168,20 @@ def test_zip_de_evidencia_tras_una_corrida(cliente, tmp_path):
     k6.diff = "-a\n+b\n"
     r = c.get("/api/descargas/zip")
     assert r.status_code == 200 and "attachment" in r.headers["content-disposition"]
-    nombres = zipfile.ZipFile(io.BytesIO(r.content)).namelist()
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    nombres = z.namelist()
     assert sorted(n.rsplit("-", 1)[-1] for n in nombres) == ["diff.txt", "k6.log", "minutos.csv", "resumen.json", "servidor.jsonl"]
-    resumen = json.loads(c.get("/api/descargas/resumen").content)
+    # El resumen ya no tiene botón propio: viaja solo dentro del ZIP.
+    resumen = json.loads(z.read(next(n for n in nombres if n.endswith("resumen.json"))))
     assert resumen["secuencia"] == [1] and "coherencia_cliente_servidor" in resumen
+    assert c.get("/api/descargas/resumen").status_code == 422
+
+
+def test_estado_trae_todas_las_respuestas_del_k6(cliente):
+    c, k6, _ = cliente
+    k6.entorno, k6.estado = "local", "terminado"
+    k6.iteraciones = [parsear_linea(LINEA)] * 140
+    assert len(c.get("/api/estado").json()["k6"]["ultimas"]) == 140
 
 
 def test_no_cambia_de_entorno_con_k6_corriendo(cliente):

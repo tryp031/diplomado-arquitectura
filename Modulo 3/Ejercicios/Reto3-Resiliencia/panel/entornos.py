@@ -84,7 +84,8 @@ class Entorno:
         out = []
         for it in items:
             m = int(it["pk"]["S"].split("#", 1)[1])
-            out.append({"minuto": m, "iso": iso_minuto(m),
+            out.append({"minuto": m, "iso": iso_minuto(m), "pk": it["pk"]["S"],
+                        "ttl": int(it["ttl"]["N"]) if "ttl" in it else None,
                         "nivel": int(it["nivel"]["N"]) if "nivel" in it else None,
                         "degradado_en": int(it["degradado_en"]["N"]) if "degradado_en" in it else None,
                         "errores": int(it.get("errores", {"N": "0"})["N"]),
