@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autoevaluación M3 — Riesgos y estilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+  :root{
+    color-scheme:light dark;
+    --ground:#F1F4F4; --surface:#FFFFFF; --surface-2:#E7EDED;
+    --ink:#0E2226; --ink-2:#3F5A61; --ink-3:#6E868C;
+    --rule:#CDDADC; --rule-2:#E1E9EA;
+    --accent:#0A6C7C; --accent-soft:#DBEDEF;
+    --signal:#A85B0C; --signal-soft:#F7E8D4;
+    --ok:#1B6B45; --ok-soft:#DCEFE4;
+    --bad:#9B2C2C; --bad-soft:#F7E0E0;
+    --shadow:0 1px 2px rgba(14,34,38,.05), 0 10px 26px -14px rgba(14,34,38,.18);
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+      --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+      --rule:#233A3F; --rule-2:#1A2E32;
+      --accent:#5CB9C8; --accent-soft:#123338;
+      --signal:#E0A257; --signal-soft:#33240F;
+      --ok:#6FCB9B; --ok-soft:#10301F;
+      --bad:#E88C8C; --bad-soft:#331616;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1517; --surface:#101F22; --surface-2:#16292D;
+    --ink:#E3EBEC; --ink-2:#A5B9BE; --ink-3:#7C9399;
+    --rule:#233A3F; --rule-2:#1A2E32;
+    --accent:#5CB9C8; --accent-soft:#123338;
+    --signal:#E0A257; --signal-soft:#33240F;
+    --ok:#6FCB9B; --ok-soft:#10301F;
+    --bad:#E88C8C; --bad-soft:#331616;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 12px 30px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1140px; margin:0 auto; padding:0 16px 96px;
+    display:grid; grid-template-columns:1fr; gap:0 56px;
+  }
+  @media (min-width:1020px){ .wrap{grid-template-columns:220px minmax(0,1fr); padding:0 24px 96px} }
+
+  /* ── masthead ─────────────────────────────────────────── */
+  .masthead{grid-column:1/-1;border-bottom:1px solid var(--rule);padding:48px 0 28px;margin-bottom:40px}
+  .kicker{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(1.95rem,4.6vw,3rem);line-height:1.05;letter-spacing:-.024em;text-wrap:balance;margin:0 0 18px}
+  .standfirst{font-size:1.16rem;line-height:1.6;color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+  .standfirst em{color:var(--ink);font-style:italic}
+  .facts{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--surface);margin:0}
+  .fact{flex:1 1 140px;padding:12px 18px;border-right:1px solid var(--rule-2)}
+  .fact:last-child{border-right:none}
+  .fact dt{font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin:0 0 5px}
+  .fact dd{margin:0;font-family:var(--sans);font-size:.92rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* ── rail ─────────────────────────────────────────────── */
+  .rail{display:none}
+  @media (min-width:1020px){
+    .rail{display:block;align-self:start;position:sticky;top:24px;font-family:var(--sans);font-size:.83rem;padding-bottom:40px;max-height:calc(100vh - 48px);overflow-y:auto}
+  }
+  .rail h2{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+  .rail ol{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:2px}
+  .rail a{display:flex;gap:9px;color:var(--ink-2);text-decoration:none;border:0;padding:3px 0;line-height:1.35}
+  .rail a:hover{color:var(--accent)}
+  .rail a .n{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);flex:0 0 16px;padding-top:1px}
+  .rail a.hit .n{color:var(--ok)}
+  .rail a.miss .n{color:var(--bad)}
+  .scorebox{border-top:1px solid var(--rule);padding-top:16px;margin-bottom:18px}
+  .scorebox .big{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2}
+  .scorebox .cap{font-size:.76rem;color:var(--ink-3);line-height:1.4}
+  .railbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+
+  /* ── controles ────────────────────────────────────────── */
+  .btn{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);
+    border-radius:2px;padding:6px 10px;cursor:pointer;line-height:1.2;
+  }
+  .btn:hover{color:var(--accent);border-color:var(--accent)}
+  .topbar{
+    position:fixed;top:12px;right:12px;z-index:10;display:flex;gap:6px;
+  }
+  @media (max-width:1019px){.topbar{position:static;margin:16px 0 0;justify-content:flex-start;flex-wrap:wrap}}
+  @media (min-width:1020px){.topbar{display:none}}
+
+  /* ── tipografía general ───────────────────────────────── */
+  main{min-width:0}
+  section{padding-top:8px;margin-bottom:58px;scroll-margin-top:20px}
+  .eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.65rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h2.sec{font-family:var(--sans);font-weight:600;font-size:1.58rem;line-height:1.2;letter-spacing:-.017em;text-wrap:balance;margin:0 0 16px;max-width:34ch}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;letter-spacing:-.008em;margin:32px 0 10px;max-width:46ch}
+  p{margin:0 0 18px;max-width:66ch}
+  main ul,main ol{max-width:64ch;margin:0 0 18px;padding-left:22px}
+  main li{margin-bottom:7px}
+  strong{font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:.1em .34em;border-radius:2px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{border-bottom-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;padding:.18em .48em;border-radius:2px;vertical-align:.14em;white-space:nowrap}
+  .p-curso{background:var(--accent-soft);color:var(--accent)}
+  .p-compl{background:var(--surface-2);color:var(--ink-2)}
+  .p-recom{background:var(--signal-soft);color:var(--signal)}
+
+  .note{border-left:2px solid var(--accent);background:var(--surface);padding:16px 20px;margin:24px 0;max-width:66ch;border-radius:0 3px 3px 0}
+  .note.risk{border-left-color:var(--signal)}
+  .note p:last-child{margin-bottom:0}
+  .note .lab{display:block;font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+
+  blockquote{margin:22px 0;padding:0 0 0 18px;border-left:2px solid var(--rule);color:var(--ink-2);font-style:italic;max-width:62ch}
+
+  .tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;line-height:1.5}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule-2);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.63rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.ok{color:var(--ok);font-weight:600}
+  .cat{font-family:var(--sans);font-weight:600}
+
+  /* ── bloque de pregunta ───────────────────────────────── */
+  .q{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px 22px 18px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .q.done{border-color:var(--rule-2)}
+  .qhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .qn{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .qhead h3{margin:0;font-size:1.08rem}
+  .stem{font-family:var(--sans);font-size:1rem;line-height:1.55;color:var(--ink);margin:0 0 16px;max-width:64ch}
+  .opts{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:7px;max-width:none}
+  .opts li{margin:0}
+  .opt{
+    width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;
+    font-family:var(--sans);font-size:.94rem;line-height:1.5;color:var(--ink);
+    background:var(--ground);border:1px solid var(--rule-2);border-radius:3px;
+    padding:11px 14px;cursor:pointer;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface-2)}
+  .opt:disabled{cursor:default}
+  .opt .k{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--ink-3);flex:0 0 14px;padding-top:2px;text-transform:lowercase}
+  .opt.is-ok{background:var(--ok-soft);border-color:var(--ok)}
+  .opt.is-ok .k{color:var(--ok)}
+  .opt.is-bad{background:var(--bad-soft);border-color:var(--bad)}
+  .opt.is-bad .k{color:var(--bad)}
+  .opt.dim{opacity:.55}
+  .verdict{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin:12px 0 0;padding:7px 11px;border-radius:2px}
+  .verdict.ok{background:var(--ok-soft);color:var(--ok)}
+  .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+  details.why{margin-top:14px;border-top:1px solid var(--rule-2);padding-top:6px}
+  details.why summary{cursor:pointer;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 0;list-style:none;display:flex;gap:8px;align-items:center}
+  details.why summary::-webkit-details-marker{display:none}
+  details.why summary::before{content:"+";font-size:.85rem;color:var(--accent)}
+  details.why[open] summary::before{content:"\2212"}
+  details.why summary:hover{color:var(--accent)}
+  .why .body{font-size:1rem;line-height:1.66;color:var(--ink-2);padding-bottom:6px}
+  .why .body p{max-width:64ch}
+  .why .body strong{color:var(--ink)}
+  .key{
+    display:flex;gap:10px;align-items:flex-start;margin:18px 0 2px;padding:12px 15px;
+    background:var(--accent-soft);border-radius:3px;font-family:var(--sans);font-size:.93rem;
+    line-height:1.5;color:var(--ink);max-width:64ch;
+  }
+  .key .lab{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);flex:0 0 auto;padding-top:3px}
+
+  /* ── prompts ──────────────────────────────────────────── */
+  .prompt{position:relative;border:1px solid var(--rule);border-radius:3px;background:var(--surface);margin:14px 0}
+  .prompt pre{margin:0;padding:15px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.6;color:var(--ink-2);white-space:pre-wrap}
+  .prompt .copy{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .12s}
+  .prompt:hover .copy,.prompt .copy:focus-visible{opacity:1}
+  @media (hover:none){.prompt .copy{opacity:1}}
+
+  .hand{list-style:none;counter-reset:h;margin:22px 0;padding:0;display:grid;gap:1px;background:var(--rule-2);border:1px solid var(--rule);border-radius:3px;overflow:hidden;max-width:none}
+  .hand li{counter-increment:h;background:var(--surface);padding:13px 16px 13px 46px;position:relative;font-family:var(--sans);font-size:.94rem;margin:0;line-height:1.5}
+  .hand li::before{content:counter(h);position:absolute;left:17px;top:13px;font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+
+  footer.end{grid-column:1/-1;border-top:1px solid var(--rule);margin-top:20px;padding-top:22px;font-family:var(--sans);font-size:.82rem;color:var(--ink-3);line-height:1.6}
+
+  @media print{
+    .topbar,.rail{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="btn" id="btn-theme" type="button">Tema</button>
+  <button class="btn" id="btn-open" type="button">Abrir análisis</button>
+  <button class="btn" id="btn-reset" type="button">Reiniciar</button>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Módulo 3 · Autoevaluación oficial · Diplomado en Arquitectura de Software y Cloud Computing</p>
+    <h1>Riesgos, estilos y distribución: las 7 preguntas, resueltas y desarmadas</h1>
+    <p class="standfirst">Cuaderno de repaso construido a partir de la autoevaluación oficial del Módulo 3. Cada pregunta se puede <em>volver a responder</em> antes de ver el análisis: primero eliges, después lees por qué la correcta es correcta, <em>por qué cada distractora está mal</em> y dónde aparece esa idea en nuestro Reto 3.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Autor</dt><dd>Daniel Mazo (Danny)</dd></div>
+      <div class="fact"><dt>Fecha</dt><dd>2026-10-29</dd></div>
+      <div class="fact"><dt>Preguntas</dt><dd>7</dd></div>
+      <div class="fact"><dt>Tipo</dt><dd>apunte de estudio</dd></div>
+      <div class="fact"><dt>Estado</dt><dd>vigente</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Índice">
+    <div class="scorebox">
+      <div class="big" id="score">0 / 7</div>
+      <div class="cap" id="scorecap">aciertos sobre respondidas</div>
+      <div class="railbtns">
+        <button class="btn" id="btn-theme-2" type="button">Tema</button>
+        <button class="btn" id="btn-reset-2" type="button">Reiniciar</button>
+        <button class="btn" id="btn-open-2" type="button">Abrir análisis</button>
+      </div>
+    </div>
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#marco"><span class="n">§</span><span>Marco conceptual</span></a></li>
+      <li><a href="#preguntas"><span class="n">§</span><span>Las 7 preguntas</span></a></li>
+    </ol>
+    <h2>Preguntas</h2>
+    <ol id="railq">
+      <li><a href="#p1" data-q="1"><span class="n">1</span><span>Las dos dimensiones</span></a></li>
+      <li><a href="#p2" data-q="2"><span class="n">2</span><span>Identificar a solas</span></a></li>
+      <li><a href="#p3" data-q="3"><span class="n">3</span><span>3 × 1 = amarillo</span></a></li>
+      <li><a href="#p4" data-q="4"><span class="n">4</span><span>Estilo vs. patrón</span></a></li>
+      <li><a href="#p5" data-q="5"><span class="n">5</span><span>Big Ball of Mud</span></a></li>
+      <li><a href="#p6" data-q="6"><span class="n">6</span><span>Las falacias</span></a></li>
+      <li><a href="#p7" data-q="7"><span class="n">7</span><span>Ventaja del monolito</span></a></li>
+    </ol>
+    <h2>Cierre</h2>
+    <ol>
+      <li><a href="#clave"><span class="n">§</span><span>Clave de respuestas</span></a></li>
+      <li><a href="#patrones"><span class="n">§</span><span>Patrones de examen</span></a></li>
+      <li><a href="#prompts"><span class="n">§</span><span>Prompts para profundizar</span></a></li>
+      <li><a href="#cuaderno"><span class="n">§</span><span>Para el cuaderno</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ══ MARCO ═══════════════════════════════════════════ -->
+    <section id="marco">
+      <p class="eyebrow">Antes de empezar</p>
+      <h2 class="sec">Los dos bloques que cubre el cuestionario</h2>
+
+      <div class="note">
+        <span class="lab">Cómo leer este documento</span>
+        <p>Las etiquetas marcan el origen de cada afirmación: <span class="pill p-curso">Curso</span> es contenido del Módulo 3 (los Genially obligatorios y el deck <code>Tecnicas-AnalisisRiesgos</code>), <span class="pill p-compl">Complementario</span> es conocimiento externo que agrego para dar contexto, y <span class="pill p-recom">Criterio</span> es lectura propia. Las preguntas y sus opciones se transcriben de la autoevaluación; los análisis son míos. Los recuadros «En el Reto 3» conectan cada concepto con lo que construimos.</p>
+      </div>
+
+      <h3>1. Análisis de riesgos: matriz y lluvia de riesgos <span class="pill p-curso">Curso</span></h3>
+      <p>La <strong>matriz de riesgos</strong> quita subjetividad a «bajo, medio o alto» con dos dimensiones, cada una calificada de 1 a 3: el <strong>impacto</strong> si el riesgo ocurre y la <strong>probabilidad</strong> de que ocurra. El riesgo es su producto.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Impacto \ Probabilidad</th><th>Baja · 1</th><th>Media · 2</th><th>Alta · 3</th></tr></thead>
+        <tbody>
+          <tr><td class="cat">Alto · 3</td><td>3 · medio</td><td>6 · alto</td><td>9 · alto</td></tr>
+          <tr><td class="cat">Medio · 2</td><td>2 · bajo</td><td>4 · medio</td><td>6 · alto</td></tr>
+          <tr><td class="cat">Bajo · 1</td><td>1 · bajo</td><td>2 · bajo</td><td>3 · medio</td></tr>
+        </tbody>
+      </table></div>
+      <p>Verde 1–2, amarillo 3–4, rojo 6–9. La <strong>lluvia de riesgos</strong> (<em>risk storming</em>) es la forma de llenar esa matriz en equipo, en tres actividades: <strong>identificación</strong> (siempre individual), <strong>consenso</strong> y <strong>mitigación</strong> (siempre colaborativas).</p>
+
+      <h3>2. Estilos de arquitectura: monolito vs. distribuido <span class="pill p-curso">Curso</span></h3>
+      <div class="tw"><table>
+        <thead><tr><th></th><th>Monolítica</th><th>Distribuida</th></tr></thead>
+        <tbody>
+          <tr><td class="cat">Puntos fuertes</td><td>Costo y simplicidad</td><td>Escalabilidad, elasticidad, tolerancia a fallos y, a veces, rendimiento</td></tr>
+          <tr><td class="cat">Puntos débiles</td><td>Escalabilidad, tolerancia a fallos, elasticidad: un error fatal tumba todo</td><td>Las 8 falacias, transacciones distribuidas, coherencia eventual, gestión de errores</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>3. Ninguna ventaja es gratis <span class="pill p-recom">Criterio</span></h3>
+      <p>Las preguntas 6 y 7 son la misma idea vista desde los dos lados: lo que gana el estilo distribuido (escalar por partes, aislar fallos) se paga con la red, y lo que gana el monolito (desplegar una sola unidad, costo bajo) se paga cuando hay que escalar o cuando algo falla. Si una opción presenta una ventaja sin su costo, desconfía.</p>
+    </section>
+
+    <!-- ══ PREGUNTAS ═══════════════════════════════════════ -->
+    <section id="preguntas">
+      <p class="eyebrow">Autoevaluación · <span style="color:var(--accent)">responde antes de abrir el análisis</span></p>
+      <h2 class="sec">Las 7 preguntas</h2>
+
+      <!-- P1 -->
+      <article class="q" id="p1" data-q="1" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 1</span><h3>Las dos dimensiones de la matriz</h3></div>
+        <p class="stem">En la matriz de riesgos arquitectónicos, ¿qué factores determinan la clasificación de un riesgo?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Complejidad técnica y tiempo de implementación.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Gravedad del impacto y posibilidad de ocurrencia.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Costos asociados y recursos disponibles.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Frecuencia de monitoreo y severidad del daño.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El material lo dice literal: la matriz «utiliza dos dimensiones para calificar el riesgo: el <strong>impacto</strong> general del riesgo y la <strong>probabilidad</strong> de que ese riesgo ocurra», cada una baja (1), media (2) o alta (3).</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> y <strong>c)</strong> son variables de planeación del proyecto (esfuerzo, costo, recursos), no del riesgo de la arquitectura.</li>
+            <li><strong>d)</strong> Es la distractora fuerte: «severidad del daño» se parece al impacto, pero la «frecuencia de monitoreo» no es la probabilidad de que el riesgo ocurra. Una mitad correcta no hace correcta la opción.</li>
+          </ul>
+          <div class="note"><span class="lab">En el Reto 3</span><p>La lámina «Matriz de riesgos» del deck cruza exactamente estas dos dimensiones para R1–R4 (oscilación entre niveles, instancias con niveles distintos, servicio de un nivel colgado, DynamoDB caído).</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Riesgo = impacto × probabilidad, cada uno de 1 a 3.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P2 -->
+      <article class="q" id="p2" data-q="2" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 2</span><h3>Identificar a solas</h3></div>
+        <p class="stem">En una «Lluvia de riesgos» (Risk Storming), ¿cuál es el propósito de la fase de identificación individual?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Discutir en grupo las posibles soluciones.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Asignar riesgos a áreas de la arquitectura sin influencia externa.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Presentar resultados a las partes interesadas.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Diseñar diagramas de arquitectura.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> Según el deck, «la identificación es siempre una actividad individual, no colaborativa»: cada participante, sin hablar con los demás, clasifica los riesgos con la matriz y los escribe en notas de colores. Así nadie ancla la opinión del grupo antes de tiempo.</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Describe el consenso y la mitigación, que son colaborativas: vienen después.</li>
+            <li><strong>c)</strong> No es una fase de la lluvia de riesgos.</li>
+            <li><strong>d)</strong> El diagrama es la <em>entrada</em>: el arquitecto lo envía en la invitación uno o dos días antes. En la identificación se usa, no se diseña.</li>
+          </ul>
+          <div class="note risk"><span class="lab">En el Reto 3 <span class="pill p-recom">Criterio</span></span><p>Nuestra matriz de R1–R4 la propuso una sola persona en el deck: nos saltamos la identificación individual. El consenso de riesgos sigue pendiente en el equipo; hacerlo bien sería que Freddy y Camilo califiquen por su cuenta antes de ver la matriz.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Identificación (individual) → consenso → mitigación (colaborativas).</span></p>
+        </div></details>
+      </article>
+
+      <!-- P3 -->
+      <article class="q" id="p3" data-q="3" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 3</span><h3>3 × 1 = amarillo</h3></div>
+        <p class="stem">Si un riesgo en la arquitectura tiene un impacto alto (3) pero una probabilidad baja (1), ¿cómo se clasifica?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Riesgo bajo (verde).</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Riesgo medio (amarillo).</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Riesgo alto (rojo).</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>No aplica.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> 3 × 1 = <strong>3</strong>, y el rango 3–4 es medio (amarillo).</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>c)</strong> La trampa: «impacto alto» empuja a elegir rojo, pero la clasificación es del <strong>producto</strong>, no de una sola dimensión.</li>
+            <li><strong>a)</strong> Verde es 1–2; el 3 ya no entra.</li>
+            <li><strong>d)</strong> Cualquier par de calificaciones tiene clasificación.</li>
+          </ul>
+          <p><span class="pill p-recom">Criterio</span> Por qué la escala salta de 4 a 6: multiplicando valores de 1 a 3 solo salen 1, 2, 3, 4, 6 y 9. El 5, el 7 y el 8 no existen. No es un error del material.</p>
+          <p><span class="pill p-curso">Curso</span> Es el mismo ejemplo del deck: una base de datos central cuya caída tendría impacto alto, pero que corre en un clúster de alta disponibilidad, así que la probabilidad es baja. Resultado: 3, riesgo medio. El deck sugiere considerar primero el impacto y después la probabilidad.</p>
+          <p><span class="pill p-recom">Criterio</span> Un 3 por impacto alto no es igual a un 3 por probabilidad alta: el número los empata, pero la mitigación cambia (prepararse para la catástrofe rara vs. reducir algo que pasa seguido).</p>
+          <div class="note"><span class="lab">En el Reto 3</span><p>R1 (el sistema oscila) quedó en <strong>3, amarillo</strong> después de mitigarlo con la permanencia de 2 minutos: bajó de 9 a 3. Mitigar casi siempre baja la probabilidad, no el impacto.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Se clasifica el producto. Verde 1–2, amarillo 3–4, rojo 6–9.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P4 -->
+      <article class="q" id="p4" data-q="4" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 4</span><h3>Estilo vs. patrón</h3></div>
+        <p class="stem">¿Cuál es la principal diferencia entre un estilo de arquitectura y un patrón de arquitectura?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Los estilos definen la estructura del código fuente, mientras que los patrones organizan componentes físicos.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Los estilos describen la macroestructura del sistema, mientras que los patrones resuelven problemas concretos dentro de esos estilos.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Los patrones son exclusivos de aplicaciones monolíticas, mientras que los estilos solo aplican a sistemas distribuidos.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Ambos términos son intercambiables y no tienen diferencias significativas.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El Genially de estilos lo dice así: un estilo «describe la <strong>macroestructura</strong> de un sistema»; los patrones son «estructuras de diseño de nivel inferior que ayudan a dar forma a soluciones específicas <strong>dentro de</strong> un estilo». El ejemplo del material es <strong>CQRS</strong>: separar lecturas y escrituras se puede aplicar en varios estilos distintos.</p>
+          <div class="tw"><table>
+            <thead><tr><th>Nivel</th><th>Qué define</th><th>Ejemplo</th></tr></thead>
+            <tbody>
+              <tr><td class="cat">Estilo</td><td>La forma general del sistema</td><td>Capas, microservicios, eventos, microkernel</td></tr>
+              <tr><td class="cat">Patrón de arquitectura</td><td>Un problema estructural dentro del estilo</td><td>CQRS, API Gateway, Circuit Breaker</td></tr>
+              <tr><td class="cat">Patrón de diseño</td><td>La forma del código</td><td>Builder, Factory, Singleton</td></tr>
+            </tbody>
+          </table></div>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Mezcla niveles: la estructura del código es asunto de los patrones de <em>diseño</em>, no de los estilos.</li>
+            <li><strong>c)</strong> Falso en las dos mitades: CQRS, por ejemplo, se usa en monolitos y en sistemas distribuidos.</li>
+            <li><strong>d)</strong> El material dedica una lámina a explicar que la diferencia «puede resultar confusa», justamente porque existe.</li>
+          </ul>
+          <div class="note"><span class="lab">En el Reto 3</span><p>El estilo es serverless sobre AWS (distribuido). Dentro de él, el «minuto anterior decide el nivel» y la permanencia de 2 minutos son decisiones de diseño, y el corte a los 3 s sin reintentos es una táctica de disponibilidad.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Estilo = macroestructura. Patrón = solución reutilizable dentro del estilo.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P5 -->
+      <article class="q" id="p5" data-q="5" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 5</span><h3>Big Ball of Mud</h3></div>
+        <p class="stem">¿Qué característica es común en una arquitectura de «Big Ball of Mud»?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Estructura modular bien definida con componentes desacoplados.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Crecimiento no regulado, código espagueti y alta interdependencia entre clases.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Uso exclusivo de patrones de diseño como Singleton o Factory.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Alto rendimiento y escalabilidad predecible.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El material la define como «la ausencia de cualquier estructura arquitectónica perceptible», con «signos inequívocos de <strong>crecimiento no regulado</strong> y reparaciones repetidas», en la que cualquier cambio en una clase hace difícil predecir sus efectos en otras. El nombre viene del antipatrón de Brian Foote y Joseph Yoder (1997).</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Es justo lo contrario.</li>
+            <li><strong>c)</strong> Los patrones de diseño no definen la arquitectura; un sistema puede usarlos y seguir siendo una bola de barro.</li>
+            <li><strong>d)</strong> Nada en ella es predecible: ese es el problema.</li>
+          </ul>
+          <p><span class="pill p-recom">Criterio</span> No confundir con «monolito». Un monolito modular tiene límites claros; la bola de barro no tiene ninguno. Y un sistema distribuido sin límites claros es peor todavía: un «monolito distribuido» con todos los problemas de la red.</p>
+          <p class="key"><span class="lab">Concepto</span><span>Big Ball of Mud = antipatrón: sin estructura, alto acoplamiento, crecimiento desordenado.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P6 -->
+      <article class="q" id="p6" data-q="6" data-correct="b">
+        <div class="qhead"><span class="qn">Pregunta 6</span><h3>Las falacias de la computación distribuida</h3></div>
+        <p class="stem">En arquitecturas distribuidas, ¿cuál de estos es un desafío derivado de las «falacias de la computación distribuida»?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Tiempos de arranque rápidos (MTTS en segundos).</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Suposición errónea de que la red es 100% confiable y segura.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Implementación sencilla de transacciones atómicas globales.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Bajo costo de mantenimiento comparado con arquitecturas monolíticas.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> «Una falacia es algo que se cree o se supone que es cierto, pero no lo es». La opción b) junta dos de las ocho que lista el material:</p>
+          <ol>
+            <li>La red es confiable.</li>
+            <li>La latencia es cero.</li>
+            <li>El ancho de banda es infinito.</li>
+            <li>La red es segura.</li>
+            <li>La topología nunca cambia.</li>
+            <li>Solo hay un administrador.</li>
+            <li>El costo de transporte es cero.</li>
+            <li>La red es homogénea.</li>
+          </ol>
+          <p><span class="pill p-compl">Complementario</span> La lista se atribuye a L. Peter Deutsch y otros ingenieros de Sun Microsystems (años 90).</p>
+          <p><strong>Por qué fallan las demás:</strong></p>
+          <ul>
+            <li><strong>a)</strong> Es una <em>ventaja</em>, no un desafío. <span class="pill p-compl">Complementario</span> MTTS (<em>mean time to start</em>) es el tiempo que tarda un servicio en arrancar; los servicios pequeños arrancan rápido, y eso ayuda a la elasticidad.</li>
+            <li><strong>c)</strong> Al revés: el material lista las <strong>transacciones distribuidas</strong> entre las dificultades que se suman a las ocho falacias.</li>
+            <li><strong>d)</strong> Al revés: el costo bajo es el punto fuerte del <em>monolito</em> (pregunta 7).</li>
+          </ul>
+          <div class="note"><span class="lab">En el Reto 3</span><p>Dos de nuestros riesgos son falacias con nombre propio. <strong>R3</strong> (la Lambda de un nivel no responde) es «la red es confiable»: por eso cortamos a los 3 s sin reintentos. <strong>R2</strong> (dos instancias con niveles distintos) aparece porque ya no hay un solo proceso con una sola memoria: el estado vive en DynamoDB, y <strong>R4</strong> cubre el caso en que DynamoDB tampoco responde.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Lo que se gana al distribuir se paga en la red: 8 supuestos falsos que hay que diseñar a propósito.</span></p>
+        </div></details>
+      </article>
+
+      <!-- P7 -->
+      <article class="q" id="p7" data-q="7" data-correct="c">
+        <div class="qhead"><span class="qn">Pregunta 7</span><h3>La ventaja del monolito</h3></div>
+        <p class="stem">¿Qué ventaja clave ofrece una arquitectura monolítica frente a una distribuida?</p>
+        <ul class="opts">
+          <li><button class="opt" data-k="a" type="button"><span class="k">a</span><span>Escalabilidad independiente por componente.</span></button></li>
+          <li><button class="opt" data-k="b" type="button"><span class="k">b</span><span>Mayor tolerancia a fallos en servicios individuales.</span></button></li>
+          <li><button class="opt" data-k="c" type="button"><span class="k">c</span><span>Simplicidad en despliegue y menor costo inicial.</span></button></li>
+          <li><button class="opt" data-k="d" type="button"><span class="k">d</span><span>Agilidad para actualizar componentes sin afectar el sistema completo.</span></button></li>
+        </ul>
+        <p class="verdict" hidden></p>
+        <details class="why"><summary>Análisis</summary><div class="body">
+          <p><strong>Por qué es correcta.</strong> El material: «el <strong>coste</strong> y la <strong>simplicidad</strong> son los principales puntos fuertes de una arquitectura monolítica», mientras que la escalabilidad, la tolerancia a fallos y la elasticidad son sus puntos débiles. Una sola unidad se construye, prueba y despliega una vez.</p>
+          <p><strong>Por qué fallan las demás:</strong> <strong>a)</strong>, <strong>b)</strong> y <strong>d)</strong> son ventajas de las arquitecturas <strong>distribuidas</strong>. En un monolito, «un error fatal (como un fallo de memoria)» afecta a toda la aplicación, y escalar significa escalar todo.</p>
+          <p><span class="pill p-recom">Criterio</span> «Menor costo <em>inicial</em>» es la palabra clave. Por eso el monolito, o la arquitectura en capas que el material recomienda «cuando aún no se sabe» qué estilo se usará, es un buen punto de partida. Se distribuye cuando un atributo de calidad lo exige, no antes.</p>
+          <div class="note"><span class="lab">En el Reto 3</span><p>Elegimos una Lambda por nivel y estado en DynamoDB: ganamos aislamiento entre niveles, y lo pagamos con R2, R3 y R4 (pregunta 6). La lógica de decidir el nivel por minuto cabría en un solo proceso; vale la pena poder explicar en la sustentación por qué distribuimos.</p></div>
+          <p class="key"><span class="lab">Concepto</span><span>Monolito: simple y barato al inicio. Distribuido: escala y aísla fallos, a cambio de complejidad.</span></p>
+        </div></details>
+      </article>
+    </section>
+
+    <!-- ══ CLAVE ═══════════════════════════════════════════ -->
+    <section id="clave">
+      <p class="eyebrow">Referencia</p>
+      <h2 class="sec">Clave de respuestas</h2>
+      <p>Está plegada a propósito: si la abres antes de responder, el documento pierde su función.</p>
+      <details class="why"><summary>Mostrar la clave</summary><div class="body">
+        <div class="tw"><table>
+          <thead><tr><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th></tr></thead>
+          <tbody><tr><td>b</td><td>b</td><td>b</td><td>b</td><td>b</td><td>b</td><td>c</td></tr></tbody>
+        </table></div>
+      </div></details>
+    </section>
+
+    <!-- ══ PATRONES ════════════════════════════════════════ -->
+    <section id="patrones">
+      <p class="eyebrow">Lo que sirve para los módulos siguientes</p>
+      <h2 class="sec">Patrones para resolver este tipo de pregunta</h2>
+      <ol class="hand">
+        <li><strong>En riesgos, multiplica.</strong> Nunca clasifiques por una sola dimensión: impacto alto con probabilidad baja es amarillo (pregunta 3).</li>
+        <li><strong>Media opción correcta es una opción incorrecta.</strong> «Severidad del daño» suena a impacto, pero viene con «frecuencia de monitoreo» (pregunta 1).</li>
+        <li><strong>Pregunta por la fase, no por la actividad.</strong> Si dice «individual», todo lo que suene a grupo (discutir, consensuar, presentar) queda fuera (pregunta 2).</li>
+        <li><strong>Busca la ventaja disfrazada de desafío, y al revés.</strong> En la pregunta 6, arrancar rápido es una ventaja; en la 7, tres opciones son ventajas del estilo contrario.</li>
+        <li><strong>Ubica el nivel.</strong> Estilo (macroestructura) → patrón de arquitectura → patrón de diseño (código). Las distractoras mezclan niveles (preguntas 4 y 5).</li>
+      </ol>
+    </section>
+
+    <!-- ══ PROMPTS ═════════════════════════════════════════ -->
+    <section id="prompts">
+      <p class="eyebrow">Seguir estudiando</p>
+      <h2 class="sec">Prompts para profundizar</h2>
+      <p>Para pegar en una conversación nueva. Pasa el cursor sobre cada bloque para copiarlo.</p>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Simula conmigo una lluvia de riesgos sobre una arquitectura serverless
+en AWS (API Gateway, Lambdas y DynamoDB). Primero pídeme mi
+identificación individual con la matriz impacto × probabilidad, y solo
+después muéstrame la tuya para discutir el consenso y la mitigación.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Dame un ejemplo concreto de cómo cada una de las 8 falacias de la
+computación distribuida rompe un sistema de pagos, y qué táctica
+(timeout, reintento, idempotencia, caché, etc.) la mitiga.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Explícame la diferencia entre estilo de arquitectura, patrón de
+arquitectura y patrón de diseño con 6 ejemplos, y dime en qué nivel
+cae cada uno y por qué.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>¿Cuándo conviene empezar con un monolito modular y cuándo con
+microservicios? Dame criterios medibles (equipo, carga, frecuencia de
+despliegue) y señales de que llegó el momento de distribuir.</pre></div>
+
+      <div class="prompt"><button class="btn copy" type="button">Copiar</button><pre>Tómame una evaluación de 10 preguntas de opción múltiple sobre análisis
+de riesgos (matriz, evaluación, lluvia de riesgos), estilos de
+arquitectura y monolito vs. distribuido, al nivel de este módulo. No me
+des las respuestas hasta que yo responda todas.</pre></div>
+    </section>
+
+    <!-- ══ CUADERNO ════════════════════════════════════════ -->
+    <section id="cuaderno">
+      <p class="eyebrow">Cierre</p>
+      <h2 class="sec">Los seis puntos que resumen el cuestionario</h2>
+      <ol class="hand">
+        <li><strong>Matriz de riesgos:</strong> impacto (1–3) × probabilidad (1–3). Verde 1–2, amarillo 3–4, rojo 6–9.</li>
+        <li><strong>Lluvia de riesgos:</strong> identificación individual → consenso en grupo → mitigación en grupo.</li>
+        <li><strong>Estilo vs. patrón:</strong> el estilo es la macroestructura; el patrón, una solución puntual dentro del estilo.</li>
+        <li><strong>Big Ball of Mud:</strong> antipatrón sin estructura, con alto acoplamiento y crecimiento desordenado.</li>
+        <li><strong>Falacias de la computación distribuida:</strong> 8 supuestos falsos sobre la red (confiable, latencia cero, segura…).</li>
+        <li><strong>Monolito vs. distribuido:</strong> simple y barato al inicio frente a escalabilidad, tolerancia a fallos y despliegue por partes, a cambio de complejidad.</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer class="end">
+    <p>Aporte de Daniel Mazo (Danny) · Módulo 3 — Diseño de arquitecturas de software · 29/10/2026.<br>
+    Fuente primaria: autoevaluación oficial del Módulo 3 (7 preguntas, plataforma Brightspace). Los enunciados y opciones se transcriben; los análisis, tablas y notas son elaboración propia con apoyo de IA, verificados contra <code>Material-Clase/Genially-Contenidos-Obligatorios.md</code> y <code>Material-Clase/Tecnicas-AnalisisRiesgos.md</code>. El contenido marcado <span class="pill p-compl">Complementario</span> no proviene del material oficial del diplomado.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_THEME = "m1-autoeval-theme";
+
+  /* ── tema ─────────────────────────────────────────── */
+  try{
+    var saved = localStorage.getItem(LS_THEME);
+    if(saved === "dark" || saved === "light"){ document.documentElement.setAttribute("data-theme", saved); }
+  }catch(e){}
+
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    if(!cur){
+      cur = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem(LS_THEME, next); }catch(e){}
+  }
+
+  /* ── quiz ─────────────────────────────────────────── */
+  var qs = Array.prototype.slice.call(document.querySelectorAll(".q"));
+  var state = {};
+
+  function railLink(n){ return document.querySelector('#railq a[data-q="' + n + '"]'); }
+
+  function paint(){
+    var answered = 0, hits = 0;
+    Object.keys(state).forEach(function(k){
+      answered++;
+      if(state[k]) hits++;
+    });
+    var el = document.getElementById("score");
+    var cap = document.getElementById("scorecap");
+    if(el){ el.textContent = hits + " / " + (answered || 0); }
+    if(cap){
+      cap.textContent = answered === 0
+        ? "aún no has respondido"
+        : "aciertos sobre " + answered + " respondida" + (answered === 1 ? "" : "s") + " de 7";
+    }
+  }
+
+  function answer(q, key){
+    var n = q.getAttribute("data-q");
+    if(state.hasOwnProperty(n)) return;           // una sola oportunidad por pregunta
+    var correct = q.getAttribute("data-correct");
+    var good = key === correct;
+    state[n] = good;
+
+    q.classList.add("done");
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      var k = b.getAttribute("data-k");
+      b.disabled = true;
+      if(k === correct){ b.classList.add("is-ok"); }
+      else if(k === key){ b.classList.add("is-bad"); }
+      else { b.classList.add("dim"); }
+    });
+
+    var v = q.querySelector(".verdict");
+    v.hidden = false;
+    v.className = "verdict " + (good ? "ok" : "bad");
+    v.textContent = good
+      ? "Correcto — la respuesta es " + correct + ")"
+      : "Revisa: elegiste " + key + "), la correcta es " + correct + ")";
+
+    var d = q.querySelector("details.why");
+    if(d){ d.open = true; }
+
+    var link = railLink(n);
+    if(link){ link.classList.add(good ? "hit" : "miss"); }
+
+    paint();
+  }
+
+  qs.forEach(function(q){
+    Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+      b.addEventListener("click", function(){ answer(q, b.getAttribute("data-k")); });
+    });
+  });
+
+  function reset(){
+    state = {};
+    qs.forEach(function(q){
+      q.classList.remove("done");
+      Array.prototype.forEach.call(q.querySelectorAll(".opt"), function(b){
+        b.disabled = false;
+        b.classList.remove("is-ok","is-bad","dim");
+      });
+      var v = q.querySelector(".verdict");
+      v.hidden = true; v.textContent = ""; v.className = "verdict";
+      var d = q.querySelector("details.why");
+      if(d){ d.open = false; }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#railq a"), function(a){
+      a.classList.remove("hit","miss");
+    });
+    paint();
+  }
+
+  function openAll(){
+    Array.prototype.forEach.call(document.querySelectorAll("details"), function(d){ d.open = true; });
+  }
+
+  /* ── copiar prompts ───────────────────────────────── */
+  Array.prototype.forEach.call(document.querySelectorAll(".prompt .copy"), function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.parentNode.querySelector("pre");
+      var txt = pre ? pre.textContent : "";
+      var done = function(){
+        var old = btn.textContent;
+        btn.textContent = "Copiado";
+        setTimeout(function(){ btn.textContent = old; }, 1400);
+      };
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done, function(){});
+          return;
+        }
+      }catch(e){}
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); done();
+      }catch(e2){}
+    });
+  });
+
+  /* ── botones y teclado ────────────────────────────── */
+  ["btn-theme","btn-theme-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", toggleTheme);
+  });
+  ["btn-reset","btn-reset-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", reset);
+  });
+  ["btn-open","btn-open-2"].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener("click", openAll);
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    var k = e.key.toLowerCase();
+    if(k === "t"){ toggleTheme(); }
+    else if(k === "r"){ reset(); }
+  });
+
+  paint();
+})();
+</script>
+</body>
+</html>

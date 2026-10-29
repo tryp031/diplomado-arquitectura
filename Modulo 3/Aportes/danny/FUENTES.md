@@ -55,3 +55,33 @@ de CloudFormation indica la acción que falta, y se agrega con el mismo prefijo.
 
 **Límites:** la narración por minuto supone que AWS reproduce la secuencia de LocalStack (1-2-3-2-1). Si la corrida oficial
 da otra cosa, se reescribe esa fila.
+
+---
+
+## `m3-autoevaluacion-oficial-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny) |
+| **Fecha** | 2026-10-29 |
+| **Módulo** | 3 — Diseño de arquitecturas de software |
+| **Tema** | Las 7 preguntas de la autoevaluación oficial del M3, resueltas y analizadas |
+| **Tipo** | `apunte` — notas de estudio propias, elaboradas con IA |
+| **Fuentes** | **Autoevaluación oficial del M3** (Brightspace, 7 preguntas; enunciados y opciones transcritos) · `Material-Clase/Tecnicas-AnalisisRiesgos.md` (matriz y lluvia de riesgos) · `Material-Clase/Genially-Contenidos-Obligatorios.md` (estilos, Big Ball of Mud, falacias, monolito vs. distribuido) · deck del Reto 3 (matriz R1–R4) · conocimiento complementario marcado como tal |
+| **Estado** | vigente · ⬜ sin consolidar |
+| **Origen** | `autoevaluacion_M3.md`, redactado por Danny con IA tras presentar la autoevaluación. El `.md` no se versiona: este HTML lo reemplaza |
+
+**Qué contiene:** marco conceptual (matriz 3×3, fases de la lluvia de riesgos, monolito vs. distribuido) ·
+las 7 preguntas en formato interactivo, con el análisis de cada distractora y recuadros «En el Reto 3» ·
+clave plegada · 5 patrones de examen · 5 prompts · resumen de 6 puntos. Mismo diseño y script que
+`Modulo 2/Aportes/danny/m2-autoevaluacion-oficial-danny.html`.
+
+**Verificación:** las 7 claves coinciden con el material oficial; la P3 es literalmente el ejemplo del deck
+(base de datos en clúster: impacto 3 × probabilidad 1 = 3, medio).
+
+**Límites:**
+- El `.md` de origen no registra el **resultado obtenido** en el intento.
+- La atribución de las falacias a L. Peter Deutsch (Sun) y la definición de MTTS son complementarias: el
+  material lista las 8 falacias, pero no menciona a Deutsch ni define MTTS.
+- El recuadro de la P2 señala que la matriz R1–R4 del deck la propuso una sola persona (sin identificación
+  individual del equipo). Es criterio propio, no una observación del docente.
