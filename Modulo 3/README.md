@@ -16,7 +16,7 @@ registro de decisiones (ADR).
 | Sección | Estado |
 |---|---|
 | Contenidos obligatorios | ✅ 4 Genially transcritos 18/10 (`Material-Clase/Genially-Contenidos-Obligatorios.md`) |
-| Autoevaluación M3 | ⬜ **no abierta** (decisión de Danny) · reglas desconocidas |
+| Autoevaluación M3 | ✅ presentada · 7 preguntas · cuadernillo de repaso en `Aportes/danny/m3-autoevaluacion-oficial-danny.html` (29/10) |
 | **Actividad M3** | ✅ enunciado capturado 18/10 (`Material-Clase/Actividad-Reto3.md`) · **Reto 3: arquitectura resiliente con degradación en 3 niveles, solo AWS** · ✅ k6 del profesor en `Material-Clase/k6-script-profesor-reto3.js` |
 | Conclusiones · Recursos complementarios | ✅ capturados como texto; 6 decks extraídos |
 
