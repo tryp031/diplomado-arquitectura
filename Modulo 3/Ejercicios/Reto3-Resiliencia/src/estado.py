@@ -1,4 +1,4 @@
-"""Estado compartido del sistema: un ítem por minuto de reloj en DynamoDB."""
+"""Estado compartido del sistema en DynamoDB: un ítem por minuto de reloj (v1) o un ítem `V3` (histéresis)."""
 from dataclasses import dataclass
 import time
 from typing import Callable, Iterable
@@ -23,6 +23,9 @@ TTL_SEGUNDOS = 24 * 3600
 
 # Sin reintentos ocultos: una caída de DynamoDB tiene que llegar rápido a la falla segura (lección del M2).
 _CONFIG = Config(connect_timeout=1, read_timeout=1, retries={"total_max_attempts": 1})
+
+
+_CLAVE_V3 = {"pk": {"S": "V3"}}
 
 
 def _clave(minuto: int) -> dict:
@@ -97,4 +100,45 @@ class RepositorioDynamo:
                                            ":t": self._ttl()},
             )
         except (ClientError, BotoCoreError) as e:
+            raise EstadoNoDisponible(str(e)) from e
+
+    # --- v3 (histéresis): un solo ítem con el estado de la corrida y una versión ---
+
+    def leer_histeresis(self):
+        """Estado v3 y su versión (0 si todavía no existe)."""
+        from histeresis import EstadoHisteresis
+        try:
+            item = self._db.get_item(TableName=self.tabla, Key=_CLAVE_V3, ConsistentRead=True).get("Item")
+        except (ClientError, BotoCoreError) as e:
+            raise EstadoNoDisponible(str(e)) from e
+        if not item:
+            return EstadoHisteresis(), 0
+        try:
+            return EstadoHisteresis(
+                seq=int(item["seq"]["N"]), nivel=int(item["nivel"]["N"]),
+                errores_bloque=int(item["errores_bloque"]["N"]), racha=int(item["racha"]["N"]),
+                ultimo=float(item["ultimo"]["N"]) if "ultimo" in item else None,
+            ), int(item["version"]["N"])
+        except (KeyError, ValueError) as e:
+            raise EstadoNoDisponible(f"ítem malformado: {e!r}") from e
+
+    def guardar_histeresis(self, estado, version: int) -> bool:
+        """Escribe solo si nadie lo cambió desde `version`. False = conflicto: hay que releer."""
+        valores = {":v": {"N": str(version)}, ":v1": {"N": str(version + 1)},
+                   ":s": {"N": str(estado.seq)}, ":n": {"N": str(estado.nivel)},
+                   ":b": {"N": str(estado.errores_bloque)}, ":r": {"N": str(estado.racha)},
+                   ":u": {"N": repr(estado.ultimo or 0.0)}, ":t": self._ttl()}
+        try:
+            self._db.update_item(
+                TableName=self.tabla, Key=_CLAVE_V3,
+                UpdateExpression="SET version = :v1, seq = :s, nivel = :n, errores_bloque = :b, racha = :r, "
+                                 "ultimo = :u, #ttl = :t",
+                ConditionExpression="attribute_not_exists(version) OR version = :v",
+                ExpressionAttributeNames={"#ttl": "ttl"}, ExpressionAttributeValues=valores)
+            return True
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                return False
+            raise EstadoNoDisponible(str(e)) from e
+        except BotoCoreError as e:
             raise EstadoNoDisponible(str(e)) from e

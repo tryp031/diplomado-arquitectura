@@ -1,6 +1,7 @@
 # ADR-001 — Permanencia mínima de 2 minutos tras degradar
 
-**Estado:** Aceptada (se confirma con el docente el 27/10/2026)
+**Estado:** **Reemplazada por ADR-002** (histéresis, v3) el 30/10/2026, por decisión del equipo. Se conserva como
+histórico y sigue disponible con `Modo=reloj`. Antes: aceptada (se confirma con el docente el 27/10/2026).
 **Fecha:** 2026-10-22
 **Decisores:** Danny (Group 2), con el análisis de Claude. Lo propuso Camilo al compartir las notas del docente.
 **Contexto del módulo / ejercicio:** Módulo 3, Reto 3 (resiliencia en 3 niveles). Modifica la regla de la spec

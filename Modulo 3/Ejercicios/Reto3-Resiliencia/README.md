@@ -1,9 +1,16 @@
 # Reto 3: arquitectura resiliente (Group 2)
 
-API Gateway → `reto3-router` → `reto3-nivel{1,2,3}`, con el estado en DynamoDB. **El nivel de cada minuto de reloj se
-decide con los errores del minuto anterior**: ≥ 10 → N3 y ≥ 5 → N2. Se degrada de inmediato. Tras degradar, el nivel
-se sostiene **2 minutos** y luego se recupera de a un nivel por minuto (`docs/ADR/ADR-001`, 22/10). Con el k6 oficial
-la secuencia es **1-2-3-2-1**. Diseño completo: `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md`.
+API Gateway → `reto3-router` → `reto3-nivel{1,2,3}`, con el estado en DynamoDB.
+
+**Versión oficial: v3, histéresis (`docs/ADR/ADR-002`, aceptada el 30/10).**
+- **Degradar:** con la regla del docente. Los errores del «minuto» anterior deciden: ≥ 10 → N3 y ≥ 5 → N2, de
+  inmediato. El «minuto» es el del k6 (bloques de 20 peticiones numeradas), no el reloj.
+- **Recuperar:** de a un nivel. Se pasa de N3 a N2 tras **30** peticiones seguidas sin error y de N2 a N1 tras **40**.
+- **Corrida nueva:** 15 s sin tráfico devuelven el sistema a N1.
+
+Con el k6 oficial la secuencia es **1 → 2 → 3 → 2 → 1** (cambios en las iteraciones 21, 61, 126 y 136) y no depende
+de la latencia. La v1 (minuto de reloj y permanencia de 2 min, `ADR-001`) sigue disponible con `Modo=reloj`. Diseño
+original: `docs/superpowers/specs/2026-10-18-reto3-resiliencia-design.md`.
 
 ## Pruebas (sin AWS)
 ```bash
@@ -14,7 +21,8 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 ## LocalStack
 ```bash
 docker compose -f localstack/docker-compose.yml up -d
-scripts/deploy.sh localstack
+scripts/deploy.sh localstack                           # v3 (por defecto)
+PARAMETROS="Modo=reloj" scripts/deploy.sh localstack   # v1, para comparar
 scripts/correr-k6.sh localstack
 ```
 LocalStack **no valida** IAM, cold starts, latencias reales ni el dashboard.
@@ -38,13 +46,24 @@ El script aborta si el perfil no es `diplomado` o si la cuenta no coincide. **Nu
 **Credenciales de lectura (igual que en el Reto 2):** `cp .env.aws.example .env.aws` y pegar la llave del usuario
 `reto3-panel-lectura`. El archivo está en `.gitignore` y no toca `~/.aws`. El panel y `verificar-aws.sh` lo leen solos.
 
-**Antes de la corrida oficial** (el despliegue en AWS es a mano, por consola), comprobar con la llave de lectura:
+**Despliegue a mano por consola (v3):** `python3 scripts/empaquetar.py` crea `.build/reto3-src.zip`, que se sube a las
+cuatro Lambdas. En `reto3-router` se agregan `MODO=histeresis`, `RACHA_N2=30` y `RACHA_N1=40`. El .zip es
+determinista: el mismo `src/` da el mismo `CodeSha256` en cualquier máquina. Paso a paso para Camilo:
+`Modulo 3/Aportes/danny/m3-guia-despliegue-v3-camilo-danny.md`.
+
+**Antes de la corrida oficial**, comprobar con la llave de lectura:
 ```bash
-scripts/verificar-aws.sh   # PERMANENCIA_MINUTOS, umbrales, mismo código en las 4 Lambdas
+scripts/verificar-aws.sh   # MODO=histeresis, rachas, umbrales y CodeSha256 = el .zip de este checkout
 ```
-Si no dice «listo», no se corre el k6 oficial.
+Si no dice «listo», no se corre el k6 oficial. Las 4 Lambdas deben tener **exactamente** el código de este checkout:
+el código viejo ignora `MODO`, así que una variable bien puesta sobre un .zip viejo seguiría siendo la v1.
 
 ## Panel de control
+
+> **Limitación con la v3 (30/10):** el panel todavía implementa la regla v1. Predice con `reglas.decision_para` y lee
+> los ítems `MIN#` de la tabla. Con la v3 se puede usar para **correr el k6 y ver las respuestas**, pero la columna
+> «regla», la coherencia ✓/✗ y el «nivel del servidor» no aplican. La evidencia oficial de la v3 es el log de
+> `correr-k6.sh` más los `CAMBIO_NIVEL` de CloudWatch. Adaptar el panel queda para otro PR.
 ```bash
 scripts/panel.sh                                      # http://localhost:8030, contra LocalStack
 scripts/panel.sh                                      # con .env.aws, el switch AWS también lee el servidor
@@ -75,6 +94,16 @@ primero hay que descargar la evidencia**, porque en LocalStack el redespliegue p
 
 ## Qué cambia en el k6 oficial
 Solo la URL. `correr-k6.sh` lo verifica con `diff` y guarda el diff en `.build/`.
+
+## Corridas de la v3 (histéresis, ADR-002)
+
+| Fecha | Entorno | Cómo | Resultado | Evidencia |
+|---|---|---|---|---|
+| 27/10 | LocalStack | k6 oficial, a mano | 140/140, **1 → 2 → 3 → 2 → 1** (it. 21, 61, 126, 136), termina en «Nivel 1: OK». Iteración media de 3,07 s: el reloj se corrió unos 9 s y no afectó | `logs/k6-local-v3-20261028T011300Z.log` (hora aproximada) |
+| 30/10 | LocalStack | 140 peticiones con el patrón del k6, **despliegue por defecto sin pasar `Modo`** | Igual: 1 → 2 → 3 → 2 → 1, 4 `CAMBIO_NIVEL` y los 6 mensajes del enunciado, incluido el 503 «mantenimiento» | (smoke, sin log guardado) |
+| — | AWS | pendiente: Camilo redespliega con la guía | — | — |
+
+> Histórico desde aquí: las corridas que siguen son de la v1.
 
 ## Corridas del 22/10/2026 (permanencia de 2 min, ADR-001)
 
