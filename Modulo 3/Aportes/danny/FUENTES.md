@@ -85,3 +85,37 @@ clave plegada · 5 patrones de examen · 5 prompts · resumen de 6 puntos. Mismo
   material lista las 8 falacias, pero no menciona a Deutsch ni define MTTS.
 - El recuadro de la P2 señala que la matriz R1–R4 del deck la propuso una sola persona (sin identificación
   individual del equipo). Es criterio propio, no una observación del docente.
+
+---
+
+## `m3-reto3-v3-histeresis-danny.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny), con IA |
+| **Fecha** | 2026-10-28 |
+| **Módulo** | 3 |
+| **Tema** | Explicación de la v3 del Reto 3 (histéresis) para debatir en el equipo: por qué 1-1-2-3-2-1 es imposible con el k6, la regla, la tabla por minuto, la comparativa de arquitectura v1 vs v3 y las opciones A/B |
+| **Tipo** | `investigacion`. Diseño propio, **no es material oficial** |
+| **Fuentes** | `Material-Clase/k6-script-profesor-reto3.js` · `Material-Clase/Discord-Aclaraciones-Docente.md` · `Material-Clase/Actividad-Reto3.md` · ADR-001 y ADR-002 · corrida manual del k6 en LocalStack (27/10) |
+| **Estado** | histórico · la decisión ya se tomó: el equipo eligió la v3 como oficial el 30/10 (ADR-002 aceptada) |
+
+**Límites:** escrito antes de la decisión. Presenta la v3 como propuesta y deja abiertas las opciones A/B. La hora del
+log de la corrida manual es aproximada.
+
+---
+
+## `m3-guia-despliegue-v3-camilo-danny.md`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Daniel Mazo Serna (Danny), con IA |
+| **Fecha** | 2026-10-30 |
+| **Módulo** | 3 |
+| **Tema** | Paso a paso para que Camilo despliegue la v3 (histéresis) en AWS por consola: .zip determinista, variables del router, permisos, verificación, corrida oficial y rollback |
+| **Tipo** | `investigacion`. Procedimiento propio |
+| **Fuentes** | ADR-002 · `scripts/empaquetar.py` y `scripts/verificar-aws.sh` · prueba en LocalStack del 30/10: el `CodeSha256` del .zip coincidió en las 4 Lambdas y el despliegue por defecto dio 1 → 2 → 3 → 2 → 1 |
+| **Estado** | vigente · pendiente de que Camilo lo ejecute |
+
+**Límites:** **no se probó en la cuenta real.** Los nombres de los menús de la consola de Lambda pueden variar un poco.
+El permiso `dynamodb:GetItem` del rol del router no se pudo verificar con la llave de solo lectura.

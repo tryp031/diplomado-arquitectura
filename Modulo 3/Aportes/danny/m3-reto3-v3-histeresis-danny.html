@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reto 3 · v3 Histéresis</title>
+<style>
+:root{
+  --bg:#f7f7f5; --surface:#ffffff; --ink:#1d2129; --muted:#5b6170; --line:#e3e4e8;
+  --accent:#2f5bd3; --accent-soft:#e8eefc;
+  --n1:#2e9e6b; --n1-soft:#e3f4ec; --n2:#d99a1b; --n2-soft:#fbf1dc; --n3:#d2463c; --n3-soft:#fbe5e3;
+  --code:#f0f1f4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161b; --surface:#1c1f26; --ink:#e7e9ee; --muted:#a0a6b4; --line:#2c303a;
+    --accent:#7d9cf0; --accent-soft:#222c45;
+    --n1:#46c08a; --n1-soft:#17322a; --n2:#e8b24a; --n2-soft:#372c15; --n3:#ee6b61; --n3-soft:#3b1d1b;
+    --code:#252932;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161b; --surface:#1c1f26; --ink:#e7e9ee; --muted:#a0a6b4; --line:#2c303a;
+  --accent:#7d9cf0; --accent-soft:#222c45;
+  --n1:#46c08a; --n1-soft:#17322a; --n2:#e8b24a; --n2-soft:#372c15; --n3:#ee6b61; --n3-soft:#3b1d1b;
+  --code:#252932;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:40px 16px 80px}
+header{margin-bottom:32px}
+.eyebrow{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:32px;line-height:1.2;margin:6px 0 10px}
+h2{font-size:22px;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:22px 0 8px}
+p{margin:0 0 12px}
+.lead{font-size:18px;color:var(--muted)}
+.meta{font-size:13px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-size:24px}
+.kpi span{color:var(--muted);font-size:13px}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--n2);background:var(--n2-soft)}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font-size:.9em}
+.table-wrap{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-weight:600;font-size:13px;white-space:nowrap}
+.p1{background:var(--n1-soft);color:var(--n1)} .p2{background:var(--n2-soft);color:var(--n2)} .p3{background:var(--n3-soft);color:var(--n3)}
+.seq{font-size:20px;font-weight:700;letter-spacing:.02em}
+.timeline{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin-top:6px}
+.cell{aspect-ratio:1;border-radius:3px;position:relative}
+.cell.l1{background:var(--n1)} .cell.l2{background:var(--n2)} .cell.l3{background:var(--n3)}
+.cell.err::after{content:"";position:absolute;inset:30%;border-radius:50%;background:var(--surface)}
+.cell.chg{outline:2px solid var(--ink);outline-offset:1px}
+.tl-row{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center;margin:4px 0}
+.tl-row .lbl{font-size:12.5px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:5px;position:relative}
+svg text{font-family:inherit}
+.two{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+@media (max-width:640px){.two{grid-template-columns:1fr} h1{font-size:26px} .tl-row{grid-template-columns:56px 1fr}}
+ul,ol{padding-left:22px;margin:0 0 12px} li{margin:4px 0}
+.pro{color:var(--n1);font-weight:700} .con{color:var(--n3);font-weight:700}
+footer{margin-top:48px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">Módulo 3 · Reto 3 Resiliencia · Group 2</div>
+  <h1>v3: degradar rápido, recuperar despacio (histéresis)</h1>
+  <p class="lead">Propuesta para debatir en el equipo. No reemplaza la solución entregada (ADR-001) hasta que lo decidamos juntos.</p>
+  <p class="meta">Autor: Danny (con IA) · 27–28/10/2026 · Estado: <b>propuesta</b> (ADR-002) · Evidencia: corrida manual del k6 oficial contra LocalStack</p>
+</header>
+
+<div class="grid">
+  <div class="kpi"><b class="seq">1→2→3→2→1</b><span>transiciones con el k6 oficial</span></div>
+  <div class="kpi"><b>140 / 140</b><span>iteraciones completas</span></div>
+  <div class="kpi"><b>Nivel 1: OK</b><span>estado al terminar</span></div>
+  <div class="kpi"><b>70 ms</b><span>latencia mediana (no afecta el resultado)</span></div>
+</div>
+
+<h2>1. El problema</h2>
+<p>El k6 oficial divide las 140 iteraciones en 7 «minutos» de 20 peticiones (<code>floor(i/20)+1</code>) y manda esta cantidad de errores por minuto:</p>
+<div class="table-wrap"><table>
+  <tr><th>Minuto k6</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+  <tr><td>Errores enviados</td><td>5</td><td>0</td><td>15</td><td>0</td><td>15</td><td>0</td><td>0</td></tr>
+</table></div>
+<p>La regla del docente es que <b>los errores del minuto anterior deciden el nivel del minuto actual</b> (≥ 5 → N2, ≥ 10 → N3). Aplicada al pie de la letra a ese script, el sistema hace esto:</p>
+<div class="card">
+  <span class="pill p1">N1</span> → <span class="pill p2">N2</span> → <span class="pill p1">N1</span> → <span class="pill p3">N3</span> → <span class="pill p1">N1</span> → <span class="pill p3">N3</span> → <span class="pill p1">N1</span>
+  <p class="meta" style="margin:8px 0 0">Sube y baja en cada minuto. Eso no es una recuperación gradual: es <i>flapping</i>.</p>
+</div>
+<p>Hubo dos problemas más:</p>
+<ul>
+  <li><b>El 1-1-2-3-2-1 del diagrama de la sesión no se puede reproducir con este script.</b> Ese diagrama supone otros errores (0/5/10/5/0). Con el k6 real, el sistema llega a los minutos 4 y 6 exactamente en el mismo estado, y el diagrama pide N3 en uno y N1 en el otro. Ninguna regla puede dar dos resultados distintos a partir del mismo estado.</li>
+  <li><b>La v1 depende de la latencia.</b> Usa el minuto del reloj, y termina en N1 solo porque la latencia hace que el k6 se pase al minuto 8. Con latencia cercana a 0 terminaría en N2.</li>
+</ul>
+
+<h2>2. Qué hicimos en la v3</h2>
+<div class="two">
+  <div class="card">
+    <h3 style="margin-top:0">Cambio 1 · La ventana pasa a ser el «minuto» del k6</h3>
+    <p>Cada petición se numera en DynamoDB y los minutos se cuentan por bloques de 20 peticiones, no por el reloj. Así la latencia no corre las ventanas: en la corrida, el reloj se desfasó unos 10 s y el resultado no cambió.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Cambio 2 · Recuperar con histéresis</h3>
+    <p>La degradación sigue la regla del docente. La recuperación usa otro criterio, más exigente: una <b>racha de peticiones seguidas sin error</b>, y sube de a un nivel por vez.</p>
+  </div>
+</div>
+
+<h2>3. La táctica: recuperación con histéresis</h2>
+<h3>Concepto</h3>
+<p>Histéresis significa que la condición para <b>entrar</b> a un estado no es la misma que la condición para <b>salir</b> de él. El ejemplo clásico es un termostato: prende la calefacción a 19 °C y la apaga a 21 °C. Si usara el mismo umbral para las dos cosas, prendería y apagaría sin parar.</p>
+
+<h3>Qué problema resuelve</h3>
+<p>Evita que el sistema oscile entre niveles (<i>flapping</i>) cada vez que un minuto sale limpio, aunque el anterior haya estado lleno de errores. Un minuto sin errores no demuestra que la dependencia se haya recuperado.</p>
+
+<h3>Cómo funciona</h3>
+<div class="card" style="padding:12px">
+<svg viewBox="0 0 760 230" width="100%" role="img" aria-label="Máquina de estados: N1, N2 y N3. Se degrada por errores del bloque anterior y se recupera por rachas sin error.">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker>
+  </defs>
+  <g style="color:var(--muted)" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M150,85 C230,40 290,40 340,75" marker-end="url(#a)" style="color:var(--n3)" stroke="var(--n3)"/>
+    <path d="M420,85 C500,40 560,40 610,75" marker-end="url(#a)" stroke="var(--n3)" style="color:var(--n3)"/>
+    <path d="M150,70 C300,-15 480,-15 615,65" marker-end="url(#a)" stroke="var(--n3)" stroke-dasharray="5 4" style="color:var(--n3)"/>
+    <path d="M610,150 C560,190 500,190 420,155" marker-end="url(#a)" stroke="var(--n1)" style="color:var(--n1)"/>
+    <path d="M340,150 C290,190 230,190 150,155" marker-end="url(#a)" stroke="var(--n1)" style="color:var(--n1)"/>
+  </g>
+  <g font-size="15" font-weight="700" text-anchor="middle">
+    <rect x="40" y="85" width="110" height="60" rx="12" fill="var(--n1-soft)" stroke="var(--n1)" stroke-width="2"/>
+    <text x="95" y="112" fill="var(--n1)">N1</text><text x="95" y="132" font-size="11" font-weight="500" fill="var(--muted)">Operación full</text>
+    <rect x="325" y="85" width="110" height="60" rx="12" fill="var(--n2-soft)" stroke="var(--n2)" stroke-width="2"/>
+    <text x="380" y="112" fill="var(--n2)">N2</text><text x="380" y="132" font-size="11" font-weight="500" fill="var(--muted)">Operación limitada</text>
+    <rect x="610" y="85" width="110" height="60" rx="12" fill="var(--n3-soft)" stroke="var(--n3)" stroke-width="2"/>
+    <text x="665" y="112" fill="var(--n3)">N3</text><text x="665" y="132" font-size="11" font-weight="500" fill="var(--muted)">Operación al mínimo</text>
+  </g>
+  <g font-size="12" text-anchor="middle" fill="var(--ink)">
+    <text x="245" y="38">bloque anterior ≥ 5 errores</text>
+    <text x="515" y="38">bloque anterior ≥ 10 errores</text>
+    <text x="380" y="12" fill="var(--muted)">≥ 10 errores: salta directo a N3</text>
+    <text x="515" y="210">30 seguidas sin error</text>
+    <text x="245" y="210">40 seguidas sin error</text>
+  </g>
+</svg>
+<div class="legend"><span><i style="background:var(--n3)"></i>Degradar: rápido, se evalúa al abrir cada bloque de 20</span><span><i style="background:var(--n1)"></i>Recuperar: despacio, de a un nivel, por racha sin error</span></div>
+</div>
+
+<div class="table-wrap"><table>
+  <tr><th>Regla</th><th>Condición</th><th>Efecto</th><th>Por qué</th></tr>
+  <tr><td>Degradar</td><td>El bloque anterior tuvo ≥ 5 errores</td><td>Pasa a <span class="pill p2">N2</span></td><td>Regla del docente</td></tr>
+  <tr><td>Degradar</td><td>El bloque anterior tuvo ≥ 10 errores</td><td>Pasa a <span class="pill p3">N3</span>, aunque esté en N1</td><td>Regla del docente: ante una falla grave se reacciona de inmediato</td></tr>
+  <tr><td>Recuperar</td><td>30 peticiones seguidas sin error estando en N3</td><td>Sube a <span class="pill p2">N2</span></td><td>«Cuando los indicadores vuelven a estar saludables» (enunciado)</td></tr>
+  <tr><td>Recuperar</td><td>40 peticiones seguidas sin error estando en N2</td><td>Sube a <span class="pill p1">N1</span></td><td>«Cuando están completamente estables» (enunciado)</td></tr>
+  <tr><td>Romper la racha</td><td>Llega una petición con error</td><td>La racha vuelve a 0</td><td>Un solo error invalida la estabilidad acumulada</td></tr>
+  <tr><td>Corrida nueva</td><td>15 s sin tráfico</td><td>Vuelve a <span class="pill p1">N1</span> y la cuenta empieza de cero</td><td>Regla propia, para poder repetir el k6 (no está en el enunciado)</td></tr>
+</table></div>
+<div class="callout"><b>Clave:</b> nunca salta de N3 a N1. Para recuperarse tiene que pasar por N2, y cada paso exige más estabilidad que el anterior (30 &lt; 40).</div>
+
+<h2>4. Cómo se comportó con el k6 oficial</h2>
+<p>Corrida manual del 27/10 contra LocalStack. Cada fila es un «minuto» del k6 y cada cuadro es una petición. El punto blanco marca un error enviado y el borde marca un cambio de nivel.</p>
+<div class="card" id="tl"></div>
+<div class="legend">
+  <span><i style="background:var(--n1)"></i>N1</span><span><i style="background:var(--n2)"></i>N2</span><span><i style="background:var(--n3)"></i>N3</span>
+  <span><i style="background:var(--muted);box-shadow:inset 0 0 0 4px var(--muted)"></i>● error enviado</span>
+  <span><i style="outline:2px solid var(--ink);background:transparent"></i>cambio de nivel</span>
+</div>
+
+<div class="table-wrap"><table>
+  <tr><th>Minuto k6</th><th>Iteraciones</th><th>Errores</th><th>Racha al cerrar</th><th>Nivel</th><th>Por qué</th></tr>
+  <tr><td>1</td><td>1–20</td><td>5</td><td>15</td><td><span class="pill p1">N1</span></td><td>Arranca sano</td></tr>
+  <tr><td>2</td><td>21–40</td><td>0</td><td>35</td><td><span class="pill p2">N2</span> en la it. 21</td><td>El bloque 1 tuvo 5 errores. La racha de 35 no alcanza los 40</td></tr>
+  <tr><td>3</td><td>41–60</td><td>15</td><td>5</td><td><span class="pill p2">N2</span></td><td>Los errores ponen la racha en 0</td></tr>
+  <tr><td>4</td><td>61–80</td><td>0</td><td>25</td><td><span class="pill p3">N3</span> en la it. 61</td><td>El bloque 3 tuvo 15 errores. La racha de 25 no alcanza los 30</td></tr>
+  <tr><td>5</td><td>81–100</td><td>15</td><td>5</td><td><span class="pill p3">N3</span></td><td>Los errores ponen la racha en 0. Responde «Sistema bajo mantenimiento»</td></tr>
+  <tr><td>6</td><td>101–120</td><td>0</td><td>25</td><td><span class="pill p3">N3</span></td><td>La racha va subiendo</td></tr>
+  <tr><td>7</td><td>121–140</td><td>0</td><td>45</td><td><span class="pill p2">N2</span> en la it. 126 → <span class="pill p1">N1</span> en la it. 136</td><td>La racha llega a 30 (sube a N2) y después a 40 (sube a N1)</td></tr>
+</table></div>
+
+<div class="grid">
+  <div class="kpi"><b>35 / 140</b><span>respuestas 500, las mismas que manda el k6</span></div>
+  <div class="kpi"><b>3,07 s</b><span>por iteración (el reloj se corrió ~10 s)</span></div>
+  <div class="kpi"><b>7 m 10 s</b><span>duración total</span></div>
+  <div class="kpi"><b>21 · 61 · 126 · 136</b><span>iteraciones con cambio de nivel, iguales a los tests</span></div>
+</div>
+
+<h2>5. Qué cambió en la arquitectura: v1 frente a v3</h2>
+<div class="callout warn">
+  <b>Primero, lo importante:</b> en la cuenta de AWS <b>no se cambió nada</b>. La v3 solo corrió en LocalStack, una copia local de AWS. Lo que sigue compara el diseño entregado (v1, que está desplegado en AWS) con el diseño propuesto (v3, probado en local). Los <b>componentes de AWS son los mismos</b>. Lo que cambia es la lógica del Router, la forma de guardar el estado en DynamoDB y tres parámetros de la plantilla.
+</div>
+
+<h3>Componentes: los mismos en las dos versiones</h3>
+<div class="card" style="padding:12px">
+<svg viewBox="0 0 760 250" width="100%" role="img" aria-label="Flujo: k6, API Gateway, Lambda Router, Lambdas de nivel 1, 2 y 3, DynamoDB y CloudWatch. Los cambios de la v3 están en el Router y en DynamoDB.">
+  <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>
+  <g fill="none" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#b)">
+    <line x1="100" y1="105" x2="148" y2="105"/><line x1="270" y1="105" x2="318" y2="105"/>
+    <line x1="450" y1="95" x2="560" y2="42"/><line x1="450" y1="105" x2="560" y2="105"/><line x1="450" y1="115" x2="560" y2="168"/>
+    <line x1="385" y1="135" x2="385" y2="183"/>
+  </g>
+  <line x1="420" y1="135" x2="560" y2="220" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <g font-size="13" text-anchor="middle">
+    <rect x="15" y="80" width="85" height="50" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/><text x="57" y="110" fill="var(--ink)">k6</text>
+    <rect x="150" y="80" width="120" height="50" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/><text x="210" y="102" fill="var(--ink)">API Gateway</text><text x="210" y="119" font-size="11" fill="var(--muted)">sin cambios</text>
+    <rect x="320" y="75" width="130" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/><text x="385" y="100" fill="var(--accent)" font-weight="700">Lambda Router</text><text x="385" y="118" font-size="11" fill="var(--accent)">CAMBIA: lógica v3</text>
+    <rect x="320" y="185" width="130" height="55" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/><text x="385" y="208" fill="var(--accent)" font-weight="700">DynamoDB</text><text x="385" y="226" font-size="11" fill="var(--accent)">CAMBIA: modelo del ítem</text>
+    <rect x="562" y="20" width="150" height="40" rx="10" fill="var(--n1-soft)" stroke="var(--n1)" stroke-width="2"/><text x="637" y="45" fill="var(--n1)">Lambda Nivel 1</text>
+    <rect x="562" y="85" width="150" height="40" rx="10" fill="var(--n2-soft)" stroke="var(--n2)" stroke-width="2"/><text x="637" y="110" fill="var(--n2)">Lambda Nivel 2</text>
+    <rect x="562" y="150" width="150" height="40" rx="10" fill="var(--n3-soft)" stroke="var(--n3)" stroke-width="2"/><text x="637" y="175" fill="var(--n3)">Lambda Nivel 3</text>
+    <rect x="562" y="205" width="150" height="38" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/><text x="637" y="224" fill="var(--ink)">CloudWatch</text><text x="637" y="238" font-size="10.5" fill="var(--muted)">eventos nuevos en el log</text>
+  </g>
+</svg>
+<p class="meta" style="margin:6px 0 0">En azul, lo que cambia. Las Lambdas de nivel, API Gateway, el throttling, los permisos IAM y el dashboard quedan iguales.</p>
+</div>
+
+<h3>Comparación punto por punto</h3>
+<div class="table-wrap"><table>
+  <tr><th>Aspecto</th><th>v1 · ADR-001 (entregada, en AWS)</th><th>v3 · ADR-002 (propuesta, en LocalStack)</th><th>Impacto</th></tr>
+  <tr><td><b>Ventana de evaluación</b></td><td>Minuto del reloj: <code>int(tiempo / 60)</code></td><td>«Minuto» del k6: bloques de 20 peticiones numeradas</td><td>La latencia ya no corre las ventanas</td></tr>
+  <tr><td><b>Ítems en DynamoDB</b></td><td>Un ítem por minuto, <code>pk = MIN#&lt;minuto&gt;</code>, con <code>nivel</code>, <code>errores</code>, <code>peticiones</code>, <code>degradado_en</code> y <code>ttl</code></td><td>Un único ítem, <code>pk = V3</code>, con <code>seq</code>, <code>nivel</code>, <code>errores_bloque</code>, <code>racha</code>, <code>ultimo</code>, <code>version</code> y <code>ttl</code></td><td>La tabla y su clave no cambian, así que no hay migración. Cambia lo que se guarda</td></tr>
+  <tr><td><b>Control de concurrencia</b></td><td>Escritura condicional <code>attribute_not_exists(nivel)</code>: el primer Router que decide el minuto gana y los demás leen su decisión. Los contadores suben con <code>ADD</code> atómico</td><td>Bloqueo optimista con <code>version</code>: leer, calcular y escribir solo si la versión no cambió. Si choca, relee y reintenta hasta 5 veces</td><td>Ninguna petición se pierde ni se numera dos veces. A cambio, un solo ítem se vuelve un punto caliente</td></tr>
+  <tr><td><b>Acceso a DynamoDB por petición</b></td><td><code>BatchGetItem</code> de varios minutos, <code>UpdateItem</code> condicional (solo al abrir un minuto) y <code>UpdateItem</code> con <code>ADD</code></td><td><code>GetItem</code> + <code>UpdateItem</code> condicional al entrar, y otra vez <code>GetItem</code> + <code>UpdateItem</code> al registrar el resultado</td><td>Unas 4 operaciones por petición, latencia similar (70 ms de mediana)</td></tr>
+  <tr><td><b>Degradación</b></td><td>Errores del minuto anterior: ≥ 5 → N2, ≥ 10 → N3</td><td>La misma regla, aplicada al bloque anterior</td><td>La regla del docente no cambia</td></tr>
+  <tr><td><b>Recuperación</b></td><td>Permanencia mínima de 2 minutos en el nivel al que se degradó</td><td>Racha sin error: 30 para pasar de N3 a N2 y 40 para pasar de N2 a N1, de a un nivel</td><td>Ya no depende del tiempo transcurrido sino de la estabilidad demostrada</td></tr>
+  <tr><td><b>Fin de una corrida</b></td><td>Implícito: los minutos nuevos de reloj empiezan vacíos. TTL de 24 h</td><td>Explícito: 15 s sin tráfico reinician el estado (evento <code>CORRIDA_NUEVA</code>). TTL de 24 h</td><td>Se puede repetir el k6 sin limpiar la tabla</td></tr>
+  <tr><td><b>Falla segura</b></td><td>Si DynamoDB no responde, se opera en N3</td><td>Igual. También va a N3 si hay 5 conflictos seguidos al guardar</td><td>Mismo comportamiento ante una caída</td></tr>
+  <tr><td><b>Parámetros de la plantilla</b> (<code>template.yaml</code>)</td><td><code>UmbralDegradado</code>, <code>UmbralMinimo</code>, <code>PermanenciaMinutos</code></td><td>Los anteriores más <code>Modo</code> (<code>reloj</code> | <code>histeresis</code>, por defecto <code>reloj</code>), <code>RachaN2</code> (30) y <code>RachaN1</code> (40)</td><td>Si no se pasa nada, el despliegue sigue siendo la v1. Activar la v3 es un parámetro</td></tr>
+  <tr><td><b>Variables de entorno del Router</b></td><td><code>UMBRAL_DEGRADADO</code>, <code>UMBRAL_MINIMO</code>, <code>PERMANENCIA_MINUTOS</code></td><td>Las anteriores más <code>MODO</code>, <code>RACHA_N2</code> y <code>RACHA_N1</code></td><td>Un valor de <code>MODO</code> desconocido hace fallar al Router al arrancar, a propósito</td></tr>
+  <tr><td><b>Permisos IAM del Router</b></td><td><code>BatchGetItem</code>, <code>GetItem</code>, <code>UpdateItem</code> sobre la tabla</td><td>Los mismos</td><td>No hay que pedir permisos nuevos</td></tr>
+  <tr><td><b>Observabilidad</b> (CloudWatch)</td><td><code>CAMBIO_NIVEL</code> con el minuto en ISO, los errores del minuto anterior y la permanencia</td><td><code>CAMBIO_NIVEL</code> con número de petición, <code>minuto_k6</code>, <code>racha_sin_error</code> y umbrales de racha, más el evento nuevo <code>CORRIDA_NUEVA</code></td><td>El log explica <i>por qué</i> cambió de nivel, petición por petición</td></tr>
+  <tr><td><b>Despliegue</b></td><td><code>scripts/deploy.sh localstack</code> en el puerto 4566, o <code>aws</code></td><td><code>LOCALSTACK_PUERTO=4568 PARAMETROS="Modo=histeresis" scripts/deploy.sh localstack</code>, en un LocalStack aparte (<code>docker-compose.v3.yml</code>)</td><td>La v1, la v2 y la v3 pudieron correr al mismo tiempo sin pisarse</td></tr>
+  <tr><td><b>Código nuevo</b></td><td>—</td><td><code>src/histeresis.py</code> (funciones puras), cambios en <code>router.py</code> y <code>estado.py</code>, tests nuevos (111 en total) y ADR-002</td><td>La lógica nueva se prueba sin AWS</td></tr>
+  <tr><td><b>¿Depende de la latencia?</b></td><td><span class="pill p3">Sí</span>: termina en N1 solo porque el k6 se pasa al minuto 8</td><td><span class="pill p1">No</span>: el mismo resultado con 0, 5, 50 o 70 ms</td><td>Es la razón principal de la v3</td></tr>
+</table></div>
+
+<h3>Qué haría falta para llevarla a AWS</h3>
+<ol>
+  <li>Reconstruir el código de la v3 en la rama <code>feat/daniel-m3-v3-histeresis</code> y hacer commit. Hoy no está en disco.</li>
+  <li>Desplegar con el mismo script, agregando el parámetro: <code>PARAMETROS="Modo=histeresis" scripts/deploy.sh aws</code>. No se crean recursos nuevos ni hacen falta permisos nuevos.</li>
+  <li>Correr el k6 oficial contra AWS y guardar la evidencia en <code>logs/</code>.</li>
+  <li><b>Volver atrás</b> es redesplegar con <code>Modo=reloj</code>: el ítem <code>V3</code> no interfiere con los ítems <code>MIN#</code> y vence solo por el TTL.</li>
+</ol>
+
+<h2>6. Ventajas y desventajas</h2>
+<div class="two">
+  <div class="card">
+    <p class="pro">A favor</p>
+    <ul>
+      <li>Cumple el enunciado: tres niveles, recuperación gradual y recuperación completa al final.</li>
+      <li>No oscila y nunca salta de N3 a N1.</li>
+      <li>Es determinista: el resultado no depende de la latencia ni de dónde corra.</li>
+      <li>La lógica son funciones puras y está cubierta por tests.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <p class="con">En contra</p>
+    <ul>
+      <li>Los umbrales 30/40 están calibrados con el script y el margen es de solo 5 peticiones.</li>
+      <li>N2 dura apenas 10 peticiones (126–135), porque la racha no se reinicia al subir de nivel.</li>
+      <li>Con poco tráfico, un bloque de 20 peticiones podría durar horas.</li>
+      <li>Todo el estado vive en un solo ítem de DynamoDB, que sería un punto caliente con alta concurrencia.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>7. Lo que hay que declarar (no esconder)</h2>
+<div class="callout warn">
+  <ol style="margin:0">
+    <li><b>Calibración:</b> la racha del minuto 2 llega a 35 (&lt; 40) y la del minuto 4 llega a 25 (&lt; 30). Si el docente cambia un número del k6, el resultado puede cambiar.</li>
+    <li><b>N2 corto:</b> si la racha se reiniciara al subir a N2, la corrida no terminaría en N1 dentro de las 140 iteraciones. Es un compromiso de diseño, no un bug.</li>
+    <li><b>En producción</b> la ventana sería «20 peticiones o 60 s, lo que ocurra primero».</li>
+    <li><b>El reinicio a los 15 s</b> es una regla nuestra, no viene del enunciado.</li>
+  </ol>
+</div>
+
+<h2>8. Para debatir en el equipo</h2>
+<div class="table-wrap"><table>
+  <tr><th>Opción</th><th>Qué implica</th><th>Riesgo</th></tr>
+  <tr><td><b>A · Mantener ADR-001 y presentar la v3 como alternativa evaluada</b> (recomendada)</td><td>No se toca lo entregado. La v3 y este log entran como hallazgo y argumento de compromisos.</td><td>Bajo. Queda declarado que la v1 depende de la latencia.</td></tr>
+  <tr><td><b>B · Adoptar la v3 como solución oficial</b></td><td>Reconstruir el código, desplegar en AWS, hacer una corrida oficial nueva y actualizar el deck.</td><td>Medio o alto, por el tiempo y por tocar material que ya es oficial.</td></tr>
+</table></div>
+<p><b>Preguntas abiertas:</b></p>
+<ol>
+  <li>¿Le damos más peso al determinismo (v3) o a no tocar lo que ya está entregado (v1)?</li>
+  <li>¿Nos parece válido que N2 dure 10 peticiones, o la recuperación debería ser más lenta aunque no termine en N1?</li>
+  <li>¿Cómo presentamos que el 1-1-2-3-2-1 del diagrama no se puede reproducir con el script oficial?</li>
+</ol>
+
+<footer>
+  <b>Evidencia:</b> <code>Modulo 3/Ejercicios/Reto3-Resiliencia/logs/k6-local-v3-20261028T011300Z.log</code> (corrida manual del k6 oficial, 27/10/2026, LocalStack :4568).<br>
+  <b>Decisión:</b> ADR-002 (propuesto). <b>Estado del código:</b> pendiente de reconstruir en la rama <code>feat/daniel-m3-v3-histeresis</code>.<br>
+  Documento generado con IA: es <i>investigación</i>, no material oficial del curso.
+</footer>
+</main>
+
+<script>
+// Niveles y errores por iteración, tomados del log de la corrida manual (27/10).
+(function(){
+  var nivel = function(i){ return i<=20?1 : i<=60?2 : i<=125?3 : i<=135?2 : 1; };
+  var error = function(i){ var m=Math.floor((i-1)/20)+1, k=(i-1)%20;
+    return m===1 ? k<5 : (m===3||m===5) ? k<15 : false; };
+  var cambios = {21:1,61:1,126:1,136:1};
+  var tl = document.getElementById('tl'), html = '';
+  for (var m=1; m<=7; m++){
+    html += '<div class="tl-row"><div class="lbl">Minuto '+m+'</div><div class="timeline">';
+    for (var k=1; k<=20; k++){
+      var i=(m-1)*20+k, n=nivel(i);
+      html += '<div class="cell l'+n+(error(i)?' err':'')+(cambios[i]?' chg':'')+'" title="Iteración '+i+' · N'+n+(error(i)?' · error enviado':'')+'"></div>';
+    }
+    html += '</div></div>';
+  }
+  tl.innerHTML = html;
+})();
+</script>
+</body>
+</html>
