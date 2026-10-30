@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Despliega la misma plantilla en LocalStack o en AWS.
-#   scripts/deploy.sh localstack
+#   scripts/deploy.sh localstack                                  # v3 (Modo=histeresis, la oficial)
+#   PARAMETROS="Modo=reloj" scripts/deploy.sh localstack           # v1, para comparar
 #   AWS_PROFILE=diplomado CUENTA_ESPERADA=<id de 12 dígitos de Camilo> scripts/deploy.sh aws
 # Guarda: en esta máquina el perfil `default` es corporativo. Para AWS se exige el
 # perfil `diplomado` Y que la cuenta coincida con CUENTA_ESPERADA; si no, aborta.
@@ -38,7 +39,7 @@ fi
 "${AWS[@]}" cloudformation package --template-file template.yaml --s3-bucket "$BUCKET" \
   --output-template-file .build/packaged.yaml >/dev/null
 "${AWS[@]}" cloudformation deploy --template-file .build/packaged.yaml --stack-name "$STACK" \
-  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --parameter-overrides "Entorno=$ENTORNO" --no-fail-on-empty-changeset
+  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --parameter-overrides "Entorno=$ENTORNO" ${PARAMETROS:-} --no-fail-on-empty-changeset
 
 API_ID=$("${AWS[@]}" cloudformation describe-stacks --stack-name "$STACK" \
   --query "Stacks[0].Outputs[?OutputKey=='ApiId'].OutputValue" --output text)

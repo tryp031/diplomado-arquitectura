@@ -65,3 +65,27 @@ def k6_error(i: int) -> bool:
     if minuto in (3, 5):
         return i % 20 < 15
     return False
+
+
+class RepositorioHisteresisMemoria(RepositorioMemoria):
+    """Contrato v3 de RepositorioDynamo (leer/guardar con versión), en memoria."""
+
+    def __init__(self):
+        super().__init__()
+        from histeresis import EstadoHisteresis
+        self.v3, self.version, self.conflictos = EstadoHisteresis(), 0, 0
+
+    def leer_histeresis(self):
+        self._revisar()
+        return self.v3, self.version
+
+    def guardar_histeresis(self, estado, version):
+        self._revisar()
+        if self.conflictos:
+            self.conflictos -= 1
+            self.version += 1  # otro router escribió antes
+            return False
+        if version != self.version:
+            return False
+        self.v3, self.version = estado, version + 1
+        return True

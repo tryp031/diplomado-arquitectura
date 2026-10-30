@@ -17,7 +17,20 @@ Parameters:
     Type: Number
     Default: 2
     MinValue: 1
-    Description: Minutos que se sostiene un nivel al que se entró degradando (1 = recuperar al minuto siguiente)
+    Description: Solo modo reloj (v1). Minutos que se sostiene un nivel al que se entró degradando (1 = recuperar al minuto siguiente)
+  Modo:
+    Type: String
+    AllowedValues: [histeresis, reloj]
+    Default: histeresis
+    Description: histeresis = v3, la oficial (bloques de 20 peticiones y recuperación por rachas, ADR-002); reloj = v1 (minuto de reloj, ADR-001)
+  RachaN2:
+    Type: Number
+    Default: 30
+    Description: v3 — peticiones seguidas sin error para pasar de N3 a N2
+  RachaN1:
+    Type: Number
+    Default: 40
+    Description: v3 — peticiones seguidas sin error para pasar de N2 a N1
 
 Conditions:
   EsAws: !Equals [!Ref Entorno, aws]
@@ -77,6 +90,9 @@ Resources:
           UMBRAL_DEGRADADO: !Ref UmbralDegradado
           UMBRAL_MINIMO: !Ref UmbralMinimo
           PERMANENCIA_MINUTOS: !Ref PermanenciaMinutos
+          MODO: !Ref Modo
+          RACHA_N2: !Ref RachaN2
+          RACHA_N1: !Ref RachaN1
       Policies:
         # Solo lo que usa estado.py (DynamoDBCrudPolicy daría también Put/Delete/Scan/Query).
         - Statement:
