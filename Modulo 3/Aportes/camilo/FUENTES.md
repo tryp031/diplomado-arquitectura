@@ -101,3 +101,87 @@ bajo cada caja y una leyenda de colores.
 - El arranque en frío (sección 10.2) usa cifras de una corrida de prueba anterior, no de la oficial.
 - No incluye el video ni la exportación a PDF que pide el enunciado.
 - La tabla de contenido del Word se actualiza en Word (clic derecho → Actualizar campo).
+- **Actualización 2026-11-02:** la versión con la v3 (histéresis) es `m3-informe-arquitectura-reto3-histeresis-camilo.docx`, más abajo. Este documento se conserva como histórico de la v1.
+
+## `m3-informe-arquitectura-reto3-histeresis-camilo.docx`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA. Documento del Grupo 2 sobre el diseño de Daniel Mazo |
+| **Fecha de recepción** | 2026-11-02 |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | El informe de arquitectura actualizado a la **v3 (histéresis)**, la versión oficial del equipo desde el 30/10/2026, con la **corrida oficial del 02/11/2026** |
+| **Tipo** | `investigacion` — borrador de un entregable; **no es material oficial** y todavía no pasó por `Consolidado/` |
+| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/` (`src/histeresis.py`, `src/router.py`, `src/estado.py`, `docs/ADR/ADR-002-histeresis-v3.md`, README) · `Modulo 3/Aportes/danny/m3-guia-despliegue-v3-camilo-danny.md` · la evidencia de `evidencia-corrida-oficial-v3-20261102/` (esta carpeta) · el informe anterior, `m3-informe-arquitectura-reto3-avance-camilo.docx` |
+| **Estado** | borrador · ⬜ sin consolidar |
+
+**Qué cambia frente a `m3-informe-arquitectura-reto3-avance-camilo.docx` (v1, que se conserva):**
+- **La regla.** El «minuto» es un bloque de 20 peticiones numeradas y no el minuto de reloj; para recuperar se exigen rachas de 30 y 40 peticiones sin error en lugar de la permanencia de 2 minutos; el estado vive en un solo ítem `V3` de DynamoDB.
+- **Resultados (sección 11).** Corrida oficial del 02/11/2026, 12:32 hora de Colombia: 140 de 140 peticiones, 35 con error, cambios de nivel en las peticiones 21, 61, 126 y 136, secuencia 1-2-3-2-1. El k6 midió 167 ms de promedio y el router, 52,8 ms. Las Figuras 4 y 5 se rehicieron con el servidor.
+- **Figuras.** La Figura 3 es nueva (secuencia de una petición) y las Figuras 1 y 2 se actualizaron a la v3.
+- **Matriz de riesgos.** R1 a R4 se ajustaron a la v3 y se agregaron R5 (los umbrales 30 y 40 dependen del script) y R6 (el ítem único de estado es un punto caliente).
+- **Conclusión y glosario.** Se agregan los términos *Histéresis* y *Racha de éxitos*.
+
+**Límites:**
+- **Las calificaciones de la matriz de riesgos siguen pendientes de consenso** entre los tres integrantes; las de R5 y R6 son de Camilo.
+- **La v3 cuesta más por petición.** El router pasó de unos 37 ms a unos 53 ms por las lecturas y escrituras adicionales en DynamoDB.
+- **El panel todavía calcula la regla de la v1.** Su regla y su coherencia por minuto no aplican a la v3; la evidencia es el log del k6 y los eventos del router (sección 8 del informe).
+- **Los datos de arranque en frío (sección 10.2) son de una prueba anterior**, no de la corrida oficial.
+- **Otras corridas de prueba del mismo día no se incluyen.**
+- **Pregunta abierta:** el docente dijo que se vería 1-2-3-3-2-1; con el script oficial esta regla produce 1-2-3-2-1.
+- No incluye el video ni la exportación a PDF que pide el enunciado.
+- La tabla de contenido del Word se actualiza en Word (clic derecho → Actualizar campo).
+
+## `evidencia-corrida-oficial-v3-20261102/`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón. La corrida se lanzó desde el panel de control de Daniel Mazo |
+| **Fecha de recepción** | 2026-11-02 (corrida a las 12:32 hora de Colombia, 17:32 UTC) |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | Evidencia de la corrida oficial de la v3 en AWS (us-east-2) con el script de k6 del docente |
+| **Tipo** | `dato medido propio` |
+| **Fuentes** | Exportación del panel (log del k6, diff, minutos y resumen) y eventos del router en CloudWatch Logs (`/aws/lambda/reto3-router`) de la ventana 17:33:00 a 17:40:30 UTC, filtrados a `PETICION`, `CAMBIO_NIVEL` y `CORRIDA_NUEVA` |
+| **Estado** | evidencia usada por el informe de esta carpeta |
+
+**Qué contiene:** `…-k6.log` (salida cruda del k6, 140 iteraciones), `…-k6-diff.txt` (el script solo cambia la URL), `…-servidor.jsonl` (140 `PETICION`, 4 `CAMBIO_NIVEL` y 1 `CORRIDA_NUEVA`, de la petición 1 a la 140 sin repetidas), `…-minutos.csv` y `…-resumen.json`.
+
+**Límites:**
+- **`minutos.csv` y `resumen.json` no son evidencia de la v3.** El panel los calcula con la regla de la v1 (marca «NO» en varios minutos y `regla_se_cumple: false`) y, sin credenciales de lectura, `coherencia_cliente_servidor` sale vacía. Se guardan porque el panel los exporta junto con el resto.
+- El `CORRIDA_NUEVA` trae `peticiones_previas: 49` y `nivel_previo: 3`: el estado venía de pruebas anteriores y la regla de 15 s sin tráfico lo reinició.
+- Es una sola corrida. Hubo otras de prueba el mismo día, que no se incluyen.
+
+## `codigo-v3-histeresis-comentado/`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA, sobre el código de Daniel Mazo |
+| **Fecha de recepción** | 2026-11-02 |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | Los seis módulos de `src/` de la v3 con comentarios explicativos; es lo que se subió a mano a las cuatro Lambdas |
+| **Tipo** | `investigacion` — copia comentada; **el código oficial es `Modulo 3/Ejercicios/Reto3-Resiliencia/src/`** |
+| **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/src/` (checkout `795c948`) |
+| **Estado** | borrador · ⬜ sin consolidar |
+
+**Qué contiene:** `router.py`, `histeresis.py`, `estado.py`, `reglas.py`, `niveles.py` y `observabilidad.py`. Solo cambian los comentarios y las descripciones de los módulos; el código es idéntico al de `src/` (se comparó el árbol sintáctico sin contar las descripciones).
+
+**Límites:**
+- El zip desplegado no se versiona (`*.zip` está ignorado). Su `CodeSha256` en las cuatro Lambdas es `hPWUcyOR142EWDxW65X2OpDufGf6AiSWxnZYFhDFcz4=`.
+- `scripts/verificar-aws.sh` compara con el `CodeSha256` del zip de `scripts/empaquetar.py` (`ufr+zGjlSYZb6qK+CiKl2Ylrx99kgZFOnNcFkDB/KO0=`), así que marca una diferencia aunque el código sea el mismo.
+- Si `src/` cambia, esta copia queda desactualizada.
+
+## `diagrama-contenedores-reto3-histeresis.html`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA |
+| **Fecha de recepción** | 2026-11-02 |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | Las dos figuras del modelo C4 (vista general y detalle de AWS) actualizadas a la v3; el original, `diagrama-contenedores-reto3.html`, se conserva |
+| **Tipo** | `investigacion` — representación visual de un diseño ajeno (el de Daniel); **no es material oficial** |
+| **Fuentes** | `diagrama-contenedores-reto3.html` · `Modulo 3/Ejercicios/Reto3-Resiliencia/docs/ADR/ADR-002-histeresis-v3.md` |
+| **Estado** | borrador · ⬜ sin consolidar |
+
+**Qué cambia:** el router dice «decide por bloque de 20 peticiones» y «sube con rachas»; DynamoDB muestra «un solo ítem (V3)» y lo que guarda; la nota al pie dice que las rachas de 30 y 40 son decisión del equipo; el panel muestra «respuestas del k6 y logs de cambios».
+
+**Límites:** dibuja el diseño de Daniel y no lo valida. Las figuras del informe salen de este archivo.
