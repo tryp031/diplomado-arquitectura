@@ -455,6 +455,8 @@ body.con-notas .notas{display:block}
 
 /* ══ v6: tácticas con pregunta por fase, escalera y ejemplo ══ */
 .tpreg{display:block; font-size:13px; font-style:italic; color:var(--muted); margin:-6px 0 2px 32px}
+.tcol > div > span.sens{display:inline-block; margin-top:6px; font-family:var(--mono); font-size:11px; color:var(--green); border:1px dashed var(--green); border-radius:6px; padding:1px 6px}
+.tej.esc{gap:6px 14px} .tej.esc em{font-style:normal; font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--night-muted); margin-right:2px}
 .escal{display:flex !important; align-items:center; gap:6px; margin-top:8px !important}
 .escal .ch{height:28px; min-width:34px; font-size:13px}
 .escal em{font-style:normal; font-family:var(--mono); font-size:11px; color:var(--muted); border-top:1.5px dashed var(--soft); padding-top:2px}
@@ -670,7 +672,7 @@ body.con-notas .notas{display:block}
 <!-- ═══ 04 · Tácticas ═══ -->
 <section class="lamina">
   <div class="caja ancha">
-    <span class="kicker">04 · Tácticas de arquitectura</span>
+    <span class="kicker">04 · Tácticas de arquitectura · conceptos de diseño (ADD)</span>
     <h2>Detectar, degradar y reintroducir</h2>
     <div class="tac">
       <div class="tcol t-det"><span class="tfase"><i>1</i> Detectar la falla</span><span class="tpreg">¿Algo está fallando?</span>
@@ -684,19 +686,20 @@ body.con-notas .notas{display:block}
         <div><b>Exception handling</b><span>Toda falla termina en un mensaje claro, nunca en un error crudo</span></div></div>
       <div class="tflecha">→</div>
       <div class="tcol t-rei"><span class="tfase"><i>3</i> Reintroducir con calma</span><span class="tpreg">¿Cuándo vuelvo a la normalidad?</span>
-        <div><b>Histéresis</b><span>Para recuperarse exige una racha de peticiones sin error: un bloque bueno no basta</span></div>
-        <div><b>Reintroducción gradual</b><span>Devuelve las funciones por partes, de a un nivel. Si vuelven los errores, degrada otra vez</span>
+        <div><b>Histéresis</b><span>Para recuperarse exige una racha de peticiones sin error: un bloque bueno no basta</span><span class="sens">punto de sensibilidad · 5/10 y 30/40</span></div>
+        <div><b>Shadow (adaptada)</b><span>Devuelve las funciones de a un nivel: N2 es la prueba antes de N1. Si vuelven los errores, degrada otra vez</span>
           <span class="escal"><span class="ch c3">N3</span><em>racha 30</em><span class="ch c2">N2</span><em>racha 40</em><span class="ch c1">N1</span></span></div></div>
     </div>
-    <div class="tej"><b>Ejemplo de punta a punta</b>
-      <span><i>1</i>llegan 15 errores en un minuto</span><span class="sep">→</span>
-      <span><i>2</i>el minuto siguiente opera en Nivel 3</span><span class="sep">→</span>
-      <span><i>3</i>tras 30 peticiones sin error vuelve a Nivel 2; al llegar a 40, a Nivel 1</span></div>
+    <div class="tej esc"><b>Escenario de disponibilidad</b>
+      <span><em>Fuente</em>k6</span><span><em>Estímulo</em>≥5 o ≥10 errores en 20 peticiones</span>
+      <span><em>Artefacto</em>router y Lambdas</span><span><em>Entorno</em>operación normal, 1 petición cada 3 s</span>
+      <span><em>Respuesta</em>degrada a N2/N3 y reintroduce de a un nivel</span><span><em>Medida</em>140/140 respondidas · 1-2-3-2-1</span></div>
     <div class="cb"><b>Se parece a un circuit breaker, con un nivel intermedio</b>
       <span class="ch c1">N1 ≈ cerrado</span><span class="ch c2">N2 · degrada en vez de cortar</span><span class="ch c3">N3 ≈ abierto</span><span class="cb-n">con ventanas de 20 peticiones</span></div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Se cuenta de izquierda a derecha, con la pregunta de cada columna: ¿algo está fallando?, ¿cómo sigo respondiendo?, ¿cuándo vuelvo a la normalidad?</p>
-      <p>Los nombres de las tácticas son del catálogo de disponibilidad de Bass, Clements y Kazman (<i>Software Architecture in Practice</i>), no del material del módulo. La reintroducción gradual se inspira en su táctica Shadow: en vez de devolver todo de golpe, se prueba primero con menos funciones (Nivel 2) y solo después se activan todas (Nivel 1). La histéresis es una técnica de control, no una táctica del catálogo.</p>
+      <p>En ADD las tácticas son un tipo de concepto de diseño: las elegimos para el driver de disponibilidad, expresado en el escenario de la franja oscura. Los nombres son del catálogo de disponibilidad de Bass, Clements y Kazman (<i>Software Architecture in Practice</i>), no del material del módulo. Shadow está adaptada: en vez de devolver todo de golpe, se prueba primero con menos funciones (Nivel 2) y solo después se activan todas (Nivel 1). La histéresis es una técnica de control, no una táctica del catálogo: es la regla que decide cuándo reintroducir.</p>
+      <p>Los umbrales 5/10 y las rachas 30/40 son puntos de sensibilidad (ATAM): si cambian, cambia la secuencia de niveles (R5). El tradeoff, estabilidad a costa de tiempo de reacción, está en la lámina 03. Ejemplo para contar: llegan 15 errores en un minuto, el minuto siguiente opera en Nivel 3, y tras 30 peticiones sin error vuelve a Nivel 2; al llegar a 40, a Nivel 1.</p>
       <p>Por qué no es un circuit breaker puro: el semiabierto de un breaker solo existe al recuperarse; nuestro Nivel 2 también aparece al degradar con 5 errores. Por eso decimos que «se parece».</p>
     </div>
   </div>
