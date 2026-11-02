@@ -14,15 +14,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from estado import RegistroMinuto
-from reglas import Umbrales, decision_para
-
 URL_PROFESOR = "https://6u2da0eye1.execute-api.us-east-2.amazonaws.com/prod/service-api"
 TOTAL_ITERACIONES = 140
 # Docente (Discord, 18/09/2026): «siempre vas a ver nivel 1-2-3-3-2-1». Comprimida: 1-2-3-2-1.
 SECUENCIA_ESPERADA = [1, 2, 3, 2, 1]
 # Errores que pide el script oficial en cada uno de sus 7 minutos (minutos 1, 3 y 5: < 5, < 15, < 15).
 ERRORES_DEL_GUION = (5, 0, 15, 0, 15, 0, 0)
+
+
+def error_del_script(i: int) -> bool:
+    """¿El script oficial pide error en la iteración i (base 0)? Misma fórmula que el .js: las
+    primeras 5 del minuto 1 y las primeras 15 de los minutos 3 y 5 (peticiones 1-5, 41-55, 81-95)."""
+    minuto = i // 20 + 1
+    return i % 20 < {1: 5, 3: 15, 5: 15}.get(minuto, 0)
 
 _LINEA = re.compile(
     r'time="(?P<ts>[^"]+)".*?msg="Minute: (?P<minuto>\d+), Iteration: (?P<it>\d+), '
@@ -82,26 +86,6 @@ def secuencia(niveles: list[int | None]) -> list[int]:
     for n in niveles:
         if n is not None and (not out or out[-1] != n):
             out.append(n)
-    return out
-
-
-def guion(u: Umbrales, iteraciones: list[Iteracion]) -> list[dict[str, Any]]:
-    """El plan del k6 oficial minuto a minuto: errores pedidos, nivel que predice la regla y lo observado.
-
-    El minuto 8 es la cola: las últimas iteraciones caen ahí por la latencia acumulada (riesgo R1).
-    """
-    registros: dict[int, RegistroMinuto] = {}
-    vistos: dict[int, list[int]] = {}
-    for it in iteraciones:
-        if it.nivel is not None:
-            vistos.setdefault(it.minuto_logico, []).append(it.nivel)
-    out = []
-    for m, errores in enumerate(ERRORES_DEL_GUION + (0,), start=1):
-        d = decision_para(m, registros, u)
-        registros[m] = RegistroMinuto(nivel=d.nivel, errores=errores, degradado_en=d.degradado_en)
-        niveles = vistos.get(m, [])
-        out.append({"minuto": m, "errores": errores, "nivel_esperado": d.nivel, "cola": m > len(ERRORES_DEL_GUION),
-                    "niveles_vistos": secuencia(niveles), "iteraciones": len(niveles)})
     return out
 
 

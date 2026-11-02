@@ -3,6 +3,10 @@
 Observa, no mide. La evidencia oficial es el log del k6 y los logs de CloudWatch, y el panel los
 muestra y los deja descargar. Lo que hace sobre el sistema entra por la MISMA puerta que el k6
 (la URL del API Gateway). La única excepción es «Reiniciar estado», que solo existe en LocalStack.
+
+Implementa la v3 (histéresis, ADR-002): lee el ítem `V3`, compara por «minuto del k6» (bloques de 20
+peticiones) y predice con src/histeresis.py. El panel de la v1 (minuto de reloj y permanencia,
+ítems `MIN#m`) quedó en el historial de git, hasta el commit 15bb5b7.
 """
 from __future__ import annotations
 
@@ -21,15 +25,16 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from panel import entornos as ent
-from panel.evidencia import coherencia, como_csv, como_jsonl, resumen_coherencia, zip_evidencia
-from panel.k6 import EjecutorK6, guion
-from reglas import Umbrales
+from histeresis import ParamsHisteresis
+from panel.evidencia import (coherencia, como_csv, como_jsonl, corrida_servidor, guion, resumen_coherencia,
+                             zip_evidencia)
+from panel.k6 import EjecutorK6
 
 RAIZ = Path(__file__).resolve().parents[1]
 ESTATICOS = Path(__file__).parent / "static"
 OFICIAL = RAIZ.parents[1] / "Material-Clase" / "k6-script-profesor-reto3.js"
 GRACIA_MS = 60_000
-REGLA = Umbrales()  # la misma que despliega template.yaml por defecto (5 / 10 / permanencia 2)
+REGLA = ParamsHisteresis()  # la misma que despliega template.yaml por defecto (bloques de 20, 5 / 10, rachas 30 / 40)
 VENTANA_SIN_CORRIDA_MIN = 12
 
 
@@ -69,44 +74,56 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
 
     def leer_servidor() -> dict[str, Any]:
         e = activo()
-        ahora = ent.minuto_actual()
         v = ventana_corrida()
-        desde_min = v[0] // 60_000 if v else ahora - VENTANA_SIN_CORRIDA_MIN
-        hasta_min = min(v[1] // 60_000, ahora) if v else ahora
-        desde_min = max(desde_min, hasta_min - 20)
+        desde_ms = v[0] if v else (ent.minuto_actual() - VENTANA_SIN_CORRIDA_MIN) * 60_000
+        vacio = {"estado": None, "eventos": [], "peticiones": {}}
         try:
-            minutos = e.minutos(desde_min, hasta_min)
-            eventos = e.eventos_clave(desde_min * 60_000)
-            return {"minutos": minutos, "eventos": eventos[::-1][:40], "error": None, "lectura": True, "motivo": None}
+            estado_v3 = e.estado_v3()
+            eventos = e.eventos_router(desde_ms)  # una sola lectura de CloudWatch por consulta
         except ent.SinLectura as err:  # no es una falla: el panel sigue con la mirada del cliente
-            return {"minutos": [], "eventos": [], "error": None, "lectura": False, "motivo": str(err)}
+            return {**vacio, "error": None, "lectura": False, "motivo": str(err)}
         except ent.EntornoNoDisponible as err:
-            return {"minutos": [], "eventos": [], "error": str(err), "lectura": True, "motivo": None}
+            return {**vacio, "error": str(err), "lectura": True, "motivo": None}
+        clave = [d for d in eventos if d["evento"] in ent.EVENTOS_CLAVE]
+        corrida = corrida_servidor(eventos, int(k6.inicio.timestamp() * 1000) if v else None)
+        return {"estado": estado_v3, "eventos": clave[::-1][:40], "peticiones": corrida,
+                "error": None, "lectura": True, "motivo": None}
+
+    def nivel_v3(estado_v3: dict[str, Any] | None) -> dict[str, Any]:
+        """Lo que dice el ítem V3: nivel, petición, bloque en curso y racha hacia el siguiente umbral."""
+        if not estado_v3 or not estado_v3.get("seq"):
+            return {"actual": None, "peticion": 0, "minuto_k6": None, "errores_bloque": 0, "racha": 0,
+                    "meta_racha": None, "ultimo": None, "corrida_cerrada": True}
+        n, seq = estado_v3["nivel"], estado_v3["seq"]
+        ultimo = estado_v3.get("ultimo")
+        return {"actual": n, "peticion": seq, "minuto_k6": (seq - 1) // REGLA.tamano + 1,
+                "errores_bloque": estado_v3["errores_bloque"], "racha": estado_v3["racha"],
+                "meta_racha": {3: REGLA.racha_n2, 2: REGLA.racha_n1}.get(n),
+                "ultimo": datetime.fromtimestamp(ultimo, tz=timezone.utc).isoformat() if ultimo else None,
+                # Pasado este tiempo sin tráfico, la próxima petición abre una corrida nueva en N1.
+                "corrida_cerrada": ultimo is None or time.time() - ultimo > REGLA.inactividad_s}
+
+    def regla() -> dict[str, Any]:
+        return {"tamano": REGLA.tamano, "degradado": REGLA.degradado, "minimo": REGLA.minimo,
+                "racha_n2": REGLA.racha_n2, "racha_n1": REGLA.racha_n1, "inactividad_s": REGLA.inactividad_s}
 
     @app.get("/api/estado")
     async def estado() -> dict[str, Any]:
         e = activo()
         servidor = await asyncio.to_thread(leer_servidor)
-        ahora = ent.minuto_actual()
-        por_minuto = {m["minuto"]: m for m in servidor["minutos"]}
-        actual_srv = por_minuto.get(ahora)
-        anterior = por_minuto.get(ahora - 1)
-        corrida = k6.resumen() if k6.entorno == actual["entorno"] else EjecutorK6.resumen_vacio()
-        filas = coherencia(k6.iteraciones if k6.entorno == actual["entorno"] else [], servidor["minutos"])
+        mio = k6.entorno == actual["entorno"]
+        corrida = k6.resumen() if mio else EjecutorK6.resumen_vacio()
+        filas = coherencia(k6.iteraciones if mio else [], servidor["peticiones"], REGLA)
         return {
             "entorno": {"activo": e.nombre, "url": e.url, "aws_disponible": "aws" in entornos,
                         "aws_motivo": motivo_aws, "permite_reinicio": e.permite_reinicio},
-            "reloj": {"minuto": ent.iso_minuto(ahora), "segundos_a_proximo": 60 - int(time.time() % 60)},
-            "regla": {"degradado": REGLA.degradado, "minimo": REGLA.minimo, "permanencia": REGLA.permanencia},
-            "nivel": {"actual": actual_srv["nivel"] if actual_srv else None,
-                      "degradado_en": ent.iso_minuto(actual_srv["degradado_en"])
-                      if actual_srv and actual_srv.get("degradado_en") is not None else None,
-                      "errores_minuto_anterior": anterior["errores"] if anterior else 0,
-                      "errores_minuto_actual": actual_srv["errores"] if actual_srv else 0},
-            "servidor": servidor,
+            "reloj": {"ahora": datetime.now(timezone.utc).isoformat()},
+            "regla": regla(),
+            "nivel": nivel_v3(servidor["estado"]),
+            "servidor": {k: v for k, v in servidor.items() if k != "peticiones"},
             "coherencia": {"filas": filas, **resumen_coherencia(filas)},
             "k6": corrida,
-            "guion": guion(REGLA, k6.iteraciones if k6.entorno == actual["entorno"] else []),
+            "guion": guion(REGLA, k6.iteraciones if mio else []),
         }
 
     @app.post("/api/entorno")
@@ -183,15 +200,14 @@ def crear_app(entornos: dict[str, Any] | None = None, k6: EjecutorK6 | None = No
         e = activo()
         try:
             registros = e.registros(v[0], v[1])
-            minutos = e.minutos(v[0] // 60_000, v[1] // 60_000)
+            peticiones = corrida_servidor(e.peticiones(v[0], v[1]), v[0] + GRACIA_MS)
             sin_lectura = None
         except ent.SinLectura as err:  # la evidencia del cliente sigue valiendo sola
-            registros, minutos, sin_lectura = [], [], str(err)
-        filas = coherencia(k6.iteraciones, minutos, REGLA)
+            registros, peticiones, sin_lectura = [], {}, str(err)
+        filas = coherencia(k6.iteraciones, peticiones, REGLA)
         resumen = {k: val for k, val in k6.resumen(ultimas=0).items() if k != "ultimas"}
         resumen.update({"coherencia_cliente_servidor": resumen_coherencia(filas),
-                        "regla": {"degradado": REGLA.degradado, "minimo": REGLA.minimo,
-                                  "permanencia": REGLA.permanencia},
+                        "regla": {"version": "v3 (histéresis, ADR-002)", **regla()},
                         "servidor_sin_lectura": sin_lectura,
                         "generado": datetime.now(timezone.utc).isoformat(),
                         "nota": "Evidencia exportada por el panel. El log del k6 es la salida cruda del script oficial; "

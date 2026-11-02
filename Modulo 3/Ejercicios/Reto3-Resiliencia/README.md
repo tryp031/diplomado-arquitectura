@@ -60,10 +60,9 @@ el código viejo ignora `MODO`, así que una variable bien puesta sobre un .zip 
 
 ## Panel de control
 
-> **Limitación con la v3 (30/10):** el panel todavía implementa la regla v1. Predice con `reglas.decision_para` y lee
-> los ítems `MIN#` de la tabla. Con la v3 se puede usar para **correr el k6 y ver las respuestas**, pero la columna
-> «regla», la coherencia ✓/✗ y el «nivel del servidor» no aplican. La evidencia oficial de la v3 es el log de
-> `correr-k6.sh` más los `CAMBIO_NIVEL` de CloudWatch. Adaptar el panel queda para otro PR.
+El panel implementa la **v3** (histéresis, ADR-002): agrupa por «minuto del k6» (bloques de 20 peticiones), lee el
+ítem `V3` de la tabla y predice con `src/histeresis.py`, sin copiar la regla. El panel de la v1 (minuto de reloj,
+permanencia e ítems `MIN#`) quedó en el historial de git, hasta el commit 15bb5b7.
 ```bash
 scripts/panel.sh                                      # http://localhost:8030, contra LocalStack
 scripts/panel.sh                                      # con .env.aws, el switch AWS también lee el servidor
@@ -72,22 +71,24 @@ PANEL_AWS_PERFIL=<perfil-solo-lectura> scripts/panel.sh  # AWS con lectura del s
 - **AWS sin perfil = modo «solo cliente».** Con la URL en `.build/url-aws.txt`, el panel corre el k6 y las peticiones
   manuales, y verifica la regla con los errores que ve el propio k6. Si el perfil no tiene permisos (AccessDenied),
   pasa lo mismo y el panel lo dice en un aviso, no como un error.
-- **Guion del script**: los 7 minutos del k6 (5/0/15/0/15/0/0 errores), el nivel que predice la regla y el que
-  respondió el sistema, minuto a minuto.
-- **Gráfica por minuto de reloj**: el nivel del servidor, el de la regla y el del cliente, y debajo los errores con los
-  umbrales. Tiene tooltip y una vista de tabla.
-- **Nivel del minuto actual**, leído del servidor (DynamoDB): errores del minuto anterior y del actual, y la cuenta
-  regresiva hasta la próxima evaluación.
+- **Guion del script**: los 7 minutos del k6 (5/0/15/0/15/0/0 errores), los niveles que predice la regla y los que
+  respondió el sistema. El minuto 7 tiene tres: N3 → N2 → N1 (las rachas se cumplen en las peticiones 126 y 136).
+- **Gráfica por minuto del k6**: el nivel del router (eventos `PETICION` de CloudWatch), el de la regla y el del
+  cliente, petición por petición; debajo, los errores de cada bloque contra los umbrales. Tiene tooltip y tabla.
+- **Nivel vigente**, leído del ítem `V3`: errores del bloque en curso contra 5/10, la racha sin error hacia el
+  siguiente umbral (p. ej. «17 / 30 → N2») y las peticiones que faltan para cerrar el bloque.
 - **▶ Correr k6 oficial**: la misma garantía que `correr-k6.sh`. Copia el script con la URL cambiada, verifica que
   sea la única línea distinta y guarda la salida cruda en `logs/k6-<entorno>-<sello>.log`.
-- **Línea de tiempo por minuto**: el nivel que fijó el servidor frente al que vio el k6, con ✓/✗ de coherencia. Es lo
-  que muestra que el panel no inventa nada.
-- **Cambios de nivel**: los eventos `CAMBIO_NIVEL` y las fallas, leídos de CloudWatch Logs.
+- **Coherencia por minuto del k6**: cliente = servidor = regla, comparados **petición por petición** (la iteración i
+  del k6 es la petición i del router). Es lo que muestra que el panel no inventa nada. Supuesto: la corrida empieza
+  fresca (`CORRIDA_NUEVA` o 15 s sin tráfico) y no se mandan peticiones manuales mientras corre el k6.
+- **Cambios de nivel**: los eventos `CAMBIO_NIVEL` (motivo, errores del bloque anterior o racha), `CORRIDA_NUEVA` y las
+  fallas, leídos de CloudWatch Logs.
 - **Prueba manual**: peticiones OK o con error por la misma puerta que el k6. Sirve para mostrar «Nivel 3: Sistema
   bajo mantenimiento», que el script oficial nunca produce.
-- **Descargas**: un ZIP con el log del k6, los logs de CloudWatch (JSONL), los minutos (CSV), el resumen (JSON) y el
+- **Descargas**: un ZIP con el log del k6, los logs de CloudWatch (JSONL), los minutos del k6 (CSV), el resumen (JSON) y el
   diff del script.
-- **Reiniciar estado**: solo en LocalStack. En AWS, el panel es de solo lectura.
+- **Reiniciar estado**: borra el ítem `V3`, solo en LocalStack. En AWS, el panel es de solo lectura.
 
 El panel **observa, no mide**: la evidencia sigue siendo el log del k6 y los logs de CloudWatch. **Si se redespliega,
 primero hay que descargar la evidencia**, porque en LocalStack el redespliegue puede recrear los grupos de logs.

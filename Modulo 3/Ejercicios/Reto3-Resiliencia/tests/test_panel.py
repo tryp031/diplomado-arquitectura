@@ -9,10 +9,11 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from panel.evidencia import coherencia, como_csv, resumen_coherencia
+from panel.evidencia import coherencia, como_csv, corrida_servidor, guion, resumen_coherencia, simular
 from panel.k6 import URL_PROFESOR, EjecutorK6, Iteracion, ScriptAlterado, parsear_linea, preparar_script, secuencia
 
 OFICIAL = Path(__file__).resolve().parents[3] / "Material-Clase" / "k6-script-profesor-reto3.js"
+EVIDENCIA_CAMILO = (Path(__file__).resolve().parents[3] / "Aportes" / "camilo" / "evidencia-corrida-oficial-v3-20261102")
 LINEA = ('time="2026-10-18T18:09:00-05:00" level=info msg="Minute: 1, Iteration: 1, Error: true, Status: 500, '
          'Message: {\\"message\\": \\"Nivel 1: Operación Full con Error\\"}" source=console')
 
@@ -46,54 +47,84 @@ def test_secuencia_comprime():
     assert secuencia([1, 1, None, 2, 2, 1]) == [1, 2, 1]
 
 
-def _it(ts, n, i=1):
-    return Iteracion(ts=ts, minuto_logico=1, iteracion=i, error=False, status=200, mensaje=f"Nivel {n}: OK", nivel=n)
+def _it(i, n, status=200):
+    return Iteracion(ts="2026-11-02T12:33:00-05:00", minuto_logico=(i - 1) // 20 + 1, iteracion=i,
+                     error=status >= 500, status=status, mensaje=f"Nivel {n}: x", nivel=n)
 
 
-def test_coherencia_cliente_servidor():
-    m = int(datetime(2026, 10, 18, 23, 9, tzinfo=timezone.utc).timestamp() // 60)
-    its = [_it("2026-10-18T18:09:01-05:00", 1, 1), _it("2026-10-18T18:10:02-05:00", 2, 2),
-           _it("2026-10-18T18:11:00-05:00", 1, 3)]
-    minutos = [{"minuto": m, "nivel": 1, "errores": 5, "peticiones": 1},
-               {"minuto": m + 1, "nivel": 2, "errores": 0, "peticiones": 1},
-               {"minuto": m + 2, "nivel": 3, "errores": 0, "peticiones": 1}]  # el cliente vio N1: no coincide
-    filas = coherencia(its, minutos)
-    assert [f["coincide"] for f in filas] == [True, True, False]
-    assert resumen_coherencia(filas) == {"minutos": 3, "coinciden": 2, "todo_coincide": False,
-                                         # sin errores la regla predice N1 siempre: el N2 del cliente no la cumple
-                                         "minutos_regla": 3, "coinciden_regla": 2, "regla_se_cumple": False}
-    assert como_csv(filas).splitlines()[1] == "2026-10-18 23:09,1,5,1,1,1-1,si,0,1,si"
+def _pet(i, n, status=200):
+    return {"evento": "PETICION", "peticion": i, "minuto_k6": (i - 1) // 20 + 1, "nivel": n, "status": status}
 
 
-def _itk(minuto_utc, n, status=200, i=1):
-    ts = datetime(2026, 10, 18, 23, minuto_utc, 5, tzinfo=timezone.utc).isoformat()
-    return Iteracion(ts=ts, minuto_logico=1, iteracion=i, error=status >= 500, status=status,
-                     mensaje=f"Nivel {n}: x", nivel=n)
+def _corrida_k6():
+    """Las 140 iteraciones del k6 oficial respondidas como predice la regla (la corrida perfecta)."""
+    from panel.k6 import error_del_script
+    errores = [error_del_script(i) for i in range(140)]
+    return [_it(i + 1, n, 500 if e else 200) for i, (n, e) in enumerate(zip(simular(errores), errores))]
+
+
+def test_simular_el_script_oficial_da_1_2_3_2_1():
+    from panel.k6 import error_del_script
+    niveles = simular([error_del_script(i) for i in range(140)])
+    cambios = [i + 1 for i in range(1, 140) if niveles[i] != niveles[i - 1]]
+    assert secuencia(niveles) == [1, 2, 3, 2, 1] and cambios == [21, 61, 126, 136]
+
+
+def test_coherencia_por_minuto_del_k6():
+    its = _corrida_k6()
+    srv = {i.iteracion: _pet(i.iteracion, i.nivel, i.status) for i in its}
+    srv[130] = _pet(130, 3)  # el servidor dice otra cosa en una petición del minuto 7
+    filas = coherencia(its, srv)
+    assert [f["minuto"] for f in filas] == list(range(1, 8))
+    assert filas[6]["niveles_cliente"] == filas[6]["niveles_regla"] == [3, 2, 1]
+    assert [f["coincide"] for f in filas] == [True] * 6 + [False]
+    assert resumen_coherencia(filas) == {"minutos": 7, "coinciden": 6, "todo_coincide": False,
+                                         "minutos_regla": 7, "coinciden_regla": 7, "regla_se_cumple": True}
+    assert como_csv(filas).splitlines()[1:3] == ["1,1-20,5,5,1,1,1,si,si", "2,21-40,0,0,2,2,2,si,si"]
+    assert como_csv(filas).splitlines()[7] == "7,121-140,0,0,3-2-1,3-2-3-2-1,3-2-1,NO,si"
 
 
 def test_la_regla_se_verifica_solo_con_el_cliente():
-    # Minuto 0: 5 errores en N1 → minuto 1: N2 → minuto 2 (permanencia): N2 → minuto 3: N1.
-    its = [_itk(0, 1, 500)] * 5 + [_itk(0, 1)] + [_itk(1, 2)] + [_itk(2, 2)] + [_itk(3, 1)]
-    filas = coherencia(its, [])
-    assert [f["nivel_regla"] for f in filas] == [1, 2, 2, 1]
-    assert [f["errores_cliente"] for f in filas] == [5, 0, 0, 0]
+    filas = coherencia(_corrida_k6(), {})
     r = resumen_coherencia(filas)
-    assert r["regla_se_cumple"] and r["minutos_regla"] == 4 and r["minutos"] == 0
+    assert r["regla_se_cumple"] and r["minutos_regla"] == 7 and r["minutos"] == 0
 
 
-def test_la_regla_detecta_un_salto():
-    # Si el sistema hubiera recuperado sin permanencia, el minuto 2 en N1 no cumple la regla.
-    its = [_itk(0, 1, 500)] * 5 + [_itk(1, 2), _itk(2, 1)]
-    filas = coherencia(its, [])
-    assert [f["coincide_regla"] for f in filas] == [True, True, False]
+def test_la_regla_detecta_una_recuperacion_temprana():
+    # Si el sistema hubiera vuelto a N1 apenas terminó el bloque sin errores, el minuto 2 no cumple.
+    its = [_it(i, 1, 500 if i <= 5 else 200) for i in range(1, 21)] + [_it(i, 1) for i in range(21, 41)]
+    assert [f["coincide_regla"] for f in coherencia(its, {})] == [True, False]
+
+
+def test_corrida_servidor_separa_corridas():
+    vieja = [dict(_pet(i, 3), ts=1000 + i) for i in range(1, 50)]
+    nueva = [{"evento": "CORRIDA_NUEVA", "ts": 5000}] + [dict(_pet(i, 1), ts=5000 + i) for i in range(1, 4)]
+    manual = [dict(_pet(1, 1), ts=9000)]
+    assert sorted(corrida_servidor(vieja + nueva)) == [1, 2, 3]
+    assert len(corrida_servidor(vieja + nueva + manual, desde_ms=4000)) == 3
+    assert corrida_servidor([]) == {}
+
+
+def test_coherencia_con_la_corrida_oficial_de_camilo():
+    """Evidencia real (AWS, 02/11/2026): log del k6 + servidor.jsonl. Cliente = servidor = regla en los 7 minutos."""
+    from panel.k6 import parsear_linea
+    log = next(EVIDENCIA_CAMILO.glob("*-k6.log")).read_text(encoding="utf-8")
+    its = [it for it in map(parsear_linea, log.splitlines()) if it]
+    eventos = [json.loads(l) for l in next(EVIDENCIA_CAMILO.glob("*-servidor.jsonl")).read_text().splitlines() if l]
+    filas = coherencia(its, corrida_servidor(eventos))
+    assert len(its) == 140 and [f["minuto"] for f in filas] == list(range(1, 8))
+    assert resumen_coherencia(filas) == {"minutos": 7, "coinciden": 7, "todo_coincide": True,
+                                         "minutos_regla": 7, "coinciden_regla": 7, "regla_se_cumple": True}
+    assert [f["errores_servidor"] for f in filas] == [5, 0, 15, 0, 15, 0, 0]
+    assert filas[6]["niveles_servidor"] == [3, 2, 1]
 
 
 def test_veredicto_de_secuencia():
     k6 = EjecutorK6(OFICIAL, Path("/tmp"), Path("/tmp"))
-    k6.iteraciones = [_itk(0, n, i=i) for i, n in enumerate([1] * 20 + [2] * 40 + [3] * 60 + [2] * 18 + [1] * 2)]
+    k6.iteraciones = [_it(i + 1, n) for i, n in enumerate([1] * 20 + [2] * 40 + [3] * 60 + [2] * 18 + [1] * 2)]
     v = k6.resumen()["veredicto"]
     assert v["sin_saltos"] and v["secuencia_esperada"] and v["termino_en_n1"]
-    k6.iteraciones = [_itk(0, n, i=i) for i, n in enumerate([1] * 20 + [2] * 20 + [1] * 20 + [3] * 80)]
+    k6.iteraciones = [_it(i + 1, n) for i, n in enumerate([1] * 20 + [2] * 20 + [1] * 20 + [3] * 80)]
     v = k6.resumen()["veredicto"]
     assert not v["sin_saltos"] and not v["secuencia_esperada"]
 
@@ -103,12 +134,19 @@ class EntornoFalso:
         self.nombre, self.url, self.permite_reinicio = nombre, url, permite_reinicio
         self.reiniciado = False
 
-    def minutos(self, desde, hasta):
-        return [{"minuto": hasta, "iso": "", "nivel": 2, "errores": 1, "peticiones": 3}]
+    def estado_v3(self):
+        import time
+        return {"pk": "V3", "seq": 47, "nivel": 3, "errores_bloque": 4, "racha": 17, "ultimo": time.time(),
+                "version": 47, "ttl": None}
 
-    def eventos_clave(self, desde_ms):
-        return [{"ts": 1, "evento": "CAMBIO_NIVEL", "de": 1, "a": 2, "motivo": "degradacion",
-                 "errores_minuto_anterior": 5, "umbrales": {"degradado": 5, "minimo": 10}}]
+    def eventos_router(self, desde_ms, hasta_ms=None):
+        return [{"ts": 1, "evento": "CAMBIO_NIVEL", "de": 1, "a": 2, "motivo": "degradacion", "peticion": 21,
+                 "errores_minuto_anterior": 5, "racha_sin_error": 15,
+                 "umbrales": {"degradado": 5, "minimo": 10, "racha_n2": 30, "racha_n1": 40}},
+                {"ts": 2, **_pet(1, 1)}]
+
+    def peticiones(self, desde_ms, hasta_ms=None):
+        return [e for e in self.eventos_router(desde_ms) if e["evento"] == "PETICION"]
 
     def registros(self, desde_ms, hasta_ms=None):
         return [{"grupo": "/aws/lambda/reto3-router", "ts": 1, "mensaje": '{"evento": "PETICION"}'}]
@@ -133,7 +171,9 @@ def cliente(tmp_path):
 def test_estado_muestra_nivel_y_eventos(cliente):
     c, _, _ = cliente
     s = c.get("/api/estado").json()
-    assert s["nivel"]["actual"] == 2 and s["nivel"]["errores_minuto_actual"] == 1
+    assert s["nivel"] == {**s["nivel"], "actual": 3, "peticion": 47, "minuto_k6": 3, "errores_bloque": 4,
+                          "racha": 17, "meta_racha": 30, "corrida_cerrada": False}
+    assert s["coherencia"]["filas"][0]["niveles_servidor"] == [1]
     assert s["servidor"]["eventos"][0]["evento"] == "CAMBIO_NIVEL"
     assert s["k6"]["estado"] == "inactivo"
     assert c.get("/").status_code == 200
@@ -204,7 +244,7 @@ def test_aws_sin_perfil_es_solo_cliente(tmp_path):
         e = ent.aws(tmp_path, perfil)
         assert e.url == "https://api/prod/service-api" and not e.lectura
         with pytest.raises(ent.SinLectura):
-            e.minutos(1, 2)
+            e.estado_v3()
 
 
 def test_aws_lee_credenciales_de_env_aws(tmp_path, monkeypatch):
@@ -243,9 +283,9 @@ def test_access_denied_es_sin_lectura(tmp_path):
     e = ent.Entorno("aws", boto3.Session(aws_access_key_id="x", aws_secret_access_key="x", region_name="us-east-2"),
                     tmp_path / "url.txt")
     with Stubber(e._db) as s:
-        s.add_client_error("batch_get_item", service_error_code="AccessDeniedException")
+        s.add_client_error("get_item", service_error_code="AccessDeniedException")
         with pytest.raises(ent.SinLectura):
-            e.minutos(1, 1)
+            e.estado_v3()
 
 
 def test_estado_en_modo_solo_cliente(tmp_path):
@@ -253,27 +293,27 @@ def test_estado_en_modo_solo_cliente(tmp_path):
     from panel.app import crear_app
 
     class SoloCliente(EntornoFalso):
-        def minutos(self, desde, hasta):
+        def estado_v3(self):
             raise ent.SinLectura("sin permiso")
 
     k6 = EjecutorK6(OFICIAL, tmp_path / ".build", tmp_path / "logs")
     c = TestClient(crear_app(entornos={"local": SoloCliente()}, k6=k6))
     s = c.get("/api/estado").json()
     assert s["servidor"]["lectura"] is False and s["servidor"]["error"] is None
-    assert s["regla"] == {"degradado": 5, "minimo": 10, "permanencia": 2}
+    assert s["regla"] == {"tamano": 20, "degradado": 5, "minimo": 10, "racha_n2": 30, "racha_n1": 40,
+                          "inactividad_s": 15.0}
 
 
 def test_guion_del_k6_oficial():
-    from panel.k6 import guion
-    from reglas import Umbrales
-    g = guion(Umbrales(), [])
-    assert [x["errores"] for x in g] == [5, 0, 15, 0, 15, 0, 0, 0]
-    assert [x["nivel_esperado"] for x in g] == [1, 2, 2, 3, 3, 3, 2, 1]
-    assert g[-1]["cola"] and not g[0]["cola"]
+    from histeresis import ParamsHisteresis
+    g = guion(ParamsHisteresis(), [])
+    assert [x["errores"] for x in g] == [5, 0, 15, 0, 15, 0, 0]
+    assert [x["niveles_esperados"] for x in g] == [[1], [2], [2], [3], [3], [3], [3, 2, 1]]
 
 
 def test_guion_coincide_con_el_script(tmp_path):
     # El guion no puede divergir del script del profesor: se recalcula con su misma fórmula.
     from conftest import k6_error
-    from panel.k6 import ERRORES_DEL_GUION
+    from panel.k6 import ERRORES_DEL_GUION, error_del_script
     assert tuple(sum(k6_error(m * 20 + i) for i in range(20)) for m in range(7)) == ERRORES_DEL_GUION
+    assert all(error_del_script(i) == k6_error(i) for i in range(140))
