@@ -36,7 +36,7 @@
   <!-- ═══ 1 · Ahora: nivel vigente ═══ -->
   <section class="card nivel" id="tarjetaNivel" data-nivel="0" aria-live="polite">
     <div class="cab">
-      <span class="et">Nivel del minuto actual</span>
+      <span class="et">Nivel vigente</span>
       <span class="chip-s" id="nivelFuente">—</span>
     </div>
     <div class="nivel-cuerpo">
@@ -45,19 +45,19 @@
         <div class="peldano" data-n="2"><b>N2</b><span><strong>Degradado</strong><small>Valida y registra · difiere análisis y notificación</small></span></div>
         <div class="peldano" data-n="1"><b>N1</b><span><strong>Full</strong><small>Valida, registra, analiza riesgo y notifica</small></span></div>
       </div>
-      <div class="anillo" title="Segundos para que el router evalúe el minuto siguiente">
+      <div class="anillo" title="Peticiones que faltan para cerrar el bloque (minuto del k6) en curso">
         <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="pista" cx="60" cy="60" r="52"/><circle class="arco" id="arco" cx="60" cy="60" r="52"/></svg>
-        <div class="anillo-txt"><span class="num" id="cuenta">--</span><small>s para la<br>evaluación</small></div>
+        <div class="anillo-txt"><span class="num" id="cuenta">--</span><small>pet. para<br>cerrar el bloque</small></div>
       </div>
     </div>
     <div class="medidor">
-      <div class="medidor-cab"><span>Errores del minuto anterior</span><b class="num" id="errPrev">0</b></div>
+      <div class="medidor-cab"><span>Errores del bloque en curso</span><b class="num" id="errPrev">0</b></div>
       <div class="barra-err" aria-hidden="true">
         <span class="relleno" id="rellenoErr"></span>
         <span class="tick" id="tick5"><em>5 · N2</em></span>
         <span class="tick" id="tick10"><em>10 · N3</em></span>
       </div>
-      <div class="medidor-pie"><span>En este minuto: <b class="num" id="errAct">0</b> errores</span><span id="permanencia"></span></div>
+      <div class="medidor-pie"><span id="rachaTxt"></span><span id="bloqueTxt"></span></div>
     </div>
   </section>
 
@@ -65,7 +65,7 @@
   <section class="card flujo-card">
     <div class="cab">
       <span class="et">Flujo en vivo</span>
-      <span class="chip-s" id="reglaTxt">≥ 5 → N2 · ≥ 10 → N3 · permanencia 2 min</span>
+      <span class="chip-s" id="reglaTxt">bloques de 20 · ≥ 5 → N2 · ≥ 10 → N3 · racha 30 → N2 · 40 → N1</span>
     </div>
     <svg class="diagrama" id="diagrama" viewBox="0 0 860 300" role="img" aria-labelledby="diagTit">
       <title id="diagTit">Cliente → API Gateway → router → Lambda del nivel activo; el router lee y escribe el estado en DynamoDB</title>
@@ -79,7 +79,7 @@
       <g class="nodo cli" id="nCli"><rect x="10" y="90" width="110" height="60" rx="14"/><text x="65" y="116">Cliente</text><text x="65" y="135" class="sub">k6 · panel</text></g>
       <g class="nodo" id="nGw"><rect x="176" y="90" width="154" height="60" rx="14"/><text x="253" y="116">API Gateway</text><text x="253" y="135" class="sub">POST /service-api</text></g>
       <g class="nodo" id="nRouter"><rect x="386" y="90" width="144" height="60" rx="14"/><text x="458" y="116">λ router</text><text x="458" y="135" class="sub">decide el nivel</text></g>
-      <g class="nodo dbn" id="nDb"><rect x="380" y="206" width="156" height="60" rx="14"/><text x="458" y="232">DynamoDB</text><text x="458" y="251" class="sub">estado por minuto</text></g>
+      <g class="nodo dbn" id="nDb"><rect x="380" y="206" width="156" height="60" rx="14"/><text x="458" y="232">DynamoDB</text><text x="458" y="251" class="sub">ítem V3 · bloque y racha</text></g>
       <g class="nodo nv" data-n="3"><rect x="636" y="16" width="214" height="56" rx="14"/><text x="660" y="40" class="izq">λ nivel 3 · Mínimo</text><text x="660" y="58" class="sub izq cuenta-nv">0 peticiones</text></g>
       <g class="nodo nv" data-n="2"><rect x="636" y="92" width="214" height="56" rx="14"/><text x="660" y="116" class="izq">λ nivel 2 · Degradado</text><text x="660" y="134" class="sub izq cuenta-nv">0 peticiones</text></g>
       <g class="nodo nv" data-n="1"><rect x="636" y="168" width="214" height="56" rx="14"/><text x="660" y="192" class="izq">λ nivel 1 · Full</text><text x="660" y="210" class="sub izq cuenta-nv">0 peticiones</text></g>
@@ -92,7 +92,7 @@
         <div class="fila-bt">
           <button class="bt" id="bOk">Enviar OK</button>
           <button class="bt peligro" id="bErr">Enviar con error</button>
-          <button class="bt tenue-bt" id="bReiniciar" title="Borra el estado por minuto (solo LocalStack)">Reiniciar estado</button>
+          <button class="bt tenue-bt" id="bReiniciar" title="Borra el ítem V3 (solo LocalStack)">Reiniciar estado</button>
         </div>
         <div class="resp-manual" id="respManual"></div>
       </div>
@@ -118,7 +118,7 @@
     </div>
     <div class="k6-cuerpo">
       <div class="guion">
-        <span class="et">Guion del script · minuto a minuto</span>
+        <span class="et">Guion del script · minuto del k6 (20 peticiones)</span>
         <div class="guion-grid" id="guion"></div>
         <p class="leyenda-g"><span><b class="num">5</b> errores que inyecta el k6</span><span><i class="cua esp"></i>nivel que predice la regla</span><span><i class="cua obs"></i>nivel que respondió</span></p>
       </div>
@@ -134,13 +134,13 @@
   <!-- ═══ 4 · Línea de tiempo ═══ -->
   <section class="card ancho">
     <div class="cab">
-      <span class="et">Línea de tiempo por minuto de reloj</span>
+      <span class="et">Línea de tiempo por minuto del k6 (bloques de 20 peticiones)</span>
       <div class="cab-der"><span class="coh" id="cohRegla"></span><span class="coh" id="coherencia"></span></div>
     </div>
     <div class="leyenda">
-      <span><i class="ln srv"></i>Nivel en DynamoDB</span>
+      <span><i class="ln srv"></i>Nivel del router (CloudWatch)</span>
       <span><i class="ln reg"></i>Nivel que predice la regla</span>
-      <span><i class="pt"></i>Nivel que respondió al k6</span>
+      <span><i class="pt"></i>Nivel que respondió al k6, por petición</span>
       <span><i class="cua errb"></i>Errores</span>
       <span><i class="cua okb"></i>Peticiones OK</span>
     </div>
@@ -148,7 +148,7 @@
       <svg id="svgNivel" class="svg-nivel" role="img" aria-label="Nivel por minuto"></svg>
       <svg id="svgPet" class="svg-pet" role="img" aria-label="Peticiones y errores por minuto"></svg>
       <div class="tip" id="tip" hidden></div>
-      <p class="vacio centro" id="graficaVacia">Sin minutos con tráfico. Corra el k6 o envíe peticiones manuales.</p>
+      <p class="vacio centro" id="graficaVacia">Sin peticiones todavía. Corra el k6 o envíe peticiones manuales.</p>
     </div>
   </section>
 
@@ -157,9 +157,9 @@
     <div class="cab">
       <div class="pestanas" role="tablist" aria-label="Datos">
         <button role="tab" aria-selected="true" data-p="pResp">Respuestas del k6 <span class="cnt" id="cntResp">0</span></button>
-        <button role="tab" aria-selected="false" data-p="pDb">Ítems en DynamoDB <span class="cnt" id="cntDb">0</span></button>
+        <button role="tab" aria-selected="false" data-p="pDb">Ítem V3 en DynamoDB <span class="cnt" id="cntDb">0</span></button>
         <button role="tab" aria-selected="false" data-p="pEv">Eventos CloudWatch <span class="cnt" id="cntEv">0</span></button>
-        <button role="tab" aria-selected="false" data-p="pMin">Coherencia por minuto</button>
+        <button role="tab" aria-selected="false" data-p="pMin">Coherencia por minuto del k6</button>
       </div>
       <div class="descargas">
         <span class="et">Evidencia</span>
@@ -179,7 +179,7 @@
     </div>
     <div class="panel-p" id="pDb" role="tabpanel" hidden>
       <div class="tabox"><table>
-        <thead><tr><th>pk</th><th>Minuto</th><th>Nivel</th><th class="n">Peticiones</th><th class="n">Errores</th><th>Degradó en</th><th>Expira (ttl)</th></tr></thead>
+        <thead><tr><th>pk</th><th class="n">Petición</th><th>Nivel</th><th class="n">Errores del bloque</th><th class="n">Racha</th><th class="n">Versión</th><th>Última petición</th><th>Expira (ttl)</th></tr></thead>
         <tbody id="filasDb"></tbody>
       </table></div>
     </div>
@@ -188,7 +188,7 @@
     </div>
     <div class="panel-p" id="pMin" role="tabpanel" hidden>
       <div class="tabox"><table>
-        <thead><tr><th>Minuto</th><th class="n">Errores</th><th class="n">Peticiones</th><th>DynamoDB</th><th>Regla</th><th>Cliente</th><th>Iteraciones</th></tr></thead>
+        <thead><tr><th>Minuto k6</th><th>Peticiones</th><th class="n">Errores</th><th>Servidor</th><th>Regla</th><th>Cliente</th><th class="n">Coincide</th></tr></thead>
         <tbody id="filasMin"></tbody>
       </table></div>
     </div>

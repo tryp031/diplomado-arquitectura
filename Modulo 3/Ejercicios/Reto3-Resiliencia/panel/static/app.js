@@ -1,4 +1,4 @@
-/* Panel Reto 3. Consulta /api/estado cada 1,5 s y pinta.
+/* Panel Reto 3 (v3, histéresis). Consulta /api/estado cada 1,5 s y pinta.
  * Todo dato que viene de la red entra con textContent (o como atributo de SVG), nunca con innerHTML. */
 (function () {
   'use strict';
@@ -52,22 +52,23 @@
   }
   function mostrarError(msg) { var e = $('errorGlobal'); e.hidden = !msg; e.textContent = msg || ''; }
 
-  /* ── 1 · Nivel: del servidor si se puede leer; si no, el último que vio el cliente ── */
+  /* ── 1 · Nivel: del ítem V3 si se puede leer; si no, el último que vio el cliente ── */
   function nivelVigente(s) {
-    var ahora = new Date(s.reloj.minuto).getTime();
-    if (s.servidor.lectura && s.nivel.actual) return {n: s.nivel.actual, fuente: 'servidor · DynamoDB'};
+    var ahora = new Date(s.reloj.ahora).getTime();
+    if (s.servidor.lectura && s.nivel.actual)
+      return {n: s.nivel.actual, fuente: s.nivel.corrida_cerrada ? 'DynamoDB · corrida cerrada' : 'servidor · DynamoDB (V3)'};
     var cand = [];
     if (s.k6.ultimas.length && s.k6.ultimas[0].nivel) cand.push({t: new Date(s.k6.ultimas[0].ts).getTime(), n: s.k6.ultimas[0].nivel});
     if (ultimaManual && ultimaManual.n) cand.push(ultimaManual);
     cand.sort(function (a, b) { return b.t - a.t; });
-    if (cand.length && cand[0].t >= ahora) return {n: cand[0].n, fuente: 'según el cliente'};
-    return {n: null, fuente: s.servidor.lectura ? 'sin tráfico este minuto' : 'sin datos'};
+    if (cand.length && ahora - cand[0].t < 60000) return {n: cand[0].n, fuente: 'según el cliente'};
+    return {n: null, fuente: s.servidor.lectura ? 'sin corrida en el servidor' : 'sin datos'};
   }
-  function filaDe(s, minuto) { return s.coherencia.filas.filter(function (f) { return f.minuto === minuto; })[0]; }
   function objetivo(errores, r) { return errores >= r.minimo ? 3 : errores >= r.degradado ? 2 : 1; }
+  function seqTxt(sec) { return sec.length ? 'N' + sec.join(' → N') : '—'; }
 
   function pintarNivel(s) {
-    var v = nivelVigente(s), r = s.regla, t = $('tarjetaNivel');
+    var v = nivelVigente(s), r = s.regla, t = $('tarjetaNivel'), nv = s.nivel;
     t.dataset.nivel = v.n || 0;
     $('nivelFuente').textContent = v.fuente;
     if (v.n && nivelPrev && v.n !== nivelPrev) {
@@ -76,26 +77,26 @@
       if (nodo) marcar(nodo, 'cambio', 2500);
     }
     if (v.n) nivelPrev = v.n;
-    var ahora = Math.floor(new Date(s.reloj.minuto).getTime() / 60000);
-    var prev = filaDe(s, ahora - 1), act = filaDe(s, ahora);
-    var errPrev = s.servidor.lectura ? s.nivel.errores_minuto_anterior : (prev ? prev.errores_cliente : 0);
-    var errAct = s.servidor.lectura ? s.nivel.errores_minuto_actual : (act ? act.errores_cliente : 0);
-    $('errPrev').textContent = errPrev;
-    $('errAct').textContent = errAct;
-    var tope = Math.max(15, errPrev);
-    $('rellenoErr').style.width = Math.min(errPrev / tope, 1) * 100 + '%';
-    $('rellenoErr').style.background = 'var(--n' + objetivo(errPrev, r) + ')';
+    // Sin lectura del servidor, el bloque en curso se reconstruye con lo que vio el k6.
+    var filas = s.coherencia.filas, ult = filas[filas.length - 1];
+    var hechas = s.servidor.lectura ? nv.peticion : (s.k6.hechas || 0);
+    var err = s.servidor.lectura ? nv.errores_bloque : (ult && hechas ? ult.errores_cliente : 0);
+    $('errPrev').textContent = err;
+    var tope = Math.max(15, err);
+    $('rellenoErr').style.width = Math.min(err / tope, 1) * 100 + '%';
+    $('rellenoErr').style.background = 'var(--n' + objetivo(err, r) + ')';
     $('tick5').style.left = (r.degradado / tope * 100) + '%';
     $('tick10').style.left = (r.minimo / tope * 100) + '%';
-    var seg = s.reloj.segundos_a_proximo;
-    $('cuenta').textContent = seg;
-    $('arco').style.strokeDashoffset = (326.7 * (1 - seg / 60)).toFixed(1);
-    var p = $('permanencia');
-    if (s.nivel.degradado_en && v.n > 1) {
-      var desde = new Date(s.nivel.degradado_en).getTime();
-      p.textContent = 'Degradó ' + horaMin(desde) + ' · se sostiene hasta ' + horaMin(desde + r.permanencia * 60000);
-    } else p.textContent = '';
-    $('reglaTxt').textContent = '≥ ' + r.degradado + ' → N2 · ≥ ' + r.minimo + ' → N3 · permanencia ' + r.permanencia + ' min';
+    var enBloque = hechas ? (hechas - 1) % r.tamano + 1 : 0;
+    $('cuenta').textContent = hechas ? r.tamano - enBloque : '--';
+    $('arco').style.strokeDashoffset = (326.7 * (1 - enBloque / r.tamano)).toFixed(1);
+    $('bloqueTxt').textContent = hechas ? 'Petición ' + hechas + ' · minuto ' + ((hechas - 1) / r.tamano + 1 | 0) + ' del k6' : '';
+    var racha = $('rachaTxt');
+    if (!s.servidor.lectura || !nv.peticion) racha.textContent = '';
+    else if (nv.meta_racha) racha.textContent = 'Racha sin error: ' + nv.racha + ' / ' + nv.meta_racha + ' → N' + (v.n - 1);
+    else racha.textContent = 'Racha sin error: ' + nv.racha + ' · en N1 no hay a dónde recuperar';
+    $('reglaTxt').textContent = 'bloques de ' + r.tamano + ' · ≥ ' + r.degradado + ' → N2 · ≥ ' + r.minimo +
+      ' → N3 · racha ' + r.racha_n2 + ' → N2 · ' + r.racha_n1 + ' → N1';
     return v.n;
   }
 
@@ -157,6 +158,13 @@
     });
   }
 
+  function detalleEvento(e) {
+    if (e.evento === 'CORRIDA_NUEVA') return 'venía de N' + e.nivel_previo + ' tras ' + e.peticiones_previas + ' peticiones: 15 s sin tráfico';
+    var u = e.umbrales || {}, p = e.peticion ? 'petición ' + e.peticion + ' · ' : '';
+    if (e.motivo === 'degradacion') return p + e.errores_minuto_anterior + ' errores en el minuto anterior del k6 · umbrales ' + u.degradado + '/' + u.minimo;
+    return p + 'racha de ' + e.racha_sin_error + ' sin error · umbrales ' + u.racha_n2 + '/' + u.racha_n1;
+  }
+
   function pintarUltimoEvento(s) {
     var caja = $('ultimoEv'), ev = s.servidor.lectura && s.servidor.eventos.filter(function (e) { return e.evento === 'CAMBIO_NIVEL'; })[0];
     if (!cambio('ultimoEv', ev || s.servidor.lectura)) return;
@@ -168,7 +176,7 @@
     }
     caja.appendChild(el('span', {class: 'h', text: 'Último cambio · ' + hora(ev.ts)}));
     caja.appendChild(el('span', {class: 't', text: 'N' + ev.de + ' → N' + ev.a + ' · ' + (ev.motivo === 'degradacion' ? 'degradación' : 'recuperación')}));
-    caja.appendChild(el('span', {class: 'd', text: ev.errores_minuto_anterior + ' errores en el minuto anterior'}));
+    caja.appendChild(el('span', {class: 'd', text: detalleEvento(ev)}));
   }
 
   /* ── 3 · Corrida del k6 y guion ── */
@@ -205,35 +213,33 @@
     });
   }
 
+  function iguales(a, b) { return a.length === b.length && a.every(function (x, i) { return x === b[i]; }); }
+
   function pintarGuion(s) {
     var k = s.k6, actual = k.estado === 'corriendo' && k.ultimas.length ? k.ultimas[0].minuto_logico : null;
     if (!cambio('guion', [s.guion, actual])) return;
     var g = $('guion');
     vaciar(g);
     s.guion.forEach(function (m) {
-      var lv = el('div', {class: 'lv'}, [el('span', {class: 'esp l' + m.nivel_esperado, text: 'N' + m.nivel_esperado, title: 'Predicción de la regla'})]);
+      var lv = el('div', {class: 'lv'});
+      m.niveles_esperados.forEach(function (n) { lv.appendChild(el('span', {class: 'esp l' + n, text: 'N' + n, title: 'Predicción de la regla'})); });
       m.niveles_vistos.forEach(function (n) { lv.appendChild(el('span', {class: 'l' + n, text: 'N' + n, title: 'Respondió el sistema'})); });
-      var ok = !m.iteraciones ? '' : (m.niveles_vistos.length === 1 && m.niveles_vistos[0] === m.nivel_esperado ? 'si' : 'no');
-      g.appendChild(el('div', {class: 'gm' + (m.cola ? ' cola' : '') + (actual === m.minuto ? ' ahora' : ''),
-        title: m.cola ? 'Cola: iteraciones que caen después del minuto 7 por la latencia' : ''}, [
-        el('span', {class: 'min', text: m.cola ? 'cola' : 'min ' + m.minuto}),
-        el('span', {class: 'iny'}, [document.createTextNode(m.cola ? '—' : m.errores), el('small', {text: m.cola ? '' : ' err'})]),
+      var completo = m.iteraciones === s.regla.tamano;
+      var ok = !m.iteraciones ? '' : iguales(m.niveles_vistos, m.niveles_esperados) ? 'si' : completo ? 'no' : '';
+      g.appendChild(el('div', {class: 'gm' + (actual === m.minuto ? ' ahora' : '')}, [
+        el('span', {class: 'min', text: 'min ' + m.minuto}),
+        el('span', {class: 'iny'}, [document.createTextNode(m.errores), el('small', {text: ' err'})]),
         lv,
-        el('div', {class: 'ok ' + ok, text: ok === 'si' ? '✓' : ok === 'no' ? (m.niveles_vistos.length > 1 ? '↔ borde' : '✗') : ''})
+        el('div', {class: 'ok ' + ok, text: ok === 'si' ? '✓' : ok === 'no' ? '✗' : ''})
       ]));
     });
   }
 
-  /* ── 4 · Gráfica: nivel por minuto y peticiones apiladas (errores abajo, para leerlos contra los umbrales) ── */
-  function contarIteraciones(rango) {
-    if (!rango) return 0;
-    var p = String(rango).split('-');
-    return +p[1] - +p[0] + 1;
-  }
+  /* ── 4 · Gráfica: nivel por petición dentro de cada minuto del k6 y peticiones apiladas (errores abajo) ── */
   function pintarGrafica(s, forzar) {
     var filas = s.coherencia.filas, r = s.regla, lectura = s.servidor.lectura;
     var W = $('grafica').clientWidth;
-    if (!cambio('grafica', [filas, lectura, W, s.reloj.minuto]) && !forzar) return;
+    if (!cambio('grafica', [filas, lectura, W, s.nivel.minuto_k6]) && !forzar) return;
     var sN = $('svgNivel'), sP = $('svgPet');
     vaciar(sN); vaciar(sP);
     $('graficaVacia').hidden = filas.length > 0;
@@ -241,8 +247,9 @@
     if (!filas.length) return;
     // hN y hP son las alturas de .svg-nivel y .svg-pet en estilos.css: cambian juntas.
     var IZQ = 44, DER = 10, hN = 200, hP = 150;
-    var ancho = (W - IZQ - DER) / filas.length;
+    var ancho = (W - IZQ - DER) / filas.length, pw = ancho / r.tamano;
     var x = function (i) { return IZQ + i * ancho; };
+    var xp = function (i, pet) { return x(i) + ((pet - 1) % r.tamano) * pw; };
     var yN = function (n) { return {1: 158, 2: 100, 3: 42}[n]; };
     sN.setAttribute('viewBox', '0 0 ' + W + ' ' + hN);
     sP.setAttribute('viewBox', '0 0 ' + W + ' ' + hP);
@@ -250,33 +257,36 @@
       sN.appendChild(sv('rect', {class: 'banda l' + n, x: IZQ, y: yN(n) - 24, width: W - IZQ - DER, height: 48, rx: 8}));
       sN.appendChild(sv('text', {class: 'eje n', x: IZQ - 10, y: yN(n) + 4, 'text-anchor': 'end'}, 'N' + n));
     });
-    var paso = Math.ceil(filas.length / Math.max(1, Math.floor((W - IZQ) / 64)));
     filas.forEach(function (f, i) {
-      if (i % paso === 0) sN.appendChild(sv('text', {class: 'eje', x: x(i) + ancho / 2, y: hN - 2, 'text-anchor': 'middle'}, horaMin(f.minuto * 60000)));
+      sN.appendChild(sv('text', {class: 'eje', x: x(i) + ancho / 2, y: hN - 2, 'text-anchor': 'middle'}, 'min ' + f.minuto));
     });
     function escalones(clave, cls) {
-      var d = '', enTramo = false;
+      var d = '', previo = null;
       filas.forEach(function (f, i) {
-        var n = f[clave];
-        if (!n) { enTramo = false; return; }
-        d += (enTramo ? ' V' + yN(n) : ' M' + x(i) + ' ' + yN(n)) + ' H' + (x(i) + ancho);
-        enTramo = true;
+        f.detalle.forEach(function (p) {
+          var n = p[clave];
+          if (!n) { previo = null; return; }
+          d += (previo ? ' V' + yN(n) : ' M' + xp(i, p.peticion) + ' ' + yN(n)) + ' H' + (xp(i, p.peticion) + pw);
+          previo = n;
+        });
       });
       if (d) sN.appendChild(sv('path', {class: cls, d: d}));
     }
-    escalones('nivel_regla', 'reg');
-    if (lectura) escalones('nivel_servidor', 'srv');
+    escalones('regla', 'reg');
+    if (lectura) escalones('servidor', 'srv');
     filas.forEach(function (f, i) {
-      f.niveles_cliente.forEach(function (n, j) {
-        var malo = (f.nivel_regla && n !== f.nivel_regla) || (f.nivel_servidor && n !== f.nivel_servidor);
-        sN.appendChild(sv('circle', {class: 'cli l' + n + (malo ? ' malo' : ''), cx: x(i) + ancho / 2 + j * 12 - (f.niveles_cliente.length - 1) * 6, cy: yN(n), r: 6}));
+      f.detalle.forEach(function (p) {
+        if (!p.cliente) return;
+        var malo = (p.regla && p.cliente !== p.regla) || (p.servidor && p.cliente !== p.servidor);
+        sN.appendChild(sv('circle', {class: 'cli l' + p.cliente + (malo ? ' malo' : ''), cx: xp(i, p.peticion) + pw / 2, cy: yN(p.cliente), r: Math.min(4, pw / 2)}));
       });
     });
     var datos = filas.map(function (f) {
-      var pet = lectura ? f.peticiones : contarIteraciones(f.iteraciones), err = lectura ? f.errores : f.errores_cliente;
+      var pet = lectura ? Math.max(f.peticiones_servidor, f.peticiones_cliente) : f.peticiones_cliente;
+      var err = lectura && f.peticiones_servidor ? f.errores_servidor : f.errores_cliente;
       return {pet: Math.max(pet, err), err: err};
     });
-    var tope = Math.max(15, Math.max.apply(null, datos.map(function (d) { return d.pet; }))), base = hP - 20;
+    var tope = Math.max(r.tamano, Math.max.apply(null, datos.map(function (d) { return d.pet; }))), base = hP - 20;
     var y = function (v) { return base - v / tope * (base - 24); };
     [[r.degradado, 'u2'], [r.minimo, 'u3']].forEach(function (u) {
       sP.appendChild(sv('line', {class: 'umbral ' + u[1], x1: IZQ, x2: W - DER, y1: y(u[0]), y2: y(u[0])}));
@@ -284,7 +294,7 @@
     });
     sP.appendChild(sv('line', {class: 'grid', x1: IZQ, x2: W - DER, y1: base, y2: base}));
     sP.appendChild(sv('text', {class: 'lbl', x: IZQ - 6, y: base + 4, 'text-anchor': 'end'}, '0'));
-    sP.appendChild(sv('text', {class: 'lbl', x: IZQ, y: hP - 2}, lectura ? 'peticiones por minuto · DynamoDB' : 'peticiones por minuto · vistas por el k6'));
+    sP.appendChild(sv('text', {class: 'lbl', x: IZQ, y: hP - 2}, lectura ? 'peticiones por minuto del k6 · CloudWatch' : 'peticiones por minuto del k6 · vistas por el k6'));
     datos.forEach(function (d, i) {
       if (!d.pet) return;
       var bw = Math.min(ancho - 8, 44), bx = x(i) + (ancho - bw) / 2, ok = d.pet - d.err;
@@ -295,9 +305,9 @@
       }
       if (d.err) sP.appendChild(sv('text', {class: 'val', x: x(i) + ancho / 2, y: y(d.pet) - 5}, d.err + ' err'));
     });
-    var ahora = Math.floor(new Date(s.reloj.minuto).getTime() / 60000);
     filas.forEach(function (f, i) {
-      if (f.minuto === ahora) sN.appendChild(sv('line', {class: 'ahora-l', x1: x(i) + 1, x2: x(i) + 1, y1: 14, y2: 184}));
+      if (s.k6.estado === 'corriendo' && f.minuto === s.nivel.minuto_k6)
+        sN.appendChild(sv('line', {class: 'ahora-l', x1: x(i) + 1, x2: x(i) + 1, y1: 14, y2: 184}));
       [sN, sP].forEach(function (svg) {
         var h = sv('rect', {class: 'hit', x: x(i), y: 0, width: ancho, height: svg === sN ? hN : hP, tabindex: 0});
         var mostrar = function (ev) { tip(f, datos[i], ev); };
@@ -312,9 +322,8 @@
   function tip(f, d, ev) {
     var t = $('tip'), caja = $('grafica').getBoundingClientRect();
     vaciar(t);
-    t.appendChild(el('h4', {text: horaMin(f.minuto * 60000) + ' · minuto de reloj'}));
-    [['DynamoDB', f.nivel_servidor ? 'N' + f.nivel_servidor : '—'], ['Regla', f.nivel_regla ? 'N' + f.nivel_regla : '—'],
-      ['Cliente', f.niveles_cliente.length ? 'N' + f.niveles_cliente.join(' · N') : '—'],
+    t.appendChild(el('h4', {text: 'Minuto ' + f.minuto + ' del k6 · pet. ' + f.peticiones}));
+    [['Servidor', seqTxt(f.niveles_servidor)], ['Regla', seqTxt(f.niveles_regla)], ['Cliente', seqTxt(f.niveles_cliente)],
       ['Peticiones', String(d.pet)], ['Errores', String(d.err)]].forEach(function (p) {
       t.appendChild(el('div', {}, [el('b', {text: p[1]}), el('span', {text: p[0]})]));
     });
@@ -327,9 +336,9 @@
   function pintarCoherencia(s) {
     var c = s.coherencia, a = $('coherencia'), b = $('cohRegla');
     a.className = 'coh' + (c.minutos ? (c.todo_coincide ? ' si' : ' no') : '');
-    a.textContent = c.minutos ? 'Cliente = DynamoDB en ' + c.coinciden + '/' + c.minutos + ' min' : '';
+    a.textContent = c.minutos ? 'Cliente = servidor en ' + c.coinciden + '/' + c.minutos + ' min del k6' : '';
     b.className = 'coh' + (c.minutos_regla ? (c.regla_se_cumple ? ' si' : ' no') : '');
-    b.textContent = c.minutos_regla ? 'Regla cumplida en ' + c.coinciden_regla + '/' + c.minutos_regla + ' min' : '';
+    b.textContent = c.minutos_regla ? 'Regla cumplida en ' + c.coinciden_regla + '/' + c.minutos_regla + ' min del k6' : '';
   }
 
   /* ── 5 · Datos crudos (pestañas) ── */
@@ -355,27 +364,26 @@
   }
 
   function pintarDynamo(s) {
-    var items = s.servidor.minutos;
-    $('cntDb').textContent = s.servidor.lectura ? items.length : '—';
-    if (!cambio('db', [items, s.servidor.lectura])) return;
+    var it = s.servidor.estado;
+    $('cntDb').textContent = s.servidor.lectura ? (it ? 1 : 0) : '—';
+    if (!cambio('db', [it, s.servidor.lectura])) return;
     var tb = $('filasDb');
     vaciar(tb);
-    if (!items.length) {
-      filaVacia(tb, 7, s.servidor.lectura ? 'Sin ítems en la ventana observada: cada minuto con tráfico crea uno.'
+    if (!it) {
+      filaVacia(tb, 8, s.servidor.lectura ? 'Sin ítem V3: el router lo crea con la primera petición.'
         : 'Sin permiso de lectura de DynamoDB: ' + (s.servidor.motivo || ''));
       return;
     }
-    items.slice().reverse().forEach(function (it) {
-      tb.appendChild(el('tr', {}, [
-        el('td', {class: 'm', text: it.pk}),
-        el('td', {class: 'm', text: horaMin(it.minuto * 60000)}),
-        el('td', {}, [tag(it.nivel)]),
-        el('td', {class: 'n', text: it.peticiones}),
-        el('td', {class: 'n' + (it.errores ? ' st5' : ''), text: it.errores}),
-        el('td', {class: 'm', text: it.degradado_en != null ? horaMin(it.degradado_en * 60000) : '—'}),
-        el('td', {class: 'm', text: it.ttl ? fechaHora(it.ttl) : '—'})
-      ]));
-    });
+    tb.appendChild(el('tr', {}, [
+      el('td', {class: 'm', text: it.pk}),
+      el('td', {class: 'n', text: it.seq}),
+      el('td', {}, [tag(it.nivel)]),
+      el('td', {class: 'n' + (it.errores_bloque ? ' st5' : ''), text: it.errores_bloque}),
+      el('td', {class: 'n', text: it.racha}),
+      el('td', {class: 'n', text: it.version}),
+      el('td', {class: 'm', text: it.ultimo ? hora(it.ultimo * 1000) : '—'}),
+      el('td', {class: 'm', text: it.ttl ? fechaHora(it.ttl) : '—'})
+    ]));
   }
 
   function pintarEventos(s) {
@@ -392,9 +400,12 @@
       var titulo, detalle, clase;
       if (e.evento === 'CAMBIO_NIVEL') {
         titulo = 'N' + e.de + ' → N' + e.a + ' · ' + (e.motivo === 'degradacion' ? 'degradación' : 'recuperación');
-        detalle = e.errores_minuto_anterior + ' errores en el minuto anterior · umbrales ' + e.umbrales.degradado + '/' + e.umbrales.minimo +
-          (e.umbrales.permanencia ? ' · permanencia ' + e.umbrales.permanencia + ' min' : '');
+        detalle = detalleEvento(e);
         clase = e.motivo;
+      } else if (e.evento === 'CORRIDA_NUEVA') {
+        titulo = 'corrida nueva · arranca en N1';
+        detalle = detalleEvento(e);
+        clase = 'recuperacion';
       } else {
         titulo = e.evento.replace(/_/g, ' ').toLowerCase();
         detalle = e.detalle || '';
@@ -404,22 +415,27 @@
     });
   }
 
+  function tags(sec) {
+    var td = el('td');
+    if (!sec.length) td.textContent = '—';
+    sec.forEach(function (n, i) { if (i) td.appendChild(document.createTextNode(' → ')); td.appendChild(tag(n)); });
+    return td;
+  }
+
   function pintarMinutos(s) {
     var filas = s.coherencia.filas;
     if (!cambio('min', [filas, s.servidor.lectura])) return;
     var tb = $('filasMin');
     vaciar(tb);
-    if (!filas.length) return filaVacia(tb, 7, 'Sin minutos con tráfico.');
+    if (!filas.length) return filaVacia(tb, 7, 'Sin peticiones todavía.');
     filas.forEach(function (f) {
-      var cli = el('td');
-      if (!f.niveles_cliente.length) cli.textContent = '—';
-      f.niveles_cliente.forEach(function (n) { cli.appendChild(tag(n)); cli.appendChild(document.createTextNode(' ')); });
+      var ok = f.coincide === false || f.coincide_regla === false ? '✗' : f.coincide_regla ? '✓' : '—';
       tb.appendChild(el('tr', {}, [
-        el('td', {class: 'm', text: horaMin(f.minuto * 60000)}),
-        el('td', {class: 'n', text: s.servidor.lectura ? f.errores : f.errores_cliente}),
-        el('td', {class: 'n', text: f.peticiones || '—'}),
-        el('td', {}, [tag(f.nivel_servidor)]), el('td', {}, [tag(f.nivel_regla)]), cli,
-        el('td', {class: 'm', text: f.iteraciones || '—'})
+        el('td', {class: 'm', text: 'min ' + f.minuto}),
+        el('td', {class: 'm', text: f.peticiones}),
+        el('td', {class: 'n', text: s.servidor.lectura && f.peticiones_servidor ? f.errores_servidor : f.errores_cliente}),
+        tags(f.niveles_servidor), tags(f.niveles_regla), tags(f.niveles_cliente),
+        el('td', {class: 'n', text: ok})
       ]));
     });
   }
@@ -439,7 +455,7 @@
     var av = $('avisoLectura');
     av.hidden = s.servidor.lectura;
     av.textContent = s.servidor.lectura ? '' : 'Modo solo cliente: ' + (s.servidor.motivo || '') +
-      '. La regla se verifica con lo que ve el k6; faltan el nivel del servidor, DynamoDB y los logs.';
+      '. La regla se verifica con lo que ve el k6; faltan el ítem V3 de DynamoDB y los logs.';
     $('url').textContent = e.url || 'sin despliegue: corra scripts/deploy.sh ' + (e.activo === 'aws' ? 'aws' : 'localstack');
     $('url').title = e.url || '';
     $('bReiniciar').hidden = !e.permite_reinicio;
@@ -497,7 +513,7 @@
   accion($('bOk'), manual(false));
   accion($('bErr'), manual(true));
   accion($('bReiniciar'), async function () {
-    if (!confirm('¿Borrar el estado por minuto de LocalStack? El sistema vuelve a N1.')) return;
+    if (!confirm('¿Borrar el estado (ítem V3) de LocalStack? La próxima petición arranca en N1.')) return;
     await api('POST', '/api/reiniciar');
   });
   document.querySelectorAll('.seg-ctl button').forEach(function (b) {

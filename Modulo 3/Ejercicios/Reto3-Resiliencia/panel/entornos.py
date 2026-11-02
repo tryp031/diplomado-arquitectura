@@ -1,4 +1,4 @@
-"""Lo que el panel observa del servidor: el estado por minuto (DynamoDB) y los logs (CloudWatch).
+"""Lo que el panel observa del servidor: el estado v3 (el ítem `V3` de DynamoDB) y los logs (CloudWatch).
 
 Es de SOLO LECTURA en los dos entornos. La única escritura es «Reiniciar estado», que se permite
 solo en LocalStack. El panel entra al sistema por la misma puerta que el k6: la URL del API Gateway.
@@ -12,6 +12,7 @@ modo «solo cliente»: corre el k6 y las peticiones manuales contra la URL, y no
 """
 from __future__ import annotations
 
+import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,7 +25,8 @@ from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 TABLA = "reto3-estado"
 GRUPO_ROUTER = "/aws/lambda/reto3-router"
 GRUPOS = (GRUPO_ROUTER, "/aws/lambda/reto3-nivel1", "/aws/lambda/reto3-nivel2", "/aws/lambda/reto3-nivel3")
-EVENTOS_CLAVE = ("CAMBIO_NIVEL", "FALLA_NIVEL", "FALLA_ROUTER", "ESTADO_NO_DISPONIBLE")
+EVENTOS_CLAVE = ("CAMBIO_NIVEL", "CORRIDA_NUEVA", "FALLA_NIVEL", "FALLA_ROUTER", "ESTADO_NO_DISPONIBLE")
+EVENTOS_CORRIDA = ("PETICION", "CORRIDA_NUEVA")
 REGION = "us-east-2"
 _CONFIG = Config(connect_timeout=2, read_timeout=5, retries={"total_max_attempts": 2})
 
@@ -70,27 +72,18 @@ class Entorno:
         except OSError:
             return None
 
-    def minutos(self, desde: int, hasta: int) -> list[dict[str, Any]]:
-        """Ítems MIN#m de la tabla en [desde, hasta]. Los minutos sin tráfico no tienen ítem."""
+    def estado_v3(self) -> dict[str, Any] | None:
+        """El ítem `V3`: el estado de la corrida que comparten todas las instancias del router."""
         self._revisar_lectura()
-        claves = [{"pk": {"S": f"MIN#{m}"}} for m in range(desde, hasta + 1)]
-        items: list[dict] = []
         try:
-            for i in range(0, len(claves), 100):  # límite de BatchGetItem
-                r = self._db.batch_get_item(RequestItems={TABLA: {"Keys": claves[i:i + 100], "ConsistentRead": True}})
-                items += r["Responses"].get(TABLA, [])
+            it = self._db.get_item(TableName=TABLA, Key={"pk": {"S": "V3"}}, ConsistentRead=True).get("Item")
         except (ClientError, BotoCoreError) as e:
             raise self._falla("DynamoDB", e) from e
-        out = []
-        for it in items:
-            m = int(it["pk"]["S"].split("#", 1)[1])
-            out.append({"minuto": m, "iso": iso_minuto(m), "pk": it["pk"]["S"],
-                        "ttl": int(it["ttl"]["N"]) if "ttl" in it else None,
-                        "nivel": int(it["nivel"]["N"]) if "nivel" in it else None,
-                        "degradado_en": int(it["degradado_en"]["N"]) if "degradado_en" in it else None,
-                        "errores": int(it.get("errores", {"N": "0"})["N"]),
-                        "peticiones": int(it.get("peticiones", {"N": "0"})["N"])})
-        return sorted(out, key=lambda d: d["minuto"])
+        if not it:
+            return None
+        num = lambda k, tipo=int: tipo(it[k]["N"]) if k in it else None  # noqa: E731
+        return {"pk": "V3", "seq": num("seq"), "nivel": num("nivel"), "errores_bloque": num("errores_bloque"),
+                "racha": num("racha"), "ultimo": num("ultimo", float), "version": num("version"), "ttl": num("ttl")}
 
     def registros(self, desde_ms: int, hasta_ms: int | None = None, grupos=GRUPOS,
                   patron: str | None = None) -> list[dict[str, Any]]:
@@ -119,11 +112,10 @@ class Entorno:
                 raise EntornoNoDisponible(f"CloudWatch Logs: {e}") from e
         return sorted(out, key=lambda d: d["ts"])
 
-    def eventos_clave(self, desde_ms: int) -> list[dict[str, Any]]:
-        """Cambios de nivel y fallas del router, ya decodificados."""
-        import json
+    def eventos_router(self, desde_ms: int, hasta_ms: int | None = None) -> list[dict[str, Any]]:
+        """Todos los eventos JSON del router en la ventana, ya decodificados y con su `ts`."""
         out = []
-        for r in self.registros(desde_ms, grupos=(GRUPO_ROUTER,)):
+        for r in self.registros(desde_ms, hasta_ms, grupos=(GRUPO_ROUTER,)):
             inicio = r["mensaje"].find("{")
             if inicio < 0:
                 continue
@@ -131,12 +123,21 @@ class Entorno:
                 d = json.loads(r["mensaje"][inicio:])
             except ValueError:
                 continue
-            if d.get("evento") in EVENTOS_CLAVE:
+            if isinstance(d, dict) and d.get("evento"):
                 out.append({"ts": r["ts"], **{k: v for k, v in d.items() if k != "_aws"}})
         return out
 
+    def peticiones(self, desde_ms: int, hasta_ms: int | None = None) -> list[dict[str, Any]]:
+        """`PETICION` (peticion, minuto_k6, nivel, status) y `CORRIDA_NUEVA`, en orden de llegada."""
+        return [d for d in self.eventos_router(desde_ms, hasta_ms) if d["evento"] in EVENTOS_CORRIDA]
+
+    def eventos_clave(self, desde_ms: int) -> list[dict[str, Any]]:
+        """Cambios de nivel (motivo, racha_sin_error, errores_minuto_anterior, umbrales), corridas nuevas y fallas."""
+        return [d for d in self.eventos_router(desde_ms) if d["evento"] in EVENTOS_CLAVE]
+
     def reiniciar(self) -> int:
-        """Borra el estado por minuto. Solo en LocalStack: en AWS el panel es de solo lectura."""
+        """Borra el estado (el ítem V3 y, si quedan, los MIN# de la v1). Solo en LocalStack: en AWS el panel
+        es de solo lectura."""
         if not self.permite_reinicio:
             raise PermissionError("el reinicio del estado solo está permitido en LocalStack")
         borrados = 0
