@@ -24,6 +24,8 @@ def empaquetar() -> bytes:
         for archivo in sorted((RAIZ / "src").glob("*.py")):
             info = zipfile.ZipInfo(archivo.name, date_time=FECHA_FIJA)
             info.external_attr = 0o644 << 16
+            # zipfile anota el sistema de origen (0 en Windows, 3 en Unix) y cambia los bytes: se fija.
+            info.create_system = 3
             # Saltos de línea normalizados: un checkout de Windows con CRLF daría otro SHA.
             z.writestr(info, archivo.read_bytes().replace(b"\r\n", b"\n"))
     return buf.getvalue()
