@@ -323,6 +323,8 @@ body.con-notas .notas{display:block}
 .t.antes{background:transparent; color:var(--ink); border-style:dashed}
 .mx-ley{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; font-size:12.5px; color:var(--muted); margin:10px 0 0; max-width:none}
 .rlista{display:grid; gap:9px}
+/* Seis riesgos (v3): en dos columnas para que la lámina quepa en 720 px de alto. */
+.rlista.dos{grid-template-columns:1fr 1fr; align-items:stretch} .rlista.dos .ri{grid-template-columns:36px 1fr auto; gap:3px 10px; align-content:start}
 .ri{display:grid; grid-template-columns:44px 1fr auto; gap:3px 14px; align-items:center; background:var(--surface);
   border:1px solid var(--line); border-radius:14px; padding:11px 14px; box-shadow:var(--sh-s)}
 .ri .id{grid-row:1/3; font-family:var(--mono); font-weight:800; font-size:15px; background:var(--ink); color:var(--paper);
@@ -511,7 +513,7 @@ body.con-notas .notas{display:block}
       <p class="lede" style="color:#ffffffd9">Sistemas UltraSeguros S.A. falla en los picos de tráfico. Diseñamos en <b>AWS serverless</b> tres niveles de servicio
         (Full, Degradado y Mínimo) que cambian según la salud observada <b>minuto a minuto</b>, sin intervención humana.</p>
       <p style="margin-top:22px">Group 2 · Daniel Mazo · Freddy Aparicio · Camilo Céspedes<br>
-        Diplomado en Arquitectura de Software y Cloud Computing · PUJ Cali · octubre 2026</p>
+        Diplomado en Arquitectura de Software y Cloud Computing · PUJ Cali · noviembre 2026</p>
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Orden: punto de partida → riesgos → decisiones → restricciones → atributos → tácticas → arquitectura → cómo funciona → demo → fallas → corrida oficial → cierre.</p>
@@ -524,7 +526,7 @@ body.con-notas .notas{display:block}
   <div class="caja">
     <span class="kicker">Punto de partida</span>
     <h2>Priorizamos la <span style="color:var(--blue)">disponibilidad</span>: responder siempre, aunque sea con menos</h2>
-    <p class="lede">La primera versión subía y bajaba de nivel de inmediato y, con el script oficial, oscilaba. Al resolver las dudas con el docente en Discord entendimos que el reto es un <b>sistema de recuperación</b>: no basta con reaccionar, hay que evaluar el estado para recorrer los niveles en orden. Por eso, después de degradar, el sistema <b>sostiene el nivel 2 minutos</b> y luego se recupera <b>de a un nivel por minuto</b>.</p>
+    <p class="lede">La primera versión subía y bajaba de nivel de inmediato y, con el script oficial, oscilaba. Al releer el enunciado entendimos que el reto es un <b>sistema de recuperación</b>: pide volver a Nivel 2 cuando los indicadores estén «saludables» y a Nivel 1 solo cuando estén «completamente estables». No basta con reaccionar: hay que medir la estabilidad para recorrer los niveles en orden. Por eso, después de degradar, el sistema exige una <b>racha de peticiones sin error</b> para recuperarse: <b>30 para volver a N2 y 40 para N1</b>, siempre de a un nivel.</p>
     <div class="comparo">
       <div class="sec-fila"><span class="et2">Primera versión</span>
         <span class="ch c1">1</span><span class="ch c2">2</span><span class="ch c1 salto">1</span><span class="ch c3 salto">3</span><span class="ch c2">2</span><span class="ch c3 salto">3</span><span class="ch c2">2</span><span class="ch c1">1</span>
@@ -533,10 +535,10 @@ body.con-notas .notas{display:block}
         <span class="ch c1">1</span><span class="ch c2">2</span><span class="ch c3">3</span><span class="ch c2">2</span><span class="ch c1">1</span>
         <span class="res bien">✓ recorre los tres niveles en orden</span></div>
     </div>
-    <p class="fuente">Script oficial del docente: 140 peticiones, una cada 3 s, con 5 · 0 · 15 · 0 · 15 · 0 · 0 errores por minuto</p>
+    <p class="fuente">Script oficial del docente: 140 peticiones, una cada 3 s, con 5 · 0 · 15 · 0 · 15 · 0 · 0 errores por «minuto» (bloque de 20 peticiones)</p>
     <div class="notas"><span class="tag">Notas</span>
       <p>Frase para abrir: «priorizamos la disponibilidad, porque un servicio financiero que se cae en el pico pierde clientes, a costa de operar con menos funciones durante la falla».</p>
-      <p>Precisión, por si preguntan: no son 2 minutos por nivel. El nivel se sostiene 2 minutos desde que degrada; en la corrida fueron 2 min en N2, 3 en N3 y 1 más en N2.</p>
+      <p>Precisión, por si preguntan: el «minuto» es el del k6, un bloque de 20 peticiones, no el minuto de reloj. Con el reloj, la latencia corría las ventanas (la petición 20 salía en N2, como señaló el docente el 27/10). Una versión intermedia sostenía el nivel 2 minutos (ADR-001), pero solo terminaba en N1 porque la corrida se desbordaba a un 8.º minuto de reloj; la versión final (ADR-002) recupera con rachas de éxitos.</p>
     </div>
   </div>
 </section>
@@ -544,8 +546,8 @@ body.con-notas .notas{display:block}
 <!-- ═══ 00 · Matriz de riesgos ═══ -->
 <section class="lamina">
   <div class="caja ancha">
-    <span class="kicker">00 · Matriz de riesgos</span>
-    <h2>Cuatro riesgos de la resiliencia, y cómo los bajamos</h2>
+    <span class="kicker">00 · Análisis de riesgos · matriz de riesgos</span>
+    <h2>Seis riesgos de la resiliencia, y cómo los bajamos</h2>
     <div class="mx-wrap">
       <div>
         <div class="mx" role="img" aria-label="Matriz de impacto por probabilidad con la posición de cada riesgo antes y después de mitigar">
@@ -555,9 +557,9 @@ body.con-notas .notas{display:block}
           <div class="celda a"><span class="t antes">R2</span><span class="t antes">R3</span><span class="pt">6</span></div>
           <div class="celda a"><span class="t antes">R1</span><span class="pt">9</span></div>
           <span class="lab">Medio · 2</span>
-          <div class="celda b"><span class="t">R3</span><span class="t">R4</span><span class="pt">2</span></div>
-          <div class="celda m"><span class="pt">4</span></div>
-          <div class="celda a"><span class="pt">6</span></div>
+          <div class="celda b"><span class="t">R3</span><span class="t">R4</span><span class="t">R6</span><span class="pt">2</span></div>
+          <div class="celda m"><span class="t">R5</span><span class="t antes">R6</span><span class="pt">4</span></div>
+          <div class="celda a"><span class="t antes">R5</span><span class="pt">6</span></div>
           <span class="lab">Bajo · 1</span>
           <div class="celda b"><span class="pt">1</span></div>
           <div class="celda b"><span class="pt">2</span></div>
@@ -566,31 +568,40 @@ body.con-notas .notas{display:block}
           <span></span><span></span><span class="eje-x">Probabilidad</span>
         </div>
         <p class="mx-ley"><span class="t antes">R1</span> antes de mitigar <span class="t">R1</span> ahora · <span class="rk b">1–2 bajo</span> <span class="rk m">3–4 medio</span> <span class="rk a">6–9 alto</span></p>
-        <p class="mx-como"><b>Cómo se lee:</b> riesgo = impacto × probabilidad, de 1 a 3 cada uno. Mitigar no siempre baja el impacto: casi siempre baja la probabilidad.</p>
+        <p class="mx-como"><b>Matriz de riesgos</b> (técnica del módulo): riesgo = impacto × probabilidad, de 1 a 3 cada uno. Mitigar no siempre baja el impacto: casi siempre baja la probabilidad.</p>
+        <p class="mx-como"><b>Resultado:</b> ningún riesgo queda alto. Los seis suman 34 antes de mitigar y 16 después; los tres que quedan en medio son de alto impacto (R1, R2) o dependen del script (R5).</p>
       </div>
-      <div class="rlista">
+      <div class="rlista dos">
         <div class="ri"><span class="id">R1</span><b>El sistema oscila entre niveles</b>
           <span class="mov"><span class="rk a">9</span>→<span class="rk m">3</span></span>
           <p class="ej"><b>Ejemplo:</b> pasó en la primera versión. El minuto 1 llegaba limpio y devolvía el sistema a N1; el minuto 2 traía 15 errores y lo mandaba directo a N3: 1-2-<b>1-3</b>-2-<b>3</b>-2-1.</p>
-          <p class="sol"><b>Solución:</b> tras degradar, el nivel se sostiene 2 min. Un minuto limpio ya no lo devuelve a N1.</p></div>
+          <p class="sol"><b>Solución:</b> para subir exige rachas sin error (30 peticiones para N2 y 40 para N1), de a un nivel. Un bloque limpio ya no lo devuelve a N1.</p></div>
         <div class="ri"><span class="id">R2</span><b>Dos instancias responden niveles distintos</b>
           <span class="mov"><span class="rk a">6</span>→<span class="rk m">3</span></span>
-          <p class="ej"><b>Ejemplo:</b> dos peticiones del mismo minuto caen en dos instancias de Lambda. Cada una tiene su propia memoria: una podría responder «Nivel 1: OK» y la otra «Nivel 3».</p>
-          <p class="sol"><b>Solución:</b> el nivel del minuto se guarda una sola vez en DynamoDB y todas lo leen de ahí.</p></div>
+          <p class="ej"><b>Ejemplo:</b> dos peticiones caen en dos instancias de Lambda, cada una con su memoria: una podría responder «Nivel 1» y la otra «Nivel 3».</p>
+          <p class="sol"><b>Solución:</b> nivel, número de petición y racha viven en un solo ítem de DynamoDB, con escritura condicional por versión.</p></div>
         <div class="ri"><span class="id">R3</span><b>El servicio de un nivel falla o se cuelga</b>
           <span class="mov"><span class="rk a">6</span>→<span class="rk b">2</span></span>
           <p class="ej"><b>Ejemplo:</b> la Lambda del Nivel 1 no responde. Sin límite, el cliente queda esperando y los reintentos automáticos alargan la espera.</p>
-          <p class="sol"><b>Solución:</b> se corta a los 3 s, sin reintentos: responde el mensaje del Nivel 3 y el error cuenta para el minuto siguiente.</p></div>
+          <p class="sol"><b>Solución:</b> se corta a los 3 s, sin reintentos: responde el mensaje del Nivel 3; el error cuenta en el bloque y rompe la racha.</p></div>
         <div class="ri"><span class="id">R4</span><b>DynamoDB no responde</b>
           <span class="mov"><span class="rk m">3</span>→<span class="rk b">2</span></span>
           <p class="ej"><b>Ejemplo:</b> el router no puede leer el estado, así que no sabe en qué nivel está.</p>
           <p class="sol"><b>Solución:</b> asume lo peor y responde «Nivel 3: Sistema bajo mantenimiento» (503), nunca un error crudo.</p></div>
+        <div class="ri"><span class="id">R5</span><b>Las rachas de 30 y 40 dependen del script</b>
+          <span class="mov"><span class="rk a">6</span>→<span class="rk m">4</span></span>
+          <p class="ej"><b>Ejemplo:</b> con otro patrón de carga, la racha llega antes o después y la secuencia cambia.</p>
+          <p class="sol"><b>Solución:</b> calibradas con 5 peticiones de margen y configurables (<code>RACHA_N2</code>, <code>RACHA_N1</code>) sin tocar el código.</p></div>
+        <div class="ri"><span class="id">R6</span><b>El ítem único de estado es un punto caliente</b>
+          <span class="mov"><span class="rk m">4</span>→<span class="rk b">2</span></span>
+          <p class="ej"><b>Ejemplo:</b> con mucho tráfico concurrente, todas las instancias escriben el mismo ítem y chocan.</p>
+          <p class="sol"><b>Solución:</b> escritura condicional por versión, hasta 5 reintentos: la que pierde relee y recalcula.</p></div>
       </div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Guion por riesgo: qué podía pasar (el ejemplo), qué tan grave y probable era (el número rojo) y qué decisión lo bajó (el número de la derecha).</p>
       <p>R1 tiene probabilidad 3 porque ocurrió de verdad en la primera versión: no es un supuesto. R2 y R3 bajan de 6 a 3 y 2 porque la solución hace improbable que pasen, aunque el impacto siga siendo alto. R4 tiene probabilidad 1 desde el inicio porque DynamoDB es un servicio gestionado.</p>
-      <p>Pendiente del equipo: validar la calificación en consenso antes de grabar.</p>
+      <p>R5 y R6 son de la versión final. R5 baja a 4 y no más: las rachas siguen calibradas con este script, solo que cambiarlas es un parámetro. R6 no aparece con el k6 oficial (un solo usuario virtual). Si preguntan por 10 veces más tráfico: el ítem único es el límite; con 5 choques seguidos el router responde Nivel 3 por seguridad, y la salida sería repartir el estado.</p>
     </div>
   </div>
 </section>
@@ -601,10 +612,10 @@ body.con-notas .notas{display:block}
     <span class="kicker">01 · Decisiones que tomamos</span>
     <h2>Seis decisiones, cada una con su porqué</h2>
     <div class="rej d3">
-      <div class="card dec"><span class="dn">1</span><b>El minuto anterior decide el nivel</b><p>Es la regla del docente: el sistema es predecible y cada minuto queda auditado, a cambio de reaccionar hasta 60 s después.</p></div>
-      <div class="card dec"><span class="dn">2</span><b>Degradar de golpe, recuperar con calma</b><p>Baja de nivel apenas hay errores, pero se sostiene 2 minutos y sube de a un nivel. Así no oscila.</p></div>
+      <div class="card dec"><span class="dn">1</span><b>El «minuto» anterior decide el nivel</b><p>Es la regla del docente. El «minuto» es el del k6, un bloque de 20 peticiones: la latencia ya no corre las ventanas, a cambio de depender del ritmo del cliente.</p></div>
+      <div class="card dec"><span class="dn">2</span><b>Degradar de golpe, recuperar con calma</b><p>Baja de nivel apenas hay errores; para subir exige 30 peticiones seguidas sin error (N3→N2) y 40 (N2→N1). Así no oscila.</p></div>
       <div class="card dec"><span class="dn">3</span><b>Un router detrás del API Gateway</b><p>El gateway no sabe enrutar según un estado. El router decide y llama solo al servicio del nivel vigente.</p></div>
-      <div class="card dec"><span class="dn">4</span><b>Estado compartido en DynamoDB</b><p>Las instancias de Lambda no comparten memoria. Con el estado en DynamoDB, todas responden el mismo nivel.</p></div>
+      <div class="card dec"><span class="dn">4</span><b>Estado compartido en DynamoDB</b><p>Las instancias de Lambda no comparten memoria. El estado vive en un solo ítem con versión: todas responden el mismo nivel.</p></div>
       <div class="card dec"><span class="dn">5</span><b>Ante la duda, Nivel 3</b><p>Si el estado no se puede leer o un servicio falla, respondemos al mínimo con un mensaje claro, nunca con un error crudo.</p></div>
       <div class="card dec"><span class="dn">6</span><b>Infraestructura como código</b><p>Toda la arquitectura vive en una plantilla: nombres, permisos y parámetros en un solo lugar.</p></div>
     </div>
@@ -647,12 +658,12 @@ body.con-notas .notas{display:block}
           <dt>Ejemplo</dt><dd>Cuando pasa de Nivel 2 a Nivel 3 deja escrito <b>cuándo, de qué nivel a cuál y cuántos errores lo causaron</b>. Cualquiera puede explicar cada cambio sin adivinar.</dd></dl></div>
       <div class="card attr"><span class="prio">Prioridad 3</span><b>Modificabilidad</b>
         <dl><dt>Qué significa aquí</dt><dd>Cambiar la regla <b>sin tocar el código</b>.</dd>
-          <dt>Cómo lo cumplimos</dt><dd>Umbrales (5 y 10 errores) y permanencia (2 min) son parámetros del despliegue.</dd>
-          <dt>Ejemplo</dt><dd>Si el docente pide otros umbrales u otra permanencia, <b>se cambia el valor en el despliegue</b> y el código queda igual.</dd></dl></div>
+          <dt>Cómo lo cumplimos</dt><dd>Umbrales (5 y 10 errores) y rachas (30 y 40 peticiones) son parámetros del despliegue.</dd>
+          <dt>Ejemplo</dt><dd>Si el docente pide otros umbrales u otras rachas, <b>se cambia el valor en el despliegue</b> y el código queda igual.</dd></dl></div>
     </div>
-    <div class="aviso pare"><p><b>A costa de tiempo de reacción.</b> Esperar 2 minutos antes de recuperar evita que el sistema oscile y asegura la secuencia 1-2-3-2-1, pero tarda más en volver a Nivel 1. Y cada cambio se aplica al minuto siguiente, no al instante.</p></div>
+    <div class="aviso pare"><p><b>A costa de tiempo de reacción.</b> Exigir rachas de 30 y 40 peticiones sin error evita que el sistema oscile y asegura la secuencia 1-2-3-2-1, pero tarda más en volver a Nivel 1. Y cada degradación se aplica al «minuto» siguiente, no al instante.</p></div>
     <div class="notas"><span class="tag">Notas</span><p>Escenario de disponibilidad, si lo piden: con 10 o más errores en un minuto, el sistema pasa a Nivel 3 en el minuto siguiente, sigue respondiendo el 100 % de las peticiones y vuelve a Nivel 1 de a un nivel.</p>
-      <p>También cedemos funciones en los niveles 2 y 3 (análisis de riesgo y notificación) y unos 34 ms por consultar el estado compartido.</p></div>
+      <p>También cedemos funciones en los niveles 2 y 3 (análisis de riesgo y notificación) y unos 53 ms por petición en el router, que lee y escribe el estado compartido dos veces.</p></div>
   </div>
 </section>
 
@@ -664,7 +675,7 @@ body.con-notas .notas{display:block}
     <div class="tac">
       <div class="tcol t-det"><span class="tfase"><i>1</i> Detectar la falla</span><span class="tpreg">¿Algo está fallando?</span>
         <div><b>Monitor</b><span>El router mira el resultado de cada petición</span></div>
-        <div><b>Condition monitoring</b><span>Cuenta los errores del minuto contra los umbrales 5 y 10</span></div>
+        <div><b>Condition monitoring</b><span>Cuenta los errores de cada «minuto» (20 peticiones) contra los umbrales 5 y 10</span></div>
         <div><b>Exception detection</b><span>Un error del servicio o una espera de más de 3 s cuentan como falla</span></div></div>
       <div class="tflecha">→</div>
       <div class="tcol t-rec"><span class="tfase"><i>2</i> Degradar sin caerse</span><span class="tpreg">¿Cómo sigo respondiendo?</span>
@@ -673,19 +684,20 @@ body.con-notas .notas{display:block}
         <div><b>Exception handling</b><span>Toda falla termina en un mensaje claro, nunca en un error crudo</span></div></div>
       <div class="tflecha">→</div>
       <div class="tcol t-rei"><span class="tfase"><i>3</i> Reintroducir con calma</span><span class="tpreg">¿Cuándo vuelvo a la normalidad?</span>
-        <div><b>Histéresis</b><span>Tras degradar, espera 2 minutos antes de recuperarse: un minuto bueno no basta</span></div>
-        <div><b>Reintroducción gradual</b><span>Devuelve las funciones por partes, un nivel por minuto. Si vuelven los errores, degrada otra vez</span>
-          <span class="escal"><span class="ch c3">N3</span><em>2 min</em><span class="ch c2">N2</span><em>1 min</em><span class="ch c1">N1</span></span></div></div>
+        <div><b>Histéresis</b><span>Para recuperarse exige una racha de peticiones sin error: un bloque bueno no basta</span></div>
+        <div><b>Reintroducción gradual</b><span>Devuelve las funciones por partes, de a un nivel. Si vuelven los errores, degrada otra vez</span>
+          <span class="escal"><span class="ch c3">N3</span><em>racha 30</em><span class="ch c2">N2</span><em>racha 40</em><span class="ch c1">N1</span></span></div></div>
     </div>
     <div class="tej"><b>Ejemplo de punta a punta</b>
       <span><i>1</i>llegan 15 errores en un minuto</span><span class="sep">→</span>
       <span><i>2</i>el minuto siguiente opera en Nivel 3</span><span class="sep">→</span>
-      <span><i>3</i>pasados 2 min vuelve a Nivel 2 y luego a Nivel 1</span></div>
-    <div class="cb"><b>Patrón que las une: Circuit breaker de 3 estados</b>
-      <span class="ch c1">N1 ≈ cerrado</span><span class="ch c2">N2 ≈ semiabierto</span><span class="ch c3">N3 ≈ abierto</span><span class="cb-n">con una ventana de un minuto</span></div>
+      <span><i>3</i>tras 30 peticiones sin error vuelve a Nivel 2; al llegar a 40, a Nivel 1</span></div>
+    <div class="cb"><b>Se parece a un circuit breaker, con un nivel intermedio</b>
+      <span class="ch c1">N1 ≈ cerrado</span><span class="ch c2">N2 · degrada en vez de cortar</span><span class="ch c3">N3 ≈ abierto</span><span class="cb-n">con ventanas de 20 peticiones</span></div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Se cuenta de izquierda a derecha, con la pregunta de cada columna: ¿algo está fallando?, ¿cómo sigo respondiendo?, ¿cuándo vuelvo a la normalidad?</p>
-      <p>La reintroducción gradual es nuestra versión de la táctica Shadow del material: en vez de devolver todo de golpe, se prueba primero con menos funciones (Nivel 2) y solo después se activan todas (Nivel 1).</p>
+      <p>Los nombres de las tácticas son del catálogo de disponibilidad de Bass, Clements y Kazman (<i>Software Architecture in Practice</i>), no del material del módulo. La reintroducción gradual se inspira en su táctica Shadow: en vez de devolver todo de golpe, se prueba primero con menos funciones (Nivel 2) y solo después se activan todas (Nivel 1). La histéresis es una técnica de control, no una táctica del catálogo.</p>
+      <p>Por qué no es un circuit breaker puro: el semiabierto de un breaker solo existe al recuperarse; nuestro Nivel 2 también aparece al degradar con 5 errores. Por eso decimos que «se parece».</p>
     </div>
   </div>
 </section>
@@ -696,7 +708,7 @@ body.con-notas .notas{display:block}
     <span class="kicker">05 · Arquitectura · vista de contenedores</span>
     <h2>Un gateway, un router que decide y tres servicios</h2>
     <figure class="dgfig">
-      <svg class="dg" viewBox="0 0 1120 390" role="img" aria-label="k6 envía la petición al API Gateway; el router lee y escribe el nivel del minuto en DynamoDB e invoca solo la Lambda del nivel vigente; todas las Lambdas escriben en CloudWatch">
+      <svg class="dg" viewBox="0 0 1120 390" role="img" aria-label="k6 envía la petición al API Gateway; el router numera la petición y lee y escribe el estado en DynamoDB e invoca solo la Lambda del nivel vigente; todas las Lambdas escriben en CloudWatch">
         <defs><marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="punta"/></marker></defs>
         <rect class="region" x="178" y="10" width="934" height="372" rx="18"/>
         <text x="198" y="36" class="mono t-blue t-b" style="font-size:12.5px; letter-spacing:.08em">AWS · US-EAST-2</text>
@@ -711,12 +723,12 @@ body.con-notas .notas{display:block}
         <!-- decisión -->
         <rect class="dom" x="432" y="140" width="196" height="108" rx="16"/>
         <text x="530" y="178" text-anchor="middle" class="t-b" style="font-size:16px">λ Router</text>
-        <text x="530" y="200" text-anchor="middle" class="t-m" style="font-size:13px">decide el nivel</text>
-        <text x="530" y="219" text-anchor="middle" class="t-m" style="font-size:13px">del minuto</text>
+        <text x="530" y="200" text-anchor="middle" class="t-m" style="font-size:13px">numera la petición</text>
+        <text x="530" y="219" text-anchor="middle" class="t-m" style="font-size:13px">y decide el nivel</text>
         <!-- estado -->
         <rect class="shm" x="432" y="296" width="196" height="70" rx="14"/>
         <text x="530" y="326" text-anchor="middle" class="t-b">DynamoDB</text>
-        <text x="530" y="347" text-anchor="middle" class="t-m" style="font-size:12.5px">nivel y errores por minuto</text>
+        <text x="530" y="347" text-anchor="middle" class="t-m" style="font-size:12.5px">un ítem: nivel, nº y racha</text>
         <!-- servicios -->
         <text x="796" y="40" text-anchor="middle" class="mono t-m" style="font-size:11.5px; letter-spacing:.07em">UN SERVICIO POR NIVEL</text>
         <rect class="n1" x="690" y="54" width="212" height="76" rx="14"/>
@@ -754,13 +766,13 @@ body.con-notas .notas{display:block}
     <div class="pasos">
       <div><i>1</i>k6 envía la petición por HTTPS</div>
       <div><i>2</i>API Gateway la pasa al router</div>
-      <div><i>3</i>El router lee los errores del minuto anterior y fija el nivel en DynamoDB</div>
+      <div><i>3</i>El router numera la petición, evalúa el bloque anterior y la racha, y guarda el estado en DynamoDB</div>
       <div><i>4</i>Invoca solo el servicio del nivel vigente y responde su mensaje</div>
       <div><i>5</i>Cada cambio de nivel queda registrado con su motivo</div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Es la vista de contenedores del modelo C4. Se lee de izquierda a derecha siguiendo los números.</p>
-      <p>Pregunta probable: ¿por qué no enruta el API Gateway directamente? Porque no puede consultar el estado en DynamoDB para decidir. El router es el patrón Gateway Routing que lo complementa, y le cuesta unos 34 ms por petición.</p>
+      <p>Pregunta probable: ¿por qué no enruta el API Gateway directamente? Porque no puede consultar el estado en DynamoDB para decidir. El router es el patrón Gateway Routing que lo complementa, y le cuesta unos 53 ms por petición (mediana de 48 ms en la corrida oficial).</p>
     </div>
   </div>
 </section>
@@ -771,7 +783,7 @@ body.con-notas .notas{display:block}
     <span class="kicker">06 · Cómo funciona · la máquina de estados</span>
     <h2>Tres estados, una regla y lo que responde cada uno</h2>
     <figure class="dgfig maq">
-      <svg class="dg" viewBox="0 0 1000 300" role="img" aria-label="Tres estados. Se degrada con 5 o 10 errores del minuto anterior, incluso de 1 a 3 directo; se recupera de a un nivel cuando ya pasaron 2 minutos">
+      <svg class="dg" viewBox="0 0 1000 300" role="img" aria-label="Tres estados. Se degrada con 5 o 10 errores del bloque anterior, incluso de 1 a 3 directo; se recupera de a un nivel con 30 y 40 peticiones seguidas sin error">
         <defs><marker id="fm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="punta"/></marker>
           <marker id="fv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="punta-v"/></marker></defs>
         <path class="flecha" d="M222 118Q330 70 438 118" marker-end="url(#fm)"/>
@@ -781,11 +793,11 @@ body.con-notas .notas{display:block}
         <path class="flecha rojo" d="M196 96Q500 -34 804 96" marker-end="url(#fm)"/>
         <text x="500" y="20" text-anchor="middle" class="mono t-b t-red" style="font-size:14px">≥ 10 errores · directo a Nivel 3</text>
         <path class="flecha verde" d="M778 184Q670 232 562 184" marker-end="url(#fv)"/>
-        <text x="670" y="246" text-anchor="middle" class="mono t-green t-b" style="font-size:13px">&lt; 10 errores</text>
+        <text x="670" y="246" text-anchor="middle" class="mono t-green t-b" style="font-size:13px">30 seguidas sin error</text>
         <path class="flecha verde" d="M438 184Q330 232 222 184" marker-end="url(#fv)"/>
-        <text x="330" y="246" text-anchor="middle" class="mono t-green t-b" style="font-size:13px">&lt; 5 errores</text>
+        <text x="330" y="246" text-anchor="middle" class="mono t-green t-b" style="font-size:13px">40 seguidas sin error</text>
         <rect class="reloj" x="290" y="262" width="420" height="30" rx="15"/>
-        <text x="500" y="282" text-anchor="middle" class="t-b" style="font-size:13px">⏱ sube de a un nivel cuando ya pasaron 2 min desde que degradó</text>
+        <text x="500" y="282" text-anchor="middle" class="t-b" style="font-size:13px">↑ sube de a un nivel; cualquier error reinicia la racha</text>
         <circle class="n1 est" cx="160" cy="150" r="66"/>
         <text x="160" y="150" text-anchor="middle" class="mono t-b t-blue" style="font-size:30px">N1</text>
         <text x="160" y="174" text-anchor="middle" class="t-m" style="font-size:14px">Full</text>
@@ -809,7 +821,7 @@ body.con-notas .notas{display:block}
         <div class="ko"><span class="cod">503</span>Nivel 3: Sistema bajo mantenimiento, intente más tarde</div></div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
-      <p>Se evalúa una vez por minuto de reloj, con los errores del minuto anterior. Nunca baja de 3 a 1 de un salto.</p>
+      <p>La degradación se evalúa al empezar cada bloque de 20 peticiones (el «minuto» del k6), con los errores del bloque anterior. La recuperación se mide en peticiones seguidas sin error y la racha no se reinicia al subir: por eso N2 dura 10 peticiones en la corrida (de la 126 a la 135). Nunca sube de 3 a 1 de un salto.</p>
       <p>Arriba de cada tarjeta, la respuesta cuando todo va bien; abajo, cuando el cliente pide un error. El 503 de mantenimiento es nuestro: es el código HTTP que corresponde.</p>
     </div>
   </div>
@@ -821,18 +833,18 @@ body.con-notas .notas{display:block}
     <div class="portada">
       <span class="kicker">07 · Demo</span>
       <h2 style="color:#fff; font-size:clamp(32px,4.6vw,52px)">Ahora, veámoslo funcionar en vivo</h2>
-      <p class="lede" style="color:#ffffffd9">Vamos al panel de control: el mismo sistema desplegado en AWS, observado minuto a minuto.</p>
+      <p class="lede" style="color:#ffffffd9">Vamos al panel de control: el mismo sistema desplegado en AWS, observado petición a petición.</p>
       <span class="ir">▶ Ir al panel de control</span>
       <div class="cierre-rej c4">
         <div><span>1</span><b>La arquitectura en vivo</b></div>
         <div><span>2</span><b>Errores a mano y la respuesta del Nivel 3</b></div>
-        <div><span>3</span><b>El nivel que se sostiene 2 minutos</b></div>
+        <div><span>3</span><b>La racha que devuelve el sistema de a un nivel</b></div>
         <div><span>4</span><b>La corrida oficial y su evidencia</b></div>
       </div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
       <p>Antes de grabar: abrir el panel con el switch en AWS y modo «Cliente + servidor», recargar sin caché (Cmd+Shift+R) y calentar las Lambdas con una petición OK.</p>
-      <p>Paso 2: enviar 10 peticiones con error; al minuto siguiente aparece «Sistema bajo mantenimiento». Paso 4: el k6 completo tarda 7 minutos, así que se abre la corrida ya hecha.</p>
+      <p>Paso 2: enviar 10 peticiones con error y 10 sin error, seguidas, para completar el bloque de 20: la petición 21 ya responde en Nivel 3 y, con error, «Sistema bajo mantenimiento». Ojo: 15 s sin tráfico reinician la corrida, así que no hay que pausar entre clics. Paso 4: el k6 completo tarda 7 minutos, así que se abre la corrida ya hecha.</p>
       <p>Plan B si falla la red: el mismo sistema en un entorno local, con el mismo resultado.</p>
     </div>
   </div>
@@ -848,53 +860,50 @@ body.con-notas .notas{display:block}
       <div class="si"><span>Si…</span>DynamoDB no responde</div><div class="fx">→</div>
       <div class="ent"><span>El sistema…</span>responde Nivel 3 <b>«Sistema bajo mantenimiento»</b> (503) y lo registra</div>
       <div class="si"><span>Si…</span>el servicio del nivel falla o tarda más de 3 s</div><div class="fx">→</div>
-      <div class="ent"><span>El sistema…</span>responde el mensaje del Nivel 3 y <b>cuenta el error</b> para el minuto siguiente</div>
-      <div class="si"><span>Si…</span>al empezar un minuto, dos peticiones llegan a la vez a instancias distintas y las dos calculan el nivel</div><div class="fx">→</div>
-      <div class="ent"><span>El sistema…</span>deja que <b>solo una lo guarde</b> en DynamoDB; la otra encuentra el nivel ya escrito y lo usa. <b>Los clientes nunca ven dos niveles en el mismo minuto</b></div>
+      <div class="ent"><span>El sistema…</span>responde el mensaje del Nivel 3, <b>cuenta el error</b> en el bloque y reinicia la racha</div>
+      <div class="si"><span>Si…</span>dos peticiones llegan a la vez a instancias distintas y las dos leen el mismo estado</div><div class="fx">→</div>
+      <div class="ent"><span>El sistema…</span>deja que <b>solo una lo guarde</b> (escritura condicional por versión); la otra relee y recalcula. <b>Ninguna petición se pierde ni se numera dos veces</b></div>
       <div class="si"><span>Si…</span>CloudWatch no está disponible</div><div class="fx">→</div>
       <div class="ent"><span>El sistema…</span><b>sigue respondiendo</b>; solo se pierde la visibilidad mientras dure</div>
     </div>
-    <div class="notas"><span class="tag">Notas</span><p>Responde la pregunta típica del docente: «¿y si se cae el componente que decide?». Cada caso tiene una prueba automatizada.</p></div>
+    <div class="notas"><span class="tag">Notas</span><p>Responde la pregunta típica del docente: «¿y si se cae el componente que decide?». Cada caso tiene una prueba automatizada. Si los choques se repiten 5 veces seguidas, el router lo trata como estado no disponible y responde Nivel 3.</p></div>
   </div>
 </section>
 
 <!-- ═══ 09 · Corrida oficial ═══ -->
 <section class="lamina">
   <div class="caja ancha">
-    <span class="kicker">09 · Corrida oficial · AWS · 26/10/2026</span>
+    <span class="kicker">09 · Corrida oficial · AWS · 02/11/2026</span>
     <h2>El script oficial en AWS: 1 → 2 → 3 → 2 → 1</h2>
     <div class="veredicto">
       <div>✓ 140 de 140 peticiones</div><div>✓ Pasa por los 3 niveles</div><div>✓ Sin saltos</div><div>✓ Termina en Nivel 1</div>
     </div>
     <figure class="dgfig">
-      <svg class="dg tl" viewBox="0 0 820 300" role="img" aria-label="Nivel por minuto: N1, N2, N2, N3, N3, N3, N2, N1, con 5, 15 y 15 errores en los minutos 0, 2 y 4">
+      <svg class="dg tl" viewBox="0 0 820 300" role="img" aria-label="Nivel por minuto del k6: N1, N2, N2, N3, N3, N3 y, en el minuto 7, N3, N2 y N1. Cambios en las peticiones 21, 61, 126 y 136. 5, 15 y 15 errores en los minutos 1, 3 y 5">
         <rect class="b3" x="70" y="22" width="740" height="46" rx="8"/><rect class="b2" x="70" y="76" width="740" height="46" rx="8"/><rect class="b1" x="70" y="130" width="740" height="46" rx="8"/>
         <text x="58" y="50" text-anchor="end" class="mono t-b t-red">N3</text><text x="58" y="104" text-anchor="end" class="mono t-b t-warn">N2</text><text x="58" y="158" text-anchor="end" class="mono t-b t-blue">N1</text>
-        <path class="escalon" d="M74 153H162V99H347V45H624V99H717V153H806"/>
-        <circle class="pto p1" cx="118" cy="153" r="7"/><circle class="pto p2" cx="210" cy="99" r="7"/><circle class="pto p2" cx="302" cy="99" r="7"/>
-        <circle class="pto p3" cx="394" cy="45" r="7"/><circle class="pto p3" cx="487" cy="45" r="7"/><circle class="pto p3" cx="579" cy="45" r="7"/>
-        <circle class="pto p2" cx="671" cy="99" r="7"/><circle class="pto p1" cx="763" cy="153" r="7"/>
-        <g class="mono t-m" style="font-size:12px" text-anchor="middle">
-          <text x="118" y="198">min 0</text><text x="210" y="198">min 1</text><text x="302" y="198">min 2</text><text x="394" y="198">min 3</text>
-          <text x="487" y="198">min 4</text><text x="579" y="198">min 5</text><text x="671" y="198">min 6</text><text x="763" y="198">min 7</text></g>
-        <line class="umb u2" x1="70" x2="810" y1="270" y2="270"/><line class="umb u3" x1="70" x2="810" y1="250" y2="250"/>
+        <path class="escalon" d="M74 153H175.7V99H387.1V45H730.7V99H783.6V153H806"/>
+        <circle class="pto p1" cx="122.9" cy="153" r="7"/><circle class="pto p2" cx="228.6" cy="99" r="7"/><circle class="pto p2" cx="334.3" cy="99" r="7"/><circle class="pto p3" cx="440" cy="45" r="7"/><circle class="pto p3" cx="545.7" cy="45" r="7"/><circle class="pto p3" cx="651.4" cy="45" r="7"/><circle class="pto p3" cx="717.5" cy="45" r="5"/><circle class="pto p2" cx="757.1" cy="99" r="5"/><circle class="pto p1" cx="794.8" cy="153" r="5"/>
+        <text x="180.7" y="130" class="mono t-s" style="font-size:11px">21</text><text x="392.1" y="76" class="mono t-s" style="font-size:11px">61</text><text x="735.7" y="76" class="mono t-s" style="font-size:11px">126</text><text x="788.6" y="130" class="mono t-s" style="font-size:11px">136</text>
+        <g class="mono t-m" style="font-size:12px" text-anchor="middle"><text x="122.9" y="198">min 1</text><text x="228.6" y="198">min 2</text><text x="334.3" y="198">min 3</text><text x="440" y="198">min 4</text><text x="545.7" y="198">min 5</text><text x="651.4" y="198">min 6</text><text x="757.1" y="198">min 7</text></g>
+        <g class="mono t-s" style="font-size:10.5px" text-anchor="middle"><text x="122.9" y="213">1–20</text><text x="228.6" y="213">21–40</text><text x="334.3" y="213">41–60</text><text x="440" y="213">61–80</text><text x="545.7" y="213">81–100</text><text x="651.4" y="213">101–120</text><text x="757.1" y="213">121–140</text></g>
+        <line class="umb u2" x1="70" x2="810" y1="275" y2="275"/><line class="umb u3" x1="70" x2="810" y1="260" y2="260"/>
         <line class="base" x1="70" x2="810" y1="290" y2="290"/>
-        <text x="58" y="274" text-anchor="end" class="mono t-m" style="font-size:11px">5</text><text x="58" y="254" text-anchor="end" class="mono t-m" style="font-size:11px">10</text>
-        <rect class="be2" x="98" y="270" width="40" height="20" rx="4"/><text x="118" y="264" text-anchor="middle" class="mono t-b val">5</text>
-        <rect class="be3" x="282" y="230" width="40" height="60" rx="4"/><text x="302" y="224" text-anchor="middle" class="mono t-b val">15</text>
-        <rect class="be3" x="467" y="230" width="40" height="60" rx="4"/><text x="487" y="224" text-anchor="middle" class="mono t-b val">15</text>
+        <text x="58" y="279" text-anchor="end" class="mono t-m" style="font-size:11px">5</text><text x="58" y="264" text-anchor="end" class="mono t-m" style="font-size:11px">10</text>
+        <rect class="be2" x="102.9" y="275" width="40" height="15" rx="4"/><text x="122.9" y="269" text-anchor="middle" class="mono t-b val">5</text><rect class="be3" x="314.3" y="245" width="40" height="45" rx="4"/><text x="334.3" y="239" text-anchor="middle" class="mono t-b val">15</text><rect class="be3" x="525.7" y="245" width="40" height="45" rx="4"/><text x="545.7" y="239" text-anchor="middle" class="mono t-b val">15</text>
         <text x="814" y="286" text-anchor="end" class="t-s" style="font-size:12px">errores que pide el script</text>
       </svg>
     </figure>
     <div class="rej d4 cifras">
-      <div class="card"><span class="et">Cliente = servidor</span><span class="g">8/8</span><small>minutos coherentes</small></div>
-      <div class="card"><span class="et">Latencia media</span><span class="g">167 ms</span><small>p95 de 215 ms</small></div>
-      <div class="card"><span class="et">Cambios registrados</span><span class="g">4</span><small>1→2 · 2→3 · 3→2 · 2→1</small></div>
-      <div class="card"><span class="et">«Mantenimiento»</span><span class="g">15</span><small>los errores del minuto 4, en N3</small></div>
+      <div class="card"><span class="et">Cliente = servidor</span><span class="g">140/140</span><small>peticiones con el mismo nivel y status</small></div>
+      <div class="card"><span class="et">Latencia media (k6)</span><span class="g">167 ms</span><small>p95 de 182 ms · router 53 ms</small></div>
+      <div class="card"><span class="et">Cambios registrados</span><span class="g">4</span><small>en las peticiones 21 · 61 · 126 · 136</small></div>
+      <div class="card"><span class="et">«Mantenimiento»</span><span class="g">15</span><small>los errores del minuto 5, en N3</small></div>
     </div>
     <div class="notas"><span class="tag">Notas</span>
-      <p>El script del docente corrió sin cambios, salvo la URL. Las 35 peticiones fallidas son exactamente los errores que pide el script: no hubo fallas inesperadas.</p>
-      <p>Arriba, el nivel de cada minuto (cada punto es lo que vio el cliente); abajo, los errores que pidió el script y las líneas de 5 y 10.</p>
+      <p>El script del docente corrió sin cambios, salvo la URL. Las 35 peticiones fallidas son exactamente los errores que pide el script: no hubo fallas inesperadas. El log del k6 y los registros del router se compararon petición por petición y coinciden las 140.</p>
+      <p>Arriba, el nivel de cada «minuto» del k6 (20 peticiones); los números pequeños son las peticiones donde cambió el nivel. El minuto 7 recorre la recuperación: N3 hasta la 125, N2 de la 126 a la 135 y N1 desde la 136. Abajo, los errores que pidió el script y las líneas de 5 y 10.</p>
+      <p>Corrida del 02/11/2026 a las 12:32 (hora de Colombia), repetida con el mismo resultado. El k6 mide 167 ms porque incluye la red y API Gateway; el router solo, 52,8 ms de promedio.</p>
     </div>
   </div>
 </section>
