@@ -108,7 +108,7 @@ bajo cada caja y una leyenda de colores.
 | Campo | Valor |
 |---|---|
 | **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA. Documento del Grupo 2 sobre el diseño de Daniel Mazo |
-| **Fecha de recepción** | 2026-11-02 |
+| **Fecha de recepción** | 2026-11-02 (versión final, con su PDF) |
 | **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
 | **Tema** | El informe de arquitectura actualizado a la **v3 (histéresis)**, la versión oficial del equipo desde el 30/10/2026, con la **corrida oficial del 02/11/2026** |
 | **Tipo** | `investigacion` — borrador de un entregable; **no es material oficial** y todavía no pasó por `Consolidado/` |
@@ -121,16 +121,33 @@ bajo cada caja y una leyenda de colores.
 - **Figuras.** La Figura 3 es nueva (secuencia de una petición) y las Figuras 1 y 2 se actualizaron a la v3.
 - **Matriz de riesgos.** R1 a R4 se ajustaron a la v3 y se agregaron R5 (los umbrales 30 y 40 dependen del script) y R6 (el ítem único de estado es un punto caliente).
 - **Conclusión y glosario.** Se agregan los términos *Histéresis* y *Racha de éxitos*.
+- **Revisión final (02/11/2026).** La sección 8 describe el panel adaptado a la v3 (PR #70); el pie de la Figura 4 dice que los errores de un «minuto» pueden degradar el siguiente y que solo las rachas de éxitos lo recuperan (redacción sugerida por Daniel); la sección 4 ya no cita las aclaraciones del docente y la sección 10.1 queda en «se desplegó a mano por la consola».
 
 **Límites:**
-- **Las calificaciones de la matriz de riesgos siguen pendientes de consenso** entre los tres integrantes; las de R5 y R6 son de Camilo.
+- **La matriz de riesgos quedó aceptada por el equipo:** Daniel dejó las calificaciones de R5 y R6, que eran de Camilo.
 - **La v3 cuesta más por petición.** El router pasó de unos 37 ms a unos 53 ms por las lecturas y escrituras adicionales en DynamoDB.
-- **El panel todavía calcula la regla de la v1.** Su regla y su coherencia por minuto no aplican a la v3; la evidencia es el log del k6 y los eventos del router (sección 8 del informe).
+- **El panel que exportó la evidencia de la corrida era el anterior a la v3.** Su CSV y su resumen calculan la regla de la v1; el panel se adaptó después (PR #70) y la sección 8 del informe describe esa versión.
 - **Los datos de arranque en frío (sección 10.2) son de una prueba anterior**, no de la corrida oficial.
 - **Otras corridas de prueba del mismo día no se incluyen.**
 - **Pregunta abierta:** el docente dijo que se vería 1-2-3-3-2-1; con el script oficial esta regla produce 1-2-3-2-1.
-- No incluye el video ni la exportación a PDF que pide el enunciado.
-- La tabla de contenido del Word se actualiza en Word (clic derecho → Actualizar campo).
+- No lleva video: el equipo presenta en vivo. El PDF exportado está en esta carpeta.
+- El índice del Word se actualizó antes de exportar el PDF.
+
+## `m3-informe-arquitectura-reto3-histeresis-camilo.pdf`
+
+| Campo | Valor |
+|---|---|
+| **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA. Documento del Grupo 2 |
+| **Fecha de recepción** | 2026-11-02 |
+| **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
+| **Tema** | Exportación a PDF del informe de arriba (17 páginas): el documento técnico que se entrega |
+| **Tipo** | `investigacion` — exportación del Word; **no es material oficial** |
+| **Fuentes** | `m3-informe-arquitectura-reto3-histeresis-camilo.docx` (esta carpeta) |
+| **Estado** | versión final · ⬜ sin consolidar |
+
+**Límites:**
+- Se exportó desde Word 2019 el 02/11/2026 a las 22:24, hora de Colombia. Si el Word cambia, hay que exportarlo otra vez.
+- La propiedad «Título» del PDF dice «Contenido»: Word tomó el primer encabezado del documento.
 
 ## `evidencia-corrida-oficial-v3-20261102/`
 
@@ -147,7 +164,7 @@ bajo cada caja y una leyenda de colores.
 **Qué contiene:** `…-k6.log` (salida cruda del k6, 140 iteraciones), `…-k6-diff.txt` (el script solo cambia la URL), `…-servidor.jsonl` (140 `PETICION`, 4 `CAMBIO_NIVEL` y 1 `CORRIDA_NUEVA`, de la petición 1 a la 140 sin repetidas), `…-minutos.csv` y `…-resumen.json`.
 
 **Límites:**
-- **`minutos.csv` y `resumen.json` no son evidencia de la v3.** El panel los calcula con la regla de la v1 (marca «NO» en varios minutos y `regla_se_cumple: false`) y, sin credenciales de lectura, `coherencia_cliente_servidor` sale vacía. Se guardan porque el panel los exporta junto con el resto.
+- **`minutos.csv` y `resumen.json` no son evidencia de la v3.** Los exportó el panel anterior a la v3, que los calculaba con la regla de la v1 (marca «NO» en varios minutos y `regla_se_cumple: false`) y, sin credenciales de lectura, dejaba `coherencia_cliente_servidor` vacía. Se guardan porque el panel los exporta junto con el resto.
 - El `CORRIDA_NUEVA` trae `peticiones_previas: 49` y `nivel_previo: 3`: el estado venía de pruebas anteriores y la regla de 15 s sin tráfico lo reinició.
 - Es una sola corrida. Hubo otras de prueba el mismo día, que no se incluyen.
 
@@ -158,7 +175,7 @@ bajo cada caja y una leyenda de colores.
 | **Autor** | Camilo Andrés Céspedes Leguizamón, con asistencia de IA, sobre el código de Daniel Mazo |
 | **Fecha de recepción** | 2026-11-02 |
 | **Módulo** | 3 — Reto 3: Diseñando Arquitecturas Resilientes |
-| **Tema** | Los seis módulos de `src/` de la v3 con comentarios explicativos; es lo que se subió a mano a las cuatro Lambdas |
+| **Tema** | Los seis módulos de `src/` de la v3 con comentarios explicativos; es lo que se subió a mano a las cuatro Lambdas el 02/11, hasta que se reemplazó por el zip oficial del repo (sin comentarios) |
 | **Tipo** | `investigacion` — copia comentada; **el código oficial es `Modulo 3/Ejercicios/Reto3-Resiliencia/src/`** |
 | **Fuentes** | `Modulo 3/Ejercicios/Reto3-Resiliencia/src/` (checkout `795c948`) |
 | **Estado** | borrador · ⬜ sin consolidar |
@@ -166,8 +183,8 @@ bajo cada caja y una leyenda de colores.
 **Qué contiene:** `router.py`, `histeresis.py`, `estado.py`, `reglas.py`, `niveles.py` y `observabilidad.py`. Solo cambian los comentarios y las descripciones de los módulos; el código es idéntico al de `src/` (se comparó el árbol sintáctico sin contar las descripciones).
 
 **Límites:**
-- El zip desplegado no se versiona (`*.zip` está ignorado). Su `CodeSha256` en las cuatro Lambdas es `hPWUcyOR142EWDxW65X2OpDufGf6AiSWxnZYFhDFcz4=`.
-- `scripts/verificar-aws.sh` compara con el `CodeSha256` del zip de `scripts/empaquetar.py` (`ufr+zGjlSYZb6qK+CiKl2Ylrx99kgZFOnNcFkDB/KO0=`), así que marca una diferencia aunque el código sea el mismo.
+- El zip con comentarios no se versiona (`*.zip` está ignorado). Su `CodeSha256` en las cuatro Lambdas fue `hPWUcyOR142EWDxW65X2OpDufGf6AiSWxnZYFhDFcz4=`, con el que corrió la evidencia del 02/11.
+- Desde el PR #69, `scripts/empaquetar.py` da `Gq+DEPQOikPl9sW2XowRlIdEN8XHeXB+ek+uRyXHlqA=` en cualquier máquina (antes daba `ufr+zGjl…` en Windows). Las cuatro Lambdas tienen ahora ese zip, el oficial y sin comentarios, así que `scripts/verificar-aws.sh` puede dar «listo»; el código que corrió el 02/11 es equivalente.
 - Si `src/` cambia, esta copia queda desactualizada.
 
 ## `diagrama-contenedores-reto3-histeresis.html`
