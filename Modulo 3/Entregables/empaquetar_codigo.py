@@ -40,7 +40,7 @@ LIMPIEZA = {
         ("# Es el mismo esquema del Reto 2, con su propio archivo: no se mezcla con ~/.aws ni con el Reto 2.\n",
          "# Es un archivo propio: no se mezcla con ~/.aws.\n"),
         ("# --- Usuario IAM de SOLO LECTURA del Reto 3 (reto3-panel-lectura, cuenta del equipo) ---",
-         "# --- Usuario IAM de SOLO LECTURA (CloudWatch Logs, DynamoDB GetItem, Lambda GetFunction) ---"),
+         "# --- Usuario IAM de SOLO LECTURA (logs:FilterLogEvents, dynamodb:GetItem y DescribeTable, lambda:GetFunctionConfiguration) ---"),
     ],
     "docs/ADR/ADR-002-histeresis-v3.md": [
         ("El equipo (Freddy, Camilo y Danny) eligió", "El equipo eligió"),
