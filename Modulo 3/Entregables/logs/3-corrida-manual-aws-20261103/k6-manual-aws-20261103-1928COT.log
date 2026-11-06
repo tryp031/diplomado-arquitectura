@@ -1,0 +1,182 @@
+INFO[0000] Esperando 59 segundos para iniciar en el segundo 00...  source=console
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /Users/danny/Downloads/k6-reto3-aws.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 8m30s max duration (incl. graceful stop):
+              * dynamic_payload_scenario: 140 iterations for each of 1 VUs (maxDuration: 8m0s, gracefulStop: 30s)
+
+INFO[0061] Minute: 1, Iteration: 1, Error: true, Status: 500, Message: {"message": "Nivel 1: Operación Full con Error"}  source=console
+INFO[0064] Minute: 1, Iteration: 2, Error: true, Status: 500, Message: {"message": "Nivel 1: Operación Full con Error"}  source=console
+INFO[0067] Minute: 1, Iteration: 3, Error: true, Status: 500, Message: {"message": "Nivel 1: Operación Full con Error"}  source=console
+INFO[0070] Minute: 1, Iteration: 4, Error: true, Status: 500, Message: {"message": "Nivel 1: Operación Full con Error"}  source=console
+INFO[0074] Minute: 1, Iteration: 5, Error: true, Status: 500, Message: {"message": "Nivel 1: Operación Full con Error"}  source=console
+INFO[0077] Minute: 1, Iteration: 6, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0080] Minute: 1, Iteration: 7, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0083] Minute: 1, Iteration: 8, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0086] Minute: 1, Iteration: 9, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0091] Minute: 1, Iteration: 10, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0094] Minute: 1, Iteration: 11, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0097] Minute: 1, Iteration: 12, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0101] Minute: 1, Iteration: 13, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0104] Minute: 1, Iteration: 14, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0107] Minute: 1, Iteration: 15, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0110] Minute: 1, Iteration: 16, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0113] Minute: 1, Iteration: 17, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0117] Minute: 1, Iteration: 18, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0120] Minute: 1, Iteration: 19, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0123] Minute: 1, Iteration: 20, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0126] Minute: 2, Iteration: 21, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0129] Minute: 2, Iteration: 22, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0133] Minute: 2, Iteration: 23, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0136] Minute: 2, Iteration: 24, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0139] Minute: 2, Iteration: 25, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0142] Minute: 2, Iteration: 26, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0145] Minute: 2, Iteration: 27, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0149] Minute: 2, Iteration: 28, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0152] Minute: 2, Iteration: 29, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0155] Minute: 2, Iteration: 30, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0158] Minute: 2, Iteration: 31, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0161] Minute: 2, Iteration: 32, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0164] Minute: 2, Iteration: 33, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0168] Minute: 2, Iteration: 34, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0171] Minute: 2, Iteration: 35, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0174] Minute: 2, Iteration: 36, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0177] Minute: 2, Iteration: 37, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0180] Minute: 2, Iteration: 38, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0184] Minute: 2, Iteration: 39, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0187] Minute: 2, Iteration: 40, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0190] Minute: 3, Iteration: 41, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0193] Minute: 3, Iteration: 42, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0196] Minute: 3, Iteration: 43, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0200] Minute: 3, Iteration: 44, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0203] Minute: 3, Iteration: 45, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0206] Minute: 3, Iteration: 46, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0209] Minute: 3, Iteration: 47, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0212] Minute: 3, Iteration: 48, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0215] Minute: 3, Iteration: 49, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0219] Minute: 3, Iteration: 50, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0222] Minute: 3, Iteration: 51, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0225] Minute: 3, Iteration: 52, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0228] Minute: 3, Iteration: 53, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0231] Minute: 3, Iteration: 54, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0235] Minute: 3, Iteration: 55, Error: true, Status: 500, Message: {"message": "Nivel 2: Operación Limitada"}  source=console
+INFO[0238] Minute: 3, Iteration: 56, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0241] Minute: 3, Iteration: 57, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0244] Minute: 3, Iteration: 58, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0247] Minute: 3, Iteration: 59, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0250] Minute: 3, Iteration: 60, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0254] Minute: 4, Iteration: 61, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0257] Minute: 4, Iteration: 62, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0260] Minute: 4, Iteration: 63, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0263] Minute: 4, Iteration: 64, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0267] Minute: 4, Iteration: 65, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0270] Minute: 4, Iteration: 66, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0273] Minute: 4, Iteration: 67, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0276] Minute: 4, Iteration: 68, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0279] Minute: 4, Iteration: 69, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0283] Minute: 4, Iteration: 70, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0286] Minute: 4, Iteration: 71, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0289] Minute: 4, Iteration: 72, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0292] Minute: 4, Iteration: 73, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0295] Minute: 4, Iteration: 74, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0298] Minute: 4, Iteration: 75, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0302] Minute: 4, Iteration: 76, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0305] Minute: 4, Iteration: 77, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0308] Minute: 4, Iteration: 78, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0311] Minute: 4, Iteration: 79, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0315] Minute: 4, Iteration: 80, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0318] Minute: 5, Iteration: 81, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0321] Minute: 5, Iteration: 82, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0324] Minute: 5, Iteration: 83, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0327] Minute: 5, Iteration: 84, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0330] Minute: 5, Iteration: 85, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0334] Minute: 5, Iteration: 86, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0337] Minute: 5, Iteration: 87, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0340] Minute: 5, Iteration: 88, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0343] Minute: 5, Iteration: 89, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0346] Minute: 5, Iteration: 90, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0350] Minute: 5, Iteration: 91, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0353] Minute: 5, Iteration: 92, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0356] Minute: 5, Iteration: 93, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0359] Minute: 5, Iteration: 94, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0362] Minute: 5, Iteration: 95, Error: true, Status: 503, Message: {"message": "Nivel 3: Sistema bajo mantenimiento, intente más tarde"}  source=console
+INFO[0366] Minute: 5, Iteration: 96, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0369] Minute: 5, Iteration: 97, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0372] Minute: 5, Iteration: 98, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0375] Minute: 5, Iteration: 99, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0378] Minute: 5, Iteration: 100, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0381] Minute: 6, Iteration: 101, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0385] Minute: 6, Iteration: 102, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0388] Minute: 6, Iteration: 103, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0391] Minute: 6, Iteration: 104, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0394] Minute: 6, Iteration: 105, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0397] Minute: 6, Iteration: 106, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0400] Minute: 6, Iteration: 107, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0404] Minute: 6, Iteration: 108, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0407] Minute: 6, Iteration: 109, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0410] Minute: 6, Iteration: 110, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0413] Minute: 6, Iteration: 111, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0416] Minute: 6, Iteration: 112, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0420] Minute: 6, Iteration: 113, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0423] Minute: 6, Iteration: 114, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0426] Minute: 6, Iteration: 115, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0429] Minute: 6, Iteration: 116, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0432] Minute: 6, Iteration: 117, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0435] Minute: 6, Iteration: 118, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0439] Minute: 6, Iteration: 119, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0442] Minute: 6, Iteration: 120, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0445] Minute: 7, Iteration: 121, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0448] Minute: 7, Iteration: 122, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0451] Minute: 7, Iteration: 123, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0455] Minute: 7, Iteration: 124, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0458] Minute: 7, Iteration: 125, Error: false, Status: 200, Message: {"message": "Nivel 3: Operación al mínimo"}  source=console
+INFO[0461] Minute: 7, Iteration: 126, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0464] Minute: 7, Iteration: 127, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0467] Minute: 7, Iteration: 128, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0470] Minute: 7, Iteration: 129, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0474] Minute: 7, Iteration: 130, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0477] Minute: 7, Iteration: 131, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0480] Minute: 7, Iteration: 132, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0483] Minute: 7, Iteration: 133, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0486] Minute: 7, Iteration: 134, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0489] Minute: 7, Iteration: 135, Error: false, Status: 200, Message: {"message": "Nivel 2: OK"}  source=console
+INFO[0493] Minute: 7, Iteration: 136, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0496] Minute: 7, Iteration: 137, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0499] Minute: 7, Iteration: 138, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0502] Minute: 7, Iteration: 139, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0506] Minute: 7, Iteration: 140, Error: false, Status: 200, Message: {"message": "Nivel 1: OK"}  source=console
+INFO[0509] Esperando 30 segundos para iniciar en el segundo 00...  source=console
+
+
+  █ TOTAL RESULTS 
+
+    HTTP
+    http_req_duration..............: avg=209.89ms min=156.71ms med=178.05ms max=1.88s p(90)=208.37ms p(95)=358.09ms
+      { expected_response:true }...: avg=202.09ms min=156.71ms med=178.04ms max=1.67s p(90)=206.55ms p(95)=341.66ms
+    http_req_failed................: 25.00% 35 out of 140
+    http_reqs......................: 140    0.311153/s
+
+    EXECUTION
+    iteration_duration.............: avg=3.21s    min=3.15s    med=3.17s    max=5.22s p(90)=3.2s     p(95)=3.35s   
+    iterations.....................: 140    0.311153/s
+    vus............................: 1      min=1         max=1
+    vus_max........................: 1      min=1         max=1
+
+    NETWORK
+    data_received..................: 49 kB  109 B/s
+    data_sent......................: 25 kB  56 B/s
+
+
+
+
+running (7m29.9s), 0/1 VUs, 140 complete and 0 interrupted iterations
+dynamic_payload_scenario ✓ [ 100% ] 1 VUs  7m29.9s/8m0s  140/140 iters, 140 per VU

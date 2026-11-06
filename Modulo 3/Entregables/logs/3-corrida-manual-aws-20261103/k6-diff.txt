@@ -1,0 +1,4 @@
+57c57
+<   const url = 'https://6u2da0eye1.execute-api.us-east-2.amazonaws.com/prod/service-api';
+---
+>   const url = 'https://chcrdwyl0d.execute-api.us-east-2.amazonaws.com/prod/service-api';
