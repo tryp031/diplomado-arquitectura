@@ -26,7 +26,11 @@ recursos y las fuentes.
 - **Origen mezclado.** La redacción y el código están escritos con Claude. Los despliegues, las pruebas y lo visto en
   CloudWatch y X-Ray son de la ejecución real. El documento marca cada afirmación con su origen (curso, complementario,
   recomendación) y su confianza (verificado, preparado).
-- **Lo «preparado» no se probó.** El código marcado así está escrito, pero no se desplegó ni se ejecutó.
+- **Qué no se verificó, y por qué.** Las consultas de CloudWatch Logs Insights no se ejecutaron: ya se practicaron en
+  otros proyectos del diplomado (por ejemplo, `medir-aws.py` en el Módulo 2) y no se repitieron en el taller. Las
+  métricas de fallo (`FailedGetItem`, `UnsupportedHTTPMethod`) están definidas en el código, pero se decidió
+  no forzar errores y no se observaron en CloudWatch. El contenido de las anotaciones y la metadata de una traza concreta no se inspeccionó. Tampoco se
+  crearon la alarma ni el dashboard manual.
 - **Guía web del taller sin consultar.** `serverless-observability.workshop.aws` solo aparece referenciada en el
   README del repo; el código de los handlers se escribió a partir del repo, no de la guía.
 - **Sin material oficial contrastado.** El repo aún no tiene el temario ni la actividad del Módulo 4 en

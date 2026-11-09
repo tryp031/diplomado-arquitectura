@@ -165,7 +165,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 22px 44px;color:var(--muted);fon
 <tr><td class="k">Generado con IA</td><td>parcialmente — redacción y código escritos con Claude; los despliegues, pruebas y capturas de CloudWatch y X-Ray son de la ejecución real de Camilo</td></tr>
 </tbody></table></div>
 <blockquote><p><strong>Etiquetas de origen:</strong> <span class="tag">Curso</span> lo dice el material del diplomado (videos y guía del taller) · <span class="tag warn">Complementario</span> conocimiento de AWS que aporto de fuera · <span class="tag ok">Recomendación</span> criterio propio.</p>
-<p><strong>Etiquetas de confianza:</strong> <span class="tag ok">Verificado</span> visto en la consola de AWS en esta ejecución · <span class="tag warn">Preparado</span> el código está escrito pero no se desplegó ni probó.</p></blockquote>
+<p><strong>Etiquetas de confianza:</strong> <span class="tag ok">Verificado</span> visto en la consola de AWS en esta ejecución · <span class="tag warn">No verificado</span> no se comprobó en esta ejecución; cada caso indica el motivo.</p></blockquote>
 </section>
 
 <section id="resumen">
@@ -308,7 +308,7 @@ Invoke-RestMethod -Uri "$api/items/1"</code></pre>
 <ul>
   <li><span class="tag ok">Verificado</span> Síncronas: <code>ColdStart = 1</code> y <code>SuccessfulPutItem = 2</code> tras dos POST.</li>
   <li><span class="tag ok">Verificado</span> EMF: <code>SuccessfulGetAllItems</code> y <code>SuccessfulGetItem</code> visibles; con estadística <em>Sum</em> y periodo de 5 minutos, el segundo llegó a 5 tras varias consultas.</li>
-  <li><span class="tag warn">No verificado</span> Las métricas de fallo y <code>UnsupportedHTTPMethod</code>: API Gateway bloquea los métodos no definidos, así que desde la API no se pueden provocar.</li>
+  <li><span class="tag warn">No verificado</span> Las métricas de fallo (<code>FailedGetItem</code>, <code>UnsupportedHTTPMethod</code>) están definidas en el código, pero se decidió no forzar errores y no se observaron en CloudWatch. Para ver <code>UnsupportedHTTPMethod</code> habría que invocar la Lambda directamente, porque API Gateway rechaza antes los métodos no definidos.</li>
 </ul>
 <blockquote><p><strong>Hallazgo propio:</strong> las métricas EMF aparecen bajo otro grupo de dimensiones (<code>LogGroup, ServiceName, ServiceType, operation</code>) que las síncronas (<code>operation, service</code>), porque la librería agrega dimensiones por defecto. Además, para <em>contar eventos</em> hay que usar la estadística <strong>Sum</strong>: con <em>Average</em>, cada dato vale 1 y el resultado siempre es 1. <span class="tag warn">Complementario</span></p></blockquote>
 <p>Las métricas de negocio sirven para alarmas (por ejemplo, avisar por correo vía SNS cuando <code>SuccessfulGetAllItems</code> supere un umbral) y para dashboards de negocio y operación. <span class="tag">Curso</span></p>
@@ -322,7 +322,8 @@ Invoke-RestMethod -Uri "$api/items/1"</code></pre>
   <li><strong>Lambdas:</strong> un logger estructurado que registra el evento, el contexto, el detalle de cada operación y el resultado, con un campo <code>operation</code> y el identificador de traza.</li>
   <li><strong>CloudWatch Logs Insights:</strong> consultas como <code>filter @message like /operation/</code> y <code>stats count(*) by operation</code> permiten agregar y contar peticiones; el resultado se puede añadir como widget de tabla a un dashboard.</li>
 </ul>
-<p><span class="tag warn">Preparado</span> Los cambios de código y de template para esta parte están escritos en <code>sample-app</code>, tomando <code>code/backend</code> como referencia. Las consultas en Logs Insights no se ejecutaron en esta sesión.</p>
+<p>Los cambios de código y de template para esta parte están en <code>sample-app</code>, tomando <code>code/backend</code> como referencia, y se desplegaron con el stack.</p>
+<p><span class="tag warn">No verificado</span> Las consultas en Logs Insights no se ejecutaron en esta sesión. Es una práctica que ya se hizo en otros proyectos del diplomado (por ejemplo, <code>medir-aws.py</code> en el Módulo 2), así que no se repitió aquí.</p>
 <p>La diferencia con las métricas: las métricas dan el total de forma barata y rápida; los logs permiten desglosar por cualquier campo (por ejemplo, por categoría de producto) y enriquecer los dashboards de negocio. <span class="tag">Curso</span></p>
 </section>
 
@@ -406,7 +407,8 @@ Invoke-RestMethod -Uri "$api/items/1"</code></pre>
 <tbody>
 <tr><td>Despliegue de <code>sample-app</code> y pruebas de la API</td><td><span class="tag ok">Realizado</span></td></tr>
 <tr><td>Métricas síncronas y EMF, verificadas en CloudWatch</td><td><span class="tag ok">Realizado</span></td></tr>
-<tr><td>Logs: cambios de código y template preparados</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Logs: cambios de código y template en <code>sample-app</code>, desplegados</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Consultas en CloudWatch Logs Insights</td><td><span class="tag no">No realizado</span> Ya se practicaron en otros proyectos del diplomado; no se repitieron en el taller.</td></tr>
 <tr><td>Despliegue de <code>sample-app-tracing</code>, mapa y lista de trazas en X-Ray</td><td><span class="tag ok">Realizado</span></td></tr>
 <tr><td>Alarma de CloudWatch con SNS y dashboard manual</td><td><span class="tag no">No realizado</span> Se crean a mano en la consola, no con SAM, por lo que hay que borrarlos manualmente al terminar; si se olvidan, siguen generando costos.</td></tr>
 <tr><td>Lambda Insights y ejemplos con Powertools</td><td><span class="tag ok">Mencionado</span> El workshop los presenta al final como herramientas adicionales, sin práctica.</td></tr>
