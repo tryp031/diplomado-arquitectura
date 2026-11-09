@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observabilidad Serverless en AWS — Módulo 4</title>
+<style>
+:root{
+  --paper:#e9edf2; --card:#fff; --ink:#17212b; --muted:#5b6b7c;
+  --navy:#123252; --navy-2:#1f4e79; --navy-soft:#e2ebf3;
+  --gold:#b2802a; --gold-soft:#f8f1df;
+  --green:#256b47; --green-soft:#e3f1e9;
+  --red:#a33a2b; --red-soft:#faeae7;
+  --line:#d3dbe4; --code:#eef2f7;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0e141b; --card:#17202a; --ink:#e6ecf2; --muted:#9aa9b8;
+    --navy:#0f2a45; --navy-2:#7fb2e6; --navy-soft:#1d2b3d;
+    --gold:#d6a24a; --gold-soft:#2e2715;
+    --green:#5fcf93; --green-soft:#14291f;
+    --red:#e58a7c; --red-soft:#33201c;
+    --line:#2a3644; --code:#223040;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.62}
+
+header.cover{background:var(--navy);color:#fff;padding:46px 32px 36px;border-bottom:4px solid var(--gold)}
+.cover-in{max-width:1180px;margin:0 auto}
+.cover .kicker{font-size:.86rem;letter-spacing:.04em;color:#a9c4dd;margin:0 0 14px}
+.cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;
+  font-size:2.25rem;line-height:1.2;margin:0 0 8px;max-width:26ch}
+.cover .sub{font-family:Georgia,serif;font-size:1.22rem;color:#f0d6a0;margin:0 0 18px}
+.cover p.lead{margin:0;max-width:72ch;color:#dbe6f0;font-size:1rem}
+.cover p.by{margin:18px 0 0;color:#a9c4dd;font-size:.9rem}
+.cover strong{color:#fff}
+
+.shell{max-width:1180px;margin:0 auto;padding:26px 22px 70px;
+  display:grid;grid-template-columns:232px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px;max-height:calc(100vh - 40px);overflow-y:auto}
+nav.toc h2{font-family:Georgia,serif;font-weight:normal;font-size:1rem;color:var(--navy-2);
+  margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+nav.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);
+  font-size:.88rem;padding:5px 6px;border-radius:6px;line-height:1.35}
+nav.toc a:hover{background:var(--navy-soft);color:var(--navy-2)}
+nav.toc .tn{color:var(--gold);font-weight:700;flex:0 0 22px;text-align:right}
+
+main{min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:6px 30px 26px;margin:0 0 16px}
+h2{font-family:Georgia,serif;font-weight:normal;color:var(--navy-2);
+  font-size:1.5rem;margin:26px 0 6px;padding-bottom:9px;border-bottom:2px solid var(--navy-soft);scroll-margin-top:16px}
+h3{font-size:1.1rem;color:var(--navy-2);margin:26px 0 6px;scroll-margin-top:16px}
+p{margin:11px 0;max-width:78ch}
+ul,ol{padding-left:22px;margin:11px 0;max-width:78ch}
+li{margin:5px 0}
+strong{color:var(--navy-2)}
+a{color:var(--navy-2)}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:var(--code);
+  padding:1px 5px;border-radius:4px}
+pre{background:#0f2237;color:#e7eef6;padding:14px 16px;border-radius:8px;overflow-x:auto;
+  font-size:.85rem;line-height:1.5;margin:14px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+
+blockquote{margin:16px 0;padding:13px 18px;background:var(--gold-soft);
+  border-left:4px solid var(--gold);border-radius:8px}
+blockquote p{margin:4px 0;max-width:76ch}
+blockquote strong{color:var(--gold)}
+blockquote.ok{background:var(--green-soft);border-color:var(--green)}
+blockquote.ok strong{color:var(--green)}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--navy-soft);color:var(--navy-2);font-weight:600}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--navy-soft) 35%,transparent)}
+.tw{overflow-x:auto}
+td.k{white-space:nowrap;font-weight:600;color:var(--navy-2)}
+
+.tag{display:inline-block;font-size:.74rem;font-weight:700;padding:1px 8px;border-radius:999px;
+  background:var(--navy-soft);color:var(--navy-2);white-space:nowrap}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tag.warn{background:var(--gold-soft);color:var(--gold)}
+.tag.no{background:var(--red-soft);color:var(--red)}
+
+figure{margin:18px 0}
+figure svg{width:100%;height:auto;display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:6px}
+.dg .box{fill:var(--card);stroke:var(--navy-2);stroke-width:1.5}
+.dg .box.data{stroke:var(--green)}
+.dg .box.edge{stroke:var(--muted)}
+.dg text{fill:var(--ink);font:600 12px "Segoe UI",system-ui,sans-serif}
+.dg .sub{fill:var(--muted);font-weight:400;font-size:10.5px}
+.dg line{stroke:var(--muted);stroke-width:1.4}
+
+footer{max-width:1180px;margin:0 auto;padding:0 22px 44px;color:var(--muted);font-size:.88rem}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr;gap:18px;padding:18px 16px 50px}
+  nav.toc{position:static;max-height:none}
+  header.cover{padding:32px 16px 26px}
+  .cover h1{font-size:1.7rem}
+  section{padding:4px 16px 20px}
+}
+@media print{
+  nav.toc{display:none}
+  .shell{display:block;padding:0}
+  section{break-inside:avoid-page;border:none;padding:0}
+  body{background:#fff;font-size:11pt}
+}
+</style>
+</head>
+<body>
+
+<header class="cover"><div class="cover-in">
+  <p class="kicker">Diplomado Arquitectura de Software y Cloud Computing · Pontificia Universidad Javeriana Cali</p>
+  <h1>Observabilidad en aplicaciones Serverless con AWS</h1>
+  <p class="sub">Módulo 4 · Serverless Observability Workshop</p>
+  <p class="lead">Qué abarca el despliegue del taller, cómo lo ejecutamos paso a paso y qué aprendimos sobre métricas, logs y trazas. Incluye lo que se hizo, lo que no, y por qué.</p>
+  <p class="by"><strong>Camilo Andrés Céspedes Leguizamón</strong> · con asistencia de IA · 2026-11-09</p>
+</div></header>
+
+<div class="shell">
+
+<nav class="toc" aria-label="Contenido">
+  <h2>Contenido</h2>
+  <a href="#ficha"><span class="tn">0</span>Ficha de autoría</a>
+  <a href="#resumen"><span class="tn">1</span>Qué investigué y por qué</a>
+  <a href="#arquitectura"><span class="tn">2</span>Arquitectura desplegada</a>
+  <a href="#recursos"><span class="tn">3</span>Recursos que crea</a>
+  <a href="#preparacion"><span class="tn">4</span>Preparación del entorno</a>
+  <a href="#despliegue"><span class="tn">5</span>Despliegue paso a paso</a>
+  <a href="#pruebas"><span class="tn">6</span>Pruebas de la API</a>
+  <a href="#metricas"><span class="tn">7</span>Métricas</a>
+  <a href="#logs"><span class="tn">8</span>Logs</a>
+  <a href="#trazas"><span class="tn">9</span>Trazas con X-Ray</a>
+  <a href="#conceptos"><span class="tn">10</span>Conceptos clave</a>
+  <a href="#conexion"><span class="tn">11</span>Conexión con otros módulos</a>
+  <a href="#contradicciones"><span class="tn">12</span>Hallazgos y contradicciones</a>
+  <a href="#lecciones"><span class="tn">13</span>Problemas y lecciones</a>
+  <a href="#alcance"><span class="tn">14</span>Alcance y pendientes</a>
+  <a href="#abiertas"><span class="tn">15</span>Preguntas abiertas</a>
+  <a href="#limpieza"><span class="tn">16</span>Limpieza y costos</a>
+  <a href="#fuentes"><span class="tn">17</span>Fuentes</a>
+</nav>
+
+<main>
+
+<section id="ficha">
+<h2>0 · Ficha de autoría</h2>
+<div class="tw"><table>
+<thead><tr><th>Campo</th><th>Valor</th></tr></thead>
+<tbody>
+<tr><td class="k">Autor</td><td>Camilo Andrés Céspedes Leguizamón, con asistencia de IA</td></tr>
+<tr><td class="k">Fecha</td><td>2026-11-09</td></tr>
+<tr><td class="k">Módulo</td><td>4 — Observabilidad serverless (métricas, logs y trazas)</td></tr>
+<tr><td class="k">Tema</td><td>Qué despliega el taller <em>Serverless Observability Workshop</em>, cómo se ejecutó y qué se verificó en AWS (us-east-2)</td></tr>
+<tr><td class="k">Tipo</td><td><code>investigacion</code> — documento derivado, elaborado con IA; <strong>no es material oficial</strong></td></tr>
+<tr><td class="k">Fuentes</td><td>Repositorio <code>aws-samples/serverless-observability-workshop</code> (clon local) · videos del taller del Módulo 4 · ejecución propia en la cuenta de AWS de Camilo. Detalle en la sección 17</td></tr>
+<tr><td class="k">Estado</td><td>borrador · ⬜ sin consolidar</td></tr>
+<tr><td class="k">Generado con IA</td><td>parcialmente — redacción y código escritos con Claude; los despliegues, pruebas y capturas de CloudWatch y X-Ray son de la ejecución real de Camilo</td></tr>
+</tbody></table></div>
+<blockquote><p><strong>Etiquetas de origen:</strong> <span class="tag">Curso</span> lo dice el material del diplomado (videos y guía del taller) · <span class="tag warn">Complementario</span> conocimiento de AWS que aporto de fuera · <span class="tag ok">Recomendación</span> criterio propio.</p>
+<p><strong>Etiquetas de confianza:</strong> <span class="tag ok">Verificado</span> visto en la consola de AWS en esta ejecución · <span class="tag warn">No verificado</span> no se comprobó en esta ejecución; cada caso indica el motivo.</p></blockquote>
+</section>
+
+<section id="resumen">
+<h2>1 · Qué investigué y por qué</h2>
+<p>El taller despliega una API sencilla de “ítems” sobre servicios serverless de AWS y la usa para aprender a <strong>observarla</strong>: medir su comportamiento (métricas), registrar lo que ocurre (logs) y seguir el recorrido de cada petición entre servicios (trazas). La aplicación es pequeña a propósito; lo valioso es la instrumentación que se construye a su alrededor.</p>
+<ul>
+  <li><strong>Métricas</strong> propias (de negocio y de ciclo de vida) en CloudWatch, publicadas de forma síncrona y asíncrona.</li>
+  <li><strong>Logs</strong> estructurados y access logs de API Gateway, consultables con CloudWatch Logs Insights.</li>
+  <li><strong>Trazas distribuidas</strong> con AWS X-Ray: subsegmentos, anotaciones y metadata.</li>
+</ul>
+<p>Todo se despliega con <strong>AWS SAM</strong> en la región <code>us-east-2</code> (Ohio). Documento redactado para dejar constancia de qué cubre el despliegue y de cómo reproducirlo.</p>
+</section>
+
+<section id="arquitectura">
+<h2>2 · Arquitectura desplegada</h2>
+<figure>
+<svg class="dg" viewBox="0 0 830 300" role="img" aria-label="Diagrama: cliente, API Gateway, tres funciones Lambda, DynamoDB, SNS y una cuarta Lambda de notificación">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8a97a6"/></marker></defs>
+  <line x1="130" y1="150" x2="150" y2="150" marker-end="url(#arr)"/>
+  <line x1="270" y1="150" x2="330" y2="52" marker-end="url(#arr)"/>
+  <line x1="270" y1="150" x2="330" y2="150" marker-end="url(#arr)"/>
+  <line x1="270" y1="150" x2="330" y2="248" marker-end="url(#arr)"/>
+  <line x1="450" y1="52" x2="540" y2="104" marker-end="url(#arr)"/>
+  <line x1="450" y1="150" x2="540" y2="112" marker-end="url(#arr)"/>
+  <line x1="450" y1="248" x2="540" y2="120" marker-end="url(#arr)"/>
+  <line x1="450" y1="248" x2="540" y2="248" marker-end="url(#arr)"/>
+  <line x1="660" y1="248" x2="700" y2="248" marker-end="url(#arr)"/>
+  <rect class="box edge" x="10" y="128" width="120" height="44" rx="8"/><text x="70" y="154" text-anchor="middle">Cliente</text>
+  <rect class="box" x="150" y="128" width="120" height="44" rx="8"/><text x="210" y="148" text-anchor="middle">API Gateway</text><text class="sub" x="210" y="162" text-anchor="middle">stage Prod</text>
+  <rect class="box" x="330" y="30" width="120" height="44" rx="8"/><text x="390" y="50" text-anchor="middle">Lambda</text><text class="sub" x="390" y="64" text-anchor="middle">get-all-items</text>
+  <rect class="box" x="330" y="128" width="120" height="44" rx="8"/><text x="390" y="148" text-anchor="middle">Lambda</text><text class="sub" x="390" y="162" text-anchor="middle">get-by-id</text>
+  <rect class="box" x="330" y="226" width="120" height="44" rx="8"/><text x="390" y="246" text-anchor="middle">Lambda</text><text class="sub" x="390" y="260" text-anchor="middle">put-item</text>
+  <rect class="box data" x="540" y="90" width="120" height="44" rx="8"/><text x="600" y="110" text-anchor="middle">DynamoDB</text><text class="sub" x="600" y="124" text-anchor="middle">tabla de ítems</text>
+  <rect class="box" x="540" y="226" width="120" height="44" rx="8"/><text x="600" y="246" text-anchor="middle">SNS</text><text class="sub" x="600" y="260" text-anchor="middle">tópico de ítems</text>
+  <rect class="box" x="700" y="226" width="120" height="44" rx="8"/><text x="760" y="246" text-anchor="middle">Lambda</text><text class="sub" x="760" y="260" text-anchor="middle">notify-item</text>
+</svg>
+<figcaption>Un POST guarda el ítem en DynamoDB y publica un mensaje en SNS; SNS dispara la función de notificación. Los GET solo leen de DynamoDB. SNS y <code>notify-item</code> solo existen en la aplicación de trazas.</figcaption>
+</figure>
+</section>
+
+<section id="recursos">
+<h2>3 · Recursos que crea el despliegue</h2>
+<p>El archivo <code>template.yaml</code> de SAM describe la infraestructura. Al desplegarlo, CloudFormation crea:</p>
+<div class="tw"><table>
+<thead><tr><th>Recurso</th><th>Función dentro de la solución</th></tr></thead>
+<tbody>
+<tr><td>API Gateway (REST, stage <code>Prod</code>)</td><td>Expone <code>GET /items</code>, <code>GET /items/{id}</code> y <code>POST /items</code>.</td></tr>
+<tr><td>Lambda <code>getAllItemsFunction</code></td><td>Lee todos los ítems (<em>scan</em> de la tabla).</td></tr>
+<tr><td>Lambda <code>getByIdFunction</code></td><td>Lee un ítem por su clave.</td></tr>
+<tr><td>Lambda <code>putItemFunction</code></td><td>Guarda un ítem y, en la app de trazas, publica en SNS.</td></tr>
+<tr><td>Lambda <code>notifyNewItemFunction</code></td><td>Se suscribe al tópico SNS y recibe el aviso de ítem nuevo (solo app de trazas).</td></tr>
+<tr><td>DynamoDB (<code>SimpleTable</code>, clave <code>id</code>)</td><td>Almacena los ítems.</td></tr>
+<tr><td>Tópico SNS</td><td>Canal de notificación, con filtro por atributo <code>Status = Success</code> (solo app de trazas).</td></tr>
+<tr><td>Log groups de CloudWatch (retención 7 días)</td><td>Uno por función y uno para los access logs de la API.</td></tr>
+<tr><td>Roles IAM</td><td>Permisos por función (DynamoDB, SNS, métricas de CloudWatch).</td></tr>
+</tbody></table></div>
+
+<h3>Las dos aplicaciones desplegadas</h3>
+<div class="tw"><table>
+<thead><tr><th>Carpeta</th><th>Stack</th><th>Qué se trabaja</th></tr></thead>
+<tbody>
+<tr><td><code>code/sample-app</code></td><td><code>monitoring-app</code></td><td>API base con tres funciones. Aquí se instrumentan métricas y logs.</td></tr>
+<tr><td><code>code/sample-app-tracing</code></td><td><code>monitoring-app-tracing</code></td><td>Añade SNS y la función de notificación. Aquí se trabaja X-Ray.</td></tr>
+</tbody></table></div>
+<p>El repositorio incluye además <code>code/backend</code> (versión completa de referencia, ya instrumentada), <code>code/cloudwatch-cdk</code> (dashboards con CDK) y <code>code/powertools</code> (los mismos ejemplos con AWS Lambda Powertools en Java, .NET y Python).</p>
+</section>
+
+<section id="preparacion">
+<h2>4 · Preparación del entorno</h2>
+<h3>Credenciales de AWS</h3>
+<ol>
+  <li>En IAM, crear una <strong>access key</strong> para el usuario con el caso de uso <em>Local code</em> y descargar el CSV (la clave secreta solo se muestra una vez).</li>
+  <li>Registrarla como perfil local (por ejemplo <code>develop</code>) desde la extensión AWS Toolkit de VS Code (opción <em>IAM credentials</em>) o con <code>aws configure --profile develop</code>. Queda en <code>~/.aws/credentials</code>.</li>
+  <li>Dar al usuario permisos para Lambda, DynamoDB, S3, CloudWatch, API Gateway, IAM y SNS.</li>
+</ol>
+<blockquote><p><strong>Seguridad:</strong> la access key no se comparte ni se sube al repositorio. En el taller se usaron permisos amplios por simplicidad; en un entorno real conviene mínimo privilegio y desactivar la clave al terminar. <span class="tag ok">Recomendación</span></p></blockquote>
+
+<h3>Herramientas</h3>
+<ul>
+  <li>Node.js 20, AWS CLI y AWS SAM CLI. Docker en ejecución.</li>
+  <li>Git y un cliente HTTP (Postman o PowerShell).</li>
+  <li>En Windows, si PowerShell bloquea <code>npm</code> por la política de ejecución de scripts, se usa <code>npm.cmd</code> o <code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code>.</li>
+</ul>
+
+<h3>Ajuste al template</h3>
+<p>El template original usa el runtime <code>nodejs18.x</code>; el video indica cambiarlo a <code>nodejs20.x</code> en <code>Globals → Function</code>. <span class="tag">Curso</span></p>
+</section>
+
+<section id="despliegue">
+<h2>5 · Despliegue paso a paso</h2>
+<pre><code>cd code/sample-app
+npm install
+sam build
+sam deploy -g --profile develop</code></pre>
+<p>Respuestas usadas en el asistente de <code>sam deploy -g</code>:</p>
+<div class="tw"><table>
+<thead><tr><th>Pregunta</th><th>Respuesta</th></tr></thead>
+<tbody>
+<tr><td>Stack Name</td><td><code>monitoring-app</code></td></tr>
+<tr><td>AWS Region</td><td><code>us-east-2</code></td></tr>
+<tr><td>Confirm changes before deploy</td><td><code>N</code></td></tr>
+<tr><td>Allow SAM CLI IAM role creation</td><td><code>Y</code></td></tr>
+<tr><td>Disable rollback</td><td><code>y</code> (el video lo deshabilita para poder inspeccionar fallos)</td></tr>
+<tr><td>Función sin autenticación, ¿está bien?</td><td><code>y</code>, una vez por cada función con API pública</td></tr>
+<tr><td>Guardar configuración</td><td><code>Y</code> (crea <code>samconfig.toml</code>)</td></tr>
+</tbody></table></div>
+<p>Al terminar, el stack queda en <code>CREATE_COMPLETE</code> y la salida muestra la <code>ApiUrl</code>. La aplicación de trazas se despliega igual desde <code>code/sample-app-tracing</code> con el stack <code>monitoring-app-tracing</code>. Los cambios posteriores se publican repitiendo <code>sam build</code> y <code>sam deploy --profile develop</code>; SAM solo actualiza lo que cambió.</p>
+<blockquote class="ok"><p><strong><span class="tag ok">Verificado</span></strong> Los dos stacks (<code>monitoring-app</code> y <code>monitoring-app-tracing</code>) llegaron a <code>CREATE_COMPLETE</code> en us-east-2.</p></blockquote>
+</section>
+
+<section id="pruebas">
+<h2>6 · Pruebas de la API</h2>
+<pre><code>Invoke-RestMethod -Method Post -Uri "$api/items" -ContentType "application/json" -Body '{"id":"1","name":"Item uno"}'
+Invoke-RestMethod -Method Post -Uri "$api/items" -ContentType "application/json" -Body '{"id":"2","name":"Item dos"}'
+Invoke-RestMethod -Uri "$api/items"
+Invoke-RestMethod -Uri "$api/items/1"</code></pre>
+<p><span class="tag ok">Verificado</span> Los POST responden 200 con cuerpo vacío, <code>GET /items</code> devuelve los ítems con su conteo y <code>GET /items/1</code> devuelve el ítem pedido. Un método no definido en la API (por ejemplo PATCH) lo rechaza API Gateway con 403, antes de llegar a la Lambda <span class="tag">Curso</span>.</p>
+</section>
+
+<section id="metricas">
+<h2>7 · Métricas</h2>
+<p>Métricas personalizadas en el namespace <code>MonitoringApp</code>, con dos estrategias:</p>
+<div class="tw"><table>
+<thead><tr><th></th><th>Síncronas (<code>putMetric</code>)</th><th>Asíncronas (EMF)</th></tr></thead>
+<tbody>
+<tr><td class="k">Cómo funcionan</td><td>La Lambda llama a la API de CloudWatch durante su ejecución.</td><td>La Lambda escribe una línea JSON en su log (<em>Embedded Metric Format</em>) y CloudWatch extrae la métrica.</td></tr>
+<tr><td class="k">Dónde se aplicó</td><td><code>put-item</code></td><td><code>get-all-items</code> y <code>get-by-id</code></td></tr>
+<tr><td class="k">Ventaja</td><td>Sencillas de entender; la métrica sale directamente.</td><td>No bloquean ni dependen de la disponibilidad del servicio de métricas.</td></tr>
+<tr><td class="k">Riesgo</td><td>Si CloudWatch falla o tarda, puede afectar la operación de negocio.</td><td>Requiere <code>AWS_EMF_NAMESPACE</code> y entender las dimensiones que agrega la librería.</td></tr>
+</tbody></table></div>
+
+<h3>Métricas definidas</h3>
+<ul>
+  <li><code>ColdStart</code>: una vez cuando el contenedor de la función se inicializa.</li>
+  <li><code>SuccessfulPutItem</code> / <code>FailedPutItem</code>, <code>SuccessfulGetAllItems</code> / <code>FailedGetAllItems</code>, <code>SuccessfulGetItem</code> / <code>FailedGetItem</code>: éxitos y fallos por operación.</li>
+  <li><code>UnsupportedHTTPMethod</code>: llamada con un método no permitido.</li>
+</ul>
+
+<h3>Qué se verificó en CloudWatch</h3>
+<ul>
+  <li><span class="tag ok">Verificado</span> Síncronas: <code>ColdStart = 1</code> y <code>SuccessfulPutItem = 2</code> tras dos POST.</li>
+  <li><span class="tag ok">Verificado</span> EMF: <code>SuccessfulGetAllItems</code> y <code>SuccessfulGetItem</code> visibles; con estadística <em>Sum</em> y periodo de 5 minutos, el segundo llegó a 5 tras varias consultas.</li>
+  <li><span class="tag warn">No verificado</span> Las métricas de fallo (<code>FailedGetItem</code>, <code>UnsupportedHTTPMethod</code>) están definidas en el código, pero se decidió no forzar errores y no se observaron en CloudWatch. Para ver <code>UnsupportedHTTPMethod</code> habría que invocar la Lambda directamente, porque API Gateway rechaza antes los métodos no definidos.</li>
+</ul>
+<blockquote><p><strong>Hallazgo propio:</strong> las métricas EMF aparecen bajo otro grupo de dimensiones (<code>LogGroup, ServiceName, ServiceType, operation</code>) que las síncronas (<code>operation, service</code>), porque la librería agrega dimensiones por defecto. Además, para <em>contar eventos</em> hay que usar la estadística <strong>Sum</strong>: con <em>Average</em>, cada dato vale 1 y el resultado siempre es 1. <span class="tag warn">Complementario</span></p></blockquote>
+<p>Las métricas de negocio sirven para alarmas (por ejemplo, avisar por correo vía SNS cuando <code>SuccessfulGetAllItems</code> supere un umbral) y para dashboards de negocio y operación. <span class="tag">Curso</span></p>
+</section>
+
+<section id="logs">
+<h2>8 · Logs</h2>
+<p>El módulo de logs busca centralizar el registro de la aplicación y poder <em>analizarlo</em>, no solo guardarlo. <span class="tag">Curso</span></p>
+<ul>
+  <li><strong>API Gateway:</strong> access logs en JSON (con <code>requestId</code>, método, ruta, estado, <code>xrayTraceId</code>…). Requiere un rol IAM con la política <code>AmazonAPIGatewayPushToCloudWatchLogs</code> y un recurso <code>AWS::ApiGateway::Account</code> que lo asocie.</li>
+  <li><strong>Lambdas:</strong> un logger estructurado que registra el evento, el contexto, el detalle de cada operación y el resultado, con un campo <code>operation</code> y el identificador de traza.</li>
+  <li><strong>CloudWatch Logs Insights:</strong> consultas como <code>filter @message like /operation/</code> y <code>stats count(*) by operation</code> permiten agregar y contar peticiones; el resultado se puede añadir como widget de tabla a un dashboard.</li>
+</ul>
+<p>Los cambios de código y de template para esta parte están en <code>sample-app</code>, tomando <code>code/backend</code> como referencia, y se desplegaron con el stack.</p>
+<p><span class="tag warn">No verificado</span> Las consultas en Logs Insights no se ejecutaron en esta sesión. Es una práctica que ya se hizo en otros proyectos del diplomado (por ejemplo, <code>medir-aws.py</code> en el Módulo 2), así que no se repitió aquí.</p>
+<p>La diferencia con las métricas: las métricas dan el total de forma barata y rápida; los logs permiten desglosar por cualquier campo (por ejemplo, por categoría de producto) y enriquecer los dashboards de negocio. <span class="tag">Curso</span></p>
+</section>
+
+<section id="trazas">
+<h2>9 · Trazas con AWS X-Ray</h2>
+<p>Las trazas muestran el camino de cada petición entre componentes y cuánto tarda cada tramo, lo que ayuda a encontrar cuellos de botella.</p>
+<h3>Cambios aplicados</h3>
+<ul>
+  <li>En el template: <code>Tracing: Active</code> para todas las funciones y <code>TracingEnabled: true</code> en la API.</li>
+  <li>En el código: <code>aws-xray-sdk-core</code> con <code>captureAWS</code> (antes de crear los clientes de DynamoDB y SNS), subsegmentos por operación (<code>## Handler</code>, <code>## putItemData</code>, <code>## publishNewItemSNS</code>…), <strong>anotaciones</strong> (<code>Status</code>, <code>ItemID</code>, <code>ItemsCount</code>) y <strong>metadata</strong> con el payload enviado a DynamoDB y SNS.</li>
+</ul>
+<h3>Qué se observó</h3>
+<ul>
+  <li><span class="tag ok">Verificado</span> El <em>Trace Map</em> mostró el recorrido completo: cliente → API Gateway → Lambdas → DynamoDB, y la ruta put-item → SNS → notify-item.</li>
+  <li><span class="tag ok">Verificado</span> La lista de trazas devolvió peticiones con estado OK y código 200, con tiempos de respuesta de unos 2,3 a 2,8 s y 3,5 s de duración para el POST. Se explica por el <em>cold start</em> de la primera ejecución más la publicación en SNS.</li>
+  <li><span class="tag warn">No verificado</span> El contenido de anotaciones y metadata de una traza concreta no se inspeccionó en esta sesión; están definidas en el código.</li>
+</ul>
+<p>Las anotaciones se indexan y permiten filtrar trazas, por ejemplo con <code>annotation.Status = "SUCCESS"</code>; la metadata no se indexa y sirve para ver el detalle de lo enviado a cada servicio. <span class="tag warn">Complementario</span></p>
+</section>
+
+<section id="conceptos">
+<h2>10 · Conceptos clave</h2>
+<div class="tw"><table>
+<thead><tr><th>Concepto</th><th>Idea</th><th>Origen</th></tr></thead>
+<tbody>
+<tr><td class="k">Observabilidad</td><td>Entender qué ocurre dentro del sistema a partir de métricas, logs y trazas; no solo vigilar infraestructura, también negocio.</td><td><span class="tag">Curso</span></td></tr>
+<tr><td class="k">Cold start</td><td>La función se inicializa en un contenedor nuevo tras estar inactiva; añade latencia a esa primera petición.</td><td><span class="tag">Curso</span></td></tr>
+<tr><td class="k">Métrica síncrona vs. EMF</td><td>Publicar la métrica dentro de la ejecución (acoplada al servicio de métricas) o escribirla en el log y dejar que CloudWatch la extraiga.</td><td><span class="tag">Curso</span></td></tr>
+<tr><td class="k">Dimensiones por defecto de EMF</td><td>La librería agrega <code>LogGroup</code>, <code>ServiceName</code> y <code>ServiceType</code>; la métrica queda en un grupo de dimensiones distinto.</td><td><span class="tag warn">Complementario</span></td></tr>
+<tr><td class="k">Logs Insights</td><td>Consulta y agregación sobre los logs para análisis, incluso de negocio.</td><td><span class="tag">Curso</span></td></tr>
+<tr><td class="k">Segmento, subsegmento, anotación, metadata</td><td>Unidades de una traza; las anotaciones se indexan para filtrar, la metadata no.</td><td><span class="tag">Curso</span> / <span class="tag warn">Complementario</span></td></tr>
+<tr><td class="k">Costo de observar</td><td>Observar genera costo; hay que equilibrarlo y priorizar procesos críticos, donde optimizar tiempo ahorra más de lo que cuesta medir.</td><td><span class="tag">Curso</span></td></tr>
+<tr><td class="k">Infraestructura como código (SAM)</td><td>Todo el entorno se describe en un template y se reproduce con <code>sam deploy</code>, a diferencia de lo creado a mano en la consola.</td><td><span class="tag warn">Complementario</span></td></tr>
+<tr><td class="k">Mínimo privilegio</td><td>En el taller se otorgaron permisos amplios para avanzar; en producción deben acotarse.</td><td><span class="tag ok">Recomendación</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="conexion">
+<h2>11 · Dónde conecta con el reto y con otros módulos</h2>
+<ul>
+  <li><strong>Módulo 2 (Reto 2, opción B en AWS):</strong> el diseño API Gateway → Lambda → SQS → Lambda ya se midió con CloudWatch Logs Insights (<code>medir-aws.py</code>). Aquí se profundiza en cómo se generan esas métricas y logs desde el código.</li>
+  <li><strong>Infraestructura reproducible:</strong> la opción B del M2 se armó en la consola de AWS y no se podía reproducir desde el repo (queda abierto el pedido de exportarla o pasarla a IaC). En este módulo, SAM sí describe todo en un template.</li>
+  <li><strong>Módulo 3 (resiliencia):</strong> las métricas de éxito y fallo, las alarmas y las trazas son la base para medir degradación y recuperación de un servicio. <span class="tag ok">Recomendación</span></li>
+  <li><strong>Atributos de calidad:</strong> la observabilidad habilita medir disponibilidad, desempeño y confiabilidad de forma continua. <span class="tag ok">Recomendación</span></li>
+</ul>
+</section>
+
+<section id="contradicciones">
+<h2>12 · Hallazgos y contradicciones</h2>
+<p>Cosas que encontré y que no coinciden con lo esperado. No se resuelven aquí: se registran.</p>
+<div class="tw"><table>
+<thead><tr><th>Hallazgo</th><th>Detalle</th></tr></thead>
+<tbody>
+<tr><td class="k">README vs. estructura real</td><td>El README menciona <code>sample-app</code> y <code>sample-app-tracing</code>, pero no documenta <code>backend/</code> ni <code>cloudwatch-cdk/</code>, y enlaza una imagen <code>/img/architecture.png</code>.</td></tr>
+<tr><td class="k">Mensaje SNS con datos fijos</td><td>En <code>put-item</code> el mensaje publica <code>id: 1</code> y <code>name: "N/A"</code> fijos (las líneas con los datos reales están comentadas), así que <code>notify-item</code> siempre recibe lo mismo.</td></tr>
+<tr><td class="k">Mensaje de log engañoso</td><td>En <code>backend/put-item.js</code>, el log de método inválido dice “only accept GET” cuando el método válido es POST.</td></tr>
+<tr><td class="k">Dependencias sin soporte</td><td>AWS SDK v2, Jest 26 y CDK v1. Por eso el despliegue de dashboards con <code>cloudwatch-cdk</code> falla, y el video termina creándolos a mano.</td></tr>
+<tr><td class="k">Runtime Node.js</td><td>El template trae <code>nodejs18.x</code> (ya obsoleto); el video pide <code>nodejs20.x</code>, que a su vez ya figura como deprecado, aunque aún permite crear y actualizar.</td></tr>
+<tr><td class="k">X-Ray en la API</td><td>En el video el tracing del stage de API Gateway se activa a mano tras el despliegue; en nuestro template va declarado con <code>TracingEnabled: true</code>.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="lecciones">
+<h2>13 · Problemas y lecciones</h2>
+<div class="tw"><table>
+<thead><tr><th>Situación</th><th>Causa y solución</th></tr></thead>
+<tbody>
+<tr><td><code>npm</code> bloqueado en PowerShell</td><td>La política de ejecución impide los scripts <code>.ps1</code>. Se usa <code>npm.cmd</code> o se ajusta la política solo para el usuario actual.</td></tr>
+<tr><td><code>Security Constraints Not Satisfied</code> en <code>sam deploy -g</code></td><td>Se respondió <code>n</code> a la pregunta de funciones sin autenticación. Hay que aceptar <code>y</code> para cada función con API pública (es una demo).</td></tr>
+<tr><td>Despliegue fallido por permisos</td><td>El usuario necesita permisos adicionales (API Gateway, IAM, SNS). Un stack que falla queda en <code>ROLLBACK_COMPLETE</code> y debe eliminarse antes de reintentar.</td></tr>
+<tr><td>Las métricas EMF “no aparecen”</td><td>Estaban bajo otro grupo de dimensiones. Se buscó en <em>Browse</em> el grupo con <code>LogGroup, ServiceName, ServiceType</code>.</td></tr>
+<tr><td>Contadores siempre en 1</td><td>Estadística <em>Average</em>. Se cambió a <em>Sum</em>.</td></tr>
+<tr><td>Gráfico o mapa vacío</td><td>La ventana de tiempo no incluía los datos o aún no se generaba tráfico. Se amplió el rango y se esperó el periodo de 5 minutos.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="alcance">
+<h2>14 · Alcance y pendientes</h2>
+<div class="tw"><table>
+<thead><tr><th>Parte</th><th>Estado</th></tr></thead>
+<tbody>
+<tr><td>Despliegue de <code>sample-app</code> y pruebas de la API</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Métricas síncronas y EMF, verificadas en CloudWatch</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Logs: cambios de código y template en <code>sample-app</code>, desplegados</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Consultas en CloudWatch Logs Insights</td><td><span class="tag no">No realizado</span> Ya se practicaron en otros proyectos del diplomado; no se repitieron en el taller.</td></tr>
+<tr><td>Despliegue de <code>sample-app-tracing</code>, mapa y lista de trazas en X-Ray</td><td><span class="tag ok">Realizado</span></td></tr>
+<tr><td>Alarma de CloudWatch con SNS y dashboard manual</td><td><span class="tag no">No realizado</span> Se crean a mano en la consola, no con SAM, por lo que hay que borrarlos manualmente al terminar; si se olvidan, siguen generando costos.</td></tr>
+<tr><td>Lambda Insights y ejemplos con Powertools</td><td><span class="tag ok">Mencionado</span> El workshop los presenta al final como herramientas adicionales, sin práctica.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="abiertas">
+<h2>15 · Preguntas abiertas</h2>
+<ul>
+  <li>¿Cuánto costaría mantener esta observabilidad en un servicio de tráfico real, y a partir de qué volumen conviene pasar de métricas síncronas a EMF o a Powertools?</li>
+  <li>¿Qué información debería registrar el logger sin exponer datos sensibles (el evento completo se loguea en los handlers)?</li>
+  <li>¿Cómo se comparan Powertools y la instrumentación manual en esfuerzo y consistencia? El repo trae ejemplos para contrastarlos.</li>
+  <li>¿Qué alarmas serían las mínimas razonables para esta API (errores, latencia, throttling) y con qué umbrales?</li>
+</ul>
+</section>
+
+<section id="limpieza">
+<h2>16 · Limpieza y costos</h2>
+<p>Los recursos siguen activos mientras existan los stacks. Para eliminar todo lo desplegado con SAM:</p>
+<pre><code>cd code/sample-app
+sam delete --profile develop
+
+cd ../sample-app-tracing
+sam delete --profile develop</code></pre>
+<p>Lo creado a mano en la consola (alarmas, tópicos SNS de alarmas, dashboards) no lo elimina SAM y se borra aparte. Al terminar el curso conviene desactivar la access key y retirar los permisos amplios.</p>
+<blockquote class="ok"><p><strong>Idea central:</strong> la observabilidad no es solo vigilar infraestructura. Con métricas de negocio, logs analizables y trazas se detectan problemas, se optimizan tiempos (y, en serverless, costos) y se decide con datos. Conviene aplicarla con criterio, priorizando los procesos críticos.</p></blockquote>
+</section>
+
+<section id="fuentes">
+<h2>17 · Fuentes</h2>
+<div class="tw"><table>
+<thead><tr><th>Autor o entidad</th><th>Fuente</th><th>Consulta</th><th>Qué parte usa</th></tr></thead>
+<tbody>
+<tr><td>AWS Samples</td><td><code>github.com/aws-samples/serverless-observability-workshop</code> (licencia MIT-0), clon local</td><td>2026-11-08</td><td>Templates, handlers, helper de logging y estructura (secciones 2–9, 12)</td></tr>
+<tr><td>Docente del diplomado</td><td>Videos del taller del Módulo 4 (despliegue, métricas, logs, trazas, cierre)</td><td>2026-11-08</td><td>Pasos, respuestas de <code>sam deploy -g</code> y conceptos (secciones 5, 7–10)</td></tr>
+<tr><td>AWS</td><td>Guía web del taller <code>serverless-observability.workshop.aws</code></td><td>no consultada</td><td>Solo referenciada en el README; el código de los handlers se escribió a partir del repo, no de la guía</td></tr>
+<tr><td>Ejecución propia</td><td>Consola de AWS (CloudFormation, CloudWatch, X-Ray) en la cuenta de Camilo, us-east-2</td><td>2026-11-08</td><td>Verificaciones marcadas como <span class="tag ok">Verificado</span></td></tr>
+<tr><td>Camilo, M2</td><td><code>medir-aws.py</code> y <code>arquitectura-aws-opcion-b.md</code></td><td>2026-11-09</td><td>Conexión con el Módulo 2 (sección 11)</td></tr>
+</tbody></table></div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  Documento derivado, elaborado con asistencia de IA; no es material oficial del diplomado. No incluye credenciales, identificadores de cuenta ni direcciones de la API desplegada.
+</footer>
+
+</body>
+</html>
